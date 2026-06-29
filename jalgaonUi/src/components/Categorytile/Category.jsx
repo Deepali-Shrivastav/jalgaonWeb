@@ -10,7 +10,8 @@ function Category({ name }) {
         if (name) {
             axios.get(`${djangoApi}/api/v1/listings/subcategories/`)
               .then(sub_response => {
-                const filteredSubCategories = sub_response.data.categories.filter(
+                const categoriesData = sub_response.data.results || sub_response.data.categories || sub_response.data;
+                const filteredSubCategories = categoriesData.filter(
                   subCategory => subCategory.main_category === name
                 );
                 setSubCategories(filteredSubCategories);
@@ -28,7 +29,7 @@ function Category({ name }) {
                 {subCategories.map(category=>(
                 <div className="category_business">
                     <div className="category_img">
-                    <img src={`${djangoApi}/${category.sub_category_img}`} alt="" />
+                    <img src={category.sub_category_img.startsWith('http') ? category.sub_category_img : `${djangoApi}/${category.sub_category_img}`} alt="" />
                     </div>
                     <p className="business_name">{category.sub_category}</p>
                 </div>

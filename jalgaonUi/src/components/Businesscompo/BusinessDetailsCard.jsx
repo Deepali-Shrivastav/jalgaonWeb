@@ -34,7 +34,7 @@ function BusinessDetailsCard({businessData}) {
                     </div>
                 </div>
                 <div className="business_img">
-                    <img src={`${djangoApi}/${businessData.business_banner}`} alt="" />
+                    <img src={businessData.business_banner?.startsWith('http') ? businessData.business_banner : `${djangoApi}/${businessData.business_banner}`} alt="" />
                 </div>
             </div>
         </div>
