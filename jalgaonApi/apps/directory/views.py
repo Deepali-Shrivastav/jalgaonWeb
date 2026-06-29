@@ -17,7 +17,7 @@ class CategoryView(APIView):
 
     def get(self, request):
         try:
-            categories = MainCategory.objects.all()
+            categories = MainCategory.objects.select_related('category_img').all()
             serializer = MainCategorySerializer(categories, many=True)
             return Response({"categories": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
@@ -28,7 +28,7 @@ class SubCategoryView(APIView):
 
     def get(self, request):
         try:
-            subCategories = SubCategory.objects.all()
+            subCategories = SubCategory.objects.select_related('main_category').all()
             serializer = SubCategorySerializer(subCategories, many=True)
             return Response({"categories": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
@@ -85,7 +85,7 @@ class LikedShopsView(APIView):
         if not user_id:
             return Response({"error": "User ID not provided"}, status=400)
 
-        liked_shops = LikedShops.objects.filter(user=user_id)
+        liked_shops = LikedShops.objects.select_related('shop_listing', 'shop_listing__main_category', 'shop_listing__sub_category').filter(user=user_id)
         serializer = LikedShopsSerializer(liked_shops, many=True)
         return Response(serializer.data)
 
@@ -108,7 +108,7 @@ class UserListedShops(APIView):
         user_id = request.query_params.get('user_id', None)
         if not user_id:
             return Response({"error": "User ID not provided"}, status=400)
-        listed_shops = ShopListing.objects.filter(user=user_id)
+        listed_shops = ShopListing.objects.select_related('main_category', 'sub_category').filter(user=user_id)
         serializer = ShopListingSerializer(listed_shops, many=True)
         return Response(serializer.data)
 
