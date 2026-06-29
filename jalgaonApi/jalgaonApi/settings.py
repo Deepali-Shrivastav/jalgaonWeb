@@ -5,17 +5,44 @@ from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load environment variables
+DJANGO_ENV = os.getenv('DJANGO_ENV', 'development')
+
+try:
+    from dotenv import load_dotenv
+    generic_env = os.path.join(BASE_DIR, '.env')
+    if os.path.exists(generic_env):
+        load_dotenv(generic_env)
+    else:
+        if DJANGO_ENV == 'production':
+            load_dotenv(os.path.join(BASE_DIR, '.env.production'))
+        else:
+            load_dotenv(os.path.join(BASE_DIR, '.env.development'))
+except ImportError:
+    pass
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-puv6kv)$735=-=71i*xk28t5ve726_=o(hgc#vxf-5@4jf_yo+'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-puv6kv)$735=-=71i*xk28t5ve726_=o(hgc#vxf-5@4jf_yo+')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 'yes')
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'www.jalgaon.com', 'api.jalgaon.com']
-CSRF_TRUSTED_ORIGINS = ['https://api.jalgaon.com', 'https://www.jalgaon.com']
+allowed_hosts_env = os.getenv('ALLOWED_HOSTS')
+if allowed_hosts_env:
+    ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',') if host.strip()]
+else:
+    ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'www.jalgaon.com', 'api.jalgaon.com']
+
+csrf_trusted_origins_env = os.getenv('CSRF_TRUSTED_ORIGINS')
+if csrf_trusted_origins_env:
+    CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_trusted_origins_env.split(',') if origin.strip()]
+else:
+    CSRF_TRUSTED_ORIGINS = ['https://api.jalgaon.com', 'https://www.jalgaon.com']
+
 
 # Application definition
 INSTALLED_APPS = [
@@ -124,16 +151,29 @@ TEMPLATES = [
 WSGI_APPLICATION = 'jalgaonApi.wsgi.application'
 
 # Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'jalgaon_database',
-        'USER': 'jalgaon-app',
-        'PASSWORD': 'kjshfgkhdkjhgjdkhfgyghi',
-        'HOST': '65.1.52.6',
-        'PORT': '5432'
+# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
+USE_SQLITE = os.getenv('USE_SQLITE', 'False').lower() in ('true', '1', 'yes')
+
+if USE_SQLITE:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql_psycopg2'),
+            'NAME': os.getenv('DB_NAME', 'jalgaon_database'),
+            'USER': os.getenv('DB_USER', ''),
+            'PASSWORD': os.getenv('DB_PASSWORD', ''),
+            'HOST': os.getenv('DB_HOST', '127.0.0.1'),
+            'PORT': os.getenv('DB_PORT', '5432'),
+        }
+    }
+
+
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -171,10 +211,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS settings
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-    'https://api.jalgaon.com',
-    'https://www.jalgaon.com',
-    'capacitor://localhost',
-    'http://localhost:5173',
-    'http://127.0.0.1:5173'
-]
+
+cors_allowed_origins_env = os.getenv('CORS_ALLOWED_ORIGINS')
+if cors_allowed_origins_env:
+    CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_allowed_origins_env.split(',') if origin.strip()]
+else:
+    CORS_ALLOWED_ORIGINS = [
+        'https://api.jalgaon.com',
+        'https://www.jalgaon.com',
+        'capacitor://localhost',
+        'http://localhost:5173',
+        'http://127.0.0.1:5173'
+    ]
+
