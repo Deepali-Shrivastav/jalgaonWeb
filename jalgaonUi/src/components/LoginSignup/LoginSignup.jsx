@@ -30,7 +30,7 @@ function LoginSignup() {
 
   const getCsrfToken = async () => {
     try {
-      const response = await axios.get(`${djangoApi}/app/csrf-token/`);
+      const response = await axios.get(`${djangoApi}/api/v1/auth/csrf-token/`);
       console.log('Fetched CSRF Token:', response.data.csrfToken); // Log token for debugging
       return response.data.csrfToken;
     } catch (error) {
@@ -45,7 +45,7 @@ function LoginSignup() {
     const csrfToken = await getCsrfToken();
 
     try {
-      const response = await axios.post(`${djangoApi}/app/register/`, {
+      const response = await axios.post(`${djangoApi}/api/v1/auth/register/`, {
         phone_number: phoneNumber,
         password: userPassword
       }, {
@@ -66,7 +66,7 @@ function LoginSignup() {
     const csrfToken = await getCsrfToken();
 
     try {
-      const response = await axios.post(`${djangoApi}/app/login/`, {
+      const response = await axios.post(`${djangoApi}/api/v1/auth/login/`, {
         phone_number: phoneNumber,
         password: userPassword
       }, {
@@ -94,7 +94,7 @@ function LoginSignup() {
 
   const getTokenKey = async (csrfToken) => {
     try {
-      const response = await axios.post(`${djangoApi}/app/tokenKey/`, {
+      const response = await axios.post(`${djangoApi}/api/v1/auth/token-key/`, {
         phone_number: phoneNumber,
         password: userPassword
       },{
@@ -122,7 +122,7 @@ function LoginSignup() {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const res = await client.get('/app/user/');
+          const res = await client.get('/api/v1/auth/user/');
           setUser(res.data.user);
           setIsLogin(true);
         } catch (error) {

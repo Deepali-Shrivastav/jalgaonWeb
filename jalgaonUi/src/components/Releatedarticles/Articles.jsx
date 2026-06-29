@@ -11,7 +11,7 @@ function Articles() {
     useEffect(() => {
         const getArticlesData = async () => {
             try {
-                const response = await axios.get(`${djangoApi}/app/articles/`);
+                const response = await axios.get(`${djangoApi}/api/v1/news/articles/`);
                 setArticleData(response.data);
                 console.log(response.data);
                 console.log("Data fetched successfully");

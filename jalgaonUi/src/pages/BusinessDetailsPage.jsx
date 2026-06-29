@@ -22,7 +22,7 @@ function BusinessDetailsPage() {
       try {
         console.log("Fetching data...");
         const token = "your_token_here"; // Replace with your actual token
-        const response = await axios.get(`${djangoApi}/app/business-view/`, {
+        const response = await axios.get(`${djangoApi}/api/v1/listings/detail/`, {
           params: { productId },
           headers: {
             Authorization: `Token ${token}` // Using Token authentication scheme

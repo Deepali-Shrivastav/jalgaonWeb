@@ -18,7 +18,7 @@ function CompanyWork({ businessData }) {
             const csrfToken = await getCsrfToken();
 
             try {
-                const response = await axios.get(`${djangoApi}/app/get_shop_reviews/`, {
+                const response = await axios.get(`${djangoApi}/api/v1/reviews/by-shop/`, {
                     params: { shop_listing: businessData.id },
                     headers: {
                         'Authorization': `Token ${tokenKey}`,
@@ -52,7 +52,7 @@ function CompanyWork({ businessData }) {
 
     const getCsrfToken = async () => {
         try {
-            const response = await axios.get(`${djangoApi}/app/csrf-token/`);
+            const response = await axios.get(`${djangoApi}/api/v1/auth/csrf-token/`);
             return response.data.csrfToken;
         } catch (error) {
             console.error('Error fetching CSRF token:', error);
@@ -72,7 +72,7 @@ function CompanyWork({ businessData }) {
         };
 
         try {
-            const response = await axios.post(`${djangoApi}/app/shop_reviews/`, formData, {
+            const response = await axios.post(`${djangoApi}/api/v1/reviews/`, formData, {
                 headers: {
                     // 'Authorization': `Token ${token}`,
                     'Authorization': `Bearer ${token}`,

@@ -12,7 +12,7 @@ function Search() {
 
   const getCsrfToken = async () => {
     try {
-      const response = await axios.get(`${djangoApi}/app/csrf-token/`);
+      const response = await axios.get(`${djangoApi}/api/v1/auth/csrf-token/`);
       return response.data.csrfToken;
     } catch (error) {
       console.error('Error fetching CSRF token:', error);
@@ -30,7 +30,7 @@ function Search() {
     }
   
     try {
-      const response = await axios.get(`${djangoApi}/app/searchResult/?search=${query}`);
+      const response = await axios.get(`${djangoApi}/api/v1/search/?search=${query}`);
       console.log(response.data);
       navigate('/searchResults', { state: { searchData: response.data } });
       

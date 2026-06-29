@@ -14,7 +14,7 @@ function CategoryPage() {
   useEffect(() => {
     const fetchProducts = async () => {
         try {
-            const response = await axios.get(`${djangoApi}/app/filtered-business/`, {
+            const response = await axios.get(`${djangoApi}/api/v1/listings/by-category/`, {
                 params: { mainCategoryId }
             });
             setBusinessData(response.data);

@@ -4,7 +4,7 @@ import BusinessCard from '../Categorysection/BusinessCard';
 import { UserContext } from '../../context/UserContext';
 
 function Listingspage() {
-  const apiUrl = `${import.meta.env.VITE_DJANGO_API}/app/listedShops/`;
+  const apiUrl = `${import.meta.env.VITE_DJANGO_API}/api/v1/listings/my-listings/`;
 
   const { user } = useContext(UserContext);
   const [listedPosts, setListedPosts] = useState([]);

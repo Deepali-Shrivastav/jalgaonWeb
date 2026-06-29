@@ -14,7 +14,7 @@ function ArticleView() {
     useEffect(() => {
         const fetchArticleData = async () => {
             try {
-                const response = await axios.get(`${djangoApi}/app/articleGet/`, { params: { articleId } });
+                const response = await axios.get(`${djangoApi}/api/v1/news/detail/`, { params: { articleId } });
                 setArticleData(response.data);
                 setLoading(false);
             } catch (error) {

@@ -20,10 +20,10 @@ function Likedpage() {
       console.error('No token found in localStorage');
       return;
     }
-    // http://127.0.0.1:8000/app/likedShops/
+    // http://127.0.0.1:8000/api/v1/listings/favorites/
     const fetchLikedShops = async () => {
       try {
-        const response = await axios.get(`${djangoApi}/app/likedShops/`, {
+        const response = await axios.get(`${djangoApi}/api/v1/listings/favorites/`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },

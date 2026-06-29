@@ -13,7 +13,7 @@ export const UserProvider = ({ children }) => {
             const token = localStorage.getItem('token');
             if (token) {
                 try {
-                    const response = await axios.get(`${djangoApi}/app/user/`, {
+                    const response = await axios.get(`${djangoApi}/api/v1/auth/user/`, {
                         headers: { Authorization: `Bearer ${token}` }
                     });
                     setUser(response.data.user);

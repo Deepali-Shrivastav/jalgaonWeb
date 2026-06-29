@@ -14,8 +14,8 @@ const divStyle = {
 
 
 function Advertise() {
-  const apiUrl = `${import.meta.env.VITE_DJANGO_API}/app/crousel-ads/`;
-  const apiUrl_banner = `${import.meta.env.VITE_DJANGO_API}/app/banner-ads/`;
+  const apiUrl = `${import.meta.env.VITE_DJANGO_API}/api/v1/ads/carousel/`;
+  const apiUrl_banner = `${import.meta.env.VITE_DJANGO_API}/api/v1/ads/banners/`;
   const [sliedData, setSlideData] = useState([])
   const [slide, setSlide] = useState(0);
   const [ads, setAds] = useState([]);

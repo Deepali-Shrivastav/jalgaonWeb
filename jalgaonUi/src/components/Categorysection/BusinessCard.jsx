@@ -19,8 +19,8 @@ function BusinessCard({ businessData, is_like, is_edit=false }) {
 
         try {
             const response = await axios.post(
-                // 'http://127.0.0.1:8000/app/likedShops/',
-                `${djangoApi}/app/likedShops/`,
+                // 'http://127.0.0.1:8000/api/v1/listings/favorites/',
+                `${djangoApi}/api/v1/listings/favorites/`,
             {
                 user: userId,               // Ensure this matches the expected field name
                 shop_listing: shopListingId // Ensure this matches the expected field name

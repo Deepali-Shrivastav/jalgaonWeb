@@ -12,7 +12,7 @@ function Stocktickle() {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    axios.get(`${djangoApi}/app/finance-data/`)
+    axios.get(`${djangoApi}/api/v1/finance/data/`)
       .then(response => {
         setData(response.data.financeData);
       })

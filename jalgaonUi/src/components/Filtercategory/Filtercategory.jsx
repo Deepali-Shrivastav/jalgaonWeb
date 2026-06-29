@@ -9,7 +9,7 @@
     useEffect(() => {
         if (mainCategory) {
         console.log(`Fetching sub-categories for main category: ${mainCategory}`);
-        axios.get(`${djangoApi}/app/subCategorys/`)
+        axios.get(`${djangoApi}/api/v1/listings/subcategories/`)
             .then(sub_response => {
             console.log('Sub-categories fetched:', sub_response.data);
             const filteredSubCategories = sub_response.data.categories.filter(

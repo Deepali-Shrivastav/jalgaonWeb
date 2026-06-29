@@ -9,9 +9,9 @@ import imageCompression from 'browser-image-compression';
 function AddListingForm({ is_edit = false }) {
     const { shopId } = useParams();
     const djangoApi = import.meta.env.VITE_DJANGO_API;
-    const apiUrl = `${djangoApi}/app/categorys/`;
-    const apiUrl_subCategory = `${djangoApi}/app/subCategorys/`;
-    const apiUrl_editShop = `${djangoApi}/app/editShopsData/`;
+    const apiUrl = `${djangoApi}/api/v1/listings/categories/`;
+    const apiUrl_subCategory = `${djangoApi}/api/v1/listings/subcategories/`;
+    const apiUrl_editShop = `${djangoApi}/api/v1/listings/edit-data/`;
 
     const { user } = useContext(UserContext);
     const [selectedMainCategory, setSelectedMainCategory] = useState(null);
@@ -55,7 +55,7 @@ function AddListingForm({ is_edit = false }) {
 
     const getCsrfToken = async () => {
         try {
-          const response = await axios.get(`${djangoApi}/app/csrf-token/`);
+          const response = await axios.get(`${djangoApi}/api/v1/auth/csrf-token/`);
           return response.data.csrfToken;
         } catch (error) {
           console.error('Error fetching CSRF token:', error);
@@ -244,8 +244,8 @@ function AddListingForm({ is_edit = false }) {
 
         try {
             const response = await axios.post(
-                //   'http://127.0.0.1:8000/app/shopListing/',
-                `${djangoApi}/app/shopListing/`,
+                //   'http://127.0.0.1:8000/api/v1/listings/',
+                `${djangoApi}/api/v1/listings/`,
                 data,
                 {
                     headers: {
@@ -281,7 +281,7 @@ function AddListingForm({ is_edit = false }) {
         }
         try {
             const response = await axios.put(
-                `${djangoApi}/app/updateShop/`,
+                `${djangoApi}/api/v1/listings/update/`,
                 data,
                 {
                     headers: {

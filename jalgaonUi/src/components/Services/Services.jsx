@@ -10,7 +10,7 @@ function Services() {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        axios.get(`${djangoApi}/app/categorys/`)
+        axios.get(`${djangoApi}/api/v1/listings/categories/`)
             .then(response => {
                 setCategories(response.data.categories);
             })

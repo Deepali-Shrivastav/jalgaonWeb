@@ -35,7 +35,7 @@ function Layout() {
     //         const token = localStorage.getItem('authToken');
     //         if (token) {
     //             try {
-    //                 const response = await axios.get('http://127.0.0.1:8000/app/user/', {
+    //                 const response = await axios.get('http://127.0.0.1:8000/api/v1/auth/user/', {
     //                     headers: { Authorization: `Bearer ${token}` }
     //                 });
     //                 setUser(response.data.user);

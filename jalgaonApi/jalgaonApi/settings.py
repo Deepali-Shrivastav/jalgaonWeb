@@ -30,11 +30,33 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-    'app',
-    'api',
+    'core',
+    'apps.accounts',
+    'apps.directory',
+    'apps.search',
+    'apps.reviews',
+    'apps.news',
+    'apps.blog',
+    'apps.jobs',
+    'apps.events',
+    'apps.ads',
+    'apps.payments',
+    'apps.notifications',
+    'apps.dashboard',
+    'apps.admin_panel',
+    'apps.cms',
+    'apps.media_lib',
+    'apps.audit',
+    'apps.analytics',
+    'apps.startups',
+    'apps.clubs',
+    'apps.tourism',
+    'apps.ngo',
+    'apps.finance',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -42,12 +64,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'jalgaonApi.urls'
 
-AUTH_USER_MODEL = 'app.User'
+AUTH_USER_MODEL = 'accounts.User'
 
 # REST framework settings
 SESSION_COOKIE_AGE = 1209600  # 2 weeks
@@ -153,6 +174,7 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     'https://api.jalgaon.com',
     'https://www.jalgaon.com',
-    'capacitor://localhost'
-
+    'capacitor://localhost',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173'
 ]

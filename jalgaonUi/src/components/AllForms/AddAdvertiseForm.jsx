@@ -10,12 +10,12 @@ const adTypeOptions = [
 function AddAdvertiseForm() {
     const djangoApi = import.meta.env.VITE_DJANGO_API;
 
-    const apiUrl = `${import.meta.env.VITE_DJANGO_API}/app/adsListing/`;
+    const apiUrl = `${import.meta.env.VITE_DJANGO_API}/api/v1/ads/submit/`;
     const { user } = useContext(UserContext);
 
     const getCsrfToken = async () => {
         try {
-          const response = await axios.get(`${djangoApi}/app/csrf-token/`);
+          const response = await axios.get(`${djangoApi}/api/v1/auth/csrf-token/`);
           return response.data.csrfToken;
         } catch (error) {
           console.error('Error fetching CSRF token:', error);

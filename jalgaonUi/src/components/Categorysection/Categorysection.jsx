@@ -10,7 +10,7 @@ function Categorysection({ businessData, mainCategory, filterSubCategory }) {
 
   useEffect(() => {
     
-    axios.get(`${djangoApi}/app/banner-ads/`)
+    axios.get(`${djangoApi}/api/v1/ads/banners/`)
     .then(response => {
       console.log(response.data);
       setAds(response.data);

@@ -33,7 +33,8 @@ jalgaonApi/
 │   ├── startups/                  ← Startup Ecosystem
 │   ├── clubs/                     ← Club Activities
 │   ├── tourism/                   ← Tourist Places
-│   └── ngo/                       ← NGO Directory
+│   ├── ngo/                       ← NGO Directory
+│   └── finance/                   ← Finance Data
 ├── core/                          ← Shared utilities, permissions, mixins
 ├── jalgaonApi/                    ← Django project config
 │   ├── settings.py
@@ -128,7 +129,18 @@ apps/accounts/
 
 **DB preservation:** `db_table = 'app_homecrouselads'`, `'app_bannerads'`, `'app_adslisting'`
 
-### 2.7 Skeleton Apps (No existing code — built in later phases)
+### 2.7 `apps/finance/`
+
+| Source | Code | Target |
+|--------|------|--------|
+| models.py L130–138 | `FinanceData` | apps/finance/models.py |
+| serializers.py L111–114 | `FinanceDataSerializer` | apps/finance/serializers.py |
+| views.py L165–176 | `FinanceTickleView` | apps/finance/views.py |
+| admin.py L30 | `FinanceData` registration | apps/finance/admin.py |
+
+**DB preservation:** `db_table = 'app_financedata'`
+
+### 2.8 Skeleton Apps (No existing code — built in later phases)
 
 | App | Phase | Key Models to Build |
 |-----|-------|---------------------|
@@ -148,15 +160,10 @@ apps/accounts/
 | `apps/tourism/` | Phase 3 | TouristPlace, TouristReview |
 | `apps/ngo/` | Phase 3 | NGO, NGOCategory |
 
-### 2.8 Code to DELETE
+### 2.9 Code to DELETE
 
 | Source | Code | Reason |
 |--------|------|--------|
-| models.py L130–138 | `FinanceData` | Not in PRD |
-| views.py L165–176 | `FinanceTickleView` | Not in PRD |
-| serializers.py L111–114 | `FinanceDataSerializer` | Not in PRD |
-| urls.py L28 | `/finance-data/` | Not in PRD |
-| admin.py L30 | `FinanceData` registration | Not in PRD |
 | urls.py L48, L52 | Duplicate `/searchResult/` | Duplicates |
 | `api/` directory | Entire app | Redundant |
 
@@ -192,6 +199,7 @@ urlpatterns = [
     path('api/v1/clubs/',        include('apps.clubs.urls')),
     path('api/v1/tourism/',      include('apps.tourism.urls')),
     path('api/v1/ngo/',          include('apps.ngo.urls')),
+    path('api/v1/finance/',      include('apps.finance.urls')),
 ]
 ```
 
@@ -225,6 +233,8 @@ urlpatterns = [
 'apps.clubs',
 'apps.tourism',
 'apps.ngo',
+'apps.finance',
+]
 ```
 
 ---
@@ -264,7 +274,7 @@ urlpatterns = [
 | `/app/crousel-ads/` | `/api/v1/ads/carousel/` | ads |
 | `/app/banner-ads/` | `/api/v1/ads/banners/` | ads |
 | `/app/adsListing/` | `/api/v1/ads/submit/` | ads |
-| `/app/finance-data/` | ❌ **DELETE** — Not in PRD | — |
+| `/app/finance-data/` | `/api/v1/finance/data/` | finance |
 
 ### 4.2 Frontend Files to Update (File-by-File)
 
@@ -420,7 +430,7 @@ NEW: ${djangoApi}/api/v1/listings/my-listings/
 #### `src/components/Stocktickle/Stocktickle.jsx`
 ```
 OLD: ${djangoApi}/app/finance-data/
-NEW: ❌ DELETE this component — Not in PRD
+NEW: ${djangoApi}/api/v1/finance/data/
 ```
 
 ### 4.3 Frontend Summary
@@ -450,8 +460,8 @@ NEW: ❌ DELETE this component — Not in PRD
 | components/AllForms/AddListingForm.jsx | 6 |
 | components/AccountCompo/Likedpage.jsx | 1 |
 | components/AccountCompo/Listingspage.jsx | 1 |
-| components/Stocktickle/Stocktickle.jsx | ❌ DELETE |
-| **Total** | **~38 API calls across 23 files** |
+| components/Stocktickle/Stocktickle.jsx | 1 |
+| **Total** | **~39 API calls across 24 files** |
 
 ---
 

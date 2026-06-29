@@ -11,7 +11,7 @@ function Categorytile() {
 
   const [categories, setCategories] = useState([]);
   useEffect(() => {
-    axios.get(`${djangoApi}/app/categorys/`)
+    axios.get(`${djangoApi}/api/v1/listings/categories/`)
         .then(response => {
             setCategories(response.data.categories);
         })

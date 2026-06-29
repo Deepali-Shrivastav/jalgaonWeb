@@ -12,7 +12,7 @@ export default function RelatedArticles() {
   useEffect(() => {
     const getArticlesData = async () => {
       try {
-        const response = await axios.get(`${djangoApi}/app/active-articles/`);
+        const response = await axios.get(`${djangoApi}/api/v1/news/active/`);
         setArticleData(response.data);
         console.log(response.data);
         console.log("Data fetched successfully");

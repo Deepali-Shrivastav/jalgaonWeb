@@ -8,7 +8,7 @@ function Category({ name }) {
 
     useEffect(()=>{
         if (name) {
-            axios.get(`${djangoApi}/app/subCategorys/`)
+            axios.get(`${djangoApi}/api/v1/listings/subcategories/`)
               .then(sub_response => {
                 const filteredSubCategories = sub_response.data.categories.filter(
                   subCategory => subCategory.main_category === name

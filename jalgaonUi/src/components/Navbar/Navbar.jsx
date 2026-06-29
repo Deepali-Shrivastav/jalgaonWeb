@@ -32,7 +32,7 @@ const Navbar = () => {
         e.preventDefault();
         try {
             const token = localStorage.getItem('authToken');
-            await client.post('/app/logout/', {}, {
+            await client.post('/api/v1/auth/logout/', {}, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }

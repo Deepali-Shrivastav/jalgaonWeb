@@ -21,8 +21,13 @@ from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('app/', include('app.urls')),
-    path('api/', include('api.urls'))
+    path('api/v1/auth/', include('apps.accounts.urls')),
+    path('api/v1/listings/', include('apps.directory.urls')),
+    path('api/v1/search/', include('apps.search.urls')),
+    path('api/v1/reviews/', include('apps.reviews.urls')),
+    path('api/v1/news/', include('apps.news.urls')),
+    path('api/v1/ads/', include('apps.ads.urls')),
+    path('api/v1/finance/', include('apps.finance.urls')),
 ]
 
 
