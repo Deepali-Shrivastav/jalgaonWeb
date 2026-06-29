@@ -11,28 +11,24 @@ from .serializers import (
     MainCategorySerializer, SubCategorySerializer, ShopListingSerializer,
     LikedShopsSerializer, LikedShopsCreateSerializer
 )
+from rest_framework.pagination import PageNumberPagination
 
-class CategoryView(APIView):
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 20
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+class CategoryView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
+    queryset = MainCategory.objects.select_related('category_img').all()
+    serializer_class = MainCategorySerializer
+    pagination_class = StandardResultsSetPagination
 
-    def get(self, request):
-        try:
-            categories = MainCategory.objects.select_related('category_img').all()
-            serializer = MainCategorySerializer(categories, many=True)
-            return Response({"categories": serializer.data}, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": "An error occurred while fetching categories."}, status=status.HTTP_400_BAD_REQUEST)
-
-class SubCategoryView(APIView):
+class SubCategoryView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
-
-    def get(self, request):
-        try:
-            subCategories = SubCategory.objects.select_related('main_category').all()
-            serializer = SubCategorySerializer(subCategories, many=True)
-            return Response({"categories": serializer.data}, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": "An error occurred while fetching categories."}, status=status.HTTP_400_BAD_REQUEST)
+    queryset = SubCategory.objects.select_related('main_category').all()
+    serializer_class = SubCategorySerializer
+    pagination_class = StandardResultsSetPagination
 
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication])
@@ -77,17 +73,16 @@ class ProductDetailView(APIView):
                 return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
         return Response({'error': 'productId parameter is missing'}, status=status.HTTP_400_BAD_REQUEST)
 
-class LikedShopsView(APIView):
+class LikedShopsView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-        user_id = request.query_params.get('user_id', None)
-        if not user_id:
-            return Response({"error": "User ID not provided"}, status=400)
-
-        liked_shops = LikedShops.objects.select_related('shop_listing', 'shop_listing__main_category', 'shop_listing__sub_category').filter(user=user_id)
-        serializer = LikedShopsSerializer(liked_shops, many=True)
-        return Response(serializer.data)
+    serializer_class = LikedShopsSerializer
+    pagination_class = StandardResultsSetPagination
+    
+    def get_queryset(self):
+        user_id = self.request.query_params.get('user_id', None)
+        if user_id:
+            return LikedShops.objects.select_related('shop_listing', 'shop_listing__main_category', 'shop_listing__sub_category').filter(user=user_id)
+        return LikedShops.objects.none()
 
     def post(self, request, *args, **kwargs):
         serializer = LikedShopsCreateSerializer(data=request.data)
@@ -101,16 +96,16 @@ class LikedShopsView(APIView):
             return Response(LikedShopsSerializer(liked_shop).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class UserListedShops(APIView):
+class UserListedShops(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-        user_id = request.query_params.get('user_id', None)
-        if not user_id:
-            return Response({"error": "User ID not provided"}, status=400)
-        listed_shops = ShopListing.objects.select_related('main_category', 'sub_category').filter(user=user_id)
-        serializer = ShopListingSerializer(listed_shops, many=True)
-        return Response(serializer.data)
+    serializer_class = ShopListingSerializer
+    pagination_class = StandardResultsSetPagination
+    
+    def get_queryset(self):
+        user_id = self.request.query_params.get('user_id', None)
+        if user_id:
+            return ShopListing.objects.select_related('main_category', 'sub_category').filter(user=user_id)
+        return ShopListing.objects.none()
 
 class UserListedShopsEdit(APIView):
     permission_classes = [IsAuthenticated]

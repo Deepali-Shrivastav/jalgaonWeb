@@ -33,7 +33,7 @@ function Likedpage() {
         });
 
         console.log(response.data);
-        setLikedPosts(response.data);
+        setLikedPosts(response.data.results || response.data);
       } catch (error) {
         console.error('Error fetching liked shops:', error.response ? error.response.data : error.message);
       }

@@ -40,7 +40,7 @@ function Listingspage() {
         });
 
         console.log(response.data);
-        setListedPosts(response.data);
+        setListedPosts(response.data.results || response.data);
       } catch (error) {
         console.error('Error fetching liked shops:', error.response ? error.response.data : error.message);
         setError('Error fetching liked shops');

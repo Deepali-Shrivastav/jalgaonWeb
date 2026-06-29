@@ -13,7 +13,7 @@ export default function RelatedArticles() {
     const getArticlesData = async () => {
       try {
         const response = await axios.get(`${djangoApi}/api/v1/news/active/`);
-        setArticleData(response.data);
+        setArticleData(response.data.results || response.data);
         console.log(response.data);
         console.log("Data fetched successfully");
         console.log(articleData);
