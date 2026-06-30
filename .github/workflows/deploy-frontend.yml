@@ -91,8 +91,8 @@ jobs:
       # -----------------------------------------------------------------------
       - name: "Package build output as tarball"
         run: |
-          tar -czf /tmp/jalgaon-frontend.tar.gz -C jalgaonUi/dist .
-          echo "✅ Tarball created: $(du -sh /tmp/jalgaon-frontend.tar.gz | cut -f1)"
+          tar -czf jalgaon-frontend.tar.gz -C jalgaonUi/dist .
+          echo "✅ Tarball created: $(du -sh jalgaon-frontend.tar.gz | cut -f1)"
 
       # -----------------------------------------------------------------------
       # STEP 4: Upload the tarball to the production server
@@ -104,7 +104,7 @@ jobs:
           username: ${{ secrets.PRODUCTION_SSH_USER }}
           key: ${{ secrets.PRODUCTION_SSH_KEY }}
           port: 22
-          source: "/tmp/jalgaon-frontend.tar.gz"
+          source: "jalgaon-frontend.tar.gz"
           target: "/tmp/"
           overwrite: true
 
