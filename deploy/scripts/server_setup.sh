@@ -20,7 +20,7 @@
 set -euo pipefail  # Exit on error, unbound variable, or pipe failure
 
 # ===== CONFIGURATION — Change these if your setup is different =====
-REPO_URL="https://github.com/Deepali-Shrivastav/jalgaonWeb.git"
+REPO_URL="git@github.com:Deepali-Shrivastav/jalgaonWeb.git"
 REPO_DIR="/home/ubuntu/jalgaonWeb"
 API_DIR="${REPO_DIR}/jalgaonApi"
 VENV_DIR="${API_DIR}/.venv"
