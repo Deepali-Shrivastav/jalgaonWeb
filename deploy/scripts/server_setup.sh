@@ -33,11 +33,11 @@ echo " Server: jalgaon-webapp (13.127.8.145)"
 echo " Started at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
 echo "============================================================"
 
-# --- Step 1: Update system packages ---
+# --- Step 1: Update package list ---
 echo ""
-echo "[1/9] Updating system packages..."
+echo "[1/9] Updating package list..."
 sudo apt-get update -y
-sudo apt-get upgrade -y
+
 
 # --- Step 2: Install system dependencies ---
 echo ""
