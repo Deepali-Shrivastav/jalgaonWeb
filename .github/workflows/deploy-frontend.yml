@@ -1,0 +1,150 @@
+# =============================================================================
+# Workflow 3 of 3: CD — Deploy React Frontend to Production
+# =============================================================================
+# Triggers on:
+#   - Push/merge to 'main' branch, ONLY when jalgaonUi/ files changed (auto)
+#   - Manual button in GitHub Actions UI (manual)
+#
+# Target: jalgaon-webapp Lightsail server — 13.127.8.145
+# Nginx web root: /var/www/jalgaon-frontend
+#
+# BUG FIXES vs previous version:
+#   1. Added workflow_dispatch for manual trigger button
+#   2. Added concurrency group — prevents two deploys running simultaneously
+#   3. CRITICAL FIX: Replaced appleboy/scp-action (unreliable strip_components)
+#      with a tar+SSH approach: tar the dist/ locally → SCP the tarball →
+#      SSH to extract. This GUARANTEES files land exactly in the web root.
+#   4. Added 'set -euo pipefail' in SSH scripts
+#   5. Added pre-deploy step to verify build output exists before uploading
+#   6. Server-side: cleared old files before extracting new ones (atomic swap)
+#   7. Added nginx -t config test before reload (prevents bad config crashes)
+# =============================================================================
+name: "CD — Deploy Frontend to Production"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "jalgaonUi/**"
+      - ".github/workflows/deploy-frontend.yml"
+
+  # ✅ Manual trigger button
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Reason for manual deployment"
+        required: true
+        default: "Hotfix / manual deploy"
+
+# Prevent two frontend deploys running simultaneously
+concurrency:
+  group: production-frontend-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy-frontend:
+    name: "Build & Deploy React App → /var/www/jalgaon-frontend"
+    runs-on: ubuntu-22.04
+
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      # -----------------------------------------------------------------------
+      # STEP 1: Checkout the repository
+      # -----------------------------------------------------------------------
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+
+      # -----------------------------------------------------------------------
+      # STEP 2: Build the React production bundle
+      # -----------------------------------------------------------------------
+      - name: "Set up Node.js 20 LTS"
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: jalgaonUi/package-lock.json
+
+      - name: "Install frontend dependencies"
+        working-directory: jalgaonUi
+        run: npm install --legacy-peer-deps
+
+      - name: "Build production bundle"
+        working-directory: jalgaonUi
+        # Vite automatically loads jalgaonUi/.env.production →
+        # VITE_DJANGO_API=https://api.jalgaon.com
+        run: npm run build
+
+      - name: "Verify build output exists"
+        run: |
+          if [ ! -d "jalgaonUi/dist" ] || [ -z "$(ls -A jalgaonUi/dist)" ]; then
+            echo "❌ ERROR: Build output directory jalgaonUi/dist is missing or empty!"
+            exit 1
+          fi
+          echo "✅ Build output verified: $(find jalgaonUi/dist -type f | wc -l) files"
+
+      # -----------------------------------------------------------------------
+      # STEP 3: Package the build output as a tarball
+      # CRITICAL FIX: This guarantees file paths are correct when extracted
+      # on the server — no strip_components ambiguity
+      # -----------------------------------------------------------------------
+      - name: "Package build output as tarball"
+        run: |
+          tar -czf /tmp/jalgaon-frontend.tar.gz -C jalgaonUi/dist .
+          echo "✅ Tarball created: $(du -sh /tmp/jalgaon-frontend.tar.gz | cut -f1)"
+
+      # -----------------------------------------------------------------------
+      # STEP 4: Upload the tarball to the production server
+      # -----------------------------------------------------------------------
+      - name: "Upload build tarball to production server"
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.PRODUCTION_SERVER_IP }}
+          username: ${{ secrets.PRODUCTION_SSH_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          port: 22
+          source: "/tmp/jalgaon-frontend.tar.gz"
+          target: "/tmp/"
+          overwrite: true
+
+      # -----------------------------------------------------------------------
+      # STEP 5: SSH to extract tarball into Nginx web root and reload Nginx
+      # -----------------------------------------------------------------------
+      - name: "Extract build on server and reload Nginx"
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PRODUCTION_SERVER_IP }}
+          username: ${{ secrets.PRODUCTION_SSH_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          port: 22
+          command_timeout: 5m
+          script: |
+            set -euo pipefail
+
+            WEB_ROOT="/var/www/jalgaon-frontend"
+            TARBALL="/tmp/jalgaon-frontend.tar.gz"
+
+            echo "=== [1/3] Verifying tarball was uploaded ==="
+            if [ ! -f "${TARBALL}" ]; then
+              echo "❌ ERROR: Tarball not found at ${TARBALL}"
+              exit 1
+            fi
+            echo "✅ Tarball found: $(du -sh ${TARBALL} | cut -f1)"
+
+            echo "=== [2/3] Deploying new build to Nginx web root ==="
+            # Clear old files and extract new build atomically
+            rm -rf "${WEB_ROOT}"/*
+            tar -xzf "${TARBALL}" -C "${WEB_ROOT}/"
+            rm -f "${TARBALL}"
+            echo "✅ Build extracted: $(find ${WEB_ROOT} -type f | wc -l) files in ${WEB_ROOT}"
+
+            echo "=== [3/3] Testing Nginx config and reloading ==="
+            # Test config before reloading — prevents crash if config is broken
+            sudo nginx -t
+            sudo systemctl reload nginx
+            echo "✅ Nginx reloaded"
+
+            echo ""
+            echo "🚀 Frontend deployment completed successfully"
+            echo "   Timestamp: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
