@@ -43,9 +43,9 @@ sudo apt-get update -y
 echo ""
 echo "[2/9] Installing system dependencies..."
 sudo apt-get install -y \
-    python3.11 \
-    python3.11-venv \
-    python3.11-dev \
+    python3 \
+    python3-venv \
+    python3-dev \
     python3-pip \
     build-essential \
     libpq-dev \
@@ -64,7 +64,7 @@ sudo apt-get install -y nodejs
 
 # Verify
 echo "Verifying installations:"
-python3.11 --version
+python3 --version
 node --version
 npm --version
 nginx -v
@@ -88,7 +88,7 @@ echo "   Latest commit: $(git log -1 --oneline)"
 # --- Step 4: Set up Python virtual environment ---
 echo ""
 echo "[4/9] Setting up Python virtual environment..."
-python3.11 -m venv "${VENV_DIR}"
+python3 -m venv "${VENV_DIR}"
 source "${VENV_DIR}/bin/activate"
 pip install --upgrade pip
 pip install -r "${API_DIR}/requirements.txt"

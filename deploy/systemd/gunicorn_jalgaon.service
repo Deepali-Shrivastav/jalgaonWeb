@@ -8,6 +8,9 @@ User=ubuntu
 Group=www-data
 WorkingDirectory=/home/ubuntu/jalgaonWeb/jalgaonApi
 
+# Automatically create /run/gunicorn/ directory owned by ubuntu:www-data on startup
+RuntimeDirectory=gunicorn
+
 # Load production environment
 Environment="DJANGO_ENV=production"
 
@@ -15,7 +18,7 @@ Environment="DJANGO_ENV=production"
 ExecStart=/home/ubuntu/jalgaonWeb/jalgaonApi/.venv/bin/gunicorn \
     --workers 3 \
     --worker-class sync \
-    --bind unix:/run/gunicorn_jalgaon.sock \
+    --bind unix:/run/gunicorn/gunicorn_jalgaon.sock \
     --access-logfile /var/log/gunicorn/access.log \
     --error-logfile /var/log/gunicorn/error.log \
     --log-level info \
