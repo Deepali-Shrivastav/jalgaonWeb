@@ -30,7 +30,7 @@ class UserLoginSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'phone_number']
+        fields = ['id', 'phone_number', 'first_name', 'last_name', 'profile_pic', 'role']
 
     def validate_phone_number(self, value):
         if len(value) > 13:

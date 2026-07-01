@@ -4,6 +4,7 @@ import axios from 'axios';
 import { assets } from '../../assets/assets';
 import { FormContext } from '../../context/FormContext';
 import { UserContext } from '../../context/UserContext';
+import { MdPhone, MdLock, MdVisibility, MdVisibilityOff, MdAdminPanelSettings } from 'react-icons/md';
 
 axios.defaults.xsrfCookieName = 'csrftoken';
 axios.defaults.xsrfHeaderName = 'X-CSRFToken';
@@ -25,13 +26,14 @@ function LoginSignup() {
   const { closeForm, setCloseForm } = useContext(FormContext);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [userPassword, setUserPassword] = useState('');
-  const [isNumber, setIsNumber] = useState(true);
+  const [isNumber, setIsNumber] = useState(false); // Default to Login now
   const [errorMessage, setErrorMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const getCsrfToken = async () => {
     try {
       const response = await axios.get(`${djangoApi}/api/v1/auth/csrf-token/`);
-      console.log('Fetched CSRF Token:', response.data.csrfToken); // Log token for debugging
       return response.data.csrfToken;
     } catch (error) {
       console.error('Error fetching CSRF token:', error);
@@ -41,28 +43,29 @@ function LoginSignup() {
   
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setIsLoading(true);
+    setErrorMessage('');
     const csrfToken = await getCsrfToken();
 
     try {
-      const response = await axios.post(`${djangoApi}/api/v1/auth/register/`, {
+      await axios.post(`${djangoApi}/api/v1/auth/register/`, {
         phone_number: phoneNumber,
         password: userPassword
       }, {
-        headers: {
-          'X-CSRFToken': csrfToken,
-        }
+        headers: { 'X-CSRFToken': csrfToken }
       });
-
-      handleLoginSubmit(e);
+      handleLoginSubmit(e); // auto login after register
     } catch (error) {
       console.error('Registration failed', error);
-      setErrorMessage('Registration failed');
+      setErrorMessage(error.response?.data?.error || 'Registration failed. Please try again.');
+      setIsLoading(false);
     }
   };
 
   const handleLoginSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    setIsLoading(true);
+    setErrorMessage('');
     const csrfToken = await getCsrfToken();
 
     try {
@@ -70,9 +73,7 @@ function LoginSignup() {
         phone_number: phoneNumber,
         password: userPassword
       }, {
-        headers: {
-          'X-CSRFToken': csrfToken,
-        },
+        headers: { 'X-CSRFToken': csrfToken },
         withCredentials: true
       });
 
@@ -81,14 +82,20 @@ function LoginSignup() {
       setIsLogin(true);
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
-      setCloseForm(true);
-      console.log('Login successful', user);
+      
+      // If user is admin/staff, route them to /admin immediately or just close form
+      if (['super_admin', 'admin', 'moderator', 'content_manager'].includes(user.role)) {
+          window.location.href = '/admin'; // Force redirect to admin dashboard
+      } else {
+          setCloseForm(true);
+      }
 
-      // Fetch token key
       await getTokenKey(csrfToken);
     } catch (error) {
       console.error('Login failed', error);
-      setErrorMessage('Login failed');
+      setErrorMessage(error.response?.data?.error || 'Invalid credentials. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -105,15 +112,10 @@ function LoginSignup() {
       });
   
       if (response.status === 200) {
-        // Store token in localStorage
         localStorage.setItem('tokenKey', response.data.token);
-        console.log('Token stored successfully:', response.data.token);
-      } else {
-        console.error('Error:', response.data.error);
       }
     } catch (error) {
       console.error('Error fetching token key:', error);
-      setErrorMessage('Error fetching token key');
     }
   };
 
@@ -131,68 +133,136 @@ function LoginSignup() {
         }
       }
     };
-
     checkUserSession();
   }, [setUser, setIsLogin]);
+
+  // Prevent background scroll when modal is open
+  useEffect(() => {
+    if (!closeForm) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => { document.body.style.overflow = 'unset'; }
+  }, [closeForm]);
 
   return (
     <div className={`login_signup_container ${closeForm ? "close_form" : ""}`}>
       <div className="login_form">
-        <div className="close_btn">
-          <i onClick={() => setCloseForm(!closeForm)} className='bx bx-x'></i>
+        <div className="close_btn" onClick={() => setCloseForm(true)}>
+          <i className='bx bx-x'></i>
         </div>
-        <form onSubmit={handleSubmit} className={`${isNumber ? "isNumber" : "noForm"}`}>
-          <h1>Welcome to Jalgaon.Com</h1>
-          <p>Register to personalize your experience</p>
-          <div className="hr_line"></div>
+        
+        {/* Registration Form */}
+        <form onSubmit={handleSubmit} className={`${isNumber ? "activeForm" : "noForm"}`}>
+          <div className="login_header">
+            <div className="login_logo_container">
+                <img src={assets.logo} alt="Jalgaon Logo" className="login_brand_logo" />
+            </div>
+            <h1>Create Account</h1>
+            <p>Join Jalgaon.com to get started</p>
+          </div>
 
-          <label htmlFor="mobile-number">Mobile Number</label>
-          <div className="number_input">
-            <img src={assets.flag} alt="Flag" />
-            <input type="text" name='phone_number' value={phoneNumber} id='mobile-number' onChange={(e) => setPhoneNumber(e.target.value)} required />
+          <div className="input_group">
+            <label htmlFor="reg-mobile">Mobile Number</label>
+            <div className="input_wrapper">
+              <MdPhone className="input_icon" />
+              <input 
+                type="tel" 
+                value={phoneNumber} 
+                id="reg-mobile" 
+                placeholder="Enter 10-digit number"
+                onChange={(e) => setPhoneNumber(e.target.value)} 
+                required 
+              />
+            </div>
           </div>
-          <label htmlFor="user-password">Password</label>
-          <div className="number_input">
-            <img src={assets.flag} alt="Flag" />
-            <input type="password" name='password' value={userPassword} id='user-password' onChange={(e) => setUserPassword(e.target.value)} required />
+
+          <div className="input_group">
+            <label htmlFor="reg-password">Password</label>
+            <div className="input_wrapper">
+              <MdLock className="input_icon" />
+              <input 
+                type={showPassword ? "text" : "password"} 
+                value={userPassword} 
+                id="reg-password" 
+                placeholder="Create a strong password"
+                onChange={(e) => setUserPassword(e.target.value)} 
+                required 
+              />
+              <div className="password_toggle" onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? <MdVisibilityOff /> : <MdVisibility />}
+              </div>
+            </div>
           </div>
-          <span>By Login or Signup I accept terms and conditions</span>
+
+          <span className="terms_text">By registering, you accept our terms and conditions.</span>
           {errorMessage && <p className="error_message">{errorMessage}</p>}
-          <div className="submit_button">
-            <button type="submit">
-              <span>Continue</span>
-              <i className='bx bx-right-arrow-alt'></i>
-            </button>
-          </div>
-          <div className="back_btn_login">
-            <p onClick={() => setIsNumber(!isNumber)}>Already have an <span>account</span></p>
+          
+          <button type="submit" className="submit_button" disabled={isLoading}>
+            {isLoading ? <span className="loader_spinner"></span> : <span>Create Account</span>}
+          </button>
+          
+          <div className="switch_form_text">
+            <p>Already have an account? <span onClick={() => {setIsNumber(false); setErrorMessage('');}}>Log In</span></p>
           </div>
         </form>
-        <form onSubmit={handleLoginSubmit} className={`${!isNumber ? "" : "noForm"}`}>
-          <h1>Welcome to Jalgaon.Com</h1>
-          <p>Login to personalize your experience</p>
-          <div className="hr_line"></div>
 
-          <label htmlFor="mobile-number">Mobile Number</label>
-          <div className="number_input">
-            <img src={assets.flag} alt="Flag" />
-            <input type="text" name='phone_number' value={phoneNumber} id='mobile-number' onChange={(e) => setPhoneNumber(e.target.value)} required />
+        {/* Login Form */}
+        <form onSubmit={handleLoginSubmit} className={`${!isNumber ? "activeForm" : "noForm"}`}>
+          <div className="login_header">
+            <div className="login_logo_container">
+                <MdAdminPanelSettings className="login_admin_icon" />
+            </div>
+            <h1>Welcome Back</h1>
+            <p>Log in to your account or admin portal</p>
           </div>
-          <label htmlFor="user-password">Password</label>
-          <div className="number_input">
-            <img src={assets.flag} alt="Flag" />
-            <input type="password" name='password' value={userPassword} id='user-password' onChange={(e) => setUserPassword(e.target.value)} required />
+
+          <div className="input_group">
+            <label htmlFor="login-mobile">Mobile Number</label>
+            <div className="input_wrapper">
+              <MdPhone className="input_icon" />
+              <input 
+                type="tel" 
+                value={phoneNumber} 
+                id="login-mobile" 
+                placeholder="Enter your registered number"
+                onChange={(e) => setPhoneNumber(e.target.value)} 
+                required 
+              />
+            </div>
           </div>
-          <span>By Login or Signup I accept terms and conditions</span>
+
+          <div className="input_group">
+            <label htmlFor="login-password">Password</label>
+            <div className="input_wrapper">
+              <MdLock className="input_icon" />
+              <input 
+                type={showPassword ? "text" : "password"} 
+                value={userPassword} 
+                id="login-password" 
+                placeholder="Enter your password"
+                onChange={(e) => setUserPassword(e.target.value)} 
+                required 
+              />
+              <div className="password_toggle" onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? <MdVisibilityOff /> : <MdVisibility />}
+              </div>
+            </div>
+          </div>
+
+          <div className="form_extras">
+            <span className="terms_text">Secure login portal.</span>
+          </div>
+          
           {errorMessage && <p className="error_message">{errorMessage}</p>}
-          <div className="submit_button">
-            <button type="submit">
-              <span>Continue</span>
-              <i className='bx bx-right-arrow-alt'></i>
-            </button>
-          </div>
-          <div className="back_btn_login">
-            <p onClick={() => setIsNumber(!isNumber)}>Create new <span>account</span></p>
+          
+          <button type="submit" className="submit_button" disabled={isLoading}>
+            {isLoading ? <span className="loader_spinner"></span> : <span>Access Dashboard</span>}
+          </button>
+          
+          <div className="switch_form_text">
+            <p>Don't have an account? <span onClick={() => {setIsNumber(true); setErrorMessage('');}}>Sign Up</span></p>
           </div>
         </form>
       </div>
