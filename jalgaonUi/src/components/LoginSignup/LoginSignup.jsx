@@ -57,7 +57,25 @@ function LoginSignup() {
       handleLoginSubmit(e); // auto login after register
     } catch (error) {
       console.error('Registration failed', error);
-      setErrorMessage(error.response?.data?.error || 'Registration failed. Please try again.');
+      
+      let msg = '';
+      if (error.response?.data) {
+        const data = error.response.data;
+        if (typeof data === 'object' && !Array.isArray(data)) {
+          // Format field validation errors, e.g., {"phone_number": ["..."], "password": ["..."]}
+          msg = Object.entries(data)
+            .map(([field, errors]) => {
+              const fieldLabel = field.charAt(0).toUpperCase() + field.slice(1).replace('_', ' ');
+              const errorText = Array.isArray(errors) ? errors.join(' ') : errors;
+              return `${fieldLabel}: ${errorText}`;
+            })
+            .join(' | ');
+        } else if (typeof data === 'string') {
+          msg = data;
+        }
+      }
+      
+      setErrorMessage(msg || 'Registration failed. Please try again.');
       setIsLoading(false);
     }
   };
