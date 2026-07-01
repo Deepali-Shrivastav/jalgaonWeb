@@ -44,3 +44,18 @@ dist/
 # OS Files
 .DS_Store
 Thumbs.db
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Legacy Media Uploads (from models)
+jalgaonApi/static/assets/article_imgs/
+jalgaonApi/static/assets/categories/
+
+# One-off Utility Scripts
+jalgaonApi/create_apps.py
+jalgaonApi/fake_mig.py
+jalgaonApi/data.json

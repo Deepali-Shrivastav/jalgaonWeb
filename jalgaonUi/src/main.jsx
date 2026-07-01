@@ -21,6 +21,11 @@ import SearchPage from './pages/SearchPage';
 import NewsIndexPage from './pages/NewsIndexPage';
 import NewsArticlePage from './pages/NewsArticlePage';
 
+// Jobs Module
+import JobsIndexPage from './pages/JobsIndexPage';
+import JobDetailPage from './pages/JobDetailPage';
+import PostJobPage from './pages/PostJobPage';
+
 // Admin Imports
 import AdminGuard from './components/admin/AdminGuard';
 import AdminLayout from './pages/admin/AdminLayout';
@@ -33,6 +38,9 @@ import AdminNews from './pages/admin/AdminNews';
 import AdminNewsCreate from './pages/admin/AdminNewsCreate';
 import AdminNewsComments from './pages/admin/AdminNewsComments';
 import AdminNewsCategories from './pages/admin/AdminNewsCategories';
+import AdminJobs from './pages/admin/AdminJobs';
+import AdminJobCategories from './pages/admin/AdminJobCategories';
+import AdminJobApplications from './pages/admin/AdminJobApplications';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -59,6 +67,11 @@ const router = createBrowserRouter(
       <Route path='/news/:slug' element={<NewsArticlePage />} />
       <Route path='/news/category/:slug' element={<NewsIndexPage />} />
 
+      {/* Jobs Module */}
+      <Route path='/jobs' element={<JobsIndexPage />} />
+      <Route path='/jobs/post' element={<PostJobPage />} />
+      <Route path='/jobs/:slug' element={<JobDetailPage />} />
+
       {/* Admin Panel */}
       <Route path='/admin' element={<AdminGuard><AdminLayout /></AdminGuard>}>
         <Route index element={<AdminDashboard />} />
@@ -73,6 +86,11 @@ const router = createBrowserRouter(
         <Route path='news/edit/:id' element={<AdminNewsCreate />} />
         <Route path='news/comments' element={<AdminNewsComments />} />
         <Route path='news/categories' element={<AdminNewsCategories />} />
+        
+        {/* Admin Jobs */}
+        <Route path='jobs' element={<AdminJobs />} />
+        <Route path='jobs/categories' element={<AdminJobCategories />} />
+        <Route path='jobs/applications' element={<AdminJobApplications />} />
       </Route>
     </>
   )

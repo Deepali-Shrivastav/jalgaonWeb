@@ -1,0 +1,35 @@
+.job-category-filter {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    scrollbar-width: none; /* Firefox */
+}
+
+.job-category-filter::-webkit-scrollbar {
+    display: none; /* Chrome, Safari */
+}
+
+.category-chip {
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.category-chip:hover {
+    background: #e2e8f0;
+}
+
+.category-chip.active {
+    background: #3b82f6;
+    color: #fff;
+    border-color: #3b82f6;
+}

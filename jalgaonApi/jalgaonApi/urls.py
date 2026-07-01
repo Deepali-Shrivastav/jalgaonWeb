@@ -30,6 +30,7 @@ urlpatterns = [
     path('api/v1/news/', include('apps.news.urls')),
     path('api/v1/ads/', include('apps.ads.urls')),
     path('api/v1/finance/', include('apps.finance.urls')),
+    path('api/v1/jobs/', include('apps.jobs.urls')),
     path('api/v1/admin-panel/', include('apps.admin_panel.urls')),
 
     # Swagger / OpenAPI Docs

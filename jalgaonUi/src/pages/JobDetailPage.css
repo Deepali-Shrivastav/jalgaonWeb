@@ -1,0 +1,246 @@
+.job-detail-page {
+    background-color: #f8fafc;
+    min-height: 100vh;
+}
+
+.job-header-bg {
+    background: #1e293b;
+    height: 120px;
+    padding-top: 20px;
+}
+
+.back-link-top {
+    color: #cbd5e1;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.2s;
+}
+
+.back-link-top:hover {
+    color: white;
+}
+
+.job-detail-main {
+    margin-top: -60px;
+    padding-bottom: 60px;
+}
+
+.job-content-wrapper {
+    display: flex;
+    gap: 30px;
+}
+
+.job-main-column {
+    flex: 1;
+    min-width: 0;
+}
+
+.job-sidebar-column {
+    width: 300px;
+    flex-shrink: 0;
+}
+
+.job-header-card {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.job-header-top {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.job-category-tag, .job-type-tag {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.job-category-tag {
+    background: #eff6ff;
+    color: #3b82f6;
+}
+
+.job-type-tag {
+    background: #f1f5f9;
+    color: #475569;
+    text-transform: capitalize;
+}
+
+.job-detail-title {
+    font-size: 2rem;
+    color: #1e293b;
+    margin: 0 0 20px 0;
+}
+
+.job-company-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.job-detail-logo {
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid #e2e8f0;
+}
+
+.job-detail-logo-placeholder {
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+    background: #e2e8f0;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.job-detail-company {
+    margin: 0 0 5px 0;
+    font-size: 1.2rem;
+    color: #334155;
+}
+
+.job-detail-location {
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.job-quick-stats {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 20px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.stat-item i {
+    font-size: 1.5rem;
+    color: #94a3b8;
+    margin-top: 3px;
+}
+
+.stat-item span {
+    display: block;
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.stat-item strong {
+    display: block;
+    color: #1e293b;
+    font-size: 1rem;
+}
+
+.job-description-section, .job-requirements-section {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.job-description-section h2, .job-requirements-section h2 {
+    font-size: 1.4rem;
+    color: #1e293b;
+    margin: 0 0 20px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.formatted-content p {
+    color: #475569;
+    line-height: 1.7;
+    margin-bottom: 15px;
+}
+
+.job-sidebar-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.job-sidebar-card h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.1rem;
+    color: #1e293b;
+}
+
+.apply-sticky-card {
+    position: sticky;
+    top: 90px;
+}
+
+.apply-jump-btn {
+    display: block;
+    text-align: center;
+    padding: 12px;
+    background: #3b82f6;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.apply-jump-btn:hover {
+    background: #2563eb;
+}
+
+.external-apply-box {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.apply-external-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 30px;
+    background: #1e293b;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    margin-top: 15px;
+}
+
+@media (max-width: 992px) {
+    .job-content-wrapper {
+        flex-direction: column;
+    }
+    
+    .job-sidebar-column {
+        width: 100%;
+    }
+    
+    .apply-sticky-card {
+        position: static;
+    }
+}

@@ -1,0 +1,47 @@
+.admin-jobs-page .status-badge.pending { background: #fef3c7; color: #d97706; }
+.admin-jobs-page .status-badge.active { background: #dcfce7; color: #15803d; }
+.admin-jobs-page .status-badge.rejected { background: #fee2e2; color: #b91c1c; }
+.admin-jobs-page .status-badge.closed { background: #f1f5f9; color: #475569; }
+
+.admin-action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: none;
+    background: #f1f5f9;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-icon:hover { background: #e2e8f0; }
+.btn-icon.success:hover { background: #dcfce7; color: #15803d; }
+.btn-icon.danger:hover { background: #fee2e2; color: #b91c1c; }
+.btn-icon.warning:hover { background: #fef3c7; color: #d97706; }
+
+.admin-search-bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.admin-search-bar .search-icon {
+    position: absolute;
+    left: 10px;
+    color: #94a3b8;
+}
+
+.admin-search-bar input {
+    padding: 8px 10px 8px 30px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    outline: none;
+}
