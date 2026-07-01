@@ -1,0 +1,34 @@
+.latest-news-home {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.latest-news-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.latest-news-header .section-title {
+    margin-bottom: 0;
+}
+
+.view-all-news {
+    color: #dc2626;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.view-all-news:hover {
+    color: #b91c1c;
+    text-decoration: underline;
+}
+
+.latest-news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+}

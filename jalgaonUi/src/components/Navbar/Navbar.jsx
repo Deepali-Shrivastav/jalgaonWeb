@@ -24,7 +24,7 @@ client.interceptors.request.use((config) => {
 
 const Navbar = () => {
     const { isLogin, setIsLogin } = useContext(LoginContext);
-    const { user, setUser } = useContext(UserContext);
+    const { user, setUser, isStaff } = useContext(UserContext);
     const { closeSpecial, setCloseSpecial } = useContext(FormContext);
     const { closeForm, setCloseForm } = useContext(FormContext);
 
@@ -66,7 +66,7 @@ const Navbar = () => {
                         <NavLink to='/advertise'>
                             <li>Advertise</li>
                         </NavLink>
-                        <NavLink to='/addListig'>
+                        <NavLink to='/news'>
                             <li>News</li>
                         </NavLink>
                     </ul>
@@ -74,6 +74,9 @@ const Navbar = () => {
                         <i className='bx bx-heart'></i>
                         {user ? (
                             <>
+                                {isStaff && (
+                                    <NavLink to='/admin'><p className="login_btn" style={{backgroundColor: '#dc2626'}}>Admin Panel</p></NavLink>
+                                )}
                                 <NavLink to='/account'><p className="login_btn">Account: {user?.phone_number}</p></NavLink>
                                 {/* <form onSubmit={handleLogout}>
                                     <button type='submit' className="login_btn">Logout</button>
