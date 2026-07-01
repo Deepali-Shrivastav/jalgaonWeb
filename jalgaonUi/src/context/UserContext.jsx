@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../utils/apiClient';
 
 export const UserContext = createContext();
 
@@ -13,7 +13,6 @@ const STAFF_ROLES = [
 ];
 
 export const UserProvider = ({ children }) => {
-    const djangoApi = import.meta.env.VITE_DJANGO_API;
     const [user, setUser] = useState(null);
     const [isLogin, setIsLogin] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -23,9 +22,7 @@ export const UserProvider = ({ children }) => {
             const token = localStorage.getItem('token');
             if (token) {
                 try {
-                    const response = await axios.get(`${djangoApi}/api/v1/auth/user/`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
+                    const response = await apiClient.get('/api/v1/auth/user/');
                     setUser(response.data.user);
                     setIsLogin(true);
                 } catch (error) {

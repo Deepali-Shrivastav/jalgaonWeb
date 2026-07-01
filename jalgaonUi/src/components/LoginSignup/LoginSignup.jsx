@@ -77,10 +77,11 @@ function LoginSignup() {
         withCredentials: true
       });
 
-      const { user, token } = response.data;
+      const { user, access, refresh } = response.data;
       setUser(user);
       setIsLogin(true);
-      localStorage.setItem('token', token);
+      localStorage.setItem('token', access);
+      localStorage.setItem('refresh_token', refresh);
       localStorage.setItem('user', JSON.stringify(user));
       
       // If user is admin/staff, route them to /admin immediately or just close form
@@ -89,33 +90,11 @@ function LoginSignup() {
       } else {
           setCloseForm(true);
       }
-
-      await getTokenKey(csrfToken);
     } catch (error) {
       console.error('Login failed', error);
       setErrorMessage(error.response?.data?.error || 'Invalid credentials. Please try again.');
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const getTokenKey = async (csrfToken) => {
-    try {
-      const response = await axios.post(`${djangoApi}/api/v1/auth/token-key/`, {
-        phone_number: phoneNumber,
-        password: userPassword
-      },{
-        headers: {
-          'X-CSRFToken': csrfToken,
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-  
-      if (response.status === 200) {
-        localStorage.setItem('tokenKey', response.data.token);
-      }
-    } catch (error) {
-      console.error('Error fetching token key:', error);
     }
   };
 

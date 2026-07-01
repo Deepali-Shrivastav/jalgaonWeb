@@ -223,7 +223,7 @@ function AddListingForm({ is_edit = false }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const token = localStorage.getItem('tokenKey');
+        const token = localStorage.getItem('token');
         const csrfToken = await getCsrfToken();
 
         console.log(token);
@@ -251,7 +251,7 @@ function AddListingForm({ is_edit = false }) {
                     headers: {
                         'X-CSRFToken': csrfToken,
                         'Content-Type': 'multipart/form-data',
-                        'Authorization': `Token ${token}`,  // Replace with actual token
+                        'Authorization': `Bearer ${token}`,  // Replace with actual token
                     },
                 }
             );
@@ -266,7 +266,7 @@ function AddListingForm({ is_edit = false }) {
     
     const updateShopListing = async (e) => {
         e.preventDefault();
-        const token = localStorage.getItem('tokenKey');
+        const token = localStorage.getItem('token');
         console.log('Token:', token);
     
         const data = new FormData();
@@ -286,7 +286,7 @@ function AddListingForm({ is_edit = false }) {
                 {
                     headers: {
                         'Content-Type': 'multipart/form-data',
-                        'Authorization': `Token ${token}`,
+                        'Authorization': `Bearer ${token}`,
                     },
                     params: {
                         shop_id: formData.id, // Ensure this is the correct ID of the shop to update
