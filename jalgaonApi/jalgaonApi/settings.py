@@ -54,7 +54,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
-    'rest_framework.authtoken',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'core',
@@ -108,25 +107,50 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    # --- Rate Limiting (NFR-SEC-06) ---
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/min',   # Unauthenticated: 100 req/min per IP
+        'user': '500/min',   # Authenticated: 500 req/min per user
+    },
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=90),
+    # Access token: 15 minutes (industry standard — short window limits damage if stolen)
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+
+    # Refresh token: 7 days (PRD FR-AUTH-06 default)
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+
+    # Security: Every use of a refresh token rotates it (issues a new one)
     'ROTATE_REFRESH_TOKENS': True,
+
+    # Security: Old refresh token is immediately blacklisted after rotation
     'BLACKLIST_AFTER_ROTATION': True,
-    'UPDATE_LAST_LOGIN': False,
+
+    # Track last login timestamp automatically
+    'UPDATE_LAST_LOGIN': True,
+
+    # Signing algorithm (HS256 for now; RS256 migration is in the pending backlog)
     'ALGORITHM': 'HS256',
     'VERIFYING_KEY': None,
     'AUDIENCE': None,
     'ISSUER': None,
+
+    # Token configuration
     'AUTH_HEADER_TYPES': ('Bearer',),
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
+
+    # Include user role in token payload for frontend role checks
+    'TOKEN_OBTAIN_SERIALIZER': 'apps.accounts.serializers.CustomTokenObtainPairSerializer',
 }
 
 CSRF_COOKIE_NAME = 'csrftoken'
@@ -223,4 +247,58 @@ else:
         'http://localhost:5173',
         'http://127.0.0.1:5173'
     ]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SWAGGER / OPENAPI DOCUMENTATION (PRD §15.1)
+# Accessible at /api/docs/ — restrict to staff only in production
+# ─────────────────────────────────────────────────────────────────────────────
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Jalgaon.com API',
+    'DESCRIPTION': (
+        'City Digital Ecosystem Platform — RESTful API for business directory, '
+        'news, events, jobs, and authentication.'
+    ),
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+        'displayRequestDuration': True,
+    },
+    'COMPONENT_SPLIT_REQUEST': True,
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECURITY HEADERS (NFR-SEC-04: XSS Protection via CSP)
+# These only apply in production (DEBUG=False).
+# ─────────────────────────────────────────────────────────────────────────────
+if not DEBUG:
+    # Prevent browsers from MIME-sniffing the Content-Type header
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+
+    # Enable browser's built-in XSS filter (legacy browsers)
+    SECURE_BROWSER_XSS_FILTER = True
+
+    # Prevent this site from being loaded in a frame/iframe (clickjacking)
+    X_FRAME_OPTIONS = 'DENY'
+
+    # Force HTTPS for 1 year; include subdomains
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+    # Redirect all HTTP to HTTPS (Nginx already does this, but Django adds a fallback)
+    SECURE_SSL_REDIRECT = False  # Keep False — Nginx handles SSL termination
+
+    # Session and CSRF cookies only sent over HTTPS
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+    # Session cookie not readable by JavaScript
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = False  # Must be False so JS can read CSRF token for AJAX
+
+    # Limit cookie scope to same-site requests (CSRF protection)
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_SAMESITE = 'Lax'
 

@@ -55,7 +55,7 @@ function AddAdvertiseForm() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log(formData);
-        const token = localStorage.getItem('tokenKey');
+        const token = localStorage.getItem('token');
         const csrfToken = await getCsrfToken();
 
         // setFormData({ ...formData, ['user']: user.id });
@@ -77,7 +77,7 @@ function AddAdvertiseForm() {
                     headers: {
                         'X-CSRFToken': csrfToken,
                         'Content-Type': 'multipart/form-data',
-                        'Authorization': `Token ${token}`,  // Replace with actual token
+                        'Authorization': `Bearer ${token}`,  // Replace with actual token
                     },
                 }
             );

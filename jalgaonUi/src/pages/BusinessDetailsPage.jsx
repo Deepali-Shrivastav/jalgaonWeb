@@ -16,17 +16,11 @@ function BusinessDetailsPage() {
   // const [reviews, setReviews] = useState([])
 
   useEffect(() => {
-    const token = localStorage.getItem('tokenKey');
-
     const fetchData = async () => {
       try {
         console.log("Fetching data...");
-        const token = "your_token_here"; // Replace with your actual token
         const response = await axios.get(`${djangoApi}/api/v1/listings/detail/`, {
-          params: { productId },
-          headers: {
-            Authorization: `Token ${token}` // Using Token authentication scheme
-          }
+          params: { productId }
         });
         setBusinessData(response.data);
         console.log(response.data);
