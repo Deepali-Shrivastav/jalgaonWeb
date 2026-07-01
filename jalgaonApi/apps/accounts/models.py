@@ -48,7 +48,6 @@ class User(AbstractUser, PermissionsMixin):
         max_length=255,
         null=True,
         blank=True,
-        unique=True,
         help_text="Optional email address for account recovery and notifications."
     )
     is_verified = models.BooleanField(

@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='user',
             name='email',
-            field=models.EmailField(blank=True, help_text='Optional email address for account recovery and notifications.', max_length=255, null=True, unique=True),
+            field=models.EmailField(blank=True, help_text='Optional email address for account recovery and notifications.', max_length=255, null=True),
         ),
         migrations.CreateModel(
             name='LoginAttempt',
