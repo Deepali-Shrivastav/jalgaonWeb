@@ -1,0 +1,28 @@
+.news-category-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.category-pill {
+    padding: 8px 16px;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.category-pill:hover {
+    background: #e2e8f0;
+}
+
+.category-pill.active {
+    background: #dc2626;
+    color: white;
+    border-color: #dc2626;
+}

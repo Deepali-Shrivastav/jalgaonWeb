@@ -18,6 +18,8 @@ import TermsPage from './pages/TermsPage';
 import AddListingForm from './components/AllForms/AddListingForm';
 import ContactPage from './pages/ContactPage';
 import SearchPage from './pages/SearchPage';
+import NewsIndexPage from './pages/NewsIndexPage';
+import NewsArticlePage from './pages/NewsArticlePage';
 
 // Admin Imports
 import AdminGuard from './components/admin/AdminGuard';
@@ -27,6 +29,10 @@ import AdminUsers from './pages/admin/AdminUsers';
 import AdminListings from './pages/admin/AdminListings';
 import AdminCategories from './pages/admin/AdminCategories';
 import AdminModeration from './pages/admin/AdminModeration';
+import AdminNews from './pages/admin/AdminNews';
+import AdminNewsCreate from './pages/admin/AdminNewsCreate';
+import AdminNewsComments from './pages/admin/AdminNewsComments';
+import AdminNewsCategories from './pages/admin/AdminNewsCategories';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -48,6 +54,11 @@ const router = createBrowserRouter(
         <Route path='editForm/:shopId' element={<AddListingForm is_edit={true}/>} />
       </Route>
 
+      {/* News Module */}
+      <Route path='/news' element={<NewsIndexPage />} />
+      <Route path='/news/:slug' element={<NewsArticlePage />} />
+      <Route path='/news/category/:slug' element={<NewsIndexPage />} />
+
       {/* Admin Panel */}
       <Route path='/admin' element={<AdminGuard><AdminLayout /></AdminGuard>}>
         <Route index element={<AdminDashboard />} />
@@ -55,6 +66,13 @@ const router = createBrowserRouter(
         <Route path='listings' element={<AdminListings />} />
         <Route path='categories' element={<AdminCategories />} />
         <Route path='moderation' element={<AdminModeration />} />
+        
+        {/* Admin News */}
+        <Route path='news' element={<AdminNews />} />
+        <Route path='news/create' element={<AdminNewsCreate />} />
+        <Route path='news/edit/:id' element={<AdminNewsCreate />} />
+        <Route path='news/comments' element={<AdminNewsComments />} />
+        <Route path='news/categories' element={<AdminNewsCategories />} />
       </Route>
     </>
   )

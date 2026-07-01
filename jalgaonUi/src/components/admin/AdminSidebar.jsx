@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { UserContext } from '../../context/UserContext';
 import { 
     MdDashboard, MdPeople, MdStorefront, 
-    MdCategory, MdGavel 
+    MdCategory, MdGavel, MdArticle, MdComment
 } from 'react-icons/md';
 
 const AdminSidebar = ({ isCollapsed }) => {
@@ -14,6 +14,8 @@ const AdminSidebar = ({ isCollapsed }) => {
     const canSeeListings = isAdmin || ['content_manager', 'moderator'].includes(userRole);
     const canSeeCategories = isAdmin || userRole === 'content_manager';
     const canSeeModeration = isAdmin || userRole === 'moderator' || userRole === 'content_manager';
+    const canSeeNews = isAdmin || ['content_manager', 'news_editor'].includes(userRole);
+    const canSeeNewsComments = isAdmin || ['content_manager', 'moderator', 'news_editor'].includes(userRole);
 
     return (
         <aside className={`admin-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
@@ -45,6 +47,27 @@ const AdminSidebar = ({ isCollapsed }) => {
                     <NavLink to="/admin/categories" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
                         <MdCategory className="admin-sidebar-icon" />
                         <span className="admin-sidebar-label">Categories</span>
+                    </NavLink>
+                )}
+                
+                {canSeeNews && (
+                    <>
+                        <NavLink to="/admin/news" end className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+                            <MdArticle className="admin-sidebar-icon" />
+                            <span className="admin-sidebar-label">News Articles</span>
+                        </NavLink>
+                        
+                        <NavLink to="/admin/news/categories" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+                            <MdCategory className="admin-sidebar-icon" />
+                            <span className="admin-sidebar-label">News Categories</span>
+                        </NavLink>
+                    </>
+                )}
+                
+                {canSeeNewsComments && (
+                    <NavLink to="/admin/news/comments" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+                        <MdComment className="admin-sidebar-icon" />
+                        <span className="admin-sidebar-label">News Comments</span>
                     </NavLink>
                 )}
 

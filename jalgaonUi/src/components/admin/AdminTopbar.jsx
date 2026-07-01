@@ -61,7 +61,15 @@ const AdminTopbar = ({ toggleSidebar, title = 'Dashboard' }) => {
             </div>
             
             <div className="admin-topbar-right" ref={dropdownRef}>
+                <button 
+                    className="admin-btn" 
+                    onClick={() => navigate('/')}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', marginRight: '15px', background: '#f1f5f9', color: '#334155' }}
+                >
+                    <MdOutlineOpenInNew /> Back to Website
+                </button>
                 <div 
+
                     className="admin-user-profile" 
                     onClick={() => setDropdownOpen(!isDropdownOpen)}
                     style={{ cursor: 'pointer', position: 'relative' }}

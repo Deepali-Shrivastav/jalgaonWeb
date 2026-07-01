@@ -1,0 +1,165 @@
+.article-page-wrapper {
+    background-color: #fff;
+    min-height: 100vh;
+}
+
+.article-loading, .article-error {
+    text-align: center;
+    padding: 100px 20px;
+    min-height: 50vh;
+}
+
+.article-error h2 {
+    color: #dc2626;
+    margin-bottom: 16px;
+}
+
+.article-main-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 140px 20px 40px;
+}
+
+.article-header {
+    margin-bottom: 32px;
+}
+
+.article-category-pill {
+    display: inline-block;
+    background: #dc2626;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+}
+
+.article-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 16px;
+    color: #1f2937;
+}
+
+.article-short-desc {
+    font-size: 1.25rem;
+    color: #4b5563;
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+.article-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.author-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.author-avatar {
+    width: 48px;
+    height: 48px;
+    background: #1f2937;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.author-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.author-name {
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.publish-date {
+    font-size: 0.9rem;
+    color: #6b7280;
+}
+
+.article-stats {
+    color: #6b7280;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.article-hero-image {
+    width: 100%;
+    margin-bottom: 40px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.article-hero-image img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    max-height: 500px;
+}
+
+.article-body {
+    font-size: 1.125rem;
+    line-height: 1.8;
+    color: #374151;
+}
+
+.article-body p {
+    margin-bottom: 24px;
+}
+
+.article-tags {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.article-tags h4 {
+    margin-bottom: 12px;
+    color: #4b5563;
+}
+
+.tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tag-pill {
+    background: #f3f4f6;
+    color: #4b5563;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .article-title {
+        font-size: 2rem;
+    }
+    
+    .article-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+}

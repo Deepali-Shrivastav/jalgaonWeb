@@ -3,7 +3,7 @@ import Advertise from '../components/Advertise/Advertise'
 import Categorytile from '../components/Categorytile/Categorytile'
 import Navbar from '../components/Navbar/Navbar'
 import Stocktickle from '../components/Stocktickle/Stocktickle'
-import Releatedarticles from '../components/Releatedarticles/Releatedarticles'
+import LatestNewsSection from '../components/News/LatestNewsSection'
 import Footer from '../components/Footer/Footer'
 import Services from '../components/Services/Services'
 import Bottomnav from '../components/Bottomnav/Bottomnav'
@@ -22,7 +22,7 @@ function Home() {
       <Advertise/>
       <Services />
       <Categorytile/>
-      <Releatedarticles />
+      <LatestNewsSection />
       <LoginSignup />
       <SpecialSections />
 

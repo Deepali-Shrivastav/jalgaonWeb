@@ -17,6 +17,10 @@ const AdminLayout = () => {
         const path = location.pathname;
         if (path.includes('users')) return 'User Management';
         if (path.includes('listings')) return 'Listing Management';
+        if (path.includes('news/categories')) return 'News Categories Management';
+        if (path.includes('news/comments')) return 'News Comment Moderation';
+        if (path.includes('news/create') || path.includes('news/edit')) return 'Edit News Article';
+        if (path.includes('news')) return 'News Management';
         if (path.includes('categories')) return 'Category Management';
         if (path.includes('moderation')) return 'Moderation Queue';
         return 'Dashboard Overview';

@@ -1,0 +1,38 @@
+.news-index-page {
+    background-color: #f8fafc;
+    min-height: 100vh;
+}
+
+.news-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 140px 20px 40px;
+}
+
+.load-more-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+}
+
+.load-more-btn {
+    background: #fff;
+    color: #dc2626;
+    border: 1px solid #dc2626;
+    padding: 12px 32px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.load-more-btn:hover:not(:disabled) {
+    background: #dc2626;
+    color: #fff;
+}
+
+.load-more-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

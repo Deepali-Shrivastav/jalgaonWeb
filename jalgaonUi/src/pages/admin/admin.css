@@ -352,3 +352,134 @@
 .admin-profile-dropdown .dropdown-menu button.logout-btn:hover {
     background: #fef2f2;
 }
+
+/* News Admin Additional Styles */
+.admin-content-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.admin-header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.admin-header-actions h2 {
+    margin: 0;
+    color: #1e293b;
+}
+
+.admin-title-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.badge.danger { background: #fee2e2; color: #991b1b; }
+.badge.success { background: #dcfce7; color: #166534; }
+.badge.warning { background: #fef9c3; color: #854d0e; }
+
+.status-select {
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: 1px solid #cbd5e1;
+    font-size: 0.85rem;
+}
+
+.admin-actions-cell {
+    display: flex;
+    gap: 8px;
+}
+
+.admin-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 4px;
+    background: #f1f5f9;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.admin-icon-btn:hover { background: #e2e8f0; }
+.admin-icon-btn.danger { color: #dc2626; }
+.admin-icon-btn.danger:hover { background: #fee2e2; }
+.admin-icon-btn.success { color: #16a34a; }
+.admin-icon-btn.success:hover { background: #dcfce7; }
+.admin-icon-btn.warning { color: #ea580c; }
+.admin-icon-btn.warning:hover { background: #ffedd5; }
+
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+}
+
+.form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-weight: 500;
+    color: #475569;
+}
+
+.admin-input, .admin-select, .admin-textarea, .admin-file-input {
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    width: 100%;
+}
+
+.admin-textarea {
+    resize: vertical;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.flex-center-vertical {
+    display: flex;
+    align-items: center;
+}
+
+.mt-4 {
+    margin-top: 1rem;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.truncate-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
