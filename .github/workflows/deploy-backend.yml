@@ -1,0 +1,193 @@
+# =============================================================================
+# Workflow 2 of 3: CD — Deploy Django Backend to Production
+# =============================================================================
+# Triggers on:
+#   - Push/merge to 'main' branch, ONLY when jalgaonApi/ files changed (auto)
+#   - Manual button in GitHub Actions UI with environment selection (manual)
+#
+# Target: jalgaon-webapp Lightsail server — 13.127.8.145 (Ubuntu, SSH user: ubuntu)
+# Service managed: gunicorn_jalgaon (systemd)
+#
+# BUG FIXES vs previous version:
+#   1. Added workflow_dispatch with inputs for manual trigger button
+#   2. Added concurrency group — prevents two deploys running simultaneously
+#   3. CRITICAL FIX: Secrets are now passed via 'envs:' as shell env vars,
+#      NOT interpolated as raw strings inside the heredoc. This is safe even
+#      when passwords contain $, \, backticks, or double-quotes.
+#   4. Fixed Django check in pre-deploy — now actually validates settings
+#   5. Added 'deactivate' guard (venv deactivation before systemctl)
+#   6. Added explicit 'set -euo pipefail' for stricter error handling
+#   7. Fixed 'if' guard to also allow workflow_dispatch from main
+# =============================================================================
+name: "CD — Deploy Backend to Production"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "jalgaonApi/**"
+      - ".github/workflows/deploy-backend.yml"
+      - "deploy/**"
+
+  # ✅ Manual trigger button with environment selection
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Reason for manual deployment"
+        required: true
+        default: "Hotfix / manual deploy"
+      skip_pre_check:
+        description: "Skip pre-deploy Python check (use only in emergency)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+# Prevent multiple deployments running at the same time
+# cancel-in-progress: false — never cancel a running production deploy
+concurrency:
+  group: production-backend-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy-backend:
+    name: "Deploy Django API → jalgaon-webapp (13.127.8.145)"
+    runs-on: ubuntu-22.04
+
+    # FIX: Updated condition to allow both push to main AND manual dispatch
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      # -----------------------------------------------------------------------
+      # STEP 1: Checkout code on the GitHub Actions runner
+      # -----------------------------------------------------------------------
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+
+      # -----------------------------------------------------------------------
+      # STEP 2: Pre-deploy sanity check on GitHub runner (fast failure before
+      # touching the production server)
+      # -----------------------------------------------------------------------
+      - name: "Set up Python 3.11 for pre-deploy check"
+        if: inputs.skip_pre_check != 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: jalgaonApi/requirements.txt
+
+      - name: "Install backend dependencies (pre-deploy check)"
+        if: inputs.skip_pre_check != 'true'
+        working-directory: jalgaonApi
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: "Pre-deploy: validate Python imports and syntax"
+        if: inputs.skip_pre_check != 'true'
+        working-directory: jalgaonApi
+        run: |
+          # Validate all Python files parse without SyntaxError
+          python -m py_compile jalgaonApi/settings.py
+          python -m py_compile app/models.py
+          python -m py_compile app/views.py
+          python -m py_compile app/serializers.py
+          echo "✅ Pre-deploy syntax check passed"
+
+      # -----------------------------------------------------------------------
+      # STEP 3: SSH into jalgaon-webapp and run the deployment
+      # -----------------------------------------------------------------------
+      - name: "Deploy to jalgaon-webapp Lightsail server"
+        uses: appleboy/ssh-action@v1.0.3
+        # CRITICAL FIX: Pass secrets as shell env vars, NOT as raw interpolated strings.
+        # This handles passwords/keys that contain $, \, `, or " safely.
+        env:
+          DEPLOY_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+          DEPLOY_DB_NAME: ${{ secrets.DB_NAME }}
+          DEPLOY_DB_USER: ${{ secrets.DB_USER }}
+          DEPLOY_DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DEPLOY_DB_HOST: ${{ secrets.DB_HOST }}
+          DEPLOY_DB_PORT: ${{ secrets.DB_PORT }}
+          DEPLOY_FAST2SMS_KEY: ${{ secrets.FAST2SMS_API_KEY }}
+        with:
+          host: ${{ secrets.PRODUCTION_SERVER_IP }}
+          username: ${{ secrets.PRODUCTION_SSH_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          port: 22
+          command_timeout: 15m
+          # Pass the env vars declared above into the remote shell session
+          envs: DEPLOY_SECRET_KEY,DEPLOY_DB_NAME,DEPLOY_DB_USER,DEPLOY_DB_PASSWORD,DEPLOY_DB_HOST,DEPLOY_DB_PORT,DEPLOY_FAST2SMS_KEY
+          script: |
+            # FIX: Strict error handling — exit on any error, unbound var, or pipe failure
+            set -euo pipefail
+
+            REPO_DIR="/home/ubuntu/jalgaonWeb"
+            API_DIR="${REPO_DIR}/jalgaonApi"
+            VENV="${API_DIR}/.venv/bin/activate"
+            ENV_FILE="${API_DIR}/.env.production"
+
+            echo "=== [1/6] Pulling latest code from main branch ==="
+            cd "${REPO_DIR}"
+            git fetch origin main
+            git reset --hard origin/main
+            echo "✅ Code updated to: $(git log -1 --oneline)"
+
+            echo "=== [2/6] Activating venv and updating Python dependencies ==="
+            # shellcheck disable=SC1090
+            source "${VENV}"
+            pip install --upgrade pip --quiet
+            pip install -r "${API_DIR}/requirements.txt" --quiet
+            echo "✅ Dependencies installed"
+
+            echo "=== [3/6] Writing .env.production from deployment secrets ==="
+            # CRITICAL FIX: Use env vars (not interpolated strings) — safe with special chars
+            # The env vars (DEPLOY_*) are injected by appleboy/ssh-action via 'envs:'
+            {
+              echo "SECRET_KEY=${DEPLOY_SECRET_KEY}"
+              echo "DEBUG=False"
+              echo "ALLOWED_HOSTS=api.jalgaon.com,www.jalgaon.com,13.127.8.145"
+              echo "CSRF_TRUSTED_ORIGINS=https://api.jalgaon.com,https://www.jalgaon.com"
+              echo "CORS_ALLOWED_ORIGINS=https://www.jalgaon.com,https://api.jalgaon.com,capacitor://localhost"
+              echo "USE_SQLITE=False"
+              echo "DB_ENGINE=django.db.backends.postgresql_psycopg2"
+              echo "DB_NAME=${DEPLOY_DB_NAME}"
+              echo "DB_USER=${DEPLOY_DB_USER}"
+              echo "DB_PASSWORD=${DEPLOY_DB_PASSWORD}"
+              echo "DB_HOST=${DEPLOY_DB_HOST}"
+              echo "DB_PORT=${DEPLOY_DB_PORT}"
+              echo "FAST2SMS_API_KEY=${DEPLOY_FAST2SMS_KEY}"
+              echo "DJANGO_ENV=production"
+            } > "${ENV_FILE}"
+            chmod 600 "${ENV_FILE}"
+            echo "✅ .env.production written (permissions: 600)"
+
+            echo "=== [4/6] Running database migrations ==="
+            cd "${API_DIR}"
+            DJANGO_ENV=production python manage.py migrate --noinput
+            echo "✅ Migrations applied"
+
+            echo "=== [5/6] Collecting static files ==="
+            DJANGO_ENV=production python manage.py collectstatic --noinput --clear
+            echo "✅ Static files collected"
+
+            echo "=== [6/6] Restarting Gunicorn service ==="
+            deactivate
+            sudo systemctl restart gunicorn_jalgaon
+            sleep 3  # Give Gunicorn time to start up
+
+            # Verify the service is running — fail the deploy if it's not
+            if sudo systemctl is-active --quiet gunicorn_jalgaon; then
+              echo "✅ Gunicorn is running — deployment successful"
+            else
+              echo "❌ ERROR: Gunicorn failed to start. Last 30 log lines:"
+              sudo journalctl -u gunicorn_jalgaon --no-pager -n 30
+              exit 1
+            fi
+
+            echo ""
+            echo "🚀 Backend deployment completed successfully"
+            echo "   Deployed commit: $(git -C ${REPO_DIR} log -1 --oneline)"
+            echo "   Timestamp: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"

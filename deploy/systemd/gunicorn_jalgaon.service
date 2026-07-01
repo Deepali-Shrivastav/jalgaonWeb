@@ -1,0 +1,37 @@
+[Unit]
+Description=Gunicorn daemon for JalgaonWeb Django API (api.jalgaon.com)
+Documentation=https://docs.gunicorn.org
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/jalgaonWeb/jalgaonApi
+
+# Automatically create /run/gunicorn/ directory owned by ubuntu:www-data on startup
+RuntimeDirectory=gunicorn
+
+# Load production environment
+Environment="DJANGO_ENV=production"
+
+# Gunicorn command — 3 workers recommended for 4GB RAM server
+ExecStart=/home/ubuntu/jalgaonWeb/jalgaonApi/.venv/bin/gunicorn \
+    --workers 3 \
+    --worker-class sync \
+    --bind unix:/run/gunicorn/gunicorn_jalgaon.sock \
+    --access-logfile /var/log/gunicorn/access.log \
+    --error-logfile /var/log/gunicorn/error.log \
+    --log-level info \
+    --timeout 60 \
+    --graceful-timeout 30 \
+    jalgaonApi.wsgi:application
+
+# Restart policy — restart on any failure, wait 5s between attempts
+Restart=on-failure
+RestartSec=5
+
+# Resource limits
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
