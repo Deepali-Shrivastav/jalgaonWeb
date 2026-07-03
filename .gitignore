@@ -1,61 +1,14 @@
-# =========================================================================
-# Git Ignore Configuration for JalgaonWeb Project
-# =========================================================================
-
-# Django Environment
-/jalgaonApi/.env
-/jalgaonApi/.env.development
-/jalgaonApi/.env.production
-db.sqlite3
-db_old.sqlite3
-*.log
-local_settings.py
-
-# React Environment
-/jalgaonUi/.env
-/jalgaonUi/.env.local
-!/jalgaonUi/.env.development
-!/jalgaonUi/.env.production
-
-
-# Python Virtual Environments
-.venv/
-venv/
-ENV/
-env/
-
-# Python caching
-__pycache__/
+**/__pycache__/
 *.pyc
 *.pyo
 *.pyd
 .pytest_cache/
-.mypy_cache/
-
-# Django static/media files
-staticfiles/
-media/
-
-# Node.js
+.coverage
+htmlcov/
+.env
+venv/
+.venv
+env/
 node_modules/
 dist/
-.eslintcache
-
-# OS Files
 .DS_Store
-Thumbs.db
-
-# IDEs and Editors
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Legacy Media Uploads (from models)
-jalgaonApi/static/assets/article_imgs/
-jalgaonApi/static/assets/categories/
-
-# One-off Utility Scripts
-jalgaonApi/create_apps.py
-jalgaonApi/fake_mig.py
-jalgaonApi/data.json
