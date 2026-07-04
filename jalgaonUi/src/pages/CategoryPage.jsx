@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import Filtercategory from '../components/Filtercategory/Filtercategory'
-import Categorysection from '../components/Categorysection/Categorysection'
-import axios from "axios"
+import Filtercategory from '../components/Filtercategory/Filtercategory';
+import Categorysection from '../components/Categorysection/Categorysection';
+import CategoryAdBanner from '../components/Ads/CategoryAdBanner';
+import axios from "axios";
 import LoginSignup from '../components/LoginSignup/LoginSignup';
+
 function CategoryPage() {
   const djangoApi = import.meta.env.VITE_DJANGO_API;
 
@@ -31,6 +33,7 @@ function CategoryPage() {
         fetchProducts();
     }
   }, [categorySlug, filterSubCategory, sortBy, djangoApi]);
+
   return (
     <div className="main_section">
       <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '10px 20px', background: '#fff', borderBottom: '1px solid #eee' }}>
@@ -45,10 +48,11 @@ function CategoryPage() {
         </select>
       </div>
       <Filtercategory categorySlug={categorySlug} setFilterSubCategory={setFilterSubCategory} filterSubCategory={filterSubCategory} />
+      <CategoryAdBanner />
       <Categorysection businessData={businessData} categorySlug={categorySlug} filterSubCategory={filterSubCategory}  />
       <LoginSignup />
     </div>
   )
 }
 
-export default CategoryPage
+export default CategoryPage;

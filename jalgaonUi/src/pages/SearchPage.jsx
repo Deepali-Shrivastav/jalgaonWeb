@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import BusinessCard from '../components/Categorysection/BusinessCard';
+import SidebarAd from '../components/Ads/SidebarAd';
+import ListingInterstitialAd from '../components/Ads/ListingInterstitialAd';
 
 function SearchPage() {
     const djangoApi = import.meta.env.VITE_DJANGO_API;
@@ -67,56 +69,55 @@ function SearchPage() {
         navigate(`/searchResults?${params.toString()}`);
     };
 
-    const handleCategoryClick = (slug) => {
-        const newCategory = selectedCategory === slug ? '' : slug;
-        setSelectedCategory(newCategory);
-        
+    const handleCategoryClick = (catName) => {
+        const newCat = selectedCategory === catName ? '' : catName;
+        setSelectedCategory(newCat);
         const params = new URLSearchParams();
         if (query) params.set('q', query);
-        if (newCategory) params.set('category', newCategory);
+        if (newCat) params.set('category', newCat);
         navigate(`/searchResults?${params.toString()}`);
     };
 
     return (
-        <div style={{ background: '#f8fafc', minHeight: '100vh', padding: '40px 0' }}>
-            <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
-                
-                {/* Search Header */}
-                <div style={{ background: '#fff', padding: '30px', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', marginBottom: '30px' }}>
-                    <h1 style={{ fontSize: '24px', color: '#1e293b', marginBottom: '20px' }}>Find Local Businesses</h1>
-                    <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '10px' }}>
-                        <div style={{ flex: 1, position: 'relative' }}>
-                            <i className='bx bx-search' style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', fontSize: '20px', color: '#94a3b8' }}></i>
-                            <input 
-                                type="text"
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                placeholder="Search for restaurants, plumbers, doctors..."
-                                style={{ width: '100%', padding: '15px 15px 15px 45px', fontSize: '16px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none' }}
-                            />
-                        </div>
-                        <button type="submit" style={{ padding: '0 30px', background: '#0081C7', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer' }}>
-                            Search
-                        </button>
-                    </form>
+        <div style={{ maxWidth: '1200px', margin: '30px auto', padding: '0 20px', fontFamily: 'Inter, sans-serif' }}>
+            {/* Header Search Box */}
+            <div style={{ background: '#fff', padding: '25px', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', marginBottom: '30px' }}>
+                <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                    <div style={{ flex: '1', minWidth: '250px', position: 'relative' }}>
+                        <i className='bx bx-search' style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '20px' }}></i>
+                        <input 
+                            type="text" 
+                            placeholder="Search businesses, services, products..." 
+                            value={query} 
+                            onChange={(e) => setQuery(e.target.value)}
+                            style={{ width: '100%', padding: '12px 12px 12px 45px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '15px', outline: 'none' }}
+                        />
+                    </div>
+                    <button type="submit" style={{ padding: '12px 30px', background: '#0081C7', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer' }}>
+                        Search
+                    </button>
+                </form>
+            </div>
 
-                    {/* Category Filter Chips */}
-                    <div style={{ marginTop: '20px' }}>
-                        <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '10px', fontWeight: '500' }}>Popular Categories:</p>
-                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '30px' }}>
+                {/* Filter Sidebar */}
+                <div>
+                    <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', marginBottom: '20px' }}>
+                        <h3 style={{ fontSize: '16px', color: '#0f172a', marginBottom: '15px', fontWeight: 'bold' }}>Categories</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             {categories.map(cat => (
                                 <button 
-                                    key={cat.id}
-                                    onClick={() => handleCategoryClick(cat.slug)}
-                                    style={{
-                                        padding: '6px 15px', 
-                                        borderRadius: '20px', 
-                                        border: selectedCategory === cat.slug ? '1px solid #0081C7' : '1px solid #e2e8f0',
-                                        background: selectedCategory === cat.slug ? '#e0f2fe' : '#f8fafc',
-                                        color: selectedCategory === cat.slug ? '#0369a1' : '#475569',
-                                        cursor: 'pointer',
-                                        fontSize: '14px',
-                                        transition: 'all 0.2s'
+                                    key={cat.id} 
+                                    onClick={() => handleCategoryClick(cat.main_category)}
+                                    style={{ 
+                                        textAlign: 'left', 
+                                        padding: '8px 12px', 
+                                        borderRadius: '6px', 
+                                        border: 'none', 
+                                        background: selectedCategory === cat.main_category ? '#eff6ff' : 'transparent', 
+                                        color: selectedCategory === cat.main_category ? '#0081C7' : '#475569',
+                                        fontWeight: selectedCategory === cat.main_category ? 'bold' : 'normal',
+                                        cursor: 'pointer' 
                                     }}
                                 >
                                     {cat.main_category}
@@ -124,6 +125,9 @@ function SearchPage() {
                             ))}
                         </div>
                     </div>
+
+                    {/* Sidebar Ad Placement Zone */}
+                    <SidebarAd />
                 </div>
 
                 {/* Search Results */}
@@ -155,11 +159,14 @@ function SearchPage() {
                                 </button>
                             </div>
                         ) : (
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-                                {searchData.map(business => (
-                                    <BusinessCard key={business.id} businessData={business} is_like={false} />
-                                ))}
-                            </div>
+                            <>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                                    {searchData.map(business => (
+                                        <BusinessCard key={business.id} businessData={business} is_like={false} />
+                                    ))}
+                                </div>
+                                <ListingInterstitialAd />
+                            </>
                         )
                     )}
                 </div>

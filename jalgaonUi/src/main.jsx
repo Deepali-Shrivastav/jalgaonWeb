@@ -9,6 +9,9 @@ import Account from './pages/Account';
 import Providers from './Providers';
 import AddListingPage from './pages/AddListingPage';
 import AdsIndexPage from './pages/AdsIndexPage';
+import AdvertisePage from './pages/AdvertisePage';
+import SubmitAdPage from './pages/SubmitAdPage';
+import MyAdsPage from './pages/MyAdsPage';
 import ArticlesPage from './pages/ArticlesPage';
 import ArticleViewPage from './pages/ArticleViewPage';
 import AboutPage from './pages/AboutPage';
@@ -24,7 +27,8 @@ import NewsArticlePage from './pages/NewsArticlePage';
 import EventsIndexPage from './pages/EventsIndexPage';
 import EventDetailPage from './pages/EventDetailPage';
 import SubmitEventPage from './pages/SubmitEventPage';
-// Jobs Module
+
+// Jobs Module Imports
 import JobsIndexPage from './pages/JobsIndexPage';
 import JobDetailPage from './pages/JobDetailPage';
 import PostJobPage from './pages/PostJobPage';
@@ -41,6 +45,7 @@ import AdminClaims from './pages/admin/AdminClaims';
 import AdminReports from './pages/admin/AdminReports';
 import AdminTrendingListings from './pages/admin/AdminTrendingListings';
 import AdminAds from './pages/admin/AdminAds';
+import AdminAdSlots from './pages/admin/AdminAdSlots';
 import AdminNews from './pages/admin/AdminNews';
 import AdminNewsCreate from './pages/admin/AdminNewsCreate';
 import AdminNewsComments from './pages/admin/AdminNewsComments';
@@ -60,7 +65,6 @@ const router = createBrowserRouter(
         <Route path='categories/:categorySlug' element={<CategoryPage />} />
         <Route path='business/jalgaon/:categorySlug/:productId' element={<BusinessDetailsPage />} />
         <Route path='account' element={<Account />} />
-        <Route path='advertise' element={<AdsIndexPage />} />
         <Route path='allarticlse' element={<ArticlesPage />} />
         <Route path='articleView/:articleId' element={<ArticleViewPage />} />
         <Route path='searchResults' element={<SearchPage />} />
@@ -75,7 +79,14 @@ const router = createBrowserRouter(
         <Route path='business-dashboard/:id' element={<BusinessDashboard />} />
       </Route>
 
-      {/* Standalone Detail Pages */}
+      {/* Standalone Advertisement Module Routes */}
+      <Route path='/advertise' element={<AdvertisePage />} />
+      <Route path='/advertise/submit' element={<SubmitAdPage />} />
+      <Route path='/advertise/ads' element={<AdsIndexPage />} />
+      <Route path='/my-ads' element={<MyAdsPage />} />
+      <Route path='/account/ads' element={<MyAdsPage />} />
+
+      {/* Standalone News Module Routes */}
       <Route path='/news' element={<NewsIndexPage />} />
       <Route path='/news/:slug' element={<NewsArticlePage />} />
       <Route path='/news/category/:slug' element={<NewsIndexPage />} />
@@ -98,6 +109,7 @@ const router = createBrowserRouter(
         <Route path='reports' element={<AdminReports />} />
         <Route path='trending' element={<AdminTrendingListings />} />
         <Route path='ads' element={<AdminAds />} />
+        <Route path='ad-slots' element={<AdminAdSlots />} />
         
         {/* Admin News */}
         <Route path='news' element={<AdminNews />} />

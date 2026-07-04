@@ -13,11 +13,13 @@ const AdsManager = ({ business }) => {
     const [contactNumber, setContactNumber] = useState('');
     const [contactEmail, setContactEmail] = useState('');
     const [adType, setAdType] = useState('BA');
+    const [targetPage, setTargetPage] = useState('hero_banner');
+    const [adPackage, setAdPackage] = useState('basic');
     const [adImage, setAdImage] = useState(null);
     const [statusMsg, setStatusMsg] = useState('');
 
     const fetchAds = async () => {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || localStorage.getItem('authToken');
         try {
             const res = await axios.get(`${djangoApi}/api/v1/ads/my-ads/?shop_id=${business.id}`, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -47,13 +49,15 @@ const AdsManager = ({ business }) => {
             return;
         }
 
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || localStorage.getItem('authToken');
         const formData = new FormData();
         formData.append('shop_listing', business.id);
         formData.append('name', name);
         formData.append('contact_number', contactNumber);
         formData.append('contact_email', contactEmail);
         formData.append('ad_type', adType);
+        formData.append('target_page', targetPage);
+        formData.append('package', adPackage);
         formData.append('ad_image', adImage);
 
         try {
@@ -66,7 +70,6 @@ const AdsManager = ({ business }) => {
             setStatusMsg("Advertisement submitted successfully! It is pending approval.");
             setShowForm(false);
             fetchAds();
-            // Reset form
             setName(''); setContactNumber(''); setContactEmail(''); setAdImage(null);
         } catch (error) {
             console.error('Error submitting ad', error);
@@ -77,7 +80,7 @@ const AdsManager = ({ business }) => {
     return (
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h2 style={{ margin: 0 }}>Advertisements</h2>
+                <h2 style={{ margin: 0 }}>Business Advertisements</h2>
                 <button 
                     onClick={() => setShowForm(!showForm)}
                     style={{ padding: '8px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}
@@ -109,10 +112,27 @@ const AdsManager = ({ business }) => {
                             <input type="email" value={contactEmail} onChange={e => setContactEmail(e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
                         </div>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '5px' }}>Ad Type</label>
+                            <label style={{ display: 'block', marginBottom: '5px' }}>Ad Format</label>
                             <select value={adType} onChange={e => setAdType(e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}>
                                 <option value="BA">Banner Ad</option>
                                 <option value="CA">Carousel Ad</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '5px' }}>Placement Zone</label>
+                            <select value={targetPage} onChange={e => setTargetPage(e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}>
+                                <option value="hero_banner">Homepage Hero Banner</option>
+                                <option value="category_banner">Category Page Banner</option>
+                                <option value="sidebar">Sidebar</option>
+                                <option value="listing_interstitial">Between Listings</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '5px' }}>Package Plan</label>
+                            <select value={adPackage} onChange={e => setAdPackage(e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}>
+                                <option value="basic">Basic (3 Days - ₹499)</option>
+                                <option value="standard">Standard (7 Days - ₹999)</option>
+                                <option value="premium">Premium (30 Days - ₹2,499)</option>
                             </select>
                         </div>
                         <div style={{ gridColumn: '1 / -1' }}>
@@ -135,22 +155,36 @@ const AdsManager = ({ business }) => {
             ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
                     {ads.map(ad => (
-                        <div key={ad.id} style={{ border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden', background: '#fff' }}>
+                        <div key={ad.id} style={{ border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden', background: '#fff', display: 'flex', flexDirection: 'column' }}>
                             <img src={ad.ad_image.startsWith('http') ? ad.ad_image : `${djangoApi}${ad.ad_image}`} alt={ad.name} style={{ width: '100%', height: '150px', objectFit: 'cover' }} />
-                            <div style={{ padding: '15px' }}>
+                            <div style={{ padding: '15px', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
                                     <h4 style={{ margin: 0 }}>{ad.name}</h4>
                                     <span className={`admin-badge ${ad.status === 'active' ? 'approved' : ad.status === 'rejected' ? 'rejected' : 'pending'}`}>
-                                        {ad.status === 'active' ? 'Active' : ad.status === 'rejected' ? 'Rejected' : 'Pending'}
+                                        {ad.status === 'active' ? 'Active' : ad.status === 'pending' ? 'Pending' : ad.status === 'rejected' ? 'Rejected' : 'Revision Requested'}
                                     </span>
                                 </div>
-                                <p style={{ fontSize: '13px', color: '#64748b', margin: '5px 0' }}>Type: {ad.ad_type === 'BA' ? 'Banner Ad' : 'Carousel Ad'}</p>
-                                <p style={{ fontSize: '13px', color: '#64748b', margin: '5px 0' }}>Date: {new Date(ad.created_at).toLocaleDateString()}</p>
+                                <p style={{ fontSize: '13px', color: '#64748b', margin: '3px 0' }}>Zone: {ad.target_page_display || ad.target_page}</p>
+                                <p style={{ fontSize: '13px', color: '#64748b', margin: '3px 0' }}>Plan: {ad.package_display || ad.package}</p>
+                                <p style={{ fontSize: '13px', color: '#64748b', margin: '3px 0' }}>Date: {new Date(ad.created_at).toLocaleDateString()}</p>
+                                
                                 {ad.status === 'rejected' && ad.rejection_reason && (
                                     <div style={{ marginTop: '10px', padding: '8px', background: '#fee2e2', color: '#b91c1c', fontSize: '12px', borderRadius: '4px' }}>
-                                        <strong>Reason:</strong> {ad.rejection_reason}
+                                        <strong>Rejection Reason:</strong> {ad.rejection_reason}
                                     </div>
                                 )}
+
+                                {ad.status === 'revision_requested' && ad.rejection_reason && (
+                                    <div style={{ marginTop: '10px', padding: '8px', background: '#e0e7ff', color: '#3730a3', fontSize: '12px', borderRadius: '4px' }}>
+                                        <strong>Revision Notes:</strong> {ad.rejection_reason}
+                                    </div>
+                                )}
+
+                                <div style={{ marginTop: 'auto', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #f1f5f9', fontSize: '12px', color: '#475569', fontWeight: 'bold' }}>
+                                    <span>Impressions: {ad.impressions || 0}</span>
+                                    <span>Clicks: {ad.clicks || 0}</span>
+                                    <span>CTR: {ad.ctr || 0}%</span>
+                                </div>
                             </div>
                         </div>
                     ))}

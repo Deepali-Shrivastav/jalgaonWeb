@@ -18,8 +18,8 @@ from .serializers import (
     AdminSettingSerializer, AdminBusinessClaimSerializer,
     AdminBusinessReportSerializer
 )
-from apps.ads.models import AdsListing
-from apps.ads.serializers import AdsListingSerializer
+from apps.ads.models import AdsListing, AdSlot
+from apps.ads.serializers import AdsListingSerializer, AdSlotSerializer
 from apps.audit.utils import log_audit_action
 
 User = get_user_model()
@@ -47,9 +47,13 @@ class DashboardStatsView(APIView):
             'pending_listings': ShopListing.objects.filter(status='pending').count(),
             'total_categories': MainCategory.objects.count(),
             'pending_moderation': ModerationQueue.objects.filter(status='pending').count(),
+            'total_ads': AdsListing.objects.count(),
+            'pending_ads': AdsListing.objects.filter(status='pending').count(),
+            'active_ads': AdsListing.objects.filter(status='active').count(),
         }
         serializer = DashboardStatsSerializer(data)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 # ──────────────────────────────────────────────
@@ -720,7 +724,7 @@ class AdminAdsListView(generics.ListAPIView):
         return qs
 
 class AdminAdsActionView(APIView):
-    """PATCH /api/v1/admin-panel/ads/<id>/ — Approve or reject an ad."""
+    """PATCH /api/v1/admin-panel/ads/<id>/ — Approve, reject, or request revision for an ad."""
     permission_classes = [IsAdminRole]
 
     def patch(self, request, ad_id):
@@ -730,10 +734,25 @@ class AdminAdsActionView(APIView):
             return Response({'error': 'Ad not found'}, status=status.HTTP_404_NOT_FOUND)
 
         action = request.data.get('action')
+        update_fields = ['status', 'rejection_reason']
+
+        if 'start_date' in request.data:
+            ad.start_date = request.data['start_date']
+            update_fields.append('start_date')
+        if 'end_date' in request.data:
+            ad.end_date = request.data['end_date']
+            update_fields.append('end_date')
+        if 'target_page' in request.data:
+            ad.target_page = request.data['target_page']
+            update_fields.append('target_page')
+        if 'package' in request.data:
+            ad.package = request.data['package']
+            update_fields.append('package')
+
         if action == 'approve':
             ad.status = 'active'
             ad.rejection_reason = None
-            ad.save(update_fields=['status', 'rejection_reason'])
+            ad.save(update_fields=list(set(update_fields)))
             
             log_audit_action(
                 actor=request.user, action='approve_ad', target_type='AdsListing',
@@ -744,12 +763,58 @@ class AdminAdsActionView(APIView):
         elif action == 'reject':
             ad.status = 'rejected'
             ad.rejection_reason = request.data.get('rejection_reason', '')
-            ad.save(update_fields=['status', 'rejection_reason'])
+            ad.save(update_fields=list(set(update_fields)))
             
             log_audit_action(
                 actor=request.user, action='reject_ad', target_type='AdsListing',
                 target_id=ad.id, changes={'reason': ad.rejection_reason}, request=request
             )
             return Response({'message': 'Ad rejected', 'status': 'rejected'})
+
+        elif action == 'request_revision':
+            ad.status = 'revision_requested'
+            ad.rejection_reason = request.data.get('rejection_reason', '')
+            ad.save(update_fields=list(set(update_fields)))
+
+            log_audit_action(
+                actor=request.user, action='request_revision_ad', target_type='AdsListing',
+                target_id=ad.id, changes={'reason': ad.rejection_reason}, request=request
+            )
+            return Response({'message': 'Revision requested', 'status': 'revision_requested'})
             
         return Response({'error': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)
+
+class AdminAdSlotListView(APIView):
+    """GET /api/v1/admin-panel/ad-slots/ — List all ad slots."""
+    permission_classes = [IsAdminRole]
+
+    def get(self, request):
+        # Ensure default slots are seeded if missing
+        default_slots = ['hero_banner', 'category_banner', 'sidebar', 'listing_interstitial']
+        for slot_key in default_slots:
+            AdSlot.objects.get_or_create(slot_name=slot_key)
+        
+        slots = AdSlot.objects.all().order_by('id')
+        serializer = AdSlotSerializer(slots, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class AdminAdSlotDetailView(APIView):
+    """PATCH /api/v1/admin-panel/ad-slots/<id>/ — Toggle or edit an ad slot."""
+    permission_classes = [IsAdminRole]
+
+    def patch(self, request, slot_id):
+        try:
+            slot = AdSlot.objects.get(id=slot_id)
+        except AdSlot.DoesNotExist:
+            return Response({'error': 'Ad slot not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = AdSlotSerializer(slot, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            log_audit_action(
+                actor=request.user, action='update_ad_slot', target_type='AdSlot',
+                target_id=slot.id, changes=serializer.validated_data, request=request
+            )
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

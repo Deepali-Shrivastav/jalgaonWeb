@@ -37,7 +37,10 @@ urlpatterns = [
     path('moderation/', views.ModerationListView.as_view(), name='moderation-list'),
     path('moderation/<int:item_id>/', views.ModerationActionView.as_view(), name='moderation-action'),
 
-    # Ads Moderation
+    # Ads Moderation & Slots
     path('ads/', views.AdminAdsListView.as_view(), name='ads-list'),
     path('ads/<int:ad_id>/', views.AdminAdsActionView.as_view(), name='ads-action'),
+    path('ad-slots/', views.AdminAdSlotListView.as_view(), name='ad-slot-list'),
+    path('ad-slots/<int:slot_id>/', views.AdminAdSlotDetailView.as_view(), name='ad-slot-detail'),
 ]
+

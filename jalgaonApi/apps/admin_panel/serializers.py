@@ -21,6 +21,10 @@ class DashboardStatsSerializer(serializers.Serializer):
     pending_listings = serializers.IntegerField()
     total_categories = serializers.IntegerField()
     pending_moderation = serializers.IntegerField()
+    total_ads = serializers.IntegerField(default=0)
+    pending_ads = serializers.IntegerField(default=0)
+    active_ads = serializers.IntegerField(default=0)
+
 
 
 # ──────────────────────────────────────────────
