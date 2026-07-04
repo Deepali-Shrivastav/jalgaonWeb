@@ -71,6 +71,7 @@ const Navbar = () => {
                         </NavLink>
                         <NavLink to='/events'>
                             <li>Events</li>
+                        </NavLink>
                         <NavLink to='/jobs'>
                             <li>Jobs</li>
                         </NavLink>
@@ -90,7 +91,7 @@ const Navbar = () => {
                         ) : (
                             <p onClick={() => setCloseForm(!closeForm)} className="login_btn">Signup/Login</p>
                         )}
-                        <i onClick={()=>setCloseSpecial(!closeSpecial)}  className='menu bx bx-menu'></i>
+                        <i onClick={()=>setCloseSpecial(!closeSpecial)} className='menu bx bx-menu'></i>
                     </div>
                 </div>
             </div>
