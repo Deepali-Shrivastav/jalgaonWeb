@@ -1,0 +1,129 @@
+.ads-index-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    font-family: 'Inter', sans-serif;
+}
+
+.ads-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.ads-header h1 {
+    font-size: 32px;
+    color: #1e293b;
+    margin-bottom: 10px;
+}
+
+.ads-header p {
+    font-size: 16px;
+    color: #64748b;
+}
+
+.loading-state, .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: #f8fafc;
+    border-radius: 12px;
+    color: #64748b;
+}
+
+.empty-state h3 {
+    font-size: 20px;
+    color: #334155;
+    margin-bottom: 10px;
+}
+
+.ads-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 30px;
+}
+
+.ad-card {
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #f1f5f9;
+}
+
+.ad-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.ad-image-wrapper {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    background: #f1f5f9;
+}
+
+.ad-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.ad-content {
+    padding: 20px;
+}
+
+.ad-content h3 {
+    margin: 0 0 5px 0;
+    font-size: 18px;
+    color: #0f172a;
+}
+
+.ad-type {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0 0 20px 0;
+    background: #f1f5f9;
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.ad-contact {
+    display: flex;
+    gap: 10px;
+}
+
+.contact-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.contact-btn.phone {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+}
+
+.contact-btn.phone:hover {
+    background: #dbeafe;
+}
+
+.contact-btn.email {
+    background: #f8fafc;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.contact-btn.email:hover {
+    background: #f1f5f9;
+}

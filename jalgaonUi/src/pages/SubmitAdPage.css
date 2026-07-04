@@ -1,0 +1,73 @@
+.submit-ad-page {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: #1e293b;
+    background-color: #f8fafc;
+    min-height: 100vh;
+}
+
+.submit-ad-container {
+    max-width: 1000px;
+    margin: 40px auto 80px;
+    padding: 0 20px;
+}
+
+.submit-ad-breadcrumbs {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 25px;
+}
+
+.submit-ad-breadcrumbs a {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.submit-ad-breadcrumbs a:hover {
+    text-decoration: underline;
+}
+
+.auth-banner-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 40px 30px;
+    text-align: center;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    margin: 40px 0;
+}
+
+.auth-banner-icon {
+    font-size: 48px;
+    color: #f59e0b;
+    margin-bottom: 15px;
+}
+
+.auth-banner-card h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 10px;
+}
+
+.auth-banner-card p {
+    font-size: 15px;
+    color: #64748b;
+    max-width: 500px;
+    margin: 0 auto 25px;
+}
+
+.btn-login-cta {
+    background: #2563eb;
+    color: #ffffff;
+    font-weight: 600;
+    padding: 12px 28px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background 0.2s;
+}
+
+.btn-login-cta:hover {
+    background: #1d4ed8;
+}

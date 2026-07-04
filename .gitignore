@@ -1,4 +1,50 @@
+<<<<<<< HEAD
 **/__pycache__/
+=======
+# =========================================================================
+# Git Ignore Configuration for JalgaonWeb Project
+# =========================================================================
+
+# Django Environment
+/jalgaonApi/.env
+/jalgaonApi/.env.development
+/jalgaonApi/.env.production
+db.sqlite3
+db_old.sqlite3
+*.log
+local_settings.py
+
+# React Environment (jalgaonUi)
+/jalgaonUi/.env
+/jalgaonUi/.env.local
+!/jalgaonUi/.env.development
+!/jalgaonUi/.env.production
+
+# React Environment (New-JalgaonUI)
+/New-JalgaonUI/.env
+/New-JalgaonUI/.env.local
+/New-JalgaonUI/.env.*.local
+/New-JalgaonUI/.next/
+/New-JalgaonUI/out/
+/New-JalgaonUI/build/
+/New-JalgaonUI/public/images/
+/New-JalgaonUI/public/*.svg
+/New-JalgaonUI/public/*.png
+/New-JalgaonUI/public/*.jpg
+/New-JalgaonUI/public/*.jpeg
+/New-JalgaonUI/public/*.ico
+
+
+
+# Python Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Python caching
+__pycache__/
+>>>>>>> 419f2e8095bcd9ea476fffd633c07faba1933b8f
 *.pyc
 *.pyo
 *.pyd

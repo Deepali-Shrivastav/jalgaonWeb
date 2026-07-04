@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 
 from apps.directory.models import MainCategory, SubCategory, ShopListing, CategoryImg
-from apps.directory.serializers import MainCategorySerializer, ShopListingSerializer
+from apps.directory.serializers import MainCategorySerializer
 from .models import AdminSetting, ModerationQueue
 
 User = get_user_model()
@@ -21,6 +21,10 @@ class DashboardStatsSerializer(serializers.Serializer):
     pending_listings = serializers.IntegerField()
     total_categories = serializers.IntegerField()
     pending_moderation = serializers.IntegerField()
+    total_ads = serializers.IntegerField(default=0)
+    pending_ads = serializers.IntegerField(default=0)
+    active_ads = serializers.IntegerField(default=0)
+
 
 
 # ──────────────────────────────────────────────
@@ -74,7 +78,7 @@ class AdminListingSerializer(serializers.ModelSerializer):
         model = ShopListing
         fields = [
             'id', 'business_name', 'business_address', 'business_banner',
-            'is_valid', 'owner_phone', 'owner_name', 'category_name',
+            'is_valid', 'status', 'owner_phone', 'owner_name', 'category_name',
             'main_category', 'sub_category'
         ]
         read_only_fields = ['id', 'owner_phone', 'owner_name', 'category_name']
@@ -164,6 +168,35 @@ class ModerationActionSerializer(serializers.Serializer):
     rejection_reason = serializers.CharField(required=False, allow_blank=True, default='')
     notes = serializers.CharField(required=False, allow_blank=True, default='')
 
+class AdminBusinessClaimSerializer(serializers.ModelSerializer):
+    business_name = serializers.CharField(source='shop_listing.business_name', read_only=True)
+    user_name = serializers.CharField(source='user.first_name', read_only=True)
+    user_phone = serializers.CharField(source='user.phone_number', read_only=True)
+
+    class Meta:
+        from apps.directory.models import BusinessClaim
+        model = BusinessClaim
+        fields = ['id', 'shop_listing', 'business_name', 'user', 'user_name', 'user_phone', 'message', 'contact_number', 'status', 'created_at']
+
+class AdminBusinessReportSerializer(serializers.ModelSerializer):
+    business_name = serializers.CharField(source='shop_listing.business_name', read_only=True)
+    reporter_name = serializers.SerializerMethodField()
+    reporter_phone = serializers.SerializerMethodField()
+
+    class Meta:
+        from apps.directory.models import BusinessReport
+        model = BusinessReport
+        fields = ['id', 'shop_listing', 'business_name', 'reported_by', 'reporter_name', 'reporter_phone', 'reason', 'description', 'status', 'created_at']
+
+    def get_reporter_name(self, obj):
+        if obj.reported_by:
+            return obj.reported_by.first_name or 'User'
+        return 'Anonymous'
+
+    def get_reporter_phone(self, obj):
+        if obj.reported_by:
+            return obj.reported_by.phone_number
+        return 'N/A'
 
 # ──────────────────────────────────────────────
 # Admin Settings

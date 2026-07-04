@@ -21,6 +21,7 @@ const AdminLayout = () => {
         if (path.includes('news/comments')) return 'News Comment Moderation';
         if (path.includes('news/create') || path.includes('news/edit')) return 'Edit News Article';
         if (path.includes('news')) return 'News Management';
+        if (path.includes('events')) return 'Event Management';
         if (path.includes('categories')) return 'Category Management';
         if (path.includes('moderation')) return 'Moderation Queue';
         return 'Dashboard Overview';

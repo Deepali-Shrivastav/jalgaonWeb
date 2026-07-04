@@ -23,8 +23,8 @@ function Categorytile() {
     <div className="categoryes_tiles">
 
         {categories.map(category=>(
-          <Link to={`/categories/${category.id}/${category.main_category}`}>
-            <Category name={category.main_category} />          
+          <Link to={`/categories/${category.slug}`} key={category.id}>
+            <Category name={category.main_category} subCategoriesData={category.subcategories} />          
           </Link>
         ))}
 

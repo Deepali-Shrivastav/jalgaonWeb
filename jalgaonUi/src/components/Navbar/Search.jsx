@@ -21,30 +21,10 @@ function Search() {
   };
 
   const handleSearch = async () => {
-    console.log('Search query:', query);
-    const csrfToken = await getCsrfToken();
-
-    if (!query) {
-      console.log("Query is empty, please enter a search term.");
+    if (!query.trim()) {
       return;
     }
-  
-    try {
-      const response = await axios.get(`${djangoApi}/api/v1/search/?search=${query}`);
-      console.log(response.data);
-      navigate('/searchResults', { state: { searchData: response.data } });
-      
-      // Set the search data to state
-      setSearchData(response.data);
-  
-      // Navigate to the results page and pass the search data
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      
-      if (error.response && error.response.status === 404) {
-        console.log("No search results found for the query.");
-      }
-    }
+    navigate(`/searchResults?q=${encodeURIComponent(query.trim())}`);
   };
   
   const handleKeyDown = (event) => {

@@ -25,7 +25,7 @@ function Footer() {
                         <Link to="/contact" className="link">Contact</Link>
                     </ul>    
                     <ul className="links_list">
-                        <a href="" className="link">Events</a>
+                        <Link to="/events" className="link">Events</Link>
                         <a href="" className="link">Directory</a>
                         <a href="" className="link">NGO</a>
                         <Link to="/addListig" className="link">Add Listing</Link>

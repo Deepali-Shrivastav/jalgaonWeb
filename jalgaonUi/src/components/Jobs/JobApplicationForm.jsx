@@ -15,7 +15,15 @@ const JobApplicationForm = ({ jobSlug, onSuccess }) => {
 
     const handleFileChange = (e) => {
         if (e.target.files && e.target.files[0]) {
-            setResume(e.target.files[0]);
+            const file = e.target.files[0];
+            if (file.size > 500 * 1024) {
+                setError("Resume file size must be less than 500 KB.");
+                setResume(null);
+                e.target.value = null; // Clear the input
+            } else {
+                setError(null);
+                setResume(file);
+            }
         }
     };
 
@@ -87,7 +95,7 @@ const JobApplicationForm = ({ jobSlug, onSuccess }) => {
                     {error && <div className="form-error">{error}</div>}
                     
                     <div className="form-group">
-                        <label htmlFor="resume">Resume/CV (PDF or DOCX) *</label>
+                        <label htmlFor="resume">Resume/CV (PDF or DOCX, Max 500 KB) *</label>
                         <div className="file-upload-wrapper">
                             <input 
                                 type="file" 

@@ -1,15 +1,8 @@
-import React from 'react'
-import AddAdvertiseForm from '../components/AllForms/AddAdvertiseForm'
-import LoginSignup from '../components/LoginSignup/LoginSignup'
+import React from 'react';
+import SubmitAdPage from './SubmitAdPage';
 
 function AddAdvertise() {
-  return (
-    <div className="advertise_section">
-        <AddAdvertiseForm />
-        <LoginSignup />
-
-    </div>
-  )
+  return <SubmitAdPage />;
 }
 
-export default AddAdvertise
+export default AddAdvertise;
