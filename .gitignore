@@ -18,9 +18,13 @@ local_settings.py
 !/jalgaonUi/.env.production
 
 # React Environment (New-JalgaonUI)
+# NOTE: .env.production is also ignored here because it contains secret API keys
+# (COMMODITY_PRICE_API_KEY, WEATHERAPI_KEY). The CI/CD workflow writes it
+# directly to the server at deploy time — never commit this file.
 /New-JalgaonUI/.env
 /New-JalgaonUI/.env.local
 /New-JalgaonUI/.env.*.local
+/New-JalgaonUI/.env.production
 /New-JalgaonUI/.next/
 /New-JalgaonUI/out/
 /New-JalgaonUI/build/

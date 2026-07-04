@@ -117,10 +117,10 @@ jobs:
           python manage.py test --verbosity=2
 
   # ---------------------------------------------------------------------------
-  # JOB 2: Frontend Build Check
+  # JOB 2: New-JalgaonUI (Next.js) Build Check
   # ---------------------------------------------------------------------------
   test-frontend:
-    name: "Frontend Lint & Build Check"
+    name: "Next.js Frontend Lint & Build Check"
     runs-on: ubuntu-22.04
 
     steps:
@@ -132,20 +132,21 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
-          cache-dependency-path: jalgaonUi/package-lock.json
+          cache-dependency-path: New-JalgaonUI/package-lock.json
 
       - name: "Install frontend dependencies"
-        working-directory: jalgaonUi
-        run: npm install --legacy-peer-deps
+        working-directory: New-JalgaonUI
+        run: npm ci
 
       - name: "Run ESLint (code quality check)"
-        working-directory: jalgaonUi
-        # FIX: Removed --if-present which silently skips lint. If lint script
-        # is missing it should fail so we know to add it
+        working-directory: New-JalgaonUI
         run: npm run lint
 
-      - name: "Build production bundle (verify no build errors)"
-        working-directory: jalgaonUi
-        # Vite loads jalgaonUi/.env.production automatically →
-        # VITE_DJANGO_API=https://api.jalgaon.com
+      - name: "Build Next.js production bundle (verify no TypeScript/build errors)"
+        working-directory: New-JalgaonUI
+        env:
+          # NEXT_PUBLIC_* vars must be present at build time.
+          # This is the production API URL — not a secret, but passed via env
+          # here so the build succeeds in the CI environment.
+          NEXT_PUBLIC_API_URL: https://api.jalgaon.com
         run: npm run build
