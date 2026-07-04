@@ -1,0 +1,62 @@
+[
+  {
+    "id": 4,
+    "title": "hi",
+    "slug": "hi",
+    "short_description": "hi",
+    "featured_image": "http://localhost:8000/media/news/featured/agent_2.png",
+    "category": null,
+    "tags": [],
+    "author_name": "None None",
+    "status": "published",
+    "is_breaking": true,
+    "published_at": null,
+    "view_count": 8,
+    "created_at": "2026-07-01T08:21:10.534825Z"
+  },
+  {
+    "id": 3,
+    "title": "Article Three",
+    "slug": "article-three",
+    "short_description": "This is a short description of article one.",
+    "featured_image": "http://localhost:8000/media/static/assets/article_imgs/atikah-akhtar-XJptUS8nbhs-unsplash.jpg",
+    "category": null,
+    "tags": [],
+    "author_name": "Admin",
+    "status": "published",
+    "is_breaking": true,
+    "published_at": "2026-07-01T07:46:12.053003Z",
+    "view_count": 6,
+    "created_at": "2026-07-01T07:46:12.053003Z"
+  },
+  {
+    "id": 1,
+    "title": "Article One",
+    "slug": "article-one",
+    "short_description": "This is a short description of article one.",
+    "featured_image": "http://localhost:8000/media/static/assets/article_imgs/anastase-maragos-m-HDOBfSI7I-unsplash.jpg",
+    "category": null,
+    "tags": [],
+    "author_name": "Admin",
+    "status": "published",
+    "is_breaking": true,
+    "published_at": "2026-07-01T07:46:12.050292Z",
+    "view_count": 2,
+    "created_at": "2026-07-01T07:46:12.050292Z"
+  },
+  {
+    "id": 2,
+    "title": "Article Two",
+    "slug": "article-two",
+    "short_description": "This is a short description of article one.",
+    "featured_image": "http://localhost:8000/media/static/assets/article_imgs/charlesdeluvio-FK81rxilUXg-unsplash.jpg",
+    "category": null,
+    "tags": [],
+    "author_name": "Admin",
+    "status": "published",
+    "is_breaking": false,
+    "published_at": "2026-07-01T07:46:12.053003Z",
+    "view_count": 2,
+    "created_at": "2026-07-01T07:46:12.053003Z"
+  }
+]

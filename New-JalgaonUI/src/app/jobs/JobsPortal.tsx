@@ -26,20 +26,62 @@ export interface JobListing {
 
 
 export default function JobsPortal() {
-  const [selectedTypes, setSelectedTypes] = useState<string[]>(['Full-time']);
-  const [selectedExp, setSelectedExp] = useState('Mid Level (2-5 Yrs)');
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedExp, setSelectedExp] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [categories, setCategories] = useState<any[]>([]);
 
   const [jobs, setJobs] = useState<JobListing[]>([]);
+  const [featuredJobs, setFeaturedJobs] = useState<JobListing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingFeatured, setLoadingFeatured] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const res = await fetch(`${baseUrl}/api/v1/jobs/categories/`);
+        if (res.ok) {
+          const data = await res.json();
+          setCategories(data.results || data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch categories:', err);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  React.useEffect(() => {
+    const fetchFeaturedJobs = async () => {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const res = await fetch(`${baseUrl}/api/v1/jobs/featured/`);
+        if (res.ok) {
+          const data = await res.json();
+          setFeaturedJobs(data.results || data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch featured jobs:', err);
+      } finally {
+        setLoadingFeatured(false);
+      }
+    };
+    fetchFeaturedJobs();
+  }, []);
 
   React.useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const url = process.env.NEXT_PUBLIC_API_URL 
-          ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/jobs/`
-          : '/api/v1/jobs/';
-        const res = await fetch(url);
+        setLoading(true);
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const url = new URL(`${baseUrl}/api/v1/jobs/`);
+        
+        if (selectedCategory) url.searchParams.append('category', selectedCategory);
+        // Add other filters if backend supports them later
+        
+        const res = await fetch(url.toString());
         if (!res.ok) throw new Error('Failed to fetch jobs');
         const json = await res.json();
         setJobs(json.results || json.data || json || []);
@@ -50,7 +92,7 @@ export default function JobsPortal() {
       }
     };
     fetchJobs();
-  }, []);
+  }, [selectedCategory, selectedTypes, selectedExp]);
 
   const toggleType = (type: string) => {
     setSelectedTypes((prev) =>
@@ -75,6 +117,34 @@ export default function JobsPortal() {
                 <h2 className="text-xl font-bold mb-3 text-primary">Filters</h2>
                 <div className="h-1 w-12 bg-primary rounded-full mb-6" />
               </div>
+
+              {/* Job Category */}
+              {categories.length > 0 && (
+                <fieldset>
+                  <legend className="text-[10px] text-secondary uppercase tracking-widest font-bold mb-4">
+                    Category
+                  </legend>
+                  <div className="space-y-3">
+                    {categories.map((cat) => (
+                      <label
+                        key={cat.id}
+                        className="flex items-center gap-3 cursor-pointer group"
+                      >
+                        <input
+                          type="radio"
+                          name="category"
+                          checked={selectedCategory === cat.slug}
+                          onChange={() => setSelectedCategory(cat.slug)}
+                          className="w-5 h-5 border-outline-variant text-primary focus:ring-primary"
+                        />
+                        <span className="text-sm group-hover:text-primary transition-colors">
+                          {cat.name}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+              )}
 
               {/* Job Type */}
               <fieldset>
@@ -131,6 +201,7 @@ export default function JobsPortal() {
                 onClick={() => {
                   setSelectedTypes([]);
                   setSelectedExp('');
+                  setSelectedCategory('');
                 }}
                 className="w-full py-3 rounded-full border-2 border-primary text-primary font-semibold text-sm hover:bg-primary hover:text-white transition-all active:scale-[0.98]"
               >
@@ -141,6 +212,44 @@ export default function JobsPortal() {
 
           {/* ─── Jobs List ─── */}
           <div className="flex-1">
+            {/* ─── Featured Jobs ─── */}
+            {!loadingFeatured && featuredJobs.length > 0 && (
+              <div className="mb-10">
+                <h2 className="text-2xl font-bold text-ink-deep mb-6 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-yellow-500 fill-1" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                  Featured Jobs
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {featuredJobs.map((job) => (
+                    <article
+                      key={job.id}
+                      className="bg-amber-50/50 rounded-xl border border-amber-200 p-5 hover:shadow-md transition-all duration-300 group cursor-pointer"
+                    >
+                      <div className="flex gap-4 items-start">
+                        <div className="w-12 h-12 rounded-lg bg-white flex items-center justify-center p-2 border border-amber-100 shrink-0">
+                          {job.logo ? (
+                            <img className="w-full h-full object-contain" src={job.logo} alt={job.logoAlt || job.company} loading="lazy" />
+                          ) : (
+                            <span className="material-symbols-outlined text-amber-600">business</span>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-bold text-ink-deep group-hover:text-primary transition-colors truncate">
+                            {job.title}
+                          </h3>
+                          <p className="text-sm text-secondary truncate">{job.company}</p>
+                          <div className="flex items-center gap-3 mt-2 text-xs text-secondary">
+                            <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">location_on</span>{job.location}</span>
+                            <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">payments</span>{job.salary}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-2xl md:text-3xl font-bold text-ink-deep">
                 Latest Job Openings

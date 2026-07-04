@@ -14,6 +14,7 @@ import TrendingListings from '@/components/TrendingListings';
 import IndustryGrids from '@/components/IndustryGrids';
 import CallToAction from '@/components/CallToAction';
 import ContactForm from '@/components/ContactForm';
+import CarouselAds from '@/components/CarouselAds';
 import Footer from '@/components/Footer';
 import BusinessListings from '@/components/BusinessListings';
 import BusinessProfile from '@/components/BusinessProfile';
@@ -67,7 +68,9 @@ export default function Home() {
         <main>
           <MarketWeatherDashboard />
           <Hero />
+          <CarouselAds slot="hero_banner" />
           <TrendingListings />
+          <CarouselAds slot="listing_interstitial" />
           <IndustryGrids onSelectCategory={handleSelectCategory} />
           <LatestNews />
           <UpcomingEvents />

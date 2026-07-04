@@ -25,9 +25,8 @@ export default function NewsPortal() {
   React.useEffect(() => {
     const fetchNews = async () => {
       try {
-        const url = process.env.NEXT_PUBLIC_API_URL 
-          ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/news/trending/`
-          : '/api/v1/news/trending/';
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const url = `${baseUrl}/api/v1/news/trending/`;
         const res = await fetch(url);
         if (!res.ok) throw new Error('Failed to fetch news');
         const json = await res.json();
@@ -111,8 +110,9 @@ export default function NewsPortal() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-xl">
-              {newsArticles.map((article) => (
-                <article
+              {newsArticles.map((article: any) => (
+                <Link
+                  href={`/news/${article.slug || article.id}`}
                   key={article.id}
                   className="article-card flex flex-col group bg-white p-6 rounded-xl border border-hairline-soft hover:border-primary transition-all duration-300 hover:shadow-lg"
                 >
@@ -143,11 +143,11 @@ export default function NewsPortal() {
                     {article.excerpt || article.short_description || 'Read the full story to learn more about this recent update.'}
                   </p>
                   <div className="mt-auto">
-                    <button className="w-full py-3 px-6 rounded-full border-2 border-primary text-primary font-semibold text-sm hover:bg-primary hover:text-white transition-all active:scale-[0.98]">
+                    <span className="block w-full text-center py-3 px-6 rounded-full border-2 border-primary text-primary font-semibold text-sm group-hover:bg-primary group-hover:text-white transition-all">
                       Read More
-                    </button>
+                    </span>
                   </div>
-                </article>
+                </Link>
               ))}
             </div>
           )}

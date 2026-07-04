@@ -27,7 +27,16 @@ export default function NgoPage() {
         const res = await fetch(url);
         if (!res.ok) throw new Error('Failed to fetch NGOs');
         const json = await res.json();
-        setNgos(json.results || json.data || json || []);
+        const rawNgos = json.results || json.data || json || [];
+        const mappedNgos = rawNgos.map((ngo: any) => ({
+          id: ngo.id,
+          name: ngo.name,
+          category: ngo.category?.name || 'General',
+          location: ngo.address || 'Jalgaon, India',
+          icon: ngo.logo || undefined,
+          verified: ngo.is_verified,
+        }));
+        setNgos(mappedNgos);
       } catch (err: any) {
         setError(err.message);
       } finally {
