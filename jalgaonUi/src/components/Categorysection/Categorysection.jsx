@@ -4,7 +4,7 @@ import './Categorysection.css';
 import BusinessCard from './BusinessCard';
 import axios from 'axios';
 
-function Categorysection({ businessData, mainCategory, filterSubCategory }) {
+function Categorysection({ businessData, categorySlug, filterSubCategory }) {
   const djangoApi = import.meta.env.VITE_DJANGO_API;
   const [ads, setAds] = useState([]);
 
@@ -21,27 +21,25 @@ function Categorysection({ businessData, mainCategory, filterSubCategory }) {
     // console.log(filterSubCategory);
   }, []);
   
-  const filteredBusinessData = filterSubCategory 
-    ? businessData.filter(business => business.sub_category_id === filterSubCategory)
-    : businessData;
+  const filteredBusinessData = businessData;
 
   return (
     <div className="business_section">
       <div className="business_content">
         <div className="page_location">
-          <Link to=''>Home</Link> &gt; Search &gt; <span>{mainCategory}</span>
+          <Link to='/'>Home</Link> &gt; Category &gt; <span style={{ textTransform: 'capitalize' }}>{categorySlug?.replace(/-/g, ' ')}</span>
         </div> 
         <div className="result_heading">Showing Results</div>
         <div className="business_cards_ads">
           <div className="business_cards">
-            {filteredBusinessData.map((business) =>
-              // business.is_valid ? (
-              //   <BusinessCard key={business.id} businessData={business} is_like={false} />
-              // ) : null
-              (
-                <Link to={`/productView/${business.id}`}>
-                <BusinessCard key={business.id} businessData={business} is_like={false} /></Link>
-              )
+            {filteredBusinessData && filteredBusinessData.length > 0 ? (
+              filteredBusinessData.map((business) => (
+                <BusinessCard key={business.id} businessData={business} is_like={false} />
+              ))
+            ) : (
+              <div style={{ padding: '2rem', textAlign: 'center', width: '100%', color: '#64748b' }}>
+                No listings found for this category.
+              </div>
             )}
           </div>
           <div className="business_ads">

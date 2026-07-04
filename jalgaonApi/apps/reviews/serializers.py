@@ -2,17 +2,26 @@ from rest_framework import serializers
 from .models import ShopReview
 from apps.accounts.serializers import UserSerializer
 
+class ShopReviewSerializer(serializers.ModelSerializer):
+    user_name = serializers.SerializerMethodField()
+    user_avatar = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ShopReview
+        fields = ['id', 'user_name', 'user_avatar', 'rating_star', 'user_review', 'timestamp', 'is_helpful_count', 'status']
+        read_only_fields = ['status', 'is_helpful_count']
+
+    def get_user_name(self, obj):
+        if obj.user.first_name:
+            return f"{obj.user.first_name} {obj.user.last_name}".strip()
+        return "User"
+
+    def get_user_avatar(self, obj):
+        if obj.user.profile_pic:
+            return obj.user.profile_pic.url
+        return None
+
 class ShopReviewCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShopReview
-        fields = ['user', 'shop_listing', 'rating_star', 'user_review', 'timestamp']
-
-    def create(self, validated_data):
-        return ShopReview.objects.create(**validated_data)
-
-class ShopReviewSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True, source='user.phone_number')
-
-    class Meta:
-        model = ShopReview
-        fields = ['user', 'shop_listing', 'rating_star', 'user_review', 'timestamp']
+        fields = ['rating_star', 'user_review']

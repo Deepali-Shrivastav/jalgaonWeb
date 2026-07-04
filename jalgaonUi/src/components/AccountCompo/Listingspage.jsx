@@ -4,7 +4,7 @@ import BusinessCard from '../Categorysection/BusinessCard';
 import { UserContext } from '../../context/UserContext';
 
 function Listingspage() {
-  const apiUrl = `${import.meta.env.VITE_DJANGO_API}/api/v1/listings/my-listings/`;
+  const apiUrl = `${import.meta.env.VITE_DJANGO_API}/api/v1/listings/user/my-listings/`;
 
   const { user } = useContext(UserContext);
   const [listedPosts, setListedPosts] = useState([]);
@@ -28,7 +28,7 @@ function Listingspage() {
       return;
     }
 
-    const fetchLikedShops = async () => {
+    const fetchMyListings = async () => {
       try {
         const response = await axios.get(apiUrl, {
           headers: {
@@ -42,12 +42,12 @@ function Listingspage() {
         console.log(response.data);
         setListedPosts(response.data.results || response.data);
       } catch (error) {
-        console.error('Error fetching liked shops:', error.response ? error.response.data : error.message);
-        setError('Error fetching liked shops');
+        console.error('Error fetching your listings:', error.response ? error.response.data : error.message);
+        setError('Error fetching your listings');
       }
     };
 
-    fetchLikedShops();
+    fetchMyListings();
   }, [user, apiUrl]);
 
   return (

@@ -4,7 +4,7 @@ import { UserContext } from '../../context/UserContext';
 import { 
     MdDashboard, MdPeople, MdStorefront, 
     MdCategory, MdGavel, MdArticle, MdComment,
-    MdWork, MdAssignment, MdExpandMore, MdExpandLess
+    MdWork, MdAssignment, MdExpandMore, MdExpandLess, MdStar, MdCampaign, MdVerifiedUser
 } from 'react-icons/md';
 
 const AdminSidebar = ({ isCollapsed }) => {
@@ -42,10 +42,20 @@ const AdminSidebar = ({ isCollapsed }) => {
                 )}
 
                 {canSeeListings && (
-                    <NavLink to="/admin/listings" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
-                        <MdStorefront className="admin-sidebar-icon" />
-                        <span className="admin-sidebar-label">Listings</span>
-                    </NavLink>
+                    <>
+                        <NavLink to="/admin/listings" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+                            <MdStorefront className="admin-sidebar-icon" />
+                            <span className="admin-sidebar-label">Listings</span>
+                        </NavLink>
+                        <NavLink to="/admin/trending" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+                            <MdStar className="admin-sidebar-icon" />
+                            <span className="admin-sidebar-label">Trending</span>
+                        </NavLink>
+                        <NavLink to="/admin/ads" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+                            <MdCampaign className="admin-sidebar-icon" />
+                            <span className="admin-sidebar-label">Ads Moderation</span>
+                        </NavLink>
+                    </>
                 )}
 
                 {canSeeCategories && (
@@ -122,10 +132,20 @@ const AdminSidebar = ({ isCollapsed }) => {
                 )}
 
                 {canSeeModeration && (
-                    <NavLink to="/admin/moderation" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
-                        <MdGavel className="admin-sidebar-icon" />
-                        <span className="admin-sidebar-label">Moderation</span>
-                    </NavLink>
+                    <>
+                        <NavLink to="/admin/moderation" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+                            <MdGavel className="admin-sidebar-icon" />
+                            <span className="admin-sidebar-label">Moderation</span>
+                        </NavLink>
+                        <NavLink to="/admin/claims" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+                            <MdVerifiedUser className="admin-sidebar-icon" />
+                            <span className="admin-sidebar-label">Business Claims</span>
+                        </NavLink>
+                        <NavLink to="/admin/reports" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+                            <MdGavel className="admin-sidebar-icon" />
+                            <span className="admin-sidebar-label">Business Reports</span>
+                        </NavLink>
+                    </>
                 )}
             </nav>
         </aside>

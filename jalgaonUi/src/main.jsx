@@ -9,13 +9,14 @@ import Account from './pages/Account';
 import { UserProvider } from './context/UserContext';
 import Providers from './Providers';
 import AddListingPage from './pages/AddListingPage';
-import AddAdvertise from './pages/AddAdvertise';
+import AdsIndexPage from './pages/AdsIndexPage';
 import ArticlesPage from './pages/ArticlesPage';
 import Articles from './components/Releatedarticles/Articles';
 import ArticleViewPage from './pages/ArticleViewPage';
 import AboutPage from './pages/AboutPage';
 import TermsPage from './pages/TermsPage';
 import AddListingForm from './components/AllForms/AddListingForm';
+import BusinessDashboard from './pages/BusinessDashboard';
 import ContactPage from './pages/ContactPage';
 import SearchPage from './pages/SearchPage';
 import NewsIndexPage from './pages/NewsIndexPage';
@@ -34,6 +35,10 @@ import AdminUsers from './pages/admin/AdminUsers';
 import AdminListings from './pages/admin/AdminListings';
 import AdminCategories from './pages/admin/AdminCategories';
 import AdminModeration from './pages/admin/AdminModeration';
+import AdminClaims from './pages/admin/AdminClaims';
+import AdminReports from './pages/admin/AdminReports';
+import AdminTrendingListings from './pages/admin/AdminTrendingListings';
+import AdminAds from './pages/admin/AdminAds';
 import AdminNews from './pages/admin/AdminNews';
 import AdminNewsCreate from './pages/admin/AdminNewsCreate';
 import AdminNewsComments from './pages/admin/AdminNewsComments';
@@ -49,10 +54,10 @@ const router = createBrowserRouter(
       <Route path='/' element={<Layout />}>
         <Route index element={<Home />} />
         <Route path='addListig' element={<AddListingPage />} />
-        <Route path='categories/:mainCategoryId/:mainCategory' element={<CategoryPage />} />
-        <Route path='productView/:productId' element={<BusinessDetailsPage />} />
+        <Route path='categories/:categorySlug' element={<CategoryPage />} />
+        <Route path='business/jalgaon/:categorySlug/:productId' element={<BusinessDetailsPage />} />
         <Route path='account' element={<Account />} />
-        <Route path='advertise' element={<AddAdvertise />} />
+        <Route path='advertise' element={<AdsIndexPage />} />
         <Route path='allarticlse' element={<ArticlesPage />} />
         <Route path='articleView/:articleId' element={<ArticleViewPage />} />
         <Route path='searchResults' element={<SearchPage />} />
@@ -60,6 +65,7 @@ const router = createBrowserRouter(
         <Route path='contact' element={<ContactPage />} />
         <Route path='termsAndCondition' element={<TermsPage />} />
         <Route path='editForm/:shopId' element={<AddListingForm is_edit={true}/>} />
+        <Route path='business-dashboard/:id' element={<BusinessDashboard />} />
       </Route>
 
       {/* News Module */}
@@ -79,6 +85,10 @@ const router = createBrowserRouter(
         <Route path='listings' element={<AdminListings />} />
         <Route path='categories' element={<AdminCategories />} />
         <Route path='moderation' element={<AdminModeration />} />
+        <Route path='claims' element={<AdminClaims />} />
+        <Route path='reports' element={<AdminReports />} />
+        <Route path='trending' element={<AdminTrendingListings />} />
+        <Route path='ads' element={<AdminAds />} />
         
         {/* Admin News */}
         <Route path='news' element={<AdminNews />} />
