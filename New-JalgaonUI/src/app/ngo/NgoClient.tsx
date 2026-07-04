@@ -1,41 +1,70 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Header from '@/components/Header';
+import ngoData from './ngo_data.json';
 
 export interface NgoItem {
   id: number;
   name: string;
   category: string;
   location: string;
+  link?: string;
+  phone?: string | number;
+  pincode?: string | number;
   icon?: string;
   verified?: boolean;
 }
 
-export default function NgoPage() {
+export default function NgoClient() {
   const [activeFaq, setActiveFaq] = useState<number>(0);
   const [ngos, setNgos] = useState<NgoItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9;
+
   useEffect(() => {
-    const fetchNgos = async () => {
-      try {
-        const url = process.env.NEXT_PUBLIC_API_URL 
-          ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/ngo/`
-          : '/api/v1/ngo/';
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('Failed to fetch NGOs');
-        const json = await res.json();
-        setNgos(json.results || json.data || json || []);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchNgos();
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory]);
+
+  useEffect(() => {
+    // Make the data static
+    setNgos(ngoData as NgoItem[]);
+    setLoading(false);
   }, []);
+
+  const filteredNgos = useMemo(() => {
+    let result = ngos;
+    if (selectedCategory !== 'All') {
+      result = result.filter(ngo => ngo.category === selectedCategory);
+    }
+    if (searchQuery.trim()) {
+      const lowerQuery = searchQuery.toLowerCase();
+      result = result.filter(
+        (ngo) =>
+          ngo.name?.toLowerCase().includes(lowerQuery) ||
+          ngo.category?.toLowerCase().includes(lowerQuery) ||
+          ngo.location?.toLowerCase().includes(lowerQuery)
+      );
+    }
+    return result;
+  }, [ngos, searchQuery, selectedCategory]);
+
+  const totalPages = Math.ceil(filteredNgos.length / itemsPerPage);
+
+  const paginatedNgos = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredNgos.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredNgos, currentPage]);
+
+  const allCategories = useMemo(() => {
+    const cats = new Set(ngos.map(n => n.category || 'Other'));
+    return ['All', ...Array.from(cats).sort()];
+  }, [ngos]);
 
   const toggleFaq = (index: number) => {
     setActiveFaq(activeFaq === index ? -1 : index);
@@ -83,9 +112,11 @@ export default function NgoPage() {
                 </span>
                 <input
                   className="w-full border-none focus:ring-0 text-ink-deep bg-transparent py-3 text-base placeholder:text-secondary outline-none"
-                  placeholder="Search by cause (Education, Health, Environment...)"
+                  placeholder="Search by name, category, or location..."
                   type="search"
                   aria-label="Search NGOs"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
               <button className="bg-primary text-white px-8 py-3 rounded-full font-bold tracking-wide hover:bg-primary-deep transition-colors active:scale-95">
@@ -121,63 +152,131 @@ export default function NgoPage() {
           <section className="mb-12">
             <h2 className="text-2xl font-bold mb-6 text-ink-deep">Filter by Cause</h2>
             <div className="flex items-center gap-3 overflow-x-auto pb-4 hide-scrollbar">
-              <button className="whitespace-nowrap px-6 py-2.5 rounded-full bg-primary text-white font-semibold shadow-sm">All</button>
-              <button className="whitespace-nowrap px-6 py-2.5 rounded-full bg-surface-container-low border border-outline-variant hover:border-primary transition-colors text-on-surface-variant font-semibold">Healthcare</button>
-              <button className="whitespace-nowrap px-6 py-2.5 rounded-full bg-surface-container-low border border-outline-variant hover:border-primary transition-colors text-on-surface-variant font-semibold">Education</button>
-              <button className="whitespace-nowrap px-6 py-2.5 rounded-full bg-surface-container-low border border-outline-variant hover:border-primary transition-colors text-on-surface-variant font-semibold">Environment</button>
-              <button className="whitespace-nowrap px-6 py-2.5 rounded-full bg-surface-container-low border border-outline-variant hover:border-primary transition-colors text-on-surface-variant font-semibold">Animal Welfare</button>
-              <button className="whitespace-nowrap px-6 py-2.5 rounded-full bg-surface-container-low border border-outline-variant hover:border-primary transition-colors text-on-surface-variant font-semibold">Women Empowerment</button>
+              {allCategories.map(cat => (
+                <button 
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`whitespace-nowrap px-6 py-2.5 rounded-full font-semibold transition-colors ${
+                    selectedCategory === cat 
+                      ? 'bg-primary text-white shadow-sm' 
+                      : 'bg-surface-container-low border border-outline-variant hover:border-primary text-on-surface-variant'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
           </section>
 
           {/* NGO Listings Grid */}
           <section className="mb-20">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="">
               {loading ? (
-                <div className="col-span-full text-center py-16">
+                <div className="text-center py-16">
                   <span className="material-symbols-outlined animate-spin text-4xl text-primary mb-4">progress_activity</span>
                   <h3 className="text-lg font-bold text-ink-deep">Loading NGOs...</h3>
                 </div>
               ) : error ? (
-                <div className="col-span-full text-center py-16 text-red-500">
+                <div className="text-center py-16 text-red-500">
                   <span className="material-symbols-outlined text-4xl mb-4">error</span>
                   <h3 className="text-lg font-bold">Failed to load NGOs</h3>
                 </div>
-              ) : ngos.length === 0 ? (
-                <div className="col-span-full text-center py-16">
+              ) : filteredNgos.length === 0 ? (
+                <div className="text-center py-16">
                   <h3 className="text-lg text-secondary">No NGOs found.</h3>
                 </div>
               ) : (
-                ngos.map((ngo) => (
-                  <div key={ngo.id || ngo.name} className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 flex flex-col hover:shadow-lg transition-shadow event-card-shadow">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="w-16 h-16 bg-surface-container-low rounded-lg flex items-center justify-center border border-hairline-soft overflow-hidden">
-                        <span className="material-symbols-outlined text-primary text-4xl">{ngo.icon || 'volunteer_activism'}</span>
+                <div className="flex flex-col gap-12">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {paginatedNgos.map((ngo) => (
+                      <div key={ngo.id || ngo.name} className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 flex flex-col hover:shadow-lg transition-shadow event-card-shadow">
+                        <div className="flex justify-between items-start mb-4">
+                          <div className="w-16 h-16 bg-surface-container-low rounded-lg flex items-center justify-center border border-hairline-soft overflow-hidden">
+                            <span className="material-symbols-outlined text-primary text-4xl">{ngo.icon || 'volunteer_activism'}</span>
+                          </div>
+                          {ngo.verified !== false && (
+                            <span className="bg-surface-container-low text-primary-deep px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 border border-hairline-soft">
+                              <span className="material-symbols-outlined text-[14px]" style={{fontVariationSettings: "'FILL' 1"}}>verified</span> Verified
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="text-xl font-bold mb-2 text-ink-deep line-clamp-2" title={ngo.name}>{ngo.name}</h3>
+                        <div className="flex gap-2 mb-4">
+                          <span className="bg-surface-container-high text-on-surface-variant px-2 py-1 rounded-sm text-[11px] font-bold uppercase">{ngo.category || 'NGO'}</span>
+                        </div>
+                        <div className="flex flex-col gap-2 text-on-surface-variant text-sm mb-6">
+                          <div className="flex items-start gap-2">
+                            <span className="material-symbols-outlined text-[18px] shrink-0 mt-0.5">location_on</span>
+                            <span className="line-clamp-2" title={ngo.location}>{ngo.location || 'Jalgaon'}</span>
+                          </div>
+                          {ngo.phone && (
+                            <div className="flex items-center gap-2">
+                              <span className="material-symbols-outlined text-[18px] shrink-0">call</span>
+                              <span>{ngo.phone}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="mt-auto grid grid-cols-2 gap-4">
+                          {ngo.link && ngo.link !== 'N/A' ? (
+                            <a href={ngo.link} target="_blank" rel="noopener noreferrer" className="border border-primary text-primary py-2.5 rounded-lg font-bold hover:bg-surface-container-high transition-colors text-center flex items-center justify-center">Directions</a>
+                          ) : (
+                            <button className="border border-primary text-primary py-2.5 rounded-lg font-bold hover:bg-surface-container-high transition-colors">Volunteer</button>
+                          )}
+                          <button className="bg-primary text-white py-2.5 rounded-lg font-bold hover:bg-primary-deep transition-colors shadow-sm">Donate</button>
+                        </div>
                       </div>
-                      {ngo.verified !== false && (
-                        <span className="bg-surface-container-low text-primary-deep px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 border border-hairline-soft">
-                          <span className="material-symbols-outlined text-[14px]" style={{fontVariationSettings: "'FILL' 1"}}>verified</span> Verified
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="text-xl font-bold mb-2 text-ink-deep">{ngo.name}</h3>
-                    <div className="flex gap-2 mb-4">
-                      <span className="bg-surface-container-high text-on-surface-variant px-2 py-1 rounded-sm text-[11px] font-bold uppercase">{ngo.category || 'NGO'}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-on-surface-variant text-sm mb-6">
-                      <span className="material-symbols-outlined text-[18px]">location_on</span>
-                      <span>{ngo.location || 'Jalgaon'}</span>
-                    </div>
-                    <div className="mt-auto grid grid-cols-2 gap-4">
-                      <button className="border border-primary text-primary py-2.5 rounded-lg font-bold hover:bg-surface-container-high transition-colors">Volunteer</button>
-                      <button className="bg-primary text-white py-2.5 rounded-lg font-bold hover:bg-primary-deep transition-colors shadow-sm">Donate</button>
-                    </div>
+                    ))}
                   </div>
-                ))
+
+                  {totalPages > 1 && (
+                    <div className="mt-12 flex justify-center items-center gap-2">
+                      <button 
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-low border border-outline-variant hover:bg-surface-container-high disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <span className="material-symbols-outlined">chevron_left</span>
+                      </button>
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
+                          if (
+                            page === 1 || 
+                            page === totalPages || 
+                            (page >= currentPage - 1 && page <= currentPage + 1)
+                          ) {
+                            return (
+                              <button
+                                key={page}
+                                onClick={() => setCurrentPage(page)}
+                                className={`w-10 h-10 flex items-center justify-center rounded-full font-bold transition-colors ${
+                                  currentPage === page 
+                                    ? 'bg-primary text-white shadow-sm' 
+                                    : 'bg-transparent text-on-surface-variant hover:bg-surface-container-high'
+                                }`}
+                              >
+                                {page}
+                              </button>
+                            );
+                          } else if (
+                            page === currentPage - 2 || 
+                            page === currentPage + 2
+                          ) {
+                            return <span key={page} className="px-1 text-on-surface-variant">...</span>;
+                          }
+                          return null;
+                        })}
+                      </div>
+                      <button 
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                        className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-low border border-outline-variant hover:bg-surface-container-high disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <span className="material-symbols-outlined">chevron_right</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
-            </div>
-            <div className="mt-12 text-center">
-              <button className="bg-surface-container-high text-on-surface px-8 py-3 rounded-full font-bold hover:bg-outline-variant transition-colors">View All NGO Listings</button>
             </div>
           </section>
 
@@ -245,6 +344,3 @@ export default function NgoPage() {
           </section>
         </div>
       </main>
-    </>
-  );
-}
