@@ -46,6 +46,11 @@ class JobApplicationCreateSerializer(serializers.ModelSerializer):
         model = JobApplication
         fields = ['resume', 'cover_letter']
 
+    def validate_resume(self, value):
+        if value.size > 500 * 1024:
+            raise serializers.ValidationError("Resume file size must be less than 500 KB.")
+        return value
+
 class JobApplicationListSerializer(serializers.ModelSerializer):
     applicant_name = serializers.CharField(source='applicant.get_full_name', read_only=True)
     applicant_email = serializers.EmailField(source='applicant.email', read_only=True)
