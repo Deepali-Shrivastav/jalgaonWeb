@@ -1,0 +1,858 @@
+[
+  {
+    "id": 22,
+    "name": "Govardhan Go Shala Nimgaon",
+    "category": "Animal Welfare",
+    "location": "AT POST NIMGAON TAL YAWAL",
+    "link": "https://www.google.com/maps/search/?api=1&query=AT+POST+NIMGAON+TAL+YAWAL",
+    "phone": "02585-261201",
+    "verified": true
+  },
+  {
+    "id": 23,
+    "name": "Govidnyan Anusandhan And Bahuuddeshiya Sanstha Bhusawal",
+    "category": "Animal Welfare",
+    "location": "AT HARIPURA POST MOHRALE TAL YAWAL DIST JALGAON",
+    "link": "https://www.google.com/maps/search/?api=1&query=AT+HARIPURA+POST+MOHRALE+TAL+YAWAL+DIST+JALGAON",
+    "phone": 8087650125,
+    "verified": true
+  },
+  {
+    "id": 79,
+    "name": "Shree Giri Govradhan Giriraj Goshala",
+    "category": "Animal Welfare",
+    "location": "C/o Gujrathi Mandir Onkar Nagar Jilha Peth Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=C%2Fo+Gujrathi+Mandir+Onkar+Nagar+Jilha+Peth+Jalgaon",
+    "phone": 7741829293,
+    "verified": true
+  },
+  {
+    "id": 83,
+    "name": "Shri Revanandji Go Shala Manvel",
+    "category": "Animal Welfare",
+    "location": "AT POST MANVEL TAL YAWAL DIST JALGAON",
+    "link": "https://www.google.com/maps/search/?api=1&query=AT+POST+MANVEL+TAL+YAWAL+DIST+JALGAON",
+    "phone": "02585-264779",
+    "verified": true
+  },
+  {
+    "id": 31,
+    "name": "Jananayak Theatre Group",
+    "category": "Art & Culture",
+    "location": "Honaji Hemaraj Chavan 220, Balaji Peth,Saraf Bazar, Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=Honaji+Hemaraj+Chavan+220%2C+Balaji+Peth%2CSaraf+Bazar%2C+Jalgaon",
+    "phone": 9403021220,
+    "verified": true
+  },
+  {
+    "id": 28,
+    "name": "Jalgaon Jilha Balkalyan Samitti",
+    "category": "Child Welfare",
+    "location": "Niwant Neri Road Wavadada Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=Niwant+Neri+Road+Wavadada+Jalgaon",
+    "phone": "0257-2353585",
+    "verified": true
+  },
+  {
+    "id": 9,
+    "name": "Arfat Education And Welfare Society",
+    "category": "Education",
+    "location": "OLD BODWAD ROADROAD JAMNER DIST JALGAON",
+    "link": "https://www.google.com/maps/search/?api=1&query=OLD+BODWAD+ROADROAD+JAMNER+DIST+JALGAON",
+    "phone": 9423491141,
+    "pincode": 424206,
+    "verified": true
+  },
+  {
+    "id": 10,
+    "name": "Ashapuri Shikshan Prasarak Mandal",
+    "category": "Education",
+    "location": "29,Krushanai, Kailas Nagar, Bhadagaon Road,Chalisgaon Tal Chalisgaon Dist.Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=29%2CKrushanai%2C+Kailas+Nagar%2C+Bhadagaon+Road%2CChalisgaon+Tal+Chalisgaon+Dist.Jalgaon",
+    "phone": "02589-228295",
+    "pincode": 424101,
+    "verified": true
+  },
+  {
+    "id": 18,
+    "name": "Dr Annasaheb G D Bendale Mahila Mahavidyalaya",
+    "category": "Education",
+    "location": "Dr. Annasaheb G. D. Bendale Mahila Mahavidyalaya Jilha Peth, Jilha Road, Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=Dr.+Annasaheb+G.+D.+Bendale+Mahila+Mahavidyalaya+Jilha+Peth%2C+Jilha+Road%2C+Jalgaon",
+    "phone": "0257-2236051",
+    "verified": true
+  },
+  {
+    "id": 20,
+    "name": "Ekta Educational And Cultural Society Aurangabad",
+    "category": "Education",
+    "location": "EKTA CULTURAL AND EDUCATIONAL SANSTHA PLOT NO.11 N-12 D-SECTOR, CIDCO AURANGABAD",
+    "link": "https://www.google.com/maps/search/?api=1&query=EKTA+CULTURAL+AND+EDUCATIONAL+SANSTHA+PLOT+NO.11+N-12+D-SECTOR%2C+CIDCO+AURANGABAD",
+    "phone": 8806212157,
+    "verified": true
+  },
+  {
+    "id": 27,
+    "name": "Iqra Education Society Jalgaon",
+    "category": "Education",
+    "location": "Haji Gulam Nabi Nagar, Mehrun,Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=Haji+Gulam+Nabi+Nagar%2C+Mehrun%2CJalgaon",
+    "phone": 9423187515,
+    "verified": true
+  },
+  {
+    "id": 30,
+    "name": "Jan Shikshan Sansthan Jalgaon",
+    "category": "Education",
+    "location": "Jan Shikshan Sansthan, Jalgaon Behind Kasturba Highschool, OLd Shirpur Road, Chopda Tal- Chopda Dist- Jalgaon 425107",
+    "link": "https://www.google.com/maps/search/?api=1&query=Jan+Shikshan+Sansthan%2C+Jalgaon+Behind+Kasturba+Highschool%2C+OLd+Shirpur+Road%2C+Chopda+Tal-+Chopda+Dist-+Jalgaon+425107",
+    "phone": "02586-222600",
+    "verified": true
+  },
+  {
+    "id": 40,
+    "name": "Late Yashwant Baliram Patil Shikshan Prasarak Mandal",
+    "category": "Education",
+    "location": "LateYashwant Baliram Patil Shikshan Prasarak Mandal.Talai.Tal Erandol Jalgaon  Pin 425109",
+    "link": "https://www.google.com/maps/search/?api=1&query=LateYashwant+Baliram+Patil+Shikshan+Prasarak+Mandal.Talai.Tal+Erandol+Jalgaon++Pin+425109",
+    "phone": "02588-245591",
+    "verified": true
+  },
+  {
+    "id": 45,
+    "name": "Mahatma Fule Shikshan Sanstha Pahur Kasbe",
+    "category": "Education",
+    "location": "MAHATMA FULE SHIKSHAN SANSTHA PAHUR KASBE",
+    "link": "https://www.google.com/maps/search/?api=1&query=MAHATMA+FULE+SHIKSHAN+SANSTHA+PAHUR+KASBE",
+    "phone": 8308414317,
+    "verified": true
+  },
+  {
+    "id": 52,
+    "name": "Muktainagar Shikshan Prasarak Mandal Edalabad",
+    "category": "Education",
+    "location": "MUKTAINAGAR SHIKSHAN PRASARAK MANDAL EDALABAD TAL EDALABAD DIST JALGAON.",
+    "link": "https://www.google.com/maps/search/?api=1&query=MUKTAINAGAR+SHIKSHAN+PRASARAK+MANDAL+EDALABAD+TAL+EDALABAD+DIST+JALGAON.",
+    "phone": 9011763768,
+    "verified": true
+  },
+  {
+    "id": 62,
+    "name": "Pasbane Millat Educational And Welfare Society",
+    "category": "Education",
+    "location": "Near Raza Tower , Bhusawal Dist: Jalgaon , Maharashtra 425201",
+    "link": "https://www.google.com/maps/search/?api=1&query=Near+Raza+Tower+%2C+Bhusawal+Dist%3A+Jalgaon+%2C+Maharashtra+425201",
+    "phone": "02582-248655",
+    "verified": true
+  },
+  {
+    "id": 64,
+    "name": "Pedkaidevi Bahuddeshiya Shikshan Sanstha",
+    "category": "Education",
+    "location": "Shop No 3 KrusiUtpanSamitiComplex Road Chopda Dist Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=Shop+No+3+KrusiUtpanSamitiComplex+Road+Chopda+Dist+Jalgaon",
+    "phone": 9420233521,
+    "verified": true
+  },
+  {
+    "id": 66,
+    "name": "Pratap College",
+    "category": "Education",
+    "location": "Pratap College, Amalner, District Jalgaon, Maharashtra,",
+    "link": "https://www.google.com/maps/search/?api=1&query=Pratap+College%2C+Amalner%2C+District+Jalgaon%2C+Maharashtra%2C",
+    "phone": 9422565721,
+    "verified": true
+  },
+  {
+    "id": 68,
+    "name": "Rashtravikas Agro Education Sanstha",
+    "category": "Education",
+    "location": "10 \"Ramkunj\", Shiv Parvati Colony, Near Surabhi Colony, Amalner, Dist. Jalgaon - 425401",
+    "link": "https://www.google.com/maps/search/?api=1&query=10+%22Ramkunj%22%2C+Shiv+Parvati+Colony%2C+Near+Surabhi+Colony%2C+Amalner%2C+Dist.+Jalgaon+-+425401",
+    "phone": "02587-222739",
+    "verified": true
+  },
+  {
+    "id": 72,
+    "name": "Sant Dhyneshwar Shikshan Prasarak Mandal",
+    "category": "Education",
+    "location": "TUKARAM KISANSINGH PATIL C/O. MADHYAMIK VIDYALAYA AT POST OZARKHEDE TAL BHUSAWAL DIST. JALGOAN",
+    "link": "https://www.google.com/maps/search/?api=1&query=TUKARAM+KISANSINGH+PATIL+C%2FO.+MADHYAMIK+VIDYALAYA+AT+POST+OZARKHEDE+TAL+BHUSAWAL+DIST.+JALGOAN",
+    "phone": "02582-200000",
+    "verified": true
+  },
+  {
+    "id": 76,
+    "name": "Secondary Education Society Bhalod",
+    "category": "Education",
+    "location": "BHALOD TAL-YAWAL DIST JALGAON",
+    "link": "https://www.google.com/maps/search/?api=1&query=BHALOD+TAL-YAWAL+DIST+JALGAON",
+    "phone": 9420788853,
+    "verified": true
+  },
+  {
+    "id": 78,
+    "name": "Shivaji Shikshan Prasak Mandal Takalipd",
+    "category": "Education",
+    "location": "Takali PD Tal-Chalisgaon Dist-Jalgaon Maharashtra pin-424116",
+    "link": "https://www.google.com/maps/search/?api=1&query=Takali+PD+Tal-Chalisgaon+Dist-Jalgaon+Maharashtra+pin-424116",
+    "phone": "02589-254892",
+    "verified": true
+  },
+  {
+    "id": 86,
+    "name": "Shri Snat Gadgebaba Shikshan Sanstha",
+    "category": "Education",
+    "location": "SHRI SANT GADGEBABA SHIKSHAN SANSTHA DESHMUKH WADI PACHORA DIST-JALGAON",
+    "link": "https://www.google.com/maps/search/?api=1&query=SHRI+SANT+GADGEBABA+SHIKSHAN+SANSTHA+DESHMUKH+WADI+PACHORA+DIST-JALGAON",
+    "phone": "02596-247385",
+    "verified": true
+  },
+  {
+    "id": 6,
+    "name": "Alhind Minority Charitable Trust",
+    "category": "Minority Welfare",
+    "location": "ALHIND HOSAPITAL, ABDUL SATTAR MANZIL, PLOT NO.17, 344/9, BEHIND SHIVAJI NAGAR HUDCO, UMAR COLONY JALGAON",
+    "link": "https://www.google.com/maps/search/?api=1&query=ALHIND+HOSAPITAL%2C+ABDUL+SATTAR+MANZIL%2C+PLOT+NO.17%2C+344%2F9%2C+BEHIND+SHIVAJI+NAGAR+HUDCO%2C+UMAR+COLONY+JALGAON",
+    "phone": "0257-2222723",
+    "pincode": 425001,
+    "verified": true
+  },
+  {
+    "id": 11,
+    "name": "Bhagini Nivedita Gramin Vigyan Niketan",
+    "category": "Rural Development",
+    "location": "Bahadarpur Dist Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=Bahadarpur+Dist+Jalgaon",
+    "phone": 9673971711,
+    "verified": true
+  },
+  {
+    "id": 24,
+    "name": "Gram Vikas Bahuudeshiya Sanstha Jalgaon",
+    "category": "Rural Development",
+    "location": "Dandekar Nagar, Pimprala Road, Jalgaon, Tal. & Dist. Jalgaon Pin Code - 425001.",
+    "link": "https://www.google.com/maps/search/?api=1&query=Dandekar+Nagar%2C+Pimprala+Road%2C+Jalgaon%2C+Tal.+%26+Dist.+Jalgaon+Pin+Code+-+425001.",
+    "phone": "0257-262723",
+    "verified": true
+  },
+  {
+    "id": 26,
+    "name": "Institute For Rural Development And Social Services Jalgaon",
+    "category": "Rural Development",
+    "location": "28/29, Jivram Nagar, Near Khote Nagar, Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=28%2F29%2C+Jivram+Nagar%2C+Near+Khote+Nagar%2C+Jalgaon",
+    "phone": 7798111179,
+    "verified": true
+  },
+  {
+    "id": 32,
+    "name": "Kai Vanjibaba Gramin Vikas Mandal Chalisgaon",
+    "category": "Rural Development",
+    "location": "Umang, Near Bhushan Mangal Karyalay, Bhadgaon Road, Chalisgaon , Dist. Jalgaon.",
+    "link": "https://www.google.com/maps/search/?api=1&query=Umang%2C+Near+Bhushan+Mangal+Karyalay%2C+Bhadgaon+Road%2C+Chalisgaon+%2C+Dist.+Jalgaon.",
+    "phone": 8007992791,
+    "verified": true
+  },
+  {
+    "id": 58,
+    "name": "Nirmal Gramvikas Foundation",
+    "category": "Rural Development",
+    "location": "AT POST BHATKHEDE TALUKA-ERANDOL, DIST-JALGAON.",
+    "link": "https://www.google.com/maps/search/?api=1&query=AT+POST+BHATKHEDE+TALUKA-ERANDOL%2C+DIST-JALGAON.",
+    "phone": "02588-263825",
+    "verified": true
+  },
+  {
+    "id": 1,
+    "name": "Aadhar Bahuddeshiya Sanstha",
+    "category": "Social Welfare",
+    "location": "Chikate Lane,New Plot,Station Road,Opp.Court, Amalner Dist Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=Chikate+Lane%2CNew+Plot%2CStation+Road%2COpp.Court%2C+Amalner+Dist+Jalgaon",
+    "phone": 9405058527,
+    "pincode": 425401,
+    "verified": true
+  },
+  {
+    "id": 2,
+    "name": "Aashray Bahuudeshia Sanstha Talukachopda Jilha Jalgaon",
+    "category": "Social Welfare",
+    "location": "25 Sahyog Colony, At/po Chopda,TalukaChopda District - Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=25+Sahyog+Colony%2C+At%2Fpo+Chopda%2CTalukaChopda+District+-+Jalgaon",
+    "phone": 9850823001,
+    "pincode": 425107,
+    "verified": true
+  },
+  {
+    "id": 3,
+    "name": "Abhinav Bahuudyaashea Sanstha Bhadgaon Maharashtra",
+    "category": "Social Welfare",
+    "location": "Abhinav Bahuudyaashea Sanstha Bhadgaon c/o Dr. Dilip B. PatilMain Road Bhadgaon Dist Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=Abhinav+Bahuudyaashea+Sanstha+Bhadgaon+c%2Fo+Dr.+Dilip+B.+PatilMain+Road+Bhadgaon+Dist+Jalgaon",
+    "phone": 7588010675,
+    "pincode": 424105,
+    "verified": true
+  },
+  {
+    "id": 4,
+    "name": "Akanksha Bahuudheshiya Sanstha Jalgaon",
+    "category": "Social Welfare",
+    "location": "Plot No. 42, Ganesh Colony, Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=Plot+No.+42%2C+Ganesh+Colony%2C+Jalgaon",
+    "phone": "0257-2252686",
+    "pincode": 425001,
+    "verified": true
+  },
+  {
+    "id": 5,
+    "name": "Alfaiz Foundation",
+    "category": "Social Welfare",
+    "location": "74, Balirampeth, Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=74%2C+Balirampeth%2C+Jalgaon",
+    "phone": 9373433172,
+    "pincode": 425001,
+    "verified": true
+  },
+  {
+    "id": 7,
+    "name": "Anjanai Foundation, Raver",
+    "category": "Social Welfare",
+    "location": "1141/1/6 Shantidut Nagar Raver Taluka Raver Dist. Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=1141%2F1%2F6+Shantidut+Nagar+Raver+Taluka+Raver+Dist.+Jalgaon",
+    "phone": 9823323582,
+    "pincode": 425508,
+    "verified": true
+  },
+  {
+    "id": 8,
+    "name": "Annaso Eknath Kumavat Bahuddeshiy Sanstha Chalisgaon",
+    "category": "Social Welfare",
+    "location": "DAYANAND HOTEL, KUMAVAT CORNER, AT POST. TAL. CHALISGAON, DIST. JALGAON",
+    "link": "https://www.google.com/maps/search/?api=1&query=DAYANAND+HOTEL%2C+KUMAVAT+CORNER%2C+AT+POST.+TAL.+CHALISGAON%2C+DIST.+JALGAON",
+    "phone": 9130100015,
+    "pincode": 424101,
+    "verified": true
+  },
+  {
+    "id": 12,
+    "name": "Bhavarlal And Kantabai Jain Multy Purpose Foundation",
+    "category": "Social Welfare",
+    "location": "Jain Pipe Park, Jain Pipe Nagar, Old Dhulia Road, Nimkhedi Khurd",
+    "link": "https://www.google.com/maps/search/?api=1&query=Jain+Pipe+Park%2C+Jain+Pipe+Nagar%2C+Old+Dhulia+Road%2C+Nimkhedi+Khurd",
+    "phone": 9422771714,
+    "verified": true
+  },
+  {
+    "id": 13,
+    "name": "Buddhist Bahuuddeshiya Sevabhavi Sanstha Bhusawal",
+    "category": "Social Welfare",
+    "location": "A/p Varangaon Tal. Bhusawal Dist Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=A%2Fp+Varangaon+Tal.+Bhusawal+Dist+Jalgaon",
+    "phone": 9764757161,
+    "verified": true
+  },
+  {
+    "id": 14,
+    "name": "Chhabildas Kalu Choudhari Bahuddeshia Shigshan Prakash Mandal",
+    "category": "Social Welfare",
+    "location": "JAI SHRIRAM COMPLEX SHANI MANDIR WARD",
+    "link": "https://www.google.com/maps/search/?api=1&query=JAI+SHRIRAM+COMPLEX+SHANI+MANDIR+WARD",
+    "phone": 9595763636,
+    "verified": true
+  },
+  {
+    "id": 15,
+    "name": "Chhatrapati Shivrai Foundation Dhule",
+    "category": "Social Welfare",
+    "location": "C/O MR.PARMANAND YASHWANT SURYAWANSHI, AT/POSTWAGHALI, TAHASILCHALISGAON,DISTRICT JALGAON.",
+    "link": "https://www.google.com/maps/search/?api=1&query=C%2FO+MR.PARMANAND+YASHWANT+SURYAWANSHI%2C+AT%2FPOSTWAGHALI%2C+TAHASILCHALISGAON%2CDISTRICT+JALGAON.",
+    "phone": 8975050035,
+    "verified": true
+  },
+  {
+    "id": 16,
+    "name": "Deepstambh Bahuuddeshiya Sanstha",
+    "category": "Social Welfare",
+    "location": "42, Housing Society, Near Sahyog Critical Hospital, Behind District Court, Shahunagar, Jalgaon – 425001",
+    "link": "https://www.google.com/maps/search/?api=1&query=42%2C+Housing+Society%2C+Near+Sahyog+Critical+Hospital%2C+Behind+District+Court%2C+Shahunagar%2C+Jalgaon+%E2%80%93+425001",
+    "phone": 8380076545,
+    "verified": true
+  },
+  {
+    "id": 17,
+    "name": "Dilasa Bahuudheshiya Sanastha Jalgaon",
+    "category": "Social Welfare",
+    "location": "48, Draupadi Nagar, National Highway No.6, JALGAON, 425001",
+    "link": "https://www.google.com/maps/search/?api=1&query=48%2C+Draupadi+Nagar%2C+National+Highway+No.6%2C+JALGAON%2C+425001",
+    "phone": "0257-2253113",
+    "verified": true
+  },
+  {
+    "id": 19,
+    "name": "Dr Manvatkar Bahuddeshiya Sanstha Bhusawal",
+    "category": "Social Welfare",
+    "location": "Manvatkar Hospital a/pBhusawal Tal Bhusawal Dist Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=Manvatkar+Hospital+a%2FpBhusawal+Tal+Bhusawal+Dist+Jalgaon",
+    "phone": 9175223931,
+    "verified": true
+  },
+  {
+    "id": 21,
+    "name": "Gandhi Research Foundation",
+    "category": "Social Welfare",
+    "location": "Gandhi Teerth, Jain Hills Sisrsoli Road",
+    "link": "https://www.google.com/maps/search/?api=1&query=Gandhi+Teerth%2C+Jain+Hills+Sisrsoli+Road",
+    "phone": "0257-2264801",
+    "verified": true
+  },
+  {
+    "id": 25,
+    "name": "Hivarkhede Bu Maji Vidyathri Sangh Hivarkhede Bu",
+    "category": "Social Welfare",
+    "location": "ATPOST-HIWARKHEDE BK TAL-JAMNER DIST-JALGAON",
+    "link": "https://www.google.com/maps/search/?api=1&query=ATPOST-HIWARKHEDE+BK+TAL-JAMNER+DIST-JALGAON",
+    "phone": 9220658271,
+    "verified": true
+  },
+  {
+    "id": 29,
+    "name": "Jalgaon Jilha Sarv Seva Samiti Jalgaon Dist Jalgaon",
+    "category": "Social Welfare",
+    "location": "Jalgaon Jilha Sarva Seva Samiti Tawar Chouk,Jalgaon Dist-Jalgaon 425001",
+    "link": "https://www.google.com/maps/search/?api=1&query=Jalgaon+Jilha+Sarva+Seva+Samiti+Tawar+Chouk%2CJalgaon+Dist-Jalgaon+425001",
+    "phone": "0257-2229674",
+    "verified": true
+  },
+  {
+    "id": 33,
+    "name": "Kai.R.C.Patil Bahu-Uddesheya Sanstha",
+    "category": "Social Welfare",
+    "location": "AT.WAVADE TAL.AMALNER DIST.JALGAON",
+    "link": "https://www.google.com/maps/search/?api=1&query=AT.WAVADE+TAL.AMALNER+DIST.JALGAON",
+    "phone": 9822273785,
+    "verified": true
+  },
+  {
+    "id": 34,
+    "name": "Keshavsmruti Pratishthan",
+    "category": "Social Welfare",
+    "location": "Keshavsmruti Pratishthan, 273, Navipeth, Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=Keshavsmruti+Pratishthan%2C+273%2C+Navipeth%2C+Jalgaon",
+    "phone": 9822994328,
+    "verified": true
+  },
+  {
+    "id": 35,
+    "name": "Kesrai Sevabhavi Sanstha",
+    "category": "Social Welfare",
+    "location": "PLOT NO.3,GUT NO 282/2,RAMESHWAR COLONY,JALGAON.DIST.JALGAON",
+    "link": "https://www.google.com/maps/search/?api=1&query=PLOT+NO.3%2CGUT+NO+282%2F2%2CRAMESHWAR+COLONY%2CJALGAON.DIST.JALGAON",
+    "phone": 9834872484,
+    "verified": true
+  },
+  {
+    "id": 36,
+    "name": "Krantikari Rashtrasant Shri. Indradevji Maharaj Radha-Rasbihari Bahuudeshia Sanstha",
+    "category": "Social Welfare",
+    "location": "Gat 139, Savkheda Hol, Taluka Parola, Dist Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=Gat+139%2C+Savkheda+Hol%2C+Taluka+Parola%2C+Dist+Jalgaon",
+    "phone": 8805960202,
+    "verified": true
+  },
+  {
+    "id": 37,
+    "name": "Kulaswamini Pratishthan Chalisgaon",
+    "category": "Social Welfare",
+    "location": "29,Krushnai, Kailas Nagar , Bhadagaon Road, Chalisgaon , Tal Chalisgaon , Dist. Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=29%2CKrushnai%2C+Kailas+Nagar+%2C+Bhadagaon+Road%2C+Chalisgaon+%2C+Tal+Chalisgaon+%2C+Dist.+Jalgaon",
+    "phone": "02589-228295",
+    "verified": true
+  },
+  {
+    "id": 38,
+    "name": "Late Annaso Narayan Patil Bahuudeshiya Sanstha Jalgaon",
+    "category": "Social Welfare",
+    "location": "GANESH NAGAR AASTHA NAGARI AT POST DHANORA TAL CHOPDA DIST JALGAON MAHARASHTRA 425303",
+    "link": "https://www.google.com/maps/search/?api=1&query=GANESH+NAGAR+AASTHA+NAGARI+AT+POST+DHANORA+TAL+CHOPDA+DIST+JALGAON+MAHARASHTRA+425303",
+    "phone": "02586-242051",
+    "verified": true
+  },
+  {
+    "id": 39,
+    "name": "Late Vasantrao Chandorkar Smruti Pratishthan",
+    "category": "Social Welfare",
+    "location": "4, Baliram Peth, \"Deep-Jyot\" Jalgaon - 425001",
+    "link": "https://www.google.com/maps/search/?api=1&query=4%2C+Baliram+Peth%2C+%22Deep-Jyot%22+Jalgaon+-+425001",
+    "phone": "0257-2227722",
+    "verified": true
+  },
+  {
+    "id": 41,
+    "name": "Lilai Foundation Karmad",
+    "category": "Social Welfare",
+    "location": "AT-POST-KARMAD, TAL-JAMNER, DIST-JALGAON. 425114",
+    "link": "https://www.google.com/maps/search/?api=1&query=AT-POST-KARMAD%2C+TAL-JAMNER%2C+DIST-JALGAON.+425114",
+    "phone": 7709331757,
+    "verified": true
+  },
+  {
+    "id": 42,
+    "name": "Lokranjan Bahuuddeshiya Sanstha",
+    "category": "Social Welfare",
+    "location": "c/o- santosh saraf , Mahavir Marga ,Saraf Bazar,Bhaskar Market Shop No -02, Jamner -Dist-Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=c%2Fo-+santosh+saraf+%2C+Mahavir+Marga+%2CSaraf+Bazar%2CBhaskar+Market+Shop+No+-02%2C+Jamner+-Dist-Jalgaon",
+    "phone": "02580-230558",
+    "verified": true
+  },
+  {
+    "id": 43,
+    "name": "Ma Jaywantrao Patil Bahuddeshiya Sanstha Rameshwar",
+    "category": "Social Welfare",
+    "location": "AT- RAMESHWAR KH. POST- CHANDANIKHURE",
+    "link": "https://www.google.com/maps/search/?api=1&query=AT-+RAMESHWAR+KH.+POST-+CHANDANIKHURE",
+    "phone": "02587-222368",
+    "verified": true
+  },
+  {
+    "id": 44,
+    "name": "Mahanubhav Anand Trith Goseva Sanstha",
+    "category": "Social Welfare",
+    "location": "8, ASHTBHUJA NAGAR, NEAR DADAWADI BUS STOP JALGAON",
+    "link": "https://www.google.com/maps/search/?api=1&query=8%2C+ASHTBHUJA+NAGAR%2C+NEAR+DADAWADI+BUS+STOP+JALGAON",
+    "phone": 8788968833,
+    "verified": true
+  },
+  {
+    "id": 46,
+    "name": "Manthan Foundation",
+    "category": "Social Welfare",
+    "location": "50/22, Krushkunj, Tilak Nagar, Jalgaon Tal",
+    "link": "https://www.google.com/maps/search/?api=1&query=50%2F22%2C+Krushkunj%2C+Tilak+Nagar%2C+Jalgaon+Tal",
+    "phone": 7588969471,
+    "verified": true
+  },
+  {
+    "id": 47,
+    "name": "Matoshri Laxmibai Charitable Trust",
+    "category": "Social Welfare",
+    "location": "Dayanand Hotel, Kumavat Corner, Chalisgaon.",
+    "link": "https://www.google.com/maps/search/?api=1&query=Dayanand+Hotel%2C+Kumavat+Corner%2C+Chalisgaon.",
+    "phone": 9511119311,
+    "verified": true
+  },
+  {
+    "id": 48,
+    "name": "Matrubhumi Sarvangin Vikas Sanstha",
+    "category": "Social Welfare",
+    "location": "C/O Sanjay Jagannath Badgujar Plot no.8/2, Gat No. 480/1, Near Girna Water TankJalgaon Taluka-Jalgaon, Dist-Jalgaon 425001",
+    "link": "https://www.google.com/maps/search/?api=1&query=C%2FO+Sanjay+Jagannath+Badgujar+Plot+no.8%2F2%2C+Gat+No.+480%2F1%2C+Near+Girna+Water+TankJalgaon+Taluka-Jalgaon%2C+Dist-Jalgaon+425001",
+    "phone": 9130248061,
+    "verified": true
+  },
+  {
+    "id": 49,
+    "name": "Maulana Azad Alpsankhyank Samaj Vikas Foudnation Jalgaon",
+    "category": "Social Welfare",
+    "location": "16/93MASTER COLONY MEHRUN JALGAON.",
+    "link": "https://www.google.com/maps/search/?api=1&query=16%2F93MASTER+COLONY+MEHRUN+JALGAON.",
+    "phone": 9923586786,
+    "verified": true
+  },
+  {
+    "id": 50,
+    "name": "Medlife Foundation",
+    "category": "Social Welfare",
+    "location": "At/post: Bahal, tal: Chalisgaon, Dist: Jalgaon, Maharshtra-424101",
+    "link": "https://www.google.com/maps/search/?api=1&query=At%2Fpost%3A+Bahal%2C+tal%3A+Chalisgaon%2C+Dist%3A+Jalgaon%2C+Maharshtra-424101",
+    "phone": 7020438881,
+    "verified": true
+  },
+  {
+    "id": 51,
+    "name": "Muktai Bahuudeshiya Sanstha Borkheda Sanchalit Buldana",
+    "category": "Social Welfare",
+    "location": "MUKTAI BAHUUDESHIYA SANSTHA BORKHEDA BK. Tq CHALISGAON Dist. JALGAON",
+    "link": "https://www.google.com/maps/search/?api=1&query=MUKTAI+BAHUUDESHIYA+SANSTHA+BORKHEDA+BK.+Tq+CHALISGAON+Dist.+JALGAON",
+    "phone": 7028286868,
+    "verified": true
+  },
+  {
+    "id": 53,
+    "name": "National Social Welfare Society",
+    "category": "Social Welfare",
+    "location": "CST NO 4007AASRA BUILDING AAZAD CHAUK CHOPDA DIST JALGAON PIN-425107",
+    "link": "https://www.google.com/maps/search/?api=1&query=CST+NO+4007AASRA+BUILDING+AAZAD+CHAUK+CHOPDA+DIST+JALGAON+PIN-425107",
+    "phone": 9730958509,
+    "verified": true
+  },
+  {
+    "id": 54,
+    "name": "Neharu Yuva Mandal Gadkhamb",
+    "category": "Social Welfare",
+    "location": "NEHARU YUVA MANDAL GADKHAMB AT. GADKHAMB POST. NAGAON TEL. AMALNER DIST. JALGAON PIN NO 425401",
+    "link": "https://www.google.com/maps/search/?api=1&query=NEHARU+YUVA+MANDAL+GADKHAMB+AT.+GADKHAMB+POST.+NAGAON+TEL.+AMALNER+DIST.+JALGAON+PIN+NO+425401",
+    "phone": 9503297746,
+    "verified": true
+  },
+  {
+    "id": 55,
+    "name": "Nehru Yuva Mandal Farkande",
+    "category": "Social Welfare",
+    "location": "At Post Farkande Tal Erandol Dist Jalgaon 425110",
+    "link": "https://www.google.com/maps/search/?api=1&query=At+Post+Farkande+Tal+Erandol+Dist+Jalgaon+425110",
+    "phone": "02588-244566",
+    "verified": true
+  },
+  {
+    "id": 56,
+    "name": "Nilkantheshwar",
+    "category": "Social Welfare",
+    "location": "At Chawalkheda, Post Pimpri Kh. , Taluka Dharanagaon. Dist-Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=At+Chawalkheda%2C+Post+Pimpri+Kh.+%2C+Taluka+Dharanagaon.+Dist-Jalgaon",
+    "phone": 9730580333,
+    "verified": true
+  },
+  {
+    "id": 57,
+    "name": "Nimjai Foundation",
+    "category": "Social Welfare",
+    "location": "63,Trambak Nagar Mahabal Road Jalgaon.",
+    "link": "https://www.google.com/maps/search/?api=1&query=63%2CTrambak+Nagar+Mahabal+Road+Jalgaon.",
+    "phone": 9730348227,
+    "verified": true
+  },
+  {
+    "id": 59,
+    "name": "Norwegian Free Evangelical Mission Dhanora",
+    "category": "Social Welfare",
+    "location": "MISSION HOUSE DHANORA TALUKA : CHOPDA, DIST. JALGAON MAHARASHTRA",
+    "link": "https://www.google.com/maps/search/?api=1&query=MISSION+HOUSE+DHANORA+TALUKA+%3A+CHOPDA%2C+DIST.+JALGAON+MAHARASHTRA",
+    "phone": 9604302007,
+    "verified": true
+  },
+  {
+    "id": 60,
+    "name": "Om Sai Shekshanik Va Samajik Sanstha",
+    "category": "Social Welfare",
+    "location": "New Plot.Sane Guruji Marg, Near Bhagini Mandal School . Amalner Dist- Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=New+Plot.Sane+Guruji+Marg%2C+Near+Bhagini+Mandal+School+.+Amalner+Dist-+Jalgaon",
+    "phone": 9422343622,
+    "verified": true
+  },
+  {
+    "id": 61,
+    "name": "Panchashil Bahu Uddeshiya Shekkshanik Samajik Sanskritik Santha",
+    "category": "Social Welfare",
+    "location": "17 Shakuntala Niwas, Adarsha Nagar Pungaon Road Pachora Tal-Pachora Dist-Jalgaon Pin-424201",
+    "link": "https://www.google.com/maps/search/?api=1&query=17+Shakuntala+Niwas%2C+Adarsha+Nagar+Pungaon+Road+Pachora+Tal-Pachora+Dist-Jalgaon+Pin-424201",
+    "phone": "02596-244968",
+    "verified": true
+  },
+  {
+    "id": 63,
+    "name": "Pawan Charitable Trust",
+    "category": "Social Welfare",
+    "location": "Pawan foundation, Dr. vilas P. narkhede,256/7,bhavani peth infront of surya saw mill,jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=Pawan+foundation%2C+Dr.+vilas+P.+narkhede%2C256%2F7%2Cbhavani+peth+infront+of+surya+saw+mill%2Cjalgaon",
+    "phone": 9403942943,
+    "verified": true
+  },
+  {
+    "id": 65,
+    "name": "Pragati Bahuuddeshiy Sanstha",
+    "category": "Social Welfare",
+    "location": "KASODA CENTRAL TQ YERANDOL DIST JALGAON",
+    "link": "https://www.google.com/maps/search/?api=1&query=KASODA+CENTRAL+TQ+YERANDOL+DIST+JALGAON",
+    "phone": 9421517403,
+    "verified": true
+  },
+  {
+    "id": 67,
+    "name": "Precious Multipurpose Foundation",
+    "category": "Social Welfare",
+    "location": "Chandani Chowk, Near Bhoiwada, SAVDA Tal. Raver, Dist. Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=Chandani+Chowk%2C+Near+Bhoiwada%2C+SAVDA+Tal.+Raver%2C+Dist.+Jalgaon",
+    "phone": "02584-223374",
+    "verified": true
+  },
+  {
+    "id": 69,
+    "name": "Sampanna Foundation",
+    "category": "Social Welfare",
+    "location": "piot no 8/2 gat no. 480/1 girana water tank jalgaon 425001",
+    "link": "https://www.google.com/maps/search/?api=1&query=piot+no+8%2F2+gat+no.+480%2F1+girana+water+tank+jalgaon+425001",
+    "phone": 9422778768,
+    "verified": true
+  },
+  {
+    "id": 70,
+    "name": "Sandesh Bahuuddeshiya Sanstha",
+    "category": "Social Welfare",
+    "location": "At/Post Kalali, Tal Amalner, Dis.Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=At%2FPost+Kalali%2C+Tal+Amalner%2C+Dis.Jalgaon",
+    "phone": 9372211596,
+    "verified": true
+  },
+  {
+    "id": 71,
+    "name": "Sankalp Foundation Samner",
+    "category": "Social Welfare",
+    "location": "SANKALP FOUNDATION ASHOK BHAVAN,OPP BANK OF BARODA, AT POST SAMNER, TALUKA PACHORA",
+    "link": "https://www.google.com/maps/search/?api=1&query=SANKALP+FOUNDATION+ASHOK+BHAVAN%2COPP+BANK+OF+BARODA%2C+AT+POST+SAMNER%2C+TALUKA+PACHORA",
+    "phone": "02596-277321",
+    "verified": true
+  },
+  {
+    "id": 73,
+    "name": "Sara Bahuddeshiy Sanstha",
+    "category": "Social Welfare",
+    "location": "6, GANESHPURI, NEAR IQRA COLLEGE JALGAON",
+    "link": "https://www.google.com/maps/search/?api=1&query=6%2C+GANESHPURI%2C+NEAR+IQRA+COLLEGE+JALGAON",
+    "phone": 9422783304,
+    "verified": true
+  },
+  {
+    "id": 74,
+    "name": "Sardar Vallabhbhai Patel Jagruti Bahuudeshiya Sanstha",
+    "category": "Social Welfare",
+    "location": "C/O SURESH DAMU BHOLE (RAJU MAMA), ICHHAPURTI, SHOP NO 6",
+    "link": "https://www.google.com/maps/search/?api=1&query=C%2FO+SURESH+DAMU+BHOLE+%28RAJU+MAMA%29%2C+ICHHAPURTI%2C+SHOP+NO+6",
+    "phone": 9967491570,
+    "verified": true
+  },
+  {
+    "id": 75,
+    "name": "Sarswati Vidya Prasarak Mandal",
+    "category": "Social Welfare",
+    "location": "C/o umakant tukaram Thakur,yashodai Nivas plot no. 3 Sant Rohidas Society, Bhagwangad Chalisgaon -424101",
+    "link": "https://www.google.com/maps/search/?api=1&query=C%2Fo+umakant+tukaram+Thakur%2Cyashodai+Nivas+plot+no.+3+Sant+Rohidas+Society%2C+Bhagwangad+Chalisgaon+-424101",
+    "phone": 9421208070,
+    "verified": true
+  },
+  {
+    "id": 77,
+    "name": "Shivaji Foundation",
+    "category": "Social Welfare",
+    "location": "AT- KASVE, POST- DUSKHEDA, TAL- YAWAL",
+    "link": "https://www.google.com/maps/search/?api=1&query=AT-+KASVE%2C+POST-+DUSKHEDA%2C+TAL-+YAWAL",
+    "phone": 9503820000,
+    "verified": true
+  },
+  {
+    "id": 80,
+    "name": "Shri Chatrapati Shivaji Paryavaran Va Sheti Vikas Pratisthan",
+    "category": "Social Welfare",
+    "location": "199,Ground Floor,New B.J.Market Jalgaon 425001",
+    "link": "https://www.google.com/maps/search/?api=1&query=199%2CGround+Floor%2CNew+B.J.Market+Jalgaon+425001",
+    "phone": 9158045285,
+    "verified": true
+  },
+  {
+    "id": 81,
+    "name": "Shri GaurangGoseva Sanstha",
+    "category": "Social Welfare",
+    "location": "Gat No 263 Nhavi Pr. Adavad (Kolnhavi ) Taluka Yawal District Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=Gat+No+263+Nhavi+Pr.+Adavad+%28Kolnhavi+%29+Taluka+Yawal+District+Jalgaon",
+    "phone": 9766466469,
+    "verified": true
+  },
+  {
+    "id": 82,
+    "name": "Shri Mahavir Krushna Gaus",
+    "category": "Social Welfare",
+    "location": "PLOT NO.9, GAT NO.55, SHIV COLONY JALGAON",
+    "link": "https://www.google.com/maps/search/?api=1&query=PLOT+NO.9%2C+GAT+NO.55%2C+SHIV+COLONY+JALGAON",
+    "phone": 7741829294,
+    "verified": true
+  },
+  {
+    "id": 84,
+    "name": "Shri Sant Gajanan Bahuudeshiya Sanstha",
+    "category": "Social Welfare",
+    "location": "Shri Sant Gajanan Bahuudeshiya Sanstha 14,\"Ramgiri \",Shankar Appa Nagar ,Near Water Tank ,Pimprala ,Jalgaon.",
+    "link": "https://www.google.com/maps/search/?api=1&query=Shri+Sant+Gajanan+Bahuudeshiya+Sanstha+14%2C%22Ramgiri+%22%2CShankar+Appa+Nagar+%2CNear+Water+Tank+%2CPimprala+%2CJalgaon.",
+    "phone": 7507454860,
+    "verified": true
+  },
+  {
+    "id": 85,
+    "name": "Shri Sant Shiromani Guru Ravidas Maharaj Bhuudeshya Sanstha",
+    "category": "Social Welfare",
+    "location": "c/o D N DESHMANE GUT NO 194/1/1 PLOT NO 43,TRIMURTHI HOUSING SOCIETY PRIMPARALA JALGAON.425001",
+    "link": "https://www.google.com/maps/search/?api=1&query=c%2Fo+D+N+DESHMANE+GUT+NO+194%2F1%2F1+PLOT+NO+43%2CTRIMURTHI+HOUSING+SOCIETY+PRIMPARALA+JALGAON.425001",
+    "phone": 9823607143,
+    "verified": true
+  },
+  {
+    "id": 87,
+    "name": "Shriswaminarayan Gurukul",
+    "category": "Social Welfare",
+    "location": "SHRI SWAMINARAYAN GURUKUL SANSTHA, GANESH COLONY, JALGAON",
+    "link": "https://www.google.com/maps/search/?api=1&query=SHRI+SWAMINARAYAN+GURUKUL+SANSTHA%2C+GANESH+COLONY%2C+JALGAON",
+    "phone": 7774878115,
+    "verified": true
+  },
+  {
+    "id": 88,
+    "name": "Swa Sau Anjali Dilip Suryawanshi Foundation",
+    "category": "Social Welfare",
+    "location": "AT POST DUSKHEDA , VINDYA PAPER MILL ROAD , PLOT NO 13 , SOMANI NAGAR, TAL YAWAL , DIST JAGAON , PIN 425203",
+    "link": "https://www.google.com/maps/search/?api=1&query=AT+POST+DUSKHEDA+%2C+VINDYA+PAPER+MILL+ROAD+%2C+PLOT+NO+13+%2C+SOMANI+NAGAR%2C+TAL+YAWAL+%2C+DIST+JAGAON+%2C+PIN+425203",
+    "phone": 9594914234,
+    "verified": true
+  },
+  {
+    "id": 89,
+    "name": "Vanashri Sangopan Sanstha Chalisgaon",
+    "category": "Social Welfare",
+    "location": "GAJANAN CONSTRUCTION BEHIND BHUSHAN MANGAL KA, BHADGAON ROAD CHALISGAON DISTJALGAON",
+    "link": "https://www.google.com/maps/search/?api=1&query=GAJANAN+CONSTRUCTION+BEHIND+BHUSHAN+MANGAL+KA%2C+BHADGAON+ROAD+CHALISGAON+DISTJALGAON",
+    "phone": 7420895709,
+    "verified": true
+  },
+  {
+    "id": 90,
+    "name": "Vidhij Bahuddeshiy Foundation Chopda",
+    "category": "Social Welfare",
+    "location": "PLOT NO.13,PADANALAYA PARIS PARK,YAWAL ROAD,POST/TALUKA-CHOPDA,DISTRICT JALGAON",
+    "link": "https://www.google.com/maps/search/?api=1&query=PLOT+NO.13%2CPADANALAYA+PARIS+PARK%2CYAWAL+ROAD%2CPOST%2FTALUKA-CHOPDA%2CDISTRICT+JALGAON",
+    "phone": 8788676728,
+    "verified": true
+  },
+  {
+    "id": 91,
+    "name": "Vivekanand Bahuddeshiya Sanstah",
+    "category": "Social Welfare",
+    "location": "A/P-PATHARAD, TAL- DHARANGAON",
+    "link": "https://www.google.com/maps/search/?api=1&query=A%2FP-PATHARAD%2C+TAL-+DHARANGAON",
+    "phone": 9923491892,
+    "verified": true
+  },
+  {
+    "id": 92,
+    "name": "Yashodhan Charitable Trust Chopda",
+    "category": "Social Welfare",
+    "location": "C/O DR RAHUL PATIL 28, \"YASHOPRABHA\" NARAYANWADI, CHOPDA DIST JALGAON",
+    "link": "https://www.google.com/maps/search/?api=1&query=C%2FO+DR+RAHUL+PATIL+28%2C+%22YASHOPRABHA%22+NARAYANWADI%2C+CHOPDA+DIST+JALGAON",
+    "phone": 9822419413,
+    "verified": true
+  },
+  {
+    "id": 93,
+    "name": "Yashwant Pratishtan Raver",
+    "category": "Social Welfare",
+    "location": "Raver Dist- Jalgaon",
+    "link": "https://www.google.com/maps/search/?api=1&query=Raver+Dist-+Jalgaon",
+    "phone": 9767238662,
+    "verified": true
+  },
+  {
+    "id": 94,
+    "name": "Yashwant Sarwajanik Vachanalaya Va Granthalaya",
+    "category": "Social Welfare",
+    "location": "RAVER ,TAL RAVER ,DIST. - JALGAON",
+    "link": "https://www.google.com/maps/search/?api=1&query=RAVER+%2CTAL+RAVER+%2CDIST.+-+JALGAON",
+    "phone": 9767215703,
+    "verified": true
+  }
+]
