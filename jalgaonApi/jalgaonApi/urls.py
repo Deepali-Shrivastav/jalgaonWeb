@@ -28,6 +28,7 @@ urlpatterns = [
     path('api/v1/search/', include('apps.search.urls')),
     path('api/v1/reviews/', include('apps.reviews.urls')),
     path('api/v1/news/', include('apps.news.urls')),
+    path('api/v1/events/', include('apps.events.urls')),
     path('api/v1/ads/', include('apps.ads.urls')),
     path('api/v1/finance/', include('apps.finance.urls')),
     path('api/v1/admin-panel/', include('apps.admin_panel.urls')),

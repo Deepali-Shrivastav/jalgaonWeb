@@ -1,0 +1,44 @@
+.upcoming-events-section {
+    padding: 40px 20px;
+    background-color: #f8fafc;
+}
+
+.upcoming-events-section .section-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.upcoming-events-section .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.upcoming-events-section .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    margin: 0;
+}
+
+.upcoming-events-section .view-all-link {
+    color: #7c3aed;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.2s ease;
+}
+
+.upcoming-events-section .view-all-link:hover {
+    color: #5b21b6;
+    text-decoration: underline;
+}
+
+.upcoming-events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+}

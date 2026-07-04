@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { UserContext } from '../../context/UserContext';
 import { 
     MdDashboard, MdPeople, MdStorefront, 
-    MdCategory, MdGavel, MdArticle, MdComment
+    MdCategory, MdGavel, MdArticle, MdComment, MdEvent
 } from 'react-icons/md';
 
 const AdminSidebar = ({ isCollapsed }) => {
@@ -16,6 +16,7 @@ const AdminSidebar = ({ isCollapsed }) => {
     const canSeeModeration = isAdmin || userRole === 'moderator' || userRole === 'content_manager';
     const canSeeNews = isAdmin || ['content_manager', 'news_editor'].includes(userRole);
     const canSeeNewsComments = isAdmin || ['content_manager', 'moderator', 'news_editor'].includes(userRole);
+    const canSeeEvents = isAdmin || ['content_manager', 'moderator'].includes(userRole);
 
     return (
         <aside className={`admin-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
@@ -68,6 +69,13 @@ const AdminSidebar = ({ isCollapsed }) => {
                     <NavLink to="/admin/news/comments" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
                         <MdComment className="admin-sidebar-icon" />
                         <span className="admin-sidebar-label">News Comments</span>
+                    </NavLink>
+                )}
+
+                {canSeeEvents && (
+                    <NavLink to="/admin/events" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+                        <MdEvent className="admin-sidebar-icon" />
+                        <span className="admin-sidebar-label">Events</span>
                     </NavLink>
                 )}
 

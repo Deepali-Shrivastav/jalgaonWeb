@@ -6,12 +6,10 @@ import Home from './pages/Home';
 import CategoryPage from './pages/CategoryPage';
 import BusinessDetailsPage from './pages/BusinessDetailsPage';
 import Account from './pages/Account';
-import { UserProvider } from './context/UserContext';
 import Providers from './Providers';
 import AddListingPage from './pages/AddListingPage';
 import AddAdvertise from './pages/AddAdvertise';
 import ArticlesPage from './pages/ArticlesPage';
-import Articles from './components/Releatedarticles/Articles';
 import ArticleViewPage from './pages/ArticleViewPage';
 import AboutPage from './pages/AboutPage';
 import TermsPage from './pages/TermsPage';
@@ -20,6 +18,11 @@ import ContactPage from './pages/ContactPage';
 import SearchPage from './pages/SearchPage';
 import NewsIndexPage from './pages/NewsIndexPage';
 import NewsArticlePage from './pages/NewsArticlePage';
+
+// Events Module Imports
+import EventsIndexPage from './pages/EventsIndexPage';
+import EventDetailPage from './pages/EventDetailPage';
+import SubmitEventPage from './pages/SubmitEventPage';
 
 // Admin Imports
 import AdminGuard from './components/admin/AdminGuard';
@@ -33,6 +36,7 @@ import AdminNews from './pages/admin/AdminNews';
 import AdminNewsCreate from './pages/admin/AdminNewsCreate';
 import AdminNewsComments from './pages/admin/AdminNewsComments';
 import AdminNewsCategories from './pages/admin/AdminNewsCategories';
+import AdminEvents from './pages/admin/AdminEvents';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -52,12 +56,18 @@ const router = createBrowserRouter(
         <Route path='contact' element={<ContactPage />} />
         <Route path='termsAndCondition' element={<TermsPage />} />
         <Route path='editForm/:shopId' element={<AddListingForm is_edit={true}/>} />
+        
+        {/* Events Module */}
+        <Route path='events' element={<EventsIndexPage />} />
+        <Route path='events/submit' element={<SubmitEventPage />} />
       </Route>
 
-      {/* News Module */}
+      {/* Standalone Detail Pages */}
       <Route path='/news' element={<NewsIndexPage />} />
       <Route path='/news/:slug' element={<NewsArticlePage />} />
       <Route path='/news/category/:slug' element={<NewsIndexPage />} />
+      
+      <Route path='/events/:slug' element={<EventDetailPage />} />
 
       {/* Admin Panel */}
       <Route path='/admin' element={<AdminGuard><AdminLayout /></AdminGuard>}>
@@ -73,6 +83,9 @@ const router = createBrowserRouter(
         <Route path='news/edit/:id' element={<AdminNewsCreate />} />
         <Route path='news/comments' element={<AdminNewsComments />} />
         <Route path='news/categories' element={<AdminNewsCategories />} />
+
+        {/* Admin Events */}
+        <Route path='events' element={<AdminEvents />} />
       </Route>
     </>
   )
