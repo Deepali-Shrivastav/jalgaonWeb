@@ -45,13 +45,10 @@ import AdminNews from './pages/admin/AdminNews';
 import AdminNewsCreate from './pages/admin/AdminNewsCreate';
 import AdminNewsComments from './pages/admin/AdminNewsComments';
 import AdminNewsCategories from './pages/admin/AdminNewsCategories';
-<<<<<<< HEAD
 import AdminEvents from './pages/admin/AdminEvents';
-=======
 import AdminJobs from './pages/admin/AdminJobs';
 import AdminJobCategories from './pages/admin/AdminJobCategories';
 import AdminJobApplications from './pages/admin/AdminJobApplications';
->>>>>>> 12d54d16a9ab087e94f21eeec75217cdfeb27b1d
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -71,14 +68,11 @@ const router = createBrowserRouter(
         <Route path='contact' element={<ContactPage />} />
         <Route path='termsAndCondition' element={<TermsPage />} />
         <Route path='editForm/:shopId' element={<AddListingForm is_edit={true}/>} />
-<<<<<<< HEAD
         
         {/* Events Module */}
         <Route path='events' element={<EventsIndexPage />} />
         <Route path='events/submit' element={<SubmitEventPage />} />
-=======
         <Route path='business-dashboard/:id' element={<BusinessDashboard />} />
->>>>>>> 12d54d16a9ab087e94f21eeec75217cdfeb27b1d
       </Route>
 
       {/* Standalone Detail Pages */}
@@ -111,17 +105,14 @@ const router = createBrowserRouter(
         <Route path='news/edit/:id' element={<AdminNewsCreate />} />
         <Route path='news/comments' element={<AdminNewsComments />} />
         <Route path='news/categories' element={<AdminNewsCategories />} />
-<<<<<<< HEAD
 
         {/* Admin Events */}
         <Route path='events' element={<AdminEvents />} />
-=======
         
         {/* Admin Jobs */}
         <Route path='jobs' element={<AdminJobs />} />
         <Route path='jobs/categories' element={<AdminJobCategories />} />
         <Route path='jobs/applications' element={<AdminJobApplications />} />
->>>>>>> 12d54d16a9ab087e94f21eeec75217cdfeb27b1d
       </Route>
     </>
   )

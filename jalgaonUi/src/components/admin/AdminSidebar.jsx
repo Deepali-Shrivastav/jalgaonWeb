@@ -21,11 +21,8 @@ const AdminSidebar = ({ isCollapsed }) => {
     const canSeeModeration = isAdmin || userRole === 'moderator' || userRole === 'content_manager';
     const canSeeNews = isAdmin || ['content_manager', 'news_editor'].includes(userRole);
     const canSeeNewsComments = isAdmin || ['content_manager', 'moderator', 'news_editor'].includes(userRole);
-<<<<<<< HEAD
     const canSeeEvents = isAdmin || ['content_manager', 'moderator'].includes(userRole);
-=======
     const canSeeJobs = isAdmin || ['content_manager', 'moderator'].includes(userRole);
->>>>>>> 12d54d16a9ab087e94f21eeec75217cdfeb27b1d
 
     return (
         <aside className={`admin-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
