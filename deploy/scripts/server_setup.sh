@@ -111,15 +111,23 @@ sudo chown ubuntu:www-data /var/log/gunicorn
 
 echo "✅ Directories created and permissions set"
 
-# --- Step 6: Install the Gunicorn systemd service ---
+# --- Step 6: Install systemd services ---
 echo ""
-echo "[6/9] Installing Gunicorn systemd service..."
+echo "[6/9] Installing systemd services..."
+
+# Install Gunicorn service (Django backend)
 sudo cp "${REPO_DIR}/deploy/systemd/gunicorn_jalgaon.service" \
         /etc/systemd/system/gunicorn_jalgaon.service
+
+# Install Next.js service (React frontend — SSR)
+sudo cp "${REPO_DIR}/deploy/systemd/nextjs_jalgaon.service" \
+        /etc/systemd/system/nextjs_jalgaon.service
+
 sudo systemctl daemon-reload
 sudo systemctl enable gunicorn_jalgaon
-echo "✅ Gunicorn service installed and enabled"
-echo "   NOTE: Service will be started after you create the .env.production file (Step 8)"
+sudo systemctl enable nextjs_jalgaon
+echo "✅ Gunicorn + Next.js services installed and enabled"
+echo "   NOTE: Services will be started after you complete steps [A]-[C] below"
 
 # --- Step 7: Configure Nginx ---
 echo ""
@@ -153,10 +161,19 @@ echo "[8/9] Configuring passwordless sudo for Gunicorn and Nginx (CI/CD)..."
 sudo tee /etc/sudoers.d/jalgaon-cicd > /dev/null << 'EOF'
 # Allow ubuntu user to manage jalgaon services without password prompt
 # This is required for automated CI/CD deployments via GitHub Actions
+
+# Django backend (Gunicorn)
 ubuntu ALL=(ALL) NOPASSWD: /bin/systemctl restart gunicorn_jalgaon
-ubuntu ALL=(ALL) NOPASSWD: /bin/systemctl reload nginx
 ubuntu ALL=(ALL) NOPASSWD: /bin/systemctl is-active gunicorn_jalgaon
 ubuntu ALL=(ALL) NOPASSWD: /bin/journalctl -u gunicorn_jalgaon *
+
+# Next.js frontend (nextjs_jalgaon)
+ubuntu ALL=(ALL) NOPASSWD: /bin/systemctl restart nextjs_jalgaon
+ubuntu ALL=(ALL) NOPASSWD: /bin/systemctl is-active nextjs_jalgaon
+ubuntu ALL=(ALL) NOPASSWD: /bin/journalctl -u nextjs_jalgaon *
+
+# Nginx — shared by both services
+ubuntu ALL=(ALL) NOPASSWD: /bin/systemctl reload nginx
 ubuntu ALL=(ALL) NOPASSWD: /usr/sbin/nginx -t
 EOF
 sudo chmod 440 /etc/sudoers.d/jalgaon-cicd
@@ -169,26 +186,45 @@ echo "============================================================"
 echo ""
 echo " MANUAL STEPS REQUIRED BEFORE STARTING SERVICES:"
 echo ""
-echo " [A] Create the production .env.production file:"
+echo " [A] Install Node.js dependencies for New-JalgaonUI:"
+echo "     cd ${REPO_DIR}/New-JalgaonUI && npm ci"
+echo ""
+echo " [B] Create Django .env.production file:"
 echo "     nano ${API_DIR}/.env.production"
 echo "     (Paste the production credentials — see deploy/README.md)"
 echo ""
-echo " [B] Run first migration and collect static files:"
+echo " [C] Create Next.js .env.production file:"
+echo "     nano ${REPO_DIR}/New-JalgaonUI/.env.production"
+echo "     # Contents:"
+echo "     # NEXT_PUBLIC_API_URL=https://api.jalgaon.com"
+echo "     # COMMODITY_PRICE_API_KEY=your_key_here"
+echo "     # WEATHERAPI_KEY=your_key_here"
+echo "     chmod 600 ${REPO_DIR}/New-JalgaonUI/.env.production"
+echo ""
+echo " [D] Build Next.js:"
+echo "     cd ${REPO_DIR}/New-JalgaonUI && npm run build"
+echo ""
+echo " [E] Run first Django migration and collect static files:"
 echo "     source ${VENV_DIR}/bin/activate"
 echo "     cd ${API_DIR}"
 echo "     DJANGO_ENV=production python manage.py migrate"
 echo "     DJANGO_ENV=production python manage.py collectstatic --noinput"
 echo "     deactivate"
 echo ""
-echo " [C] Start the Gunicorn service:"
+echo " [F] Start both services:"
 echo "     sudo systemctl start gunicorn_jalgaon"
-echo "     sudo systemctl status gunicorn_jalgaon"
+echo "     sudo systemctl start nextjs_jalgaon"
+echo "     sudo systemctl status gunicorn_jalgaon nextjs_jalgaon"
 echo ""
-echo " [D] Add GitHub Actions Secrets (see deploy/README.md)"
+echo " [G] Add GitHub Actions Secrets (see deploy/README.md)"
+echo "     Required: PRODUCTION_SERVER_IP, PRODUCTION_SSH_USER, PRODUCTION_SSH_KEY"
+echo "     Required: DJANGO_SECRET_KEY, DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT"
+echo "     Required: FAST2SMS_API_KEY"
+echo "     Required: NEXT_PUBLIC_API_URL, COMMODITY_PRICE_API_KEY, WEATHERAPI_KEY"
 echo ""
-echo " [E] Open Port 443 in Lightsail firewall and set up SSL:"
+echo " [H] Open Port 443 in Lightsail firewall and set up SSL:"
 echo "     sudo apt-get install certbot python3-certbot-nginx -y"
 echo "     sudo certbot --nginx -d api.jalgaon.com -d www.jalgaon.com"
 echo ""
-echo " After step [D], all future deployments are AUTOMATIC via GitHub Actions."
+echo " After step [G], all future deployments are AUTOMATIC via GitHub Actions."
 echo "============================================================"

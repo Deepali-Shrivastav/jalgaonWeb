@@ -1,3 +1,6 @@
+<<<<<<< HEAD
+**/__pycache__/
+=======
 # =========================================================================
 # Git Ignore Configuration for JalgaonWeb Project
 # =========================================================================
@@ -18,9 +21,13 @@ local_settings.py
 !/jalgaonUi/.env.production
 
 # React Environment (New-JalgaonUI)
+# NOTE: .env.production is also ignored here because it contains secret API keys
+# (COMMODITY_PRICE_API_KEY, WEATHERAPI_KEY). The CI/CD workflow writes it
+# directly to the server at deploy time — never commit this file.
 /New-JalgaonUI/.env
 /New-JalgaonUI/.env.local
 /New-JalgaonUI/.env.*.local
+/New-JalgaonUI/.env.production
 /New-JalgaonUI/.next/
 /New-JalgaonUI/out/
 /New-JalgaonUI/build/
@@ -41,36 +48,20 @@ env/
 
 # Python caching
 __pycache__/
+>>>>>>> 419f2e8095bcd9ea476fffd633c07faba1933b8f
 *.pyc
 *.pyo
 *.pyd
 .pytest_cache/
-.mypy_cache/
-
-# Django static/media files
-staticfiles/
-media/
-
-# Node.js
+.coverage
+htmlcov/
+.env
+venv/
+.venv
+env/
 node_modules/
 dist/
-.eslintcache
-
-# OS Files
 .DS_Store
-Thumbs.db
-
-# IDEs and Editors
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Legacy Media Uploads (from models)
-jalgaonApi/static/assets/article_imgs/
-jalgaonApi/static/assets/categories/
-
-# One-off Utility Scripts
-jalgaonApi/create_apps.py
-jalgaonApi/fake_mig.py
-jalgaonApi/data.json
+*.xlsx
+.env.local
+.env.*

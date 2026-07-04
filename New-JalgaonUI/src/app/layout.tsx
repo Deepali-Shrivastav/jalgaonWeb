@@ -12,6 +12,34 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "Jalgaon.com | Local Business Directory & News",
   description: "Find services near you or list your business in minutes. The professional gateway to North Maharashtra's economic heartbeat.",
+  keywords: [
+    "Jalgaon",
+    "Jalgaon business directory",
+    "Jalgaon news",
+    "Jalgaon local services",
+    "Khandesh businesses",
+    "North Maharashtra directory"
+  ],
+  openGraph: {
+    title: "Jalgaon.com | Local Business Directory & News",
+    description: "The professional gateway to North Maharashtra's economic heartbeat.",
+    type: "website",
+    locale: "en_IN",
+    siteName: "Jalgaon.com",
+    url: "https://jalgaon.com",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Jalgaon.com | Local Business Directory & News",
+    description: "Find services near you or list your business in minutes.",
+  },
+  alternates: {
+    canonical: "https://jalgaon.com",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  }
 };
 
 export default function RootLayout({
