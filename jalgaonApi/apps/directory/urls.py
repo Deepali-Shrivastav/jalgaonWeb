@@ -1,18 +1,35 @@
 from django.urls import path
 from .views import (
-    CategoryView, SubCategoryView, ShopListingCreateView, shop_listing,
-    get_products_by_category, ProductDetailView, LikedShopsView,
-    UserListedShops, UserListedShopsEdit, UpdateShopListingView
+    CategoryListView, ListingListView, ListingDetailView, ListingCreateView,
+    ListingUpdateView, ListingDeleteView, ListingSearchView, TrendingListingsView,
+    ListingReviewListView, ListingReviewCreateView, LikedShopsView, UserListedShops,
+    BusinessClaimCreateView, BusinessReportCreateView
 )
 
 urlpatterns = [
-    path('categories/', CategoryView.as_view(), name='categories'),
-    path('subcategories/', SubCategoryView.as_view(), name='subcategories'),
-    path('', ShopListingCreateView.as_view(), name='shop-listing'),
-    path('update/', UpdateShopListingView.as_view(), name='update-shop'),
-    path('by-category/', get_products_by_category, name='by-category'),
-    path('detail/', ProductDetailView.as_view(), name='detail'),
-    path('my-listings/', UserListedShops.as_view(), name='my-listings'),
-    path('edit-data/', UserListedShopsEdit.as_view(), name='edit-data'),
-    path('favorites/', LikedShopsView.as_view(), name='favorites'),
+    # Categories
+    path('categories/', CategoryListView.as_view(), name='categories'),
+    
+    # Listings
+    path('', ListingListView.as_view(), name='listing-list'),
+    path('search/', ListingSearchView.as_view(), name='listing-search'),
+    path('trending/', TrendingListingsView.as_view(), name='listing-trending'),
+    path('create/', ListingCreateView.as_view(), name='listing-create'),
+    path('<slug:slug>/', ListingDetailView.as_view(), name='listing-detail'),
+    path('<slug:slug>/update/', ListingUpdateView.as_view(), name='listing-update'),
+    path('<slug:slug>/delete/', ListingDeleteView.as_view(), name='listing-delete'),
+    
+    # Reviews
+    path('<slug:slug>/reviews/', ListingReviewListView.as_view(), name='listing-reviews'),
+    path('<slug:slug>/reviews/create/', ListingReviewCreateView.as_view(), name='listing-review-create'),
+    
+    # Claims
+    path('<slug:slug>/claim/', BusinessClaimCreateView.as_view(), name='listing-claim'),
+    
+    # Reports
+    path('<slug:slug>/report/', BusinessReportCreateView.as_view(), name='listing-report'),
+    
+    # User Specific
+    path('user/my-listings/', UserListedShops.as_view(), name='my-listings'),
+    path('user/favorites/', LikedShopsView.as_view(), name='favorites'),
 ]

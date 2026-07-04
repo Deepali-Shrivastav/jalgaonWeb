@@ -30,6 +30,12 @@ class JobAdminSerializer(serializers.ModelSerializer):
     slug = serializers.SlugField(required=False, read_only=True)
     category = serializers.PrimaryKeyRelatedField(queryset=JobCategory.objects.all(), required=False, allow_null=True)
     posted_by = serializers.PrimaryKeyRelatedField(read_only=True)
+    shop_listing = serializers.PrimaryKeyRelatedField(queryset=Job.objects.none(), required=False, allow_null=True) # Will override in init
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from apps.directory.models import ShopListing
+        self.fields['shop_listing'].queryset = ShopListing.objects.all()
 
     class Meta:
         model = Job

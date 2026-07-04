@@ -40,6 +40,7 @@ class Job(models.Model):
     location = models.CharField(max_length=255)
     job_type = models.CharField(max_length=20, choices=JOB_TYPE_CHOICES, default='full_time')
     category = models.ForeignKey(JobCategory, on_delete=models.SET_NULL, null=True, related_name='jobs')
+    shop_listing = models.ForeignKey('directory.ShopListing', on_delete=models.SET_NULL, null=True, blank=True, related_name='jobs')
     
     salary_min = models.IntegerField(null=True, blank=True)
     salary_max = models.IntegerField(null=True, blank=True)
