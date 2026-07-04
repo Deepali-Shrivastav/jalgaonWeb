@@ -6,12 +6,10 @@ import Home from './pages/Home';
 import CategoryPage from './pages/CategoryPage';
 import BusinessDetailsPage from './pages/BusinessDetailsPage';
 import Account from './pages/Account';
-import { UserProvider } from './context/UserContext';
 import Providers from './Providers';
 import AddListingPage from './pages/AddListingPage';
 import AdsIndexPage from './pages/AdsIndexPage';
 import ArticlesPage from './pages/ArticlesPage';
-import Articles from './components/Releatedarticles/Articles';
 import ArticleViewPage from './pages/ArticleViewPage';
 import AboutPage from './pages/AboutPage';
 import TermsPage from './pages/TermsPage';
@@ -22,6 +20,10 @@ import SearchPage from './pages/SearchPage';
 import NewsIndexPage from './pages/NewsIndexPage';
 import NewsArticlePage from './pages/NewsArticlePage';
 
+// Events Module Imports
+import EventsIndexPage from './pages/EventsIndexPage';
+import EventDetailPage from './pages/EventDetailPage';
+import SubmitEventPage from './pages/SubmitEventPage';
 // Jobs Module
 import JobsIndexPage from './pages/JobsIndexPage';
 import JobDetailPage from './pages/JobDetailPage';
@@ -43,9 +45,13 @@ import AdminNews from './pages/admin/AdminNews';
 import AdminNewsCreate from './pages/admin/AdminNewsCreate';
 import AdminNewsComments from './pages/admin/AdminNewsComments';
 import AdminNewsCategories from './pages/admin/AdminNewsCategories';
+<<<<<<< HEAD
+import AdminEvents from './pages/admin/AdminEvents';
+=======
 import AdminJobs from './pages/admin/AdminJobs';
 import AdminJobCategories from './pages/admin/AdminJobCategories';
 import AdminJobApplications from './pages/admin/AdminJobApplications';
+>>>>>>> 12d54d16a9ab087e94f21eeec75217cdfeb27b1d
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -65,13 +71,22 @@ const router = createBrowserRouter(
         <Route path='contact' element={<ContactPage />} />
         <Route path='termsAndCondition' element={<TermsPage />} />
         <Route path='editForm/:shopId' element={<AddListingForm is_edit={true}/>} />
+<<<<<<< HEAD
+        
+        {/* Events Module */}
+        <Route path='events' element={<EventsIndexPage />} />
+        <Route path='events/submit' element={<SubmitEventPage />} />
+=======
         <Route path='business-dashboard/:id' element={<BusinessDashboard />} />
+>>>>>>> 12d54d16a9ab087e94f21eeec75217cdfeb27b1d
       </Route>
 
-      {/* News Module */}
+      {/* Standalone Detail Pages */}
       <Route path='/news' element={<NewsIndexPage />} />
       <Route path='/news/:slug' element={<NewsArticlePage />} />
       <Route path='/news/category/:slug' element={<NewsIndexPage />} />
+      
+      <Route path='/events/:slug' element={<EventDetailPage />} />
 
       {/* Jobs Module */}
       <Route path='/jobs' element={<JobsIndexPage />} />
@@ -96,11 +111,17 @@ const router = createBrowserRouter(
         <Route path='news/edit/:id' element={<AdminNewsCreate />} />
         <Route path='news/comments' element={<AdminNewsComments />} />
         <Route path='news/categories' element={<AdminNewsCategories />} />
+<<<<<<< HEAD
+
+        {/* Admin Events */}
+        <Route path='events' element={<AdminEvents />} />
+=======
         
         {/* Admin Jobs */}
         <Route path='jobs' element={<AdminJobs />} />
         <Route path='jobs/categories' element={<AdminJobCategories />} />
         <Route path='jobs/applications' element={<AdminJobApplications />} />
+>>>>>>> 12d54d16a9ab087e94f21eeec75217cdfeb27b1d
       </Route>
     </>
   )

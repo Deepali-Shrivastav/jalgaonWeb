@@ -69,6 +69,8 @@ const Navbar = () => {
                         <NavLink to='/news'>
                             <li>News</li>
                         </NavLink>
+                        <NavLink to='/events'>
+                            <li>Events</li>
                         <NavLink to='/jobs'>
                             <li>Jobs</li>
                         </NavLink>
