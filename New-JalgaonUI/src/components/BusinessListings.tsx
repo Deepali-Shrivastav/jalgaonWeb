@@ -36,8 +36,8 @@ export default function BusinessListings({ category, onBack, onSelectListing }: 
       setError(null);
       try {
         const url = process.env.NEXT_PUBLIC_API_URL 
-          ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/listings/?category=${encodeURIComponent(category)}`
-          : `/api/v1/listings/?category=${encodeURIComponent(category)}`;
+          ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/search/?search=${encodeURIComponent(category)}`
+          : `/api/v1/search/?search=${encodeURIComponent(category)}`;
         const res = await fetch(url);
         if (!res.ok) throw new Error('Failed to fetch');
         const json = await res.json();

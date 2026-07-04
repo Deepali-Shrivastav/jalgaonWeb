@@ -194,10 +194,16 @@ export default function AddListingPage() {
                 <p className="text-sm text-secondary mt-xs">Your physical location for map placement and local search.</p>
               </div>
               <div className="md:col-span-8 space-y-md">
-                <button className="flex items-center gap-2 text-primary font-bold hover:underline bg-primary/10 p-3 rounded-lg w-full md:w-auto justify-center transition-colors hover:bg-primary/20" type="button">
-                  <span className="material-symbols-outlined">my_location</span>
-                  Get Current Location
-                </button>
+                <div className="flex flex-col md:flex-row gap-4">
+                  <button className="flex items-center gap-2 text-primary font-bold hover:underline bg-primary/10 p-3 rounded-lg w-full md:w-auto justify-center transition-colors hover:bg-primary/20" type="button">
+                    <span className="material-symbols-outlined">my_location</span>
+                    Get Current Location
+                  </button>
+                  <button className="flex items-center gap-2 text-primary font-bold hover:underline bg-primary/10 p-3 rounded-lg w-full md:w-auto justify-center transition-colors hover:bg-primary/20" type="button">
+                    <span className="material-symbols-outlined">map</span>
+                    Set Location
+                  </button>
+                </div>
                 <div className="group">
                   <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Detailed Address</label>
                   <textarea className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="Plot No, Building, Street, Area, Jalgaon" rows={3}></textarea>

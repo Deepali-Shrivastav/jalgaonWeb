@@ -7,11 +7,13 @@ import Footer from '@/components/Footer';
 
 export interface NewsArticle {
   id: number;
-  category: string;
+  category: any;
   readTime?: string;
   title: string;
   excerpt?: string;
+  short_description?: string;
   image?: string;
+  featured_image?: string;
   alt?: string;
 }
 
@@ -24,8 +26,8 @@ export default function NewsPortal() {
     const fetchNews = async () => {
       try {
         const url = process.env.NEXT_PUBLIC_API_URL 
-          ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/news/`
-          : '/api/v1/news/';
+          ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/news/trending/`
+          : '/api/v1/news/trending/';
         const res = await fetch(url);
         if (!res.ok) throw new Error('Failed to fetch news');
         const json = await res.json();
@@ -115,10 +117,10 @@ export default function NewsPortal() {
                   className="article-card flex flex-col group bg-white p-6 rounded-xl border border-hairline-soft hover:border-primary transition-all duration-300 hover:shadow-lg"
                 >
                   <div className="overflow-hidden rounded-lg aspect-[4/3] mb-6 bg-surface-container-low flex items-center justify-center">
-                    {article.image ? (
+                    {(article.image || article.featured_image) ? (
                       <img
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        src={article.image}
+                        src={article.image || article.featured_image}
                         alt={article.alt || article.title}
                         loading="lazy"
                       />
@@ -128,7 +130,7 @@ export default function NewsPortal() {
                   </div>
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-primary font-bold text-[10px] uppercase tracking-widest">
-                      {article.category || 'News'}
+                      {typeof article.category === 'object' && article.category !== null ? article.category.name : (article.category || 'News')}
                     </span>
                     <span className="text-secondary text-xs">
                       • {article.readTime || '3 min read'}
@@ -138,7 +140,7 @@ export default function NewsPortal() {
                     {article.title}
                   </h3>
                   <p className="text-secondary text-sm line-clamp-3 mb-6 leading-relaxed">
-                    {article.excerpt || 'Read the full story to learn more about this recent update.'}
+                    {article.excerpt || article.short_description || 'Read the full story to learn more about this recent update.'}
                   </p>
                   <div className="mt-auto">
                     <button className="w-full py-3 px-6 rounded-full border-2 border-primary text-primary font-semibold text-sm hover:bg-primary hover:text-white transition-all active:scale-[0.98]">
@@ -157,8 +159,8 @@ export default function NewsPortal() {
           className="max-w-container-max mx-auto px-xxl mt-section"
           aria-label="Newsletter subscription"
         >
-          <div className="bg-surface-container-high rounded-xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-8 md:gap-12">
-            <div className="flex-1 text-center md:text-left">
+          <div className="bg-surface-container-high rounded-xl p-8 md:p-12 flex flex-col lg:flex-row items-center gap-8 lg:gap-12 w-full overflow-hidden">
+            <div className="flex-1 text-center lg:text-left min-w-0 w-full">
               <h2 className="text-2xl md:text-3xl font-bold text-ink-deep mb-3">
                 Stay Updated with Jalgaon News
               </h2>
@@ -167,13 +169,13 @@ export default function NewsPortal() {
                 directly to your inbox every morning.
               </p>
             </div>
-            <div className="flex-1 w-full max-w-md">
+            <div className="w-full lg:w-auto flex-none max-w-md lg:min-w-[450px]">
               <form
-                className="flex flex-col sm:flex-row gap-3"
+                className="flex flex-col sm:flex-row gap-3 w-full"
                 onSubmit={(e) => e.preventDefault()}
               >
                 <input
-                  className="flex-grow px-6 py-4 rounded-full border border-outline-variant focus:ring-2 focus:ring-primary focus:outline-none bg-white text-sm"
+                  className="flex-1 w-full px-6 py-4 rounded-full border border-outline-variant focus:ring-2 focus:ring-primary focus:outline-none bg-white text-sm"
                   placeholder="Enter your email"
                   type="email"
                   aria-label="Email address for newsletter"
@@ -181,18 +183,18 @@ export default function NewsPortal() {
                 />
                 <button
                   type="submit"
-                  className="bg-primary text-white px-8 py-4 rounded-full font-bold hover:bg-primary-deep transition-colors active:scale-95 whitespace-nowrap"
+                  className="bg-primary text-white px-8 py-4 rounded-full font-bold hover:bg-primary-deep transition-colors active:scale-95 whitespace-nowrap shrink-0"
                 >
                   Subscribe
                 </button>
               </form>
-              <p className="text-[11px] text-secondary mt-3 text-center md:text-left">
+              <p className="text-[11px] text-secondary mt-3 text-center lg:text-left">
                 By subscribing, you agree to our{' '}
-                <Link href="#" className="underline">
+                <Link href="#" className="underline hover:text-primary">
                   Privacy Policy
                 </Link>{' '}
                 and{' '}
-                <Link href="#" className="underline">
+                <Link href="#" className="underline hover:text-primary">
                   Terms of Service
                 </Link>
                 .

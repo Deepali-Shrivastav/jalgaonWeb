@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/context/AuthContext";
+import LoginSignup from "@/components/LoginSignup";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-sans",
@@ -30,7 +32,10 @@ export default function RootLayout({
         className="bg-surface text-on-surface font-sans selection:bg-primary/20 min-h-full flex flex-col"
         suppressHydrationWarning
       >
-        {children}
+        <AuthProvider>
+          {children}
+          <LoginSignup />
+        </AuthProvider>
       </body>
     </html>
   );

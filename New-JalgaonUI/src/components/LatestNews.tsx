@@ -7,12 +7,14 @@ type NewsStory = {
   id?: number;
   title: string;
   summary?: string;
+  short_description?: string;
   excerpt?: string;
-  category: string;
+  category: any;
   date?: string;
   readTime?: string;
   isoDate?: string;
   image?: string | StaticImageData;
+  featured_image?: string;
   imageAlt?: string;
   alt?: string;
 };
@@ -26,7 +28,9 @@ function StoryMeta({
 }: Pick<NewsStory, "category" | "date" | "isoDate"> & { inverse?: boolean }) {
   return (
     <div className="flex items-center gap-xs text-[11px] font-extrabold uppercase tracking-[0.14em]">
-      <span className={inverse ? "text-white" : "text-primary"}>{category}</span>
+      <span className={inverse ? "text-white" : "text-primary"}>
+        {typeof category === 'object' && category !== null ? category.name : (category || 'News')}
+      </span>
       <span aria-hidden="true" className={`h-1 w-1 rounded-full ${inverse ? "bg-white/45" : "bg-outline-variant"}`} />
       <time className={inverse ? "text-white/70" : "text-secondary"} dateTime={isoDate}>
         {date}
@@ -45,9 +49,9 @@ export default function LatestNews() {
     const fetchNews = async () => {
       try {
         const url = process.env.NEXT_PUBLIC_API_URL 
-          ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/news/`
-          : '/api/v1/news/';
-        const res = await fetch(url);
+          ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/news/trending/`
+          : '/api/v1/news/trending/';
+        const res = await fetch(url, { cache: 'no-store' });
         if (!res.ok) throw new Error('Failed to fetch');
         const json = await res.json();
         const results = json.results || json.data || json || [];
@@ -102,13 +106,13 @@ export default function LatestNews() {
 
         <div className="grid grid-cols-1 items-stretch gap-xl lg:grid-cols-[1.05fr_1fr]">
           <article className="group relative min-h-[500px] overflow-hidden rounded-xl bg-ink-deep shadow-xl lg:min-h-full">
-            {featuredStory.image ? (
+            {(featuredStory.image || featuredStory.featured_image) && (
               <img
-                src={typeof featuredStory.image === 'string' ? featuredStory.image : (featuredStory.image as any).src}
+                src={((featuredStory.image || featuredStory.featured_image) as any).src || (featuredStory.image || featuredStory.featured_image)}
                 alt={featuredStory.imageAlt || featuredStory.alt || featuredStory.title}
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
-            ) : null}
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/35 to-black/5" />
             <div className="absolute inset-x-0 bottom-0 p-xl sm:p-xxxl">
               <StoryMeta 
@@ -121,7 +125,7 @@ export default function LatestNews() {
                 {featuredStory.title}
               </h3>
               <p className="mt-base max-w-[520px] text-sm leading-relaxed text-white/75 sm:text-base">
-                {featuredStory.summary || featuredStory.excerpt}
+                {featuredStory.summary || featuredStory.excerpt || featuredStory.short_description}
               </p>
             </div>
           </article>
@@ -133,9 +137,9 @@ export default function LatestNews() {
                 className="group flex h-full flex-col overflow-hidden rounded-xl border border-hairline-soft bg-white transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl"
               >
                 <div className="relative aspect-[16/9] overflow-hidden bg-surface-container-low flex justify-center items-center">
-                  {story.image ? (
+                  {(story.image || story.featured_image) ? (
                     <img
-                      src={typeof story.image === 'string' ? story.image : (story.image as any).src}
+                      src={((story.image || story.featured_image) as any).src || (story.image || story.featured_image)}
                       alt={story.imageAlt || story.alt || story.title}
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
@@ -152,7 +156,9 @@ export default function LatestNews() {
                   <h3 className="mt-sm line-clamp-2 text-base font-extrabold leading-snug text-ink-deep sm:text-lg">
                     {story.title}
                   </h3>
-                  <p className="mt-xs line-clamp-2 text-sm leading-relaxed text-secondary">{story.summary || story.excerpt}</p>
+                  <p className="mt-xs line-clamp-2 text-sm leading-relaxed text-secondary">
+                    {story.summary || story.excerpt || story.short_description}
+                  </p>
                 </div>
               </article>
             ))}

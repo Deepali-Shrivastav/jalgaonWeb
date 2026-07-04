@@ -20,8 +20,8 @@ export default function TrendingListings() {
     const fetchListings = async () => {
       try {
         const url = process.env.NEXT_PUBLIC_API_URL 
-          ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/listings/`
-          : '/api/v1/listings/';
+          ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/search/`
+          : '/api/v1/search/';
         const res = await fetch(url);
         if (!res.ok) {
           console.warn('Listings API not available yet');

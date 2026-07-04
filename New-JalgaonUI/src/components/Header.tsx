@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { AuthContext } from '@/context/AuthContext';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -15,6 +16,7 @@ const navLinks = [
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { isLogin, setIsLoginFormOpen, logout } = useContext(AuthContext);
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';
@@ -55,9 +57,22 @@ export default function Header() {
         <div className="flex items-center gap-base">
           <button className="material-symbols-outlined text-secondary hover:text-primary transition-colors p-2 hidden sm:block">favorite</button>
           <button className="material-symbols-outlined text-secondary hover:text-primary transition-colors p-2 hidden sm:block">shopping_cart</button>
-          <button className="bg-primary text-white px-xl py-3 rounded-full font-bold text-sm hover:bg-primary-deep transition-all shadow-sm active:scale-95 hidden sm:block">
-            Signup/Login
-          </button>
+          
+          {isLogin ? (
+            <button 
+              onClick={logout}
+              className="bg-red-500 text-white px-xl py-3 rounded-full font-bold text-sm hover:bg-red-600 transition-all shadow-sm active:scale-95 hidden sm:block"
+            >
+              Logout
+            </button>
+          ) : (
+            <button 
+              onClick={() => setIsLoginFormOpen(true)}
+              className="bg-primary text-white px-xl py-3 rounded-full font-bold text-sm hover:bg-primary-deep transition-all shadow-sm active:scale-95 hidden sm:block"
+            >
+              Signup/Login
+            </button>
+          )}
           
           <button 
             className="material-symbols-outlined text-ink-deep p-2 md:hidden"
@@ -107,7 +122,27 @@ export default function Header() {
               <button className="material-symbols-outlined text-secondary p-2">favorite</button>
               <button className="material-symbols-outlined text-secondary p-2">shopping_cart</button>
             </div>
-            <button className="w-full bg-primary text-white py-3 rounded-full font-bold shadow-sm">Signup/Login</button>
+            {isLogin ? (
+              <button 
+                onClick={() => {
+                  logout();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full bg-red-500 text-white py-3 rounded-full font-bold shadow-sm"
+              >
+                Logout
+              </button>
+            ) : (
+              <button 
+                onClick={() => {
+                  setIsLoginFormOpen(true);
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full bg-primary text-white py-3 rounded-full font-bold shadow-sm"
+              >
+                Signup/Login
+              </button>
+            )}
           </div>
         </div>
       )}

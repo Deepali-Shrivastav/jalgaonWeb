@@ -371,7 +371,7 @@ const industries = [
   },
 ];
 
-function IndustryCard({ ind, onSelectCategory }: { ind: typeof industries[0]; onSelectCategory: (cat: string) => void }) {
+function IndustryCard({ ind, onSelectCategory }: { ind: any; onSelectCategory: (cat: string) => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const rowRef = useRef<HTMLDivElement>(null);
   const [translateX, setTranslateX] = useState(0);
@@ -425,7 +425,7 @@ function IndustryCard({ ind, onSelectCategory }: { ind: typeof industries[0]; on
         <h3 className="text-3xl font-extrabold text-ink-deep mb-base">{ind.title}</h3>
         <p className="text-secondary mb-xxxl text-lg leading-relaxed">{ind.description}</p>
         <button 
-          onClick={() => onSelectCategory(ind.title)}
+          onClick={() => onSelectCategory(ind.slug || ind.title)}
           className="w-fit bg-primary text-white px-xl py-3 rounded-full font-bold hover:scale-105 transition-transform shadow-lg cursor-pointer"
         >
           {ind.btnText}
@@ -444,10 +444,10 @@ function IndustryCard({ ind, onSelectCategory }: { ind: typeof industries[0]; on
           }}
           className="flex flex-row gap-xl min-w-max pb-4 lg:pb-0"
         >
-          {ind.items.map((item, itemIdx) => (
+          {ind.items.map((item: any, itemIdx: number) => (
             <div 
               key={itemIdx} 
-              onClick={() => onSelectCategory(ind.title)}
+              onClick={() => onSelectCategory(ind.slug || ind.title)}
               className="flex flex-col items-center text-center group/item cursor-pointer w-[120px] sm:w-[150px] shrink-0 snap-start"
             >
               <div className="w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center mb-base group-hover/item:bg-primary/10 transition-colors overflow-hidden">
@@ -464,16 +464,71 @@ function IndustryCard({ ind, onSelectCategory }: { ind: typeof industries[0]; on
 }
 
 export default function IndustryGrids({ onSelectCategory }: { onSelectCategory: (cat: string) => void }) {
+  const [categories, setCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+        const res = await fetch(`${baseUrl}/api/v1/listings/categories/`);
+        if (!res.ok) throw new Error("Failed to fetch categories");
+        const data = await res.json();
+        
+        const mapped = data.map((cat: any, index: number) => {
+          const meta = industries.find(i => i.title.toLowerCase() === cat.main_category.toLowerCase()) || {
+            icon: "category",
+            description: `Explore listings related to ${cat.main_category}.`,
+            btnText: "Explore Industry",
+          };
+          
+          return {
+            title: cat.main_category,
+            slug: cat.slug,
+            icon: meta.icon,
+            description: meta.description,
+            btnText: meta.btnText || "Explore Industry",
+            reverse: index % 2 !== 0,
+            items: (cat.subcategories || []).map((sub: any) => {
+              const subMeta = industries.find(i => i.title.toLowerCase() === cat.main_category.toLowerCase())?.items?.find((i: any) => i.name.toLowerCase() === sub.sub_category.toLowerCase());
+              return {
+                name: sub.sub_category,
+                slug: sub.slug,
+                icon: subMeta?.icon || "category"
+              };
+            })
+          };
+        });
+        
+        setCategories(mapped);
+      } catch (error) {
+        console.error("Failed to fetch categories", error);
+        // Fallback to hardcoded if API fails
+        setCategories(industries);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchCategories();
+  }, []);
+
   return (
     <section className="py-section bg-surface-container-low">
       <div className="max-w-container-max mx-auto px-xxl">
         <h2 className="text-center text-4xl font-extrabold text-ink-deep mb-section">Explore Local Industries</h2>
         
-        <div className="space-y-xl">
-          {industries.map((ind, idx) => (
-            <IndustryCard key={idx} ind={ind} onSelectCategory={onSelectCategory} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <span className="material-symbols-outlined animate-spin text-5xl text-primary">progress_activity</span>
+          </div>
+        ) : (
+          <div className="space-y-xl">
+            {categories.map((ind, idx) => (
+              <IndustryCard key={idx} ind={ind} onSelectCategory={onSelectCategory} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

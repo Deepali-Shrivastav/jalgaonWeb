@@ -66,10 +66,11 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
       setError(null);
       try {
         const id = listingId || 'default';
-        const res = await fetch(`/api/businesses/${encodeURIComponent(id)}`);
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+        const res = await fetch(`${baseUrl}/api/v1/listings/detail/?productId=${encodeURIComponent(id)}`);
         if (!res.ok) throw new Error('Failed to fetch profile');
         const json = await res.json();
-        setBiz(json.data);
+        setBiz(json); // Use json directly as DRF serializes the object directly
       } catch (err: any) {
         setError(err.message);
       } finally {
