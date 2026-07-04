@@ -59,12 +59,18 @@ export default function Header() {
           <button className="material-symbols-outlined text-secondary hover:text-primary transition-colors p-2 hidden sm:block">shopping_cart</button>
           
           {isLogin ? (
-            <button 
-              onClick={logout}
-              className="bg-red-500 text-white px-xl py-3 rounded-full font-bold text-sm hover:bg-red-600 transition-all shadow-sm active:scale-95 hidden sm:block"
-            >
-              Logout
-            </button>
+            <div className="flex items-center gap-3 hidden sm:flex">
+              <Link href="/account" className="flex items-center gap-2 bg-surface-container-low text-ink-deep px-4 py-2 rounded-full font-bold hover:bg-surface-container-high transition-all">
+                <span className="material-symbols-outlined text-[20px]">person</span>
+                Account
+              </Link>
+              <button 
+                onClick={logout}
+                className="bg-red-500 text-white px-xl py-2 rounded-full font-bold text-sm hover:bg-red-600 transition-all shadow-sm active:scale-95"
+              >
+                Logout
+              </button>
+            </div>
           ) : (
             <button 
               onClick={() => setIsLoginFormOpen(true)}
@@ -123,15 +129,25 @@ export default function Header() {
               <button className="material-symbols-outlined text-secondary p-2">shopping_cart</button>
             </div>
             {isLogin ? (
-              <button 
-                onClick={() => {
-                  logout();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full bg-red-500 text-white py-3 rounded-full font-bold shadow-sm"
-              >
-                Logout
-              </button>
+              <div className="flex flex-col gap-3 w-full">
+                <Link 
+                  href="/account" 
+                  className="w-full flex justify-center items-center gap-2 bg-surface-container-low text-ink-deep py-3 rounded-full font-bold shadow-sm"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <span className="material-symbols-outlined text-[20px]">person</span>
+                  My Account
+                </Link>
+                <button 
+                  onClick={() => {
+                    logout();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full bg-red-500 text-white py-3 rounded-full font-bold shadow-sm"
+                >
+                  Logout
+                </button>
+              </div>
             ) : (
               <button 
                 onClick={() => {

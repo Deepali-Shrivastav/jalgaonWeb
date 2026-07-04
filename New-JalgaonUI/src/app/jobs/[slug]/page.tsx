@@ -1,0 +1,36 @@
+import React from 'react';
+import type { Metadata } from 'next';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import JobDetailClient from './JobDetailClient';
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const res = await fetch(`${baseUrl}/api/v1/jobs/${params.slug}/`);
+    if (res.ok) {
+      const data = await res.json();
+      return {
+        title: `${data.title} at ${data.company} | Jalgaon Jobs`,
+        description: `Apply for ${data.title} at ${data.company} in ${data.location}.`,
+      };
+    }
+  } catch (e) {
+    // ignore
+  }
+  return { title: 'Job Details | Jalgaon.com' };
+}
+
+export default function JobPage({ params }: { params: { slug: string } }) {
+  return (
+    <>
+      <Header />
+      <main className="flex-grow py-section px-base bg-surface">
+        <div className="max-w-4xl mx-auto py-xl">
+          <JobDetailClient slug={params.slug} />
+        </div>
+      </main>
+      <Footer />
+    </>
+  );
+}

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
-const filterTabs = ['All Dates', 'Today', 'This Weekend', 'Next Month'];
+
 
 export interface EventItem {
   id: number;
@@ -22,28 +22,51 @@ export interface EventItem {
 }
 
 export default function EventsPortal() {
-  const [activeFilter, setActiveFilter] = useState('All Dates');
+  const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [categories, setCategories] = useState<any[]>([{ id: 'all', name: 'All Categories', slug: 'all' }]);
+  
   const [featuredEvents, setFeaturedEvents] = useState<EventItem[]>([]);
   const [upcomingEvents, setUpcomingEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   React.useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const res = await fetch(`${baseUrl}/api/v1/events/categories/`);
+        if (res.ok) {
+          const data = await res.json();
+          setCategories([{ id: 'all', name: 'All Categories', slug: 'all' }, ...(data.results || data)]);
+        }
+      } catch (err) {
+        console.error('Failed to fetch categories:', err);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  React.useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const url = process.env.NEXT_PUBLIC_API_URL 
-          ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/events/`
-          : '/api/v1/events/';
-        const res = await fetch(url);
+        setLoading(true);
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const url = new URL(`${baseUrl}/api/v1/events/`);
+        if (activeCategory !== 'all') {
+          url.searchParams.append('category', activeCategory);
+        }
+        
+        const res = await fetch(url.toString());
         if (!res.ok) throw new Error('Failed to fetch events');
         const json = await res.json();
         const results = json.results || json.data || json || [];
         
-        // For demonstration, we'll split the results. 
-        // Ideally, the API would have query params for featured vs upcoming.
         if (results.length > 0) {
           setFeaturedEvents(results.slice(0, 3));
           setUpcomingEvents(results.slice(3, 9).length > 0 ? results.slice(3, 9) : results);
+        } else {
+          setFeaturedEvents([]);
+          setUpcomingEvents([]);
         }
       } catch (err: any) {
         setError(err.message);
@@ -52,7 +75,7 @@ export default function EventsPortal() {
       }
     };
     fetchEvents();
-  }, []);
+  }, [activeCategory]);
 
   return (
     <>
@@ -208,20 +231,20 @@ export default function EventsPortal() {
               </div>
               <nav
                 className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0"
-                aria-label="Event date filters"
+                aria-label="Event category filters"
               >
-                {filterTabs.map((tab) => (
+                {categories.map((cat) => (
                   <button
-                    key={tab}
-                    onClick={() => setActiveFilter(tab)}
+                    key={cat.id}
+                    onClick={() => setActiveCategory(cat.slug)}
                     className={`whitespace-nowrap px-6 py-2 rounded-full font-semibold text-sm transition-colors ${
-                      activeFilter === tab
+                      activeCategory === cat.slug
                         ? 'bg-primary text-white'
                         : 'border border-hairline-soft text-secondary hover:bg-surface-container-low'
                     }`}
-                    aria-pressed={activeFilter === tab}
+                    aria-pressed={activeCategory === cat.slug}
                   >
-                    {tab}
+                    {cat.name}
                   </button>
                 ))}
               </nav>

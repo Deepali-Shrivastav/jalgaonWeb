@@ -48,9 +48,8 @@ export default function LatestNews() {
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const url = process.env.NEXT_PUBLIC_API_URL 
-          ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/news/trending/`
-          : '/api/v1/news/trending/';
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const url = `${baseUrl}/api/v1/news/trending/`;
         const res = await fetch(url, { cache: 'no-store' });
         if (!res.ok) throw new Error('Failed to fetch');
         const json = await res.json();

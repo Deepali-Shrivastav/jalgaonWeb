@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-
+import React, { useState, useEffect, useContext } from 'react';
+import { AuthContext } from '@/context/AuthContext';
+import toast, { Toaster } from 'react-hot-toast';
 export interface Review {
   id: string;
   name: string;
@@ -55,10 +56,128 @@ interface BusinessProfileProps {
 }
 
 export default function BusinessProfile({ listingId, listingName, onBack }: BusinessProfileProps) {
+  const { isLogin } = useContext(AuthContext);
   const [showAllGallery, setShowAllGallery] = useState(false);
   const [biz, setBiz] = useState<BusinessData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Modals state
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showClaimModal, setShowClaimModal] = useState(false);
+
+  // Form states
+  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
+  const [claimForm, setClaimForm] = useState({ message: '', contact_number: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: biz?.name,
+          text: `Check out ${biz?.name} on Jalgaon.com`,
+          url: window.location.href,
+        });
+      } catch (err) {
+        console.error('Error sharing', err);
+      }
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success('Link copied to clipboard');
+    }
+  };
+
+  const handleSave = async () => {
+    if (!isLogin) {
+      toast.error('Please login to save listings');
+      return;
+    }
+    try {
+      const token = localStorage.getItem('token');
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const res = await fetch(`${baseUrl}/api/v1/listings/user/favorites/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ shop_listing_id: parseInt(biz!.id) })
+      });
+      if (res.ok) {
+        toast.success('Listing saved to favorites');
+      } else {
+        const data = await res.json();
+        toast.error(data.error || 'Failed to save listing');
+      }
+    } catch (err) {
+      toast.error('An error occurred');
+    }
+  };
+
+  const submitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isLogin) {
+      toast.error('Please login to write a review');
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const token = localStorage.getItem('token');
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const res = await fetch(`${baseUrl}/api/v1/listings/${encodeURIComponent(listingId || '')}/reviews/create/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(reviewForm)
+      });
+      if (res.ok) {
+        toast.success('Review submitted successfully');
+        setShowReviewModal(false);
+        setReviewForm({ rating: 5, comment: '' });
+      } else {
+        toast.error('Failed to submit review');
+      }
+    } catch (err) {
+      toast.error('An error occurred');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const submitClaim = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isLogin) {
+      toast.error('Please login to claim this listing');
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const token = localStorage.getItem('token');
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const res = await fetch(`${baseUrl}/api/v1/listings/${encodeURIComponent(listingId || '')}/claim/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(claimForm)
+      });
+      if (res.ok) {
+        toast.success('Claim request submitted successfully');
+        setShowClaimModal(false);
+        setClaimForm({ message: '', contact_number: '' });
+      } else {
+        toast.error('Failed to submit claim request');
+      }
+    } catch (err) {
+      toast.error('An error occurred');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     const fetchBusiness = async () => {
@@ -66,11 +185,50 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
       setError(null);
       try {
         const id = listingId || 'default';
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
-        const res = await fetch(`${baseUrl}/api/v1/listings/detail/?productId=${encodeURIComponent(id)}`);
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const res = await fetch(`${baseUrl}/api/v1/listings/${encodeURIComponent(id)}/`);
         if (!res.ok) throw new Error('Failed to fetch profile');
-        const json = await res.json();
-        setBiz(json); // Use json directly as DRF serializes the object directly
+        const drfData = await res.json();
+        
+        // Map DRF fields to BusinessData
+        const mappedBiz: BusinessData = {
+          id: drfData.id?.toString() || id,
+          name: drfData.business_name || 'Unknown Business',
+          category: drfData.main_category_name || 'Category',
+          displayCategory: drfData.sub_category_name || drfData.main_category_name || 'Category',
+          verified: true, // can be mapped from is_claimed if available
+          rating: drfData.avg_rating || 0,
+          reviewCount: drfData.review_count || 0,
+          timing: '9:00 AM - 6:00 PM', // can be parsed from business_hours later
+          isOpen: true,
+          about: drfData.business_description || 'No description available.',
+          tags: [drfData.main_category_name, drfData.sub_category_name].filter(Boolean) as string[],
+          phone: drfData.business_no || '',
+          whatsapp: drfData.whatsapp || drfData.business_no || '',
+          website: drfData.website_link || drfData.sub_domain_one || undefined,
+          heroImage: drfData.business_banner || 'https://via.placeholder.com/1200x600?text=No+Image',
+          gallery: drfData.gallery_photos?.length > 0 
+            ? drfData.gallery_photos.map((p: any) => ({ src: p.image, alt: p.caption || 'Gallery Image' }))
+            : [
+                { src: drfData.business_banner, alt: 'Banner' } // Fallback to banner if no gallery
+              ],
+          reviews: drfData.reviews?.map((r: any) => ({
+            id: r.id?.toString(),
+            name: r.user_name || 'User',
+            initials: (r.user_name || 'U').substring(0, 1).toUpperCase(),
+            timeAgo: new Date(r.timestamp).toLocaleDateString(),
+            rating: r.rating || 5,
+            comment: r.comment || ''
+          })) || [],
+          ratingBreakdown: [
+            { stars: 5, pct: 80 },
+            { stars: 4, pct: 15 },
+            { stars: 3, pct: 5 },
+            { stars: 2, pct: 0 },
+            { stars: 1, pct: 0 },
+          ]
+        };
+        setBiz(mappedBiz);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -103,7 +261,8 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
   const displayedGallery = showAllGallery ? biz.gallery : biz.gallery.slice(0, 5);
 
   return (
-    <div className="w-full">
+    <div className="w-full relative">
+      <Toaster position="top-center" />
       {/* ─── Hero Section ───────────────────────────────────────────── */}
       <section className="relative w-full h-[380px] md:h-[460px] overflow-hidden">
         <img
@@ -193,11 +352,11 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
               Website
             </a>
           )}
-          <button className="flex items-center gap-2 border border-hairline-soft text-secondary hover:border-primary hover:text-primary px-6 py-3 rounded-full font-bold text-sm transition-all cursor-pointer">
+          <button onClick={handleShare} className="flex items-center gap-2 border border-hairline-soft text-secondary hover:border-primary hover:text-primary px-6 py-3 rounded-full font-bold text-sm transition-all cursor-pointer">
             <span className="material-symbols-outlined text-lg">share</span>
             Share
           </button>
-          <button className="flex items-center gap-2 border border-hairline-soft text-secondary hover:border-primary hover:text-primary px-6 py-3 rounded-full font-bold text-sm transition-all cursor-pointer">
+          <button onClick={handleSave} className="flex items-center gap-2 border border-hairline-soft text-secondary hover:border-primary hover:text-primary px-6 py-3 rounded-full font-bold text-sm transition-all cursor-pointer">
             <span className="material-symbols-outlined text-lg">bookmark</span>
             Save
           </button>
@@ -284,7 +443,7 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
                     </div>
                   </div>
                 </div>
-                <button className="bg-primary hover:bg-primary-deep text-white font-bold px-7 py-3 rounded-full text-sm transition-all active:scale-95 cursor-pointer shadow-sm">
+                <button onClick={() => setShowReviewModal(true)} className="bg-primary hover:bg-primary-deep text-white font-bold px-7 py-3 rounded-full text-sm transition-all active:scale-95 cursor-pointer shadow-sm">
                   Write a Review
                 </button>
               </div>
@@ -392,13 +551,93 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
               <span className="material-symbols-outlined text-primary text-3xl mb-3 block">storefront</span>
               <p className="font-bold text-ink-deep mb-1 text-sm">Is this your business?</p>
               <p className="text-xs text-secondary mb-4">Claim this listing to update details and respond to reviews.</p>
-              <button className="w-full bg-primary hover:bg-primary-deep text-white font-bold text-sm py-3 rounded-full transition-all cursor-pointer">
+              <button onClick={() => setShowClaimModal(true)} className="w-full bg-primary hover:bg-primary-deep text-white font-bold text-sm py-3 rounded-full transition-all cursor-pointer">
                 Claim Listing
               </button>
             </div>
           </aside>
         </div>
       </div>
+
+      {/* Review Modal */}
+      {showReviewModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
+            <button onClick={() => setShowReviewModal(false)} className="absolute top-4 right-4 text-secondary hover:text-ink-deep">
+              <span className="material-symbols-outlined">close</span>
+            </button>
+            <h2 className="text-2xl font-bold text-ink-deep mb-4">Write a Review</h2>
+            <form onSubmit={submitReview} className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold mb-2">Rating</label>
+                <select 
+                  className="w-full border border-hairline-soft rounded-lg p-3 outline-none" 
+                  value={reviewForm.rating} 
+                  onChange={(e) => setReviewForm({...reviewForm, rating: parseInt(e.target.value)})}
+                >
+                  <option value="5">5 Stars - Excellent</option>
+                  <option value="4">4 Stars - Good</option>
+                  <option value="3">3 Stars - Average</option>
+                  <option value="2">2 Stars - Poor</option>
+                  <option value="1">1 Star - Terrible</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold mb-2">Your Review</label>
+                <textarea 
+                  required 
+                  className="w-full border border-hairline-soft rounded-lg p-3 outline-none min-h-[120px]" 
+                  placeholder="Share your experience..."
+                  value={reviewForm.comment}
+                  onChange={(e) => setReviewForm({...reviewForm, comment: e.target.value})}
+                ></textarea>
+              </div>
+              <button disabled={isSubmitting} type="submit" className="w-full bg-primary hover:bg-primary-deep text-white py-3 rounded-xl font-bold transition-all disabled:opacity-50">
+                {isSubmitting ? 'Submitting...' : 'Submit Review'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Claim Modal */}
+      {showClaimModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
+            <button onClick={() => setShowClaimModal(false)} className="absolute top-4 right-4 text-secondary hover:text-ink-deep">
+              <span className="material-symbols-outlined">close</span>
+            </button>
+            <h2 className="text-2xl font-bold text-ink-deep mb-4">Claim this Business</h2>
+            <p className="text-secondary text-sm mb-6">Provide your contact details and a message to verify ownership.</p>
+            <form onSubmit={submitClaim} className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold mb-2">Contact Number *</label>
+                <input 
+                  type="tel" 
+                  required 
+                  className="w-full border border-hairline-soft rounded-lg p-3 outline-none" 
+                  placeholder="Your mobile number"
+                  value={claimForm.contact_number}
+                  onChange={(e) => setClaimForm({...claimForm, contact_number: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold mb-2">Message *</label>
+                <textarea 
+                  required 
+                  className="w-full border border-hairline-soft rounded-lg p-3 outline-none min-h-[100px]" 
+                  placeholder="Tell us about your ownership..."
+                  value={claimForm.message}
+                  onChange={(e) => setClaimForm({...claimForm, message: e.target.value})}
+                ></textarea>
+              </div>
+              <button disabled={isSubmitting} type="submit" className="w-full bg-primary hover:bg-primary-deep text-white py-3 rounded-xl font-bold transition-all disabled:opacity-50">
+                {isSubmitting ? 'Submitting...' : 'Submit Claim Request'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -20,18 +20,29 @@ export default function TrendingListings() {
     const fetchListings = async () => {
       try {
         const url = process.env.NEXT_PUBLIC_API_URL 
-          ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/search/`
-          : '/api/v1/search/';
+          ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/listings/trending/`
+          : '/api/v1/listings/trending/';
         const res = await fetch(url);
         if (!res.ok) {
-          console.warn('Listings API not available yet');
+          console.warn('Trending Listings API not available yet');
           setListings([]);
           return;
         }
         const json = await res.json();
         const results = json.results || json.data || json || [];
-        // Just take the top 4 to simulate trending
-        setListings(results.slice(0, 4));
+        
+        // Map DRF ListingListSerializer to TrendingListing
+        const mappedResults = results.map((item: any) => ({
+          id: item.slug || item.id,
+          name: item.business_name,
+          category: item.main_category_name || 'Business',
+          rating: item.avg_rating || 4.0,
+          location: item.city || 'Jalgaon',
+          image: item.business_banner || '',
+          verified: true
+        }));
+        
+        setListings(mappedResults.slice(0, 4));
       } catch (err) {
         // Silently swallow network errors so Next.js doesn't pop up the dev overlay
       } finally {

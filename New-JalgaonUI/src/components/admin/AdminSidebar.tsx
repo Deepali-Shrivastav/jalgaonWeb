@@ -173,6 +173,16 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed }) => {
           </Link>
         )}
 
+        {/* NGOs */}
+        {canSeeEvents && (
+          <div className="space-y-1">
+            <Link href="/admin/ngos" className={navLinkClass("/admin/ngos")}>
+              <span className="material-symbols-outlined">volunteer_activism</span>
+              {!isCollapsed && <span>NGOs</span>}
+            </Link>
+          </div>
+        )}
+
         {/* Moderation */}
         {canSeeModeration && (
           <Link href="/admin/moderation" className={navLinkClass("/admin/moderation")}>
