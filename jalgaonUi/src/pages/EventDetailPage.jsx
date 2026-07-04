@@ -7,6 +7,15 @@ import SocialShareBar from '../components/News/SocialShareBar';
 import EventSchemaLD from '../components/Events/EventSchemaLD';
 import './EventDetailPage.css';
 
+const formatExternalUrl = (url) => {
+    if (!url) return '#';
+    const trimmed = url.trim();
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+        return trimmed;
+    }
+    return `https://${trimmed}`;
+};
+
 const EventDetailPage = () => {
     const { slug } = useParams();
     const djangoApi = import.meta.env.VITE_DJANGO_API;
@@ -157,7 +166,12 @@ const EventDetailPage = () => {
                                 <h3>Interested in attending?</h3>
                                 <p>Reserve your spot or register officially on the organizer site.</p>
                             </div>
-                            <a href={event.registration_link} target="_blank" rel="noopener noreferrer" className="register-now-btn">
+                            <a 
+                                href={formatExternalUrl(event.registration_link)} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="register-now-btn"
+                            >
                                 Register / RSVP Now <i className='bx bx-export'></i>
                             </a>
                         </div>
@@ -184,7 +198,7 @@ const EventDetailPage = () => {
                             </div>
                             {event.maps_url && (
                                 <div className="map-external-link">
-                                    <a href={event.maps_url} target="_blank" rel="noopener noreferrer">
+                                    <a href={formatExternalUrl(event.maps_url)} target="_blank" rel="noopener noreferrer">
                                         Open Location in Google Maps <i className='bx bx-link-external'></i>
                                     </a>
                                 </div>

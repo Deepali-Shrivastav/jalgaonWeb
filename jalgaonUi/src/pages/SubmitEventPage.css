@@ -26,6 +26,83 @@
     margin: 0;
 }
 
+/* Auth required card */
+.auth-required-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 48px 32px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    margin: 20px 0;
+}
+
+.auth-icon-wrapper {
+    width: 72px;
+    height: 72px;
+    background: #ede9fe;
+    color: #7c3aed;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    margin: 0 auto 20px;
+}
+
+.auth-required-card h2 {
+    font-size: 1.8rem;
+    color: #0f172a;
+    margin: 0 0 10px 0;
+}
+
+.auth-required-card p {
+    font-size: 1.1rem;
+    color: #64748b;
+    margin: 0 0 28px 0;
+}
+
+.auth-card-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.auth-login-btn {
+    background: #7c3aed;
+    color: #ffffff;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    transition: all 0.3s ease;
+}
+
+.auth-login-btn:hover {
+    background: #6d28d9;
+    transform: translateY(-2px);
+}
+
+.auth-back-btn {
+    color: #64748b;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.2s ease;
+}
+
+.auth-back-btn:hover {
+    color: #0f172a;
+}
+
 .alert {
     padding: 16px 20px;
     border-radius: 10px;

@@ -12,9 +12,9 @@ const UpcomingEventsSection = () => {
     useEffect(() => {
         const fetchUpcoming = async () => {
             try {
-                const response = await axios.get(`${djangoApi}/api/v1/events/?featured=true`);
+                const response = await axios.get(`${djangoApi}/api/v1/events/`);
                 const results = response.data.results || response.data;
-                setEvents(results.slice(0, 3)); // show top 3 on home
+                setEvents(results.slice(0, 3)); // show top 3 upcoming approved events
                 setLoading(false);
             } catch (error) {
                 console.error("Error fetching upcoming homepage events:", error);

@@ -2,14 +2,17 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { UserContext } from '../context/UserContext';
+import { FormContext } from '../context/FormContext';
 import Navbar from '../components/Navbar/Navbar';
 import Footer from '../components/Footer/Footer';
+import LoginSignup from '../components/LoginSignup/LoginSignup';
 import './SubmitEventPage.css';
 
 const SubmitEventPage = () => {
     const djangoApi = import.meta.env.VITE_DJANGO_API;
     const navigate = useNavigate();
     const { isLogin, loading: authLoading } = useContext(UserContext);
+    const { setCloseForm } = useContext(FormContext);
 
     const [categories, setCategories] = useState([]);
     const [submitting, setSubmitting] = useState(false);
@@ -35,13 +38,6 @@ const SubmitEventPage = () => {
     });
 
     const [imageFile, setImageFile] = useState(null);
-
-    // Auth Guard
-    useEffect(() => {
-        if (!authLoading && !isLogin) {
-            navigate('/account');
-        }
-    }, [isLogin, authLoading, navigate]);
 
     // Fetch Categories
     useEffect(() => {
@@ -129,6 +125,38 @@ const SubmitEventPage = () => {
     };
 
     if (authLoading) return null;
+
+    // Unauthenticated prompt view
+    if (!isLogin) {
+        return (
+            <div className="submit-event-page-wrapper">
+                <Navbar />
+                <main className="submit-event-container">
+                    <div className="auth-required-card">
+                        <div className="auth-icon-wrapper">
+                            <i className='bx bx-lock-alt'></i>
+                        </div>
+                        <h2>Authentication Required</h2>
+                        <p>You must be logged in to submit a new event on Jalgaon.com.</p>
+
+                        <div className="auth-card-actions">
+                            <button 
+                                onClick={() => setCloseForm(false)} 
+                                className="auth-login-btn"
+                            >
+                                <i className='bx bx-log-in-circle'></i> Login / Signup Now
+                            </button>
+                            <Link to="/events" className="auth-back-btn">
+                                ← Back to Events
+                            </Link>
+                        </div>
+                    </div>
+                </main>
+                <LoginSignup />
+                <Footer />
+            </div>
+        );
+    }
 
     return (
         <div className="submit-event-page-wrapper">
@@ -368,7 +396,7 @@ const SubmitEventPage = () => {
                                 name="registration_link"
                                 value={formData.registration_link}
                                 onChange={handleInputChange}
-                                placeholder="https://jalgaon.com/register/event-name"
+                                placeholder="https://example.com/register"
                             />
                         </div>
                     </div>
@@ -385,6 +413,7 @@ const SubmitEventPage = () => {
                 </form>
             </main>
 
+            <LoginSignup />
             <Footer />
         </div>
     );

@@ -69,6 +69,9 @@ const Navbar = () => {
                         <NavLink to='/news'>
                             <li>News</li>
                         </NavLink>
+                        <NavLink to='/events'>
+                            <li>Events</li>
+                        </NavLink>
                     </ul>
                     <div className="nav_login">
                         <i className='bx bx-heart'></i>

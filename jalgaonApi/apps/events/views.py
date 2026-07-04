@@ -52,7 +52,7 @@ class UpcomingEventsListView(generics.ListAPIView):
         queryset = Event.objects.filter(
             status='approved',
             start_datetime__gte=timezone.now()
-        ).order_by('start_datetime')
+        ).order_by('-is_featured', 'start_datetime')
 
         category_slug = self.request.query_params.get('category')
         if category_slug:
