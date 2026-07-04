@@ -39,46 +39,52 @@ function BusinessCard({ businessData, is_like, is_edit=false }) {
     };
 
     return (
-        <Link to={`/productView/${businessData.id}`}>
-        <div className="business_card">
-            <div className="business_imgg">
-                <img src={businessData.business_banner?.startsWith('http') ? businessData.business_banner : `${img_url}${businessData.business_banner}`} alt="" />
-            </div>
-            <div className="business_info">
-                <p className='business_name'>
-                    <span>{businessData.business_name}</span>
-                    {is_edit ? (
-                        <Link to={`/editForm/${businessData.id}`}>
-                            <i onClick={() => addLikedShop(user.id, businessData.id)} className='bx bxs-edit'></i>
-                        </Link>
-
-                    ) : (
-                        <i onClick={() => addLikedShop(user.id, businessData.id)} className='bx bx-heart'></i>
-                    )}
-                </p>
-                <div className="business_rating">
-                    <span>5</span>
-                    <div className="rating">
-                        <i className='bx bxs-star'></i><i className='bx bxs-star'></i><i className='bx bxs-star'></i><i className='bx bxs-star'></i><i className='bx bxs-star'></i>
+        <div className="business_card_wrapper" style={{ position: 'relative' }}>
+            {businessData.is_trending && (
+                <div style={{ position: 'absolute', top: '10px', left: '10px', background: 'gold', color: '#000', padding: '4px 10px', borderRadius: '4px', fontWeight: 'bold', fontSize: '12px', zIndex: 10 }}>
+                    <i className='bx bxs-star'></i> Featured
+                </div>
+            )}
+            <Link to={`/business/jalgaon/${businessData.main_category_slug || 'uncategorized'}/${businessData.slug || businessData.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="business_card">
+                <div className="business_imgg">
+                    <img src={businessData.business_banner?.startsWith('http') ? businessData.business_banner : (businessData.business_banner ? `${img_url}${businessData.business_banner}` : '/placeholder_banner.jpg')} alt={businessData.business_name} />
+                </div>
+                <div className="business_info">
+                    <p className='business_name'>
+                        <span>{businessData.business_name}</span>
+                        {!is_edit && (
+                            <i onClick={(e) => { e.preventDefault(); addLikedShop(user?.id, businessData.id); }} className='bx bx-heart'></i>
+                        )}
+                    </p>
+                    <div className="business_rating">
+                        <span>{businessData.avg_rating || '5.0'}</span>
+                        <div className="rating" style={{ color: '#FFD700' }}>
+                            <i className='bx bxs-star'></i>
+                            <span style={{ color: '#64748b', marginLeft: '5px', fontSize: '14px' }}>({businessData.review_count || 0} Reviews)</span>
+                        </div>
+                    </div>
+                    <div className="business_location">
+                        <i className='bx bxs-map'></i> <p>{businessData.business_address}</p>
+                    </div>
+                    <div className="business_keywords">
+                        {businessData.main_category && <span>{businessData.main_category}</span>}
+                        {businessData.sub_category && <span>{businessData.sub_category}</span>}
+                    </div>
+                    <div className="business_contact">
+                        {is_edit ? (
+                            <Link to={`/business-dashboard/${businessData.slug}`} className='business_call_btn' onClick={e => e.stopPropagation()} style={{ background: '#0f172a', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                <i className='bx bxs-dashboard'></i> Dashboard
+                            </Link>
+                        ) : (
+                            <a href={`tel:${businessData.business_no}`} className='business_call_btn' onClick={e => e.stopPropagation()}><i className='bx bxs-phone'></i> Call Us</a>
+                        )}
+                        <Link to={`/business/jalgaon/${businessData.main_category_slug || 'uncategorized'}/${businessData.slug || businessData.id}`}><p>View Details</p></Link>
                     </div>
                 </div>
-                <div className="business_location">
-                    <i className='bx bxs-map'></i> <p>{businessData.business_address}</p>
-                </div>
-                <div className="business_keywords">
-                    <span>{businessData.sub_domain_one}</span>
-                    <span>{businessData.sub_domain_two}</span>
-                    <span>{businessData.sub_domain_three}</span>
-                </div>
-                <div className="business_contact">
-                    <a href={`tel:${businessData.business_no}`} className='business_call_btn'><i className='bx bxs-phone'></i> Call Us</a>
-                    <Link to={`/productView/${businessData.id}`}><p>View Details</p></Link>
-                    <Link to='/'><p><i className='bx bx-share-alt'></i> <span>Share</span></p></Link>
-                </div>
             </div>
+            </Link>
         </div>
-        </Link>
-        
     );
 }
 

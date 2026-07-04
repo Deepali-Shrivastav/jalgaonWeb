@@ -2,26 +2,13 @@ import React, { useEffect, useState } from 'react';
 import './Category.css'
 import axios from 'axios';
 
-function Category({ name }) {
-    const djangoApi = import.meta.env.VITE_DJANGO_API
-    const [subCategories, setSubCategories] = useState([]);
+function Category({ name, subCategoriesData = [] }) {
+    const djangoApi = import.meta.env.VITE_DJANGO_API;
+    const [subCategories, setSubCategories] = useState(subCategoriesData);
 
-    useEffect(()=>{
-        if (name) {
-            axios.get(`${djangoApi}/api/v1/listings/subcategories/`)
-              .then(sub_response => {
-                const categoriesData = sub_response.data.results || sub_response.data.categories || sub_response.data;
-                const filteredSubCategories = categoriesData.filter(
-                  subCategory => subCategory.main_category === name
-                );
-                setSubCategories(filteredSubCategories);
-                console.log("datasdfsdfsdf get");
-              })
-              .catch(error => {
-                console.error('Error fetching sub-categories:', error);
-              });
-          }
-    }, [])
+    useEffect(() => {
+        setSubCategories(subCategoriesData);
+    }, [subCategoriesData]);
     return (
         <div className="category">
             <p className="category_name">{name}</p>

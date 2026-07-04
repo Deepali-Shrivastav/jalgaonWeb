@@ -3,8 +3,7 @@ from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication
-from .models import HomeCrouselAds, BannerAds
+from .models import HomeCrouselAds, BannerAds, AdsListing
 from .serializers import HomeCrouselAdsSerializer, BannerAdsSerializer, AdsListingSerializer
 
 logger = logging.getLogger(__name__)
@@ -36,13 +35,32 @@ class BannerAdsView(APIView):
 
 class AdsListingCreateAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
 
     def post(self, request, *args, **kwargs):
         serializer = AdsListingSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(user=request.user, status='pending')
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             logger.error(f"Validation errors: {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserAdsListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        shop_id = request.query_params.get('shop_id')
+        ads = AdsListing.objects.filter(user=request.user)
+        if shop_id:
+            ads = ads.filter(shop_listing_id=shop_id)
+        
+        serializer = AdsListingSerializer(ads, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class PublicAdsListView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        ads = AdsListing.objects.filter(status='active').order_by('-updated_at')
+        serializer = AdsListingSerializer(ads, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

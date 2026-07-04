@@ -1,0 +1,154 @@
+.jobs-index-page {
+    background-color: #f8fafc;
+    min-height: 100vh;
+}
+
+.jobs-hero {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    padding: 60px 0;
+    text-align: center;
+    color: white;
+}
+
+.jobs-hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.jobs-hero p {
+    font-size: 1.1rem;
+    color: #94a3b8;
+    margin-bottom: 30px;
+}
+
+.jobs-search-form {
+    display: flex;
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 10px;
+    border-radius: 50px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.search-input-wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-input-wrapper i {
+    position: absolute;
+    left: 20px;
+    color: #64748b;
+    font-size: 1.2rem;
+}
+
+.search-input-wrapper input {
+    width: 100%;
+    padding: 15px 15px 15px 50px;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    outline: none;
+}
+
+.search-btn {
+    padding: 15px 30px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.search-btn:hover {
+    background: #2563eb;
+}
+
+.jobs-main-content {
+    padding: 40px 0;
+}
+
+.jobs-layout {
+    display: flex;
+    gap: 30px;
+}
+
+.jobs-sidebar {
+    width: 280px;
+    flex-shrink: 0;
+}
+
+.jobs-feed {
+    flex: 1;
+    min-width: 0;
+}
+
+.jobs-results-header {
+    margin-bottom: 20px;
+}
+
+.jobs-results-header h2 {
+    font-size: 1.2rem;
+    color: #334155;
+    margin: 0;
+}
+
+.load-more-wrapper {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.load-more-btn {
+    padding: 12px 30px;
+    background: white;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.load-more-btn:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+}
+
+@media (max-width: 992px) {
+    .jobs-layout {
+        flex-direction: column;
+    }
+    
+    .jobs-sidebar {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .jobs-hero h1 {
+        font-size: 2rem;
+    }
+    
+    .jobs-search-form {
+        flex-direction: column;
+        border-radius: 12px;
+        background: transparent;
+        box-shadow: none;
+        padding: 0;
+        gap: 10px;
+    }
+    
+    .search-input-wrapper input {
+        border-radius: 8px;
+    }
+    
+    .search-btn {
+        border-radius: 8px;
+    }
+}

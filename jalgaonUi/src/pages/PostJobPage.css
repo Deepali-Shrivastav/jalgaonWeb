@@ -1,0 +1,166 @@
+.post-job-page {
+    background-color: #f8fafc;
+    min-height: 100vh;
+}
+
+.post-job-header {
+    background: #1e293b;
+    color: white;
+    padding: 60px 0;
+    text-align: center;
+}
+
+.post-job-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.post-job-header p {
+    color: #94a3b8;
+    font-size: 1.1rem;
+}
+
+.post-job-main {
+    max-width: 800px;
+    margin: -30px auto 60px auto;
+}
+
+.post-job-form {
+    background: white;
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.form-section {
+    margin-bottom: 40px;
+}
+
+.form-section h3 {
+    font-size: 1.2rem;
+    color: #1e293b;
+    margin: 0 0 20px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.post-job-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #475569;
+}
+
+.post-job-form input,
+.post-job-form select,
+.post-job-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.post-job-form input:focus,
+.post-job-form select:focus,
+.post-job-form textarea:focus {
+    border-color: #3b82f6;
+}
+
+.post-job-form small {
+    display: block;
+    margin-top: 5px;
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+.form-actions {
+    text-align: right;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 20px;
+}
+
+.submit-btn {
+    padding: 15px 40px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.submit-btn:hover:not(:disabled) {
+    background: #2563eb;
+}
+
+.submit-btn:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+}
+
+.error-alert {
+    background: #fee2e2;
+    color: #dc2626;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.success-box {
+    background: white;
+    padding: 50px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.success-box i {
+    font-size: 5rem;
+    color: #10b981;
+    margin-bottom: 20px;
+}
+
+.success-box h2 {
+    color: #059669;
+    margin-bottom: 15px;
+}
+
+.btn-primary {
+    display: inline-block;
+    padding: 12px 30px;
+    background: #3b82f6;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    margin-top: 20px;
+    border: none;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+}

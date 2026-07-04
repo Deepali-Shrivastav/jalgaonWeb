@@ -1,13 +1,18 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { UserContext } from '../../context/UserContext';
 import { 
     MdDashboard, MdPeople, MdStorefront, 
-    MdCategory, MdGavel, MdArticle, MdComment, MdEvent
+    MdCategory, MdGavel, MdArticle, MdComment, MdEvent,
+    // MdCategory, MdGavel, MdArticle, MdComment,
+    MdWork, MdAssignment, MdExpandMore, MdExpandLess, MdStar, MdCampaign, MdVerifiedUser
 } from 'react-icons/md';
 
 const AdminSidebar = ({ isCollapsed }) => {
     const { isAdmin, userRole } = useContext(UserContext);
+    
+    const [isNewsExpanded, setIsNewsExpanded] = useState(false);
+    const [isJobsExpanded, setIsJobsExpanded] = useState(false);
 
     // Visibility logic based on RBAC matrix
     const canSeeUsers = isAdmin;
@@ -16,7 +21,11 @@ const AdminSidebar = ({ isCollapsed }) => {
     const canSeeModeration = isAdmin || userRole === 'moderator' || userRole === 'content_manager';
     const canSeeNews = isAdmin || ['content_manager', 'news_editor'].includes(userRole);
     const canSeeNewsComments = isAdmin || ['content_manager', 'moderator', 'news_editor'].includes(userRole);
+<<<<<<< HEAD
     const canSeeEvents = isAdmin || ['content_manager', 'moderator'].includes(userRole);
+=======
+    const canSeeJobs = isAdmin || ['content_manager', 'moderator'].includes(userRole);
+>>>>>>> 12d54d16a9ab087e94f21eeec75217cdfeb27b1d
 
     return (
         <aside className={`admin-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
@@ -38,10 +47,20 @@ const AdminSidebar = ({ isCollapsed }) => {
                 )}
 
                 {canSeeListings && (
-                    <NavLink to="/admin/listings" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
-                        <MdStorefront className="admin-sidebar-icon" />
-                        <span className="admin-sidebar-label">Listings</span>
-                    </NavLink>
+                    <>
+                        <NavLink to="/admin/listings" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+                            <MdStorefront className="admin-sidebar-icon" />
+                            <span className="admin-sidebar-label">Listings</span>
+                        </NavLink>
+                        <NavLink to="/admin/trending" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+                            <MdStar className="admin-sidebar-icon" />
+                            <span className="admin-sidebar-label">Trending</span>
+                        </NavLink>
+                        <NavLink to="/admin/ads" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+                            <MdCampaign className="admin-sidebar-icon" />
+                            <span className="admin-sidebar-label">Ads Moderation</span>
+                        </NavLink>
+                    </>
                 )}
 
                 {canSeeCategories && (
@@ -52,24 +71,69 @@ const AdminSidebar = ({ isCollapsed }) => {
                 )}
                 
                 {canSeeNews && (
-                    <>
-                        <NavLink to="/admin/news" end className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
-                            <MdArticle className="admin-sidebar-icon" />
-                            <span className="admin-sidebar-label">News Articles</span>
-                        </NavLink>
-                        
-                        <NavLink to="/admin/news/categories" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
-                            <MdCategory className="admin-sidebar-icon" />
-                            <span className="admin-sidebar-label">News Categories</span>
-                        </NavLink>
-                    </>
+                    <div className="admin-sidebar-dropdown">
+                        <div 
+                            className="admin-sidebar-dropdown-header"
+                            onClick={() => setIsNewsExpanded(!isNewsExpanded)}
+                        >
+                            <div className="admin-sidebar-dropdown-header-left">
+                                <MdArticle className="admin-sidebar-icon" />
+                                <span className="admin-sidebar-label">News Module</span>
+                            </div>
+                            <span className="dropdown-icon">
+                                {isNewsExpanded ? <MdExpandLess /> : <MdExpandMore />}
+                            </span>
+                        </div>
+                        {isNewsExpanded && (
+                            <div className="admin-sidebar-dropdown-content">
+                                <NavLink to="/admin/news" end className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+                                    <span className="admin-sidebar-label">Articles</span>
+                                </NavLink>
+                                
+                                <NavLink to="/admin/news/categories" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+                                    <span className="admin-sidebar-label">Categories</span>
+                                </NavLink>
+                                
+                                {canSeeNewsComments && (
+                                    <NavLink to="/admin/news/comments" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+                                        <span className="admin-sidebar-label">Comments</span>
+                                    </NavLink>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 )}
-                
-                {canSeeNewsComments && (
-                    <NavLink to="/admin/news/comments" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
-                        <MdComment className="admin-sidebar-icon" />
-                        <span className="admin-sidebar-label">News Comments</span>
-                    </NavLink>
+
+                {canSeeJobs && (
+                    <div className="admin-sidebar-dropdown">
+                        <div 
+                            className="admin-sidebar-dropdown-header"
+                            onClick={() => setIsJobsExpanded(!isJobsExpanded)}
+                        >
+                            <div className="admin-sidebar-dropdown-header-left">
+                                <MdWork className="admin-sidebar-icon" />
+                                <span className="admin-sidebar-label">Job Portal</span>
+                            </div>
+                            <span className="dropdown-icon">
+                                {isJobsExpanded ? <MdExpandLess /> : <MdExpandMore />}
+                            </span>
+                        </div>
+                        {isJobsExpanded && (
+                            <div className="admin-sidebar-dropdown-content">
+                                <NavLink to="/admin/jobs" end className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+                                    <span className="admin-sidebar-label">Job Listings</span>
+                                </NavLink>
+                                
+                                <NavLink to="/admin/jobs/applications" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+                                    <span className="admin-sidebar-label">Applications</span>
+                                </NavLink>
+                                
+                                <NavLink to="/admin/jobs/categories" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+                                    <span className="admin-sidebar-label">Categories</span>
+                                </NavLink>
+                            </div>
+                        )}
+                    </div>
                 )}
 
                 {canSeeEvents && (
@@ -80,10 +144,20 @@ const AdminSidebar = ({ isCollapsed }) => {
                 )}
 
                 {canSeeModeration && (
-                    <NavLink to="/admin/moderation" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
-                        <MdGavel className="admin-sidebar-icon" />
-                        <span className="admin-sidebar-label">Moderation</span>
-                    </NavLink>
+                    <>
+                        <NavLink to="/admin/moderation" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+                            <MdGavel className="admin-sidebar-icon" />
+                            <span className="admin-sidebar-label">Moderation</span>
+                        </NavLink>
+                        <NavLink to="/admin/claims" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+                            <MdVerifiedUser className="admin-sidebar-icon" />
+                            <span className="admin-sidebar-label">Business Claims</span>
+                        </NavLink>
+                        <NavLink to="/admin/reports" className={({isActive}) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+                            <MdGavel className="admin-sidebar-icon" />
+                            <span className="admin-sidebar-label">Business Reports</span>
+                        </NavLink>
+                    </>
                 )}
             </nav>
         </aside>

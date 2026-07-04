@@ -32,6 +32,7 @@ class AdsListing(models.Model):
     ]
     
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    shop_listing = models.ForeignKey('directory.ShopListing', on_delete=models.CASCADE, null=True, blank=True, related_name='advertisements')
     name = models.CharField(max_length=255)
     contact_number = models.CharField(max_length=15)
     contact_email = models.CharField(max_length=255)
@@ -41,6 +42,11 @@ class AdsListing(models.Model):
         default=BANNER_AD,
     )
     ad_image = models.ImageField(upload_to='static/assets/ads_images')
+    
+    status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('active', 'Active'), ('rejected', 'Rejected')], default='pending')
+    rejection_reason = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'app_adslisting'

@@ -15,8 +15,11 @@ from .serializers import (
     AdminListingSerializer, AdminListingActionSerializer,
     AdminCategoryCreateSerializer, AdminSubCategorySerializer,
     ModerationQueueSerializer, ModerationActionSerializer,
-    AdminSettingSerializer,
+    AdminSettingSerializer, AdminBusinessClaimSerializer,
+    AdminBusinessReportSerializer
 )
+from apps.ads.models import AdsListing
+from apps.ads.serializers import AdsListingSerializer
 from apps.audit.utils import log_audit_action
 
 User = get_user_model()
@@ -40,8 +43,8 @@ class DashboardStatsView(APIView):
         data = {
             'total_users': User.objects.count(),
             'total_listings': ShopListing.objects.count(),
-            'approved_listings': ShopListing.objects.filter(is_valid=True).count(),
-            'pending_listings': ShopListing.objects.filter(is_valid=False).count(),
+            'approved_listings': ShopListing.objects.filter(status='active').count(),
+            'pending_listings': ShopListing.objects.filter(status='pending').count(),
             'total_categories': MainCategory.objects.count(),
             'pending_moderation': ModerationQueue.objects.filter(status='pending').count(),
         }
@@ -171,10 +174,16 @@ class AdminListingListView(generics.ListAPIView):
             )
 
         status_filter = self.request.query_params.get('status', '').strip()
-        if status_filter == 'approved':
-            qs = qs.filter(is_valid=True)
+        if status_filter == 'approved' or status_filter == 'active':
+            qs = qs.filter(status='active')
         elif status_filter == 'pending':
-            qs = qs.filter(is_valid=False)
+            qs = qs.filter(status='pending')
+        elif status_filter == 'rejected':
+            qs = qs.filter(status='rejected')
+
+        trending_filter = self.request.query_params.get('trending', '').strip()
+        if trending_filter == 'true':
+            qs = qs.filter(is_trending=True).order_by('-trending_priority')
 
         category = self.request.query_params.get('category', '').strip()
         if category:
@@ -198,8 +207,8 @@ class AdminListingActionView(APIView):
             ).get(id=listing_id)
         except ShopListing.DoesNotExist:
             return Response({'error': 'Listing not found'}, status=status.HTTP_404_NOT_FOUND)
-        from apps.directory.serializers import ShopListingSerializer
-        serializer = ShopListingSerializer(listing)
+        from apps.directory.serializers import ListingDetailSerializer
+        serializer = ListingDetailSerializer(listing)
         return Response(serializer.data)
 
     def patch(self, request, listing_id):
@@ -212,8 +221,8 @@ class AdminListingActionView(APIView):
         if serializer.is_valid():
             action = serializer.validated_data['action']
             if action == 'approve':
-                listing.is_valid = True
-                listing.save(update_fields=['is_valid'])
+                listing.status = 'active'
+                listing.save(update_fields=['status'])
                 
                 log_audit_action(
                     actor=request.user,
@@ -223,10 +232,10 @@ class AdminListingActionView(APIView):
                     request=request
                 )
                 
-                return Response({'message': 'Listing approved', 'is_valid': True})
+                return Response({'message': 'Listing approved', 'status': 'active'})
             elif action == 'reject':
-                listing.is_valid = False
-                listing.save(update_fields=['is_valid'])
+                listing.status = 'rejected'
+                listing.save(update_fields=['status'])
                 
                 reason = serializer.validated_data.get('rejection_reason', '')
                 log_audit_action(
@@ -240,7 +249,7 @@ class AdminListingActionView(APIView):
                 
                 return Response({
                     'message': 'Listing rejected',
-                    'is_valid': False,
+                    'status': 'rejected',
                     'reason': reason
                 })
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -262,6 +271,42 @@ class AdminListingActionView(APIView):
         
         listing.delete()
         return Response({'message': 'Listing deleted'}, status=status.HTTP_204_NO_CONTENT)
+
+class AdminTrendingActionView(APIView):
+    """
+    PATCH /api/v1/admin-panel/listings/<id>/trending/ — Manage trending status
+    """
+    permission_classes = [IsAdminRole]
+
+    def patch(self, request, listing_id):
+        try:
+            listing = ShopListing.objects.get(id=listing_id)
+        except ShopListing.DoesNotExist:
+            return Response({'error': 'Listing not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        is_trending = request.data.get('is_trending', listing.is_trending)
+        trending_priority = request.data.get('trending_priority', listing.trending_priority)
+        trending_until = request.data.get('trending_until', listing.trending_until)
+
+        listing.is_trending = is_trending
+        listing.trending_priority = trending_priority
+        if trending_until:
+            listing.trending_until = trending_until
+        elif is_trending == False:
+            listing.trending_until = None
+
+        listing.save(update_fields=['is_trending', 'trending_priority', 'trending_until'])
+
+        log_audit_action(
+            actor=request.user,
+            action='update_trending',
+            target_type='ShopListing',
+            target_id=listing.id,
+            changes={'is_trending': is_trending, 'trending_priority': trending_priority},
+            request=request
+        )
+
+        return Response({'message': 'Trending status updated successfully'})
 
 
 # ──────────────────────────────────────────────
@@ -289,7 +334,19 @@ class AdminCategoryListView(APIView):
         return Response(data)
 
     def post(self, request):
-        serializer = AdminCategoryCreateSerializer(data=request.data)
+        data = request.data.copy()
+        
+        # Handle file upload for category image
+        if 'category_img' in request.FILES:
+            from apps.directory.models import CategoryImg
+            img_file = request.FILES['category_img']
+            cat_img = CategoryImg.objects.create(
+                category_img=img_file,
+                img_name=data.get('main_category', 'Category Image')
+            )
+            data['category_img'] = cat_img.id
+            
+        serializer = AdminCategoryCreateSerializer(data=data)
         if serializer.is_valid():
             category = serializer.save()
             log_audit_action(
@@ -333,7 +390,19 @@ class AdminCategoryDetailView(APIView):
         except MainCategory.DoesNotExist:
             return Response({'error': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = AdminCategoryCreateSerializer(category, data=request.data, partial=True)
+        data = request.data.copy()
+        
+        # Handle file upload for category image if provided
+        if 'category_img' in request.FILES:
+            from apps.directory.models import CategoryImg
+            img_file = request.FILES['category_img']
+            cat_img = CategoryImg.objects.create(
+                category_img=img_file,
+                img_name=data.get('main_category', category.main_category)
+            )
+            data['category_img'] = cat_img.id
+
+        serializer = AdminCategoryCreateSerializer(category, data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
             log_audit_action(
@@ -371,6 +440,87 @@ class AdminCategoryDetailView(APIView):
         category.delete()
         return Response({'message': 'Category deleted'}, status=status.HTTP_204_NO_CONTENT)
 
+# ──────────────────────────────────────────────
+# SubCategory Management
+# ──────────────────────────────────────────────
+
+class AdminSubCategoryListView(APIView):
+    """
+    POST /api/v1/admin-panel/subcategories/ — Create a new subcategory.
+    """
+    permission_classes = [IsAdminRole]
+
+    def post(self, request):
+        data = request.data.copy()
+        
+        # Handle file upload for subcategory image
+        if 'sub_category_img' not in request.FILES:
+            return Response({'error': 'Subcategory image is required'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        serializer = AdminSubCategorySerializer(data=data)
+        if serializer.is_valid():
+            subcategory = serializer.save()
+            log_audit_action(
+                actor=request.user,
+                action='create_subcategory',
+                target_type='SubCategory',
+                target_id=subcategory.id,
+                changes={'sub_category': subcategory.sub_category, 'main_category': subcategory.main_category.id},
+                request=request
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class AdminSubCategoryDetailView(APIView):
+    """
+    PATCH  /api/v1/admin-panel/subcategories/<id>/ — Update subcategory.
+    DELETE /api/v1/admin-panel/subcategories/<id>/ — Delete subcategory.
+    """
+    permission_classes = [IsAdminRole]
+
+    def patch(self, request, subcategory_id):
+        try:
+            subcategory = SubCategory.objects.get(id=subcategory_id)
+        except SubCategory.DoesNotExist:
+            return Response({'error': 'SubCategory not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = AdminSubCategorySerializer(subcategory, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            log_audit_action(
+                actor=request.user,
+                action='update_subcategory',
+                target_type='SubCategory',
+                target_id=subcategory.id,
+                changes={'sub_category': subcategory.sub_category},
+                request=request
+            )
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, subcategory_id):
+        try:
+            subcategory = SubCategory.objects.get(id=subcategory_id)
+        except SubCategory.DoesNotExist:
+            return Response({'error': 'SubCategory not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        listings_count = ShopListing.objects.filter(sub_category=subcategory).count()
+        if listings_count > 0:
+            return Response(
+                {'error': f'Cannot delete: {listings_count} listings use this subcategory'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        log_audit_action(
+            actor=request.user,
+            action='delete_subcategory',
+            target_type='SubCategory',
+            target_id=subcategory.id,
+            changes={'sub_category': subcategory.sub_category},
+            request=request
+        )
+        subcategory.delete()
+        return Response({'message': 'SubCategory deleted'}, status=status.HTTP_204_NO_CONTENT)
 
 # ──────────────────────────────────────────────
 # Moderation Queue
@@ -421,16 +571,27 @@ class ModerationActionView(APIView):
             if action == 'approve':
                 item.status = 'approved'
                 content_obj = item.content_object
-                if content_obj and hasattr(content_obj, 'is_valid'):
-                    content_obj.is_valid = True
-                    content_obj.save(update_fields=['is_valid'])
+                if content_obj:
+                    if hasattr(content_obj, 'status'):
+                        if type(content_obj).__name__ == 'ShopListing':
+                            content_obj.status = 'active'
+                        else:
+                            content_obj.status = 'approved'
+                        content_obj.save(update_fields=['status'])
+                    elif hasattr(content_obj, 'is_valid'):
+                        content_obj.is_valid = True
+                        content_obj.save(update_fields=['is_valid'])
             elif action == 'reject':
                 item.status = 'rejected'
                 item.rejection_reason = serializer.validated_data.get('rejection_reason', '')
                 content_obj = item.content_object
-                if content_obj and hasattr(content_obj, 'is_valid'):
-                    content_obj.is_valid = False
-                    content_obj.save(update_fields=['is_valid'])
+                if content_obj:
+                    if hasattr(content_obj, 'status'):
+                        content_obj.status = 'rejected'
+                        content_obj.save(update_fields=['status'])
+                    elif hasattr(content_obj, 'is_valid'):
+                        content_obj.is_valid = False
+                        content_obj.save(update_fields=['is_valid'])
 
             item.save()
             
@@ -445,3 +606,150 @@ class ModerationActionView(APIView):
             
             return Response(ModerationQueueSerializer(item).data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class AdminBusinessClaimListView(generics.ListAPIView):
+    permission_classes = [IsModerator]
+    serializer_class = AdminBusinessClaimSerializer
+    pagination_class = AdminPagination
+
+    def get_queryset(self):
+        from apps.directory.models import BusinessClaim
+        qs = BusinessClaim.objects.select_related('shop_listing', 'user').order_by('-created_at')
+        status_filter = self.request.query_params.get('status', '').strip()
+        if status_filter:
+            qs = qs.filter(status=status_filter)
+        return qs
+
+class AdminBusinessClaimActionView(APIView):
+    permission_classes = [IsModerator]
+
+    def patch(self, request, claim_id):
+        from apps.directory.models import BusinessClaim
+        try:
+            claim = BusinessClaim.objects.get(id=claim_id)
+        except BusinessClaim.DoesNotExist:
+            return Response({'error': 'Claim not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        action = request.data.get('action')
+        if action == 'approve':
+            claim.status = 'approved'
+            claim.save()
+            
+            # Transfer ownership
+            shop = claim.shop_listing
+            shop.user = claim.user
+            shop.is_claimed = True
+            shop.save(update_fields=['user', 'is_claimed'])
+            
+            log_audit_action(
+                actor=request.user, action='approve_claim', target_type='BusinessClaim',
+                target_id=claim.id, request=request
+            )
+            return Response({'message': 'Claim approved, ownership transferred.', 'status': 'approved'})
+            
+        elif action == 'reject':
+            claim.status = 'rejected'
+            claim.save()
+            
+            log_audit_action(
+                actor=request.user, action='reject_claim', target_type='BusinessClaim',
+                target_id=claim.id, request=request
+            )
+            return Response({'message': 'Claim rejected', 'status': 'rejected'})
+            
+        return Response({'error': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)
+
+class AdminBusinessReportListView(generics.ListAPIView):
+    permission_classes = [IsModerator]
+    serializer_class = AdminBusinessReportSerializer
+    pagination_class = AdminPagination
+
+    def get_queryset(self):
+        from apps.directory.models import BusinessReport
+        qs = BusinessReport.objects.select_related('shop_listing', 'reported_by').order_by('-created_at')
+        status_filter = self.request.query_params.get('status', '').strip()
+        if status_filter:
+            qs = qs.filter(status=status_filter)
+        return qs
+
+class AdminBusinessReportActionView(APIView):
+    permission_classes = [IsModerator]
+
+    def patch(self, request, report_id):
+        from apps.directory.models import BusinessReport
+        try:
+            report = BusinessReport.objects.get(id=report_id)
+        except BusinessReport.DoesNotExist:
+            return Response({'error': 'Report not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        action = request.data.get('action')
+        if action == 'resolve':
+            report.status = 'resolved'
+            report.save()
+            log_audit_action(
+                actor=request.user, action='resolve_report', target_type='BusinessReport',
+                target_id=report.id, request=request
+            )
+            return Response({'message': 'Report marked as resolved', 'status': 'resolved'})
+        elif action == 'dismiss':
+            report.status = 'dismissed'
+            report.save()
+            log_audit_action(
+                actor=request.user, action='dismiss_report', target_type='BusinessReport',
+                target_id=report.id, request=request
+            )
+            return Response({'message': 'Report dismissed', 'status': 'dismissed'})
+            
+        return Response({'error': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)
+
+# ──────────────────────────────────────────────
+# Ads Moderation
+# ──────────────────────────────────────────────
+
+class AdminAdsListView(generics.ListAPIView):
+    """GET /api/v1/admin-panel/ads/ — All ads with filters."""
+    permission_classes = [IsAdminRole]
+    serializer_class = AdsListingSerializer
+    pagination_class = AdminPagination
+
+    def get_queryset(self):
+        qs = AdsListing.objects.select_related('user', 'shop_listing').order_by('-created_at')
+        status_filter = self.request.query_params.get('status', '').strip()
+        if status_filter:
+            qs = qs.filter(status=status_filter)
+        return qs
+
+class AdminAdsActionView(APIView):
+    """PATCH /api/v1/admin-panel/ads/<id>/ — Approve or reject an ad."""
+    permission_classes = [IsAdminRole]
+
+    def patch(self, request, ad_id):
+        try:
+            ad = AdsListing.objects.get(id=ad_id)
+        except AdsListing.DoesNotExist:
+            return Response({'error': 'Ad not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        action = request.data.get('action')
+        if action == 'approve':
+            ad.status = 'active'
+            ad.rejection_reason = None
+            ad.save(update_fields=['status', 'rejection_reason'])
+            
+            log_audit_action(
+                actor=request.user, action='approve_ad', target_type='AdsListing',
+                target_id=ad.id, request=request
+            )
+            return Response({'message': 'Ad approved', 'status': 'active'})
+            
+        elif action == 'reject':
+            ad.status = 'rejected'
+            ad.rejection_reason = request.data.get('rejection_reason', '')
+            ad.save(update_fields=['status', 'rejection_reason'])
+            
+            log_audit_action(
+                actor=request.user, action='reject_ad', target_type='AdsListing',
+                target_id=ad.id, changes={'reason': ad.rejection_reason}, request=request
+            )
+            return Response({'message': 'Ad rejected', 'status': 'rejected'})
+            
+        return Response({'error': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)

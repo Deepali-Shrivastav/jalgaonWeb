@@ -71,6 +71,11 @@ const Navbar = () => {
                         </NavLink>
                         <NavLink to='/events'>
                             <li>Events</li>
+                        <NavLink to='/jobs'>
+                            <li>Jobs</li>
+                        </NavLink>
+                        <NavLink to='/jobs/post'>
+                            <li>Post a Job</li>
                         </NavLink>
                     </ul>
                     <div className="nav_login">

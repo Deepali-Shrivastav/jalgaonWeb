@@ -1,905 +1,317 @@
 import React, { useEffect, useState, useContext } from 'react';
 import Select from 'react-select';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import './AddListingForm.css';
 import { UserContext } from '../../context/UserContext';
-import { useParams } from 'react-router-dom';
-import imageCompression from 'browser-image-compression';
 
-function AddListingForm({ is_edit = false }) {
-    const { shopId } = useParams();
-    const djangoApi = import.meta.env.VITE_DJANGO_API;
-    const apiUrl = `${djangoApi}/api/v1/listings/categories/`;
-    const apiUrl_subCategory = `${djangoApi}/api/v1/listings/subcategories/`;
-    const apiUrl_editShop = `${djangoApi}/api/v1/listings/edit-data/`;
-
+function AddListingForm() {
+    const navigate = useNavigate();
     const { user } = useContext(UserContext);
-    const [selectedMainCategory, setSelectedMainCategory] = useState(null);
-    const [selectedSubCategory, setSelectedSubCategory] = useState(null);
-    const [userLocation, setUserLocation] = useState(null);
+    const djangoApi = import.meta.env.VITE_DJANGO_API;
 
-    const [filteredSubCategories, setFilteredSubCategories] = useState([]);
+    const [currentStep, setCurrentStep] = useState(1);
+    const totalSteps = 5;
+
     const [mainCategories, setMainCategories] = useState([]);
     const [subCategories, setSubCategories] = useState([]);
-    const [error, setError] = useState(null);
+    const [filteredSubCategories, setFilteredSubCategories] = useState([]);
 
     const [formData, setFormData] = useState({
-        user: user?.id || null,
+        business_name: '',
         main_category: null,
         sub_category: null,
-        business_name: '',
-        business_rating: 0,
-        business_address: '',
-        business_banner: null,
-        sub_domain_one: '',
-        sub_domain_two: '',
-        sub_domain_three: '',
-        sub_domain_four: '',
-        sub_domain_five: '',
-        sub_domain_six: '',
-        sub_domain_seven: '',
-        business_origin: 'India',
-        business_dob: 'N/A',
-        business_gst: 'N/A',
-        business_description: '',
-        business_img_one: null,
-        business_img_two: null,
-        business_img_three: null,
-        business_no: '',
         business_email: '',
+        business_no: '',
+        whatsapp: '',
+        city: 'Jalgaon',
+        business_address: '',
+        gmap_link: '',
+        business_description: '',
+        business_dob: '',
+        business_gst: '',
+        website_link: '',
         insta_link: '',
         facebook_link: '',
-        website_link: '',
-        gmap_link: ''
+        business_banner: null
     });
 
     const getCsrfToken = async () => {
         try {
-          const response = await axios.get(`${djangoApi}/api/v1/auth/csrf-token/`);
-          return response.data.csrfToken;
+            const response = await axios.get(`${djangoApi}/api/v1/auth/csrf-token/`);
+            return response.data.csrfToken;
         } catch (error) {
-          console.error('Error fetching CSRF token:', error);
-          return '';
+            console.error('Error fetching CSRF token:', error);
+            return '';
         }
-      };
-
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await axios.get(apiUrl);
-                const categories = response.data.categories;
-                const categoryOptions = categories.map(category => ({
-                    value: category.main_category.toLowerCase().replace(/\s+/g, '_'),
-                    label: category.main_category,
-                    mainCategoryId: category.id
-                }));
-                setMainCategories(categoryOptions);
-
-                const sub_response = await axios.get(apiUrl_subCategory);
-                const sub_categories = sub_response.data.categories;
-                const subCategoryOptions = sub_categories.map(category => ({
-                    value: category.sub_category.toLowerCase().replace(/\s+/g, '_'),
-                    label: category.sub_category,
-                    main_category: category.main_category,
-                    subCategoryId: category.id
-                }));
-                setSubCategories(subCategoryOptions);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                setError(error.message);
-            }
-        };
-
-        fetchData();
-
-        if (is_edit && shopId) {
-            const getShopData = async () => {
-                const csrfToken = await getCsrfToken();
-
-                try {
-                    const response = await axios.get(apiUrl_editShop, {
-                        headers: {
-                            'X-CSRFToken': csrfToken,
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                        },
-                        params: {
-                            shop_id: shopId,
-                        },
-                    });
-
-                    setFormData(response.data);
-                    console.log(response.data);
-                    
-                } catch (error) {
-                    console.error('Error fetching shop data:', error.response ? error.response.data : error.message);
-                }
-            }
-            getShopData();
-        }
-    }, [is_edit, shopId]);
-
-    const handleMainCategoryChange = (selectedOption) => {
-        setSelectedMainCategory(selectedOption.mainCategoryId);
-        const filtered = subCategories.filter(category => category.main_category === selectedOption.label);
-        setFilteredSubCategories(filtered);
-        setFormData((prevFormData) => ({
-            ...prevFormData,
-            main_category: selectedOption.mainCategoryId
-        }));
     };
 
-    const handleSubChange = (selectedOption) => {
-        setSelectedSubCategory(selectedOption.subCategoryId);
-        setFormData((prevFormData) => ({
-            ...prevFormData,
-            sub_category: selectedOption.subCategoryId
-        }));
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const resMain = await axios.get(`${djangoApi}/api/v1/listings/categories/`);
+                
+                const mainOpts = resMain.data.results || resMain.data;
+                setMainCategories(mainOpts.map(c => ({ value: c.id, label: c.main_category })));
+                
+                // Extract subcategories from main categories
+                const allSubs = [];
+                mainOpts.forEach(mainCat => {
+                    if (mainCat.subcategories) {
+                        mainCat.subcategories.forEach(sub => {
+                            allSubs.push({ ...sub, main_category_id: mainCat.id });
+                        });
+                    }
+                });
+                setSubCategories(allSubs);
+            } catch (err) {
+                console.error("Error fetching categories:", err);
+            }
+        };
+        fetchCategories();
+    }, [djangoApi]);
+
+    const handleMainCategoryChange = (selected) => {
+        setFormData({ ...formData, main_category: selected.value, sub_category: null });
+        const subs = subCategories.filter(s => s.main_category === selected.label || s.main_category_id === selected.value);
+        setFilteredSubCategories(subs.map(s => ({ value: s.id, label: s.sub_category })));
     };
 
     const handleChange = (e) => {
-        const { name, value, type, files } = e.target;
-        setFormData(prevData => ({
-            ...prevData,
-            [name]: type === 'file' ? files[0] : value
-            
-        }));
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
     };
-
 
     const handleFileChange = (e) => {
-        const { type, files } = e.target;
-    
-        if (type === 'file' && files.length > 0) {
-            const selectedFile = files[0];
-
-
-
-
-            setFormData(prevData => ({
-                ...prevData,
-                business_banner: selectedFile,
-                business_img_one: selectedFile,
-                business_img_two: selectedFile,
-                business_img_three: selectedFile,
-            }));
+        if (e.target.files.length > 0) {
+            setFormData({ ...formData, business_banner: e.target.files[0] });
         }
     };
-    
-
-
-    // const handleFileChange = async (e) => {
-    //     const { type, files } = e.target;
-    
-    //     if (type === 'file' && files.length > 0) {
-    //         const selectedFile = files[0];
-    
-    //         // Define compression options
-    //         const options = {
-    //             maxSizeMB: 0.17, // Compress to a maximum size of 170KB
-    //             maxWidthOrHeight: 1920, // Optional: adjust based on your needs
-    //             useWebWorker: true, // Use web worker for faster compression
-    //         };
-
-
-    //         try {
-    //             // Compress the image
-    //             const compressedFile = await imageCompression(selectedFile, options);
-    //             console.log(compressedFile);
-                
-    //             // Update formData with the compressed file
-    //             setFormData(prevData => ({
-    //                 ...prevData,
-    //                 business_banner: compressedFile,
-    //                 business_img_one: compressedFile,
-    //                 business_img_two: compressedFile,
-    //                 business_img_three: compressedFile,
-    //             }));
-    //         } catch (error) {
-    //             console.error("Error compressing the image:", error);
-    //         }
-    //     }
-    // };
 
     const getUserLocation = (e) => {
         e.preventDefault();
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(position => {
-                const pos = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                };
-                const locationUrlGmap = `https://www.google.com/maps/search/?api=1&query=${pos.lat},${pos.lng}`;
-                setUserLocation(locationUrlGmap);
-                setFormData(prevData => ({
-                    ...prevData,
-                    gmap_link: locationUrlGmap
-                }));
+            navigator.geolocation.getCurrentPosition(pos => {
+                const link = `https://www.google.com/maps/search/?api=1&query=${pos.coords.latitude},${pos.coords.longitude}`;
+                setFormData({ ...formData, gmap_link: link });
             });
-        } else {
-            alert('Geolocation is not supported by this browser.');
         }
     };
+
+    const validateStep = (step) => {
+        if (step === 1) {
+            if (!formData.business_name || !formData.main_category || !formData.sub_category || !formData.business_no) {
+                alert("Please fill all required fields (Business Name, Main Category, Sub Category, Contact Number).");
+                return false;
+            }
+        } else if (step === 2) {
+            if (!formData.business_address) {
+                alert("Please enter the full address.");
+                return false;
+            }
+        } else if (step === 3) {
+            if (!formData.business_description) {
+                alert("Please provide a business description.");
+                return false;
+            }
+        } else if (step === 5) {
+            if (!formData.business_banner) {
+                alert("Please upload a cover image.");
+                return false;
+            }
+        }
+        return true;
+    };
+
+    const nextStep = () => {
+        if (validateStep(currentStep)) {
+            setCurrentStep(prev => Math.min(prev + 1, totalSteps));
+        }
+    };
+    
+    const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        if (!validateStep(5)) {
+            return;
+        }
+        
         const token = localStorage.getItem('token');
-        const csrfToken = await getCsrfToken();
-
-        console.log(token);
+        const csrf = await getCsrfToken();
+        
         const data = new FormData();
-        for (const key in formData) {
-            data.append(key, formData[key]);
-        }
-
-
-        console.log(formData);
-        // Log FormData to verify its contents
-        for (let pair of data.entries()) {
-            console.log(pair[0] + ': ' + pair[1]);
-        }
-
-        console.log(data);
-
-
-        try {
-            const response = await axios.post(
-                //   'http://127.0.0.1:8000/api/v1/listings/',
-                `${djangoApi}/api/v1/listings/`,
-                data,
-                {
-                    headers: {
-                        'X-CSRFToken': csrfToken,
-                        'Content-Type': 'multipart/form-data',
-                        'Authorization': `Bearer ${token}`,  // Replace with actual token
-                    },
-                }
-            );
-            console.log(response.data);
-            alert("Form Submitted")
-        } catch (error) {
-            console.error('Error uploading data:', error);
-        }
-
-
-    };
-    
-    const updateShopListing = async (e) => {
-        e.preventDefault();
-        const token = localStorage.getItem('token');
-        console.log('Token:', token);
-    
-        const data = new FormData();
-        for (const key in formData) {
-            if (formData.hasOwnProperty(key)) {
+        Object.keys(formData).forEach(key => {
+            if (formData[key] !== null && formData[key] !== '') {
                 data.append(key, formData[key]);
             }
-        }
-        console.log("FormData entries:");
-        for (let pair of data.entries()) {
-            console.log(pair[0]+ ', '+ pair[1]); 
-        }
+        });
+
         try {
-            const response = await axios.put(
-                `${djangoApi}/api/v1/listings/update/`,
-                data,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                    params: {
-                        shop_id: formData.id, // Ensure this is the correct ID of the shop to update
-                    }
+            await axios.post(`${djangoApi}/api/v1/listings/create/`, data, {
+                headers: {
+                    'X-CSRFToken': csrf,
+                    'Authorization': `Bearer ${token}`
                 }
-            );
-            console.log(response.data);
-            alert("Data Updated");
+            });
+            alert('Listing submitted successfully! It is now pending review.');
+            navigate('/account');
         } catch (error) {
-            console.error('Error submitting form:', error.response ? error.response.data : error.message);
+            console.error(error);
+            alert('Failed to submit listing. Please check required fields.');
         }
     };
-    
-    
 
     return (
         <div className="addListingForm_section">
-            <div className="addListingForm_heading">
-                <h1>List your business to Jalgaon.Com</h1>
+            <div className="wizard_header">
+                <h1>List Your Business</h1>
+                <p>Reach thousands of customers in Jalgaon</p>
             </div>
-            <div className="addListingForm_form">
-                {is_edit && shopId ? (                    
-                    // for edit shop informtaion
-                    <form onSubmit={updateShopListing} encType="multipart/form-data">
-                        <hr className="form_hr" />
-                        <div className="business_info_div business_details">
-                            <h3>Add Business Details</h3>
-                            <div className="form_input_fields">
-                                <div className="input_data">
-                                    <label htmlFor="businessName">Business Name</label>
-                                    <input
-                                        type="text"
-                                        name="business_name"
-                                        value={formData.business_name}
-                                        onChange={handleChange}
-                                        placeholder="Business Name"
-                                    />
-                                </div>
-                                <div className="input_data">
-                                    <label htmlFor="legalName">Legal Business Name</label>
-                                    <input
-                                        type="text"
-                                        name="legalName"
-                                        value=""
-                                        // onChange={handleChange}
-                                        placeholder="Legal Business Name"
-                                    />
-                                </div>
+
+            <div className="progress_bar">
+                {[1, 2, 3, 4, 5].map(step => (
+                    <div key={step} className={`step_indicator ${currentStep === step ? 'active' : currentStep > step ? 'completed' : ''}`}>
+                        {currentStep > step ? '✓' : step}
+                    </div>
+                ))}
+            </div>
+
+            <form onSubmit={handleSubmit}>
+                {currentStep === 1 && (
+                    <div className="wizard_step_content">
+                        <h3>1. Basic Information</h3>
+                        <div className="form_grid">
+                            <div className="input_group full_width">
+                                <label>Business Name *</label>
+                                <input type="text" name="business_name" value={formData.business_name} onChange={handleChange} required placeholder="E.g. Royal Cafe" />
+                            </div>
+                            <div className="input_group">
+                                <label>Main Category *</label>
+                                <Select options={mainCategories} onChange={handleMainCategoryChange} />
+                            </div>
+                            <div className="input_group">
+                                <label>Sub Category *</label>
+                                <Select options={filteredSubCategories} onChange={s => setFormData({...formData, sub_category: s.value})} />
+                            </div>
+                            <div className="input_group">
+                                <label>Business Email</label>
+                                <input type="email" name="business_email" value={formData.business_email} onChange={handleChange} placeholder="contact@example.com" />
+                            </div>
+                            <div className="input_group">
+                                <label>Contact Number *</label>
+                                <input type="text" name="business_no" value={formData.business_no} onChange={handleChange} required placeholder="9876543210" />
+                            </div>
+                            <div className="input_group">
+                                <label>WhatsApp Number</label>
+                                <input type="text" name="whatsapp" value={formData.whatsapp} onChange={handleChange} placeholder="9876543210" />
                             </div>
                         </div>
-                        <hr className="form_hr" />
-                        <div className="business_contactdet">
-                            <h3>Add Business Contact Info</h3>
-                            <div className="form_input_fields">
-                                <div className="input_data">
-                                    <label htmlFor="conEmail">Contact Email</label>
-                                    <input
-                                        type="text"
-                                        name="business_email"
-                                        value={formData.business_email}
-                                        onChange={handleChange}
-                                        placeholder="Contact Email"
-                                    />
-                                </div>
-                                <div className="input_data">
-                                    <label htmlFor="conPhone">Phone Number</label>
-                                    <input
-                                        type="text"
-                                        name="business_no"
-                                        value={formData.business_no}
-                                        onChange={handleChange}
-                                        placeholder="Phone Number"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <hr className="form_hr" />
-                        <div className="business_categories">
-                            <h3>Add Business Category</h3>
-                            <div className="form_input_fields">
-                                <div className="business_mainCategory">
-                                    <Select
-                                        options={mainCategories}
-                                        onChange={handleMainCategoryChange}
-                                        placeholder="Select a main category..."
-                                        isSearchable={true}
-                                    />
-                                </div>
-                                <div className="business_subCategory">
-                                    <Select
-                                        options={filteredSubCategories}
-                                        onChange={handleSubChange}
-                                        placeholder="Select a sub category..."
-                                        isSearchable={true}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <hr className="form_hr" />
-                        <div className="business_description">
-                            <h3>Add Business Description</h3>
-                            <div className="form_input_fields">
-                                <div className="input_data">
-                                    <label htmlFor="businessDesc">Description</label>
-                                    <textarea
-                                        name="business_description"
-                                        value={formData.business_description}
-                                        onChange={handleChange}
-                                        placeholder="Business Description"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <hr className="form_hr" />
-                        <div className="business_subDomains">
-                            <h3>Business Sub-Domains</h3>
-                            <div className="form_input_fields">
-                                <div className="input_data">
-                                    <label htmlFor="domainOne">Sub-Domains</label>
-                                    <input
-                                        type="text"
-                                        name="sub_domain_one"
-                                        value={formData.sub_domain_one}
-                                        onChange={handleChange}
-                                        placeholder="Sub-domain 1"
-                                    />
-                                    <input
-                                        type="text"
-                                        name="sub_domain_two"
-                                        value={formData.sub_domain_two}
-                                        onChange={handleChange}
-                                        placeholder="Sub-domain 2"
-                                    />
-                                    <input
-                                        type="text"
-                                        name="sub_domain_three"
-                                        value={formData.sub_domain_three}
-                                        onChange={handleChange}
-                                        placeholder="Sub-domain 3"
-                                    />
-                                    <input
-                                        type="text"
-                                        name="sub_domain_four"
-                                        value={formData.sub_domain_four}
-                                        onChange={handleChange}
-                                        placeholder="Sub-domain 4"
-                                    />
-                                    <input
-                                        type="text"
-                                        name="sub_domain_five"
-                                        value={formData.sub_domain_five}
-                                        onChange={handleChange}
-                                        placeholder="Sub-domain 5"
-                                    />
-                                    <input
-                                        type="text"
-                                        name="sub_domain_six"
-                                        value={formData.sub_domain_six}
-                                        onChange={handleChange}
-                                        placeholder="Sub-domain 6"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <hr className="form_hr" />
-                        <div className="business_profile">
-                            <h3>Business Profile</h3>
-                            <div className="form_input_fields">
-                                <div className="input_data">
-                                    <label htmlFor="businessOrigin">Country of Origin</label>
-                                    <input
-                                        type="text"
-                                        name="business_origin"
-                                        value={formData.business_origin}
-                                        onChange={handleChange}
-                                        placeholder="Country of Origin"
-                                    />
-                                </div>
-                                <div className="input_data">
-                                    <label htmlFor="businessEstab">Year of Establishment</label>
-                                    <input
-                                        type="text"
-                                        name="business_dob"
-                                        value={formData.business_dob}
-                                        onChange={handleChange}
-                                        placeholder="Year of Establishment"
-                                    />
-                                </div>
-                                <div className="input_data">
-                                    <label htmlFor="businessGst">GST Number</label>
-                                    <input
-                                        type="text"
-                                        name="business_gst"
-                                        value={formData.business_gst}
-                                        onChange={handleChange}
-                                        placeholder="GST Number"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <hr className="form_hr" />
-                        <div className="business_socialLinks">
-                            <h3>Social Media</h3>
-                            <div className="form_input_fields">
-                                <div className="input_data">
-                                    <label htmlFor="business_ig">Instagram</label>
-                                    <input
-                                        type="text"
-                                        name="insta_link"
-                                        value={formData.insta_link}
-                                        onChange={handleChange}
-                                        placeholder="Instagram"
-                                    />
-                                </div>
-                                <div className="input_data">
-                                    <label htmlFor="business_fb">Facebook</label>
-                                    <input
-                                        type="text"
-                                        name="facebook_link"
-                                        value={formData.facebook_link}
-                                        onChange={handleChange}
-                                        placeholder="Facebook"
-                                    />
-                                </div>
-                                <div className="input_data">
-                                    <label htmlFor="business_web">Website</label>
-                                    <input
-                                        type="text"
-                                        name="website_link"
-                                        value={formData.website_link}
-                                        onChange={handleChange}
-                                        placeholder="Website"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <hr className="form_hr" />
-                        <div className="business_imgs">
-                            <h3>Business Media</h3>
-                            <div className="form_input_fields">
-                                <div className="input_data">
-                                    <label htmlFor="banner">Business Banner</label>
-                                    <input
-                                        type="file"
-                                        name="business_banner"
-                                        // onChange={(e)=>{
-                                        //     setBusinessBanner(e.target.files[0])
-                                        //     setFormData(prevData => ({
-                                        //         ...prevData,
-                                        //         ["business_banner"]: busniessBanner
-                                        //     }));
-                                        // }}
-                                        onChange={handleFileChange}
-                                        required
-                                    />
-                                </div>
-                                {/* <div className="input_data">
-                                    <label htmlFor="imgOne">Business Photos</label>
-                                    <input
-                                        type="file"
-                                        name="business_img_one"
-                                        // onChange={(e)=>{setBusinessImgOne(e.target.files[0])}}
-                                        onChange={handleChange}
-                                        // required
-                                    />
-                                    <input
-                                        type="file"
-                                        name="business_img_two"
-                                        // onChange={(e)=>{setBusinessImgTwo(e.target.files[0])}}
-                                        onChange={handleChange}
-                                        // required
-                                    />
-                                    <input
-                                        type="file"
-                                        name="business_img_three"
-                                        // onChange={(e)=>{setBusinessImgThree(e.target.files[0])}}
-                                        onChange={handleChange}
-                                        // required
-                                    />
-                                </div> */}
-                            </div>
-                        </div>
-                        <hr className="form_hr" />
-                        <div className="business_address">
-                            <h3>Add Business Address</h3>
-                            <div className="form_input_fields">
-                                <div className="input_data">
-                                    <label htmlFor="businessAddrss">Business Address</label>
-                                    <div className="get_location">
-                                        <div onClick={getUserLocation}>
-                                            <i className='bx bxs-map'></i>
-                                            <p>Get Current Location</p>
-                                        </div>
-                                        {userLocation && (
-                                            <a href={userLocation} target='_blank' rel="noopener noreferrer">
-                                                View on Google Maps
-                                            </a>
-                                        )}
-                                    </div>
-                                    <input
-                                        type="text"
-                                        name="business_address"
-                                        value={formData.business_address}
-                                        onChange={handleChange}
-                                        placeholder='Address'
-                                    />
-                                    <input
-                                        type="hidden"
-                                        name="gmap_link"
-                                    value={formData.gmap_link}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="submit_form">
-                            <input type="submit" value="Submit Form" />
-                        </div>
-                    </form>
-                ) : (
-                    // for store shop informtaion
-                    <form onSubmit={handleSubmit} encType="multipart/form-data">
-                        <hr className="form_hr" />
-                        <div className="business_info_div business_details">
-                            <h3>Add Business Details</h3>
-                            <div className="form_input_fields">
-                                <div className="input_data">
-                                    <label htmlFor="businessName">Business Name</label>
-                                    <input
-                                        type="text"
-                                        name="business_name"
-                                        // value={formData.business_name}
-                                        onChange={handleChange}
-                                        placeholder="Business Name"
-                                    />
-                                </div>
-                                <div className="input_data">
-                                    <label htmlFor="legalName">Legal Business Name</label>
-                                    <input
-                                        type="text"
-                                        name="legalName"
-                                        // value=""
-                                        // onChange={handleChange}
-                                        placeholder="Legal Business Name"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <hr className="form_hr" />
-                        <div className="business_contactdet">
-                            <h3>Add Business Contact Info</h3>
-                            <div className="form_input_fields">
-                                <div className="input_data">
-                                    <label htmlFor="conEmail">Contact Email</label>
-                                    <input
-                                        type="text"
-                                        name="business_email"
-                                        // value={formData.business_email}
-                                        onChange={handleChange}
-                                        placeholder="Contact Email"
-                                    />
-                                </div>
-                                <div className="input_data">
-                                    <label htmlFor="conPhone">Phone Number</label>
-                                    <input
-                                        type="text"
-                                        name="business_no"
-                                        // value={formData.business_no}
-                                        onChange={handleChange}
-                                        placeholder="Phone Number"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <hr className="form_hr" />
-                        <div className="business_categories">
-                            <h3>Add Business Category</h3>
-                            <div className="form_input_fields">
-                                <div className="business_mainCategory">
-                                    <Select
-                                        options={mainCategories}
-                                        onChange={handleMainCategoryChange}
-                                        placeholder="Select a main category..."
-                                        isSearchable={true}
-                                    />
-                                </div>
-                                <div className="business_subCategory">
-                                    <Select
-                                        options={filteredSubCategories}
-                                        onChange={handleSubChange}
-                                        placeholder="Select a sub category..."
-                                        isSearchable={true}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <hr className="form_hr" />
-                        <div className="business_description">
-                            <h3>Add Business Description</h3>
-                            <div className="form_input_fields">
-                                <div className="input_data">
-                                    <label htmlFor="businessDesc">Description</label>
-                                    <textarea
-                                        name="business_description"
-                                        // value={formData.business_description}
-                                        onChange={handleChange}
-                                        placeholder="Business Description"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <hr className="form_hr" />
-                        <div className="business_subDomains">
-                            <h3>Business Sub-Domains</h3>
-                            <div className="form_input_fields">
-                                <div className="input_data">
-                                    <label htmlFor="domainOne">Sub-Domains</label>
-                                    <input
-                                        type="text"
-                                        name="sub_domain_one"
-                                        // value={formData.sub_domain_one}
-                                        onChange={handleChange}
-                                        placeholder="Sub-domain 1"
-                                    />
-                                    <input
-                                        type="text"
-                                        name="sub_domain_two"
-                                        // value={formData.sub_domain_two}
-                                        onChange={handleChange}
-                                        placeholder="Sub-domain 2"
-                                    />
-                                    <input
-                                        type="text"
-                                        name="sub_domain_three"
-                                        // value={formData.sub_domain_three}
-                                        onChange={handleChange}
-                                        placeholder="Sub-domain 3"
-                                    />
-                                    <input
-                                        type="text"
-                                        name="sub_domain_four"
-                                        // value={formData.sub_domain_four}
-                                        onChange={handleChange}
-                                        placeholder="Sub-domain 4"
-                                    />
-                                    <input
-                                        type="text"
-                                        name="sub_domain_five"
-                                        // value={formData.sub_domain_five}
-                                        onChange={handleChange}
-                                        placeholder="Sub-domain 5"
-                                    />
-                                    <input
-                                        type="text"
-                                        name="sub_domain_six"
-                                        // value={formData.sub_domain_six}
-                                        onChange={handleChange}
-                                        placeholder="Sub-domain 6"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <hr className="form_hr" />
-                        <div className="business_profile">
-                            <h3>Business Profile</h3>
-                            <div className="form_input_fields">
-                                <div className="input_data">
-                                    <label htmlFor="businessOrigin">Country of Origin</label>
-                                    <input
-                                        type="text"
-                                        name="business_origin"
-                                        // value={formData.business_origin}
-                                        onChange={handleChange}
-                                        placeholder="Country of Origin"
-                                    />
-                                </div>
-                                <div className="input_data">
-                                    <label htmlFor="businessEstab">Year of Establishment</label>
-                                    <input
-                                        type="text"
-                                        name="business_dob"
-                                        // value={formData.business_dob}
-                                        onChange={handleChange}
-                                        placeholder="Year of Establishment"
-                                    />
-                                </div>
-                                <div className="input_data">
-                                    <label htmlFor="businessGst">GST Number</label>
-                                    <input
-                                        type="text"
-                                        name="business_gst"
-                                        // value={formData.business_gst}
-                                        onChange={handleChange}
-                                        placeholder="GST Number"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <hr className="form_hr" />
-                        <div className="business_socialLinks">
-                            <h3>Social Media</h3>
-                            <div className="form_input_fields">
-                                <div className="input_data">
-                                    <label htmlFor="business_ig">Instagram</label>
-                                    <input
-                                        type="text"
-                                        name="insta_link"
-                                        // value={formData.insta_link}
-                                        onChange={handleChange}
-                                        placeholder="Instagram"
-                                    />
-                                </div>
-                                <div className="input_data">
-                                    <label htmlFor="business_fb">Facebook</label>
-                                    <input
-                                        type="text"
-                                        name="facebook_link"
-                                        // value={formData.facebook_link}
-                                        onChange={handleChange}
-                                        placeholder="Facebook"
-                                    />
-                                </div>
-                                <div className="input_data">
-                                    <label htmlFor="business_web">Website</label>
-                                    <input
-                                        type="text"
-                                        name="website_link"
-                                        // value={formData.website_link}
-                                        onChange={handleChange}
-                                        placeholder="Website"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <hr className="form_hr" />
-                        <div className="business_imgs">
-                            <h3>Business Media</h3>
-                            <div className="form_input_fields">
-                                <div className="input_data">
-                                    <label htmlFor="banner">Business Banner</label>
-                                    <input
-                                        type="file"
-                                        name="business_banner"
-                                        // onChange={(e)=>{
-                                        //     setBusinessBanner(e.target.files[0])
-                                        //     setFormData(prevData => ({
-                                        //         ...prevData,
-                                        //         ["business_banner"]: busniessBanner
-                                        //     }));
-                                        // }}
-                                        onChange={handleFileChange}
-                                    />
-                                </div>
-                                {/* <div className="input_data">
-                                    <label htmlFor="imgOne">Business Photos</label>
-                                    <input
-                                        type="file"
-                                        name="business_img_one"
-                                        // onChange={(e)=>{setBusinessImgOne(e.target.files[0])}}
-                                        onChange={handleChange}
-                                    />
-                                    <input
-                                        type="file"
-                                        name="business_img_two"
-                                        // onChange={(e)=>{setBusinessImgTwo(e.target.files[0])}}
-                                        onChange={handleChange}
-                                    />
-                                    <input
-                                        type="file"
-                                        name="business_img_three"
-                                        // onChange={(e)=>{setBusinessImgThree(e.target.files[0])}}
-                                        onChange={handleChange}
-                                    />
-                                </div> */}
-                            </div>
-                        </div>
-                        <hr className="form_hr" />
-                        <div className="business_address">
-                            <h3>Add Business Address</h3>
-                            <div className="form_input_fields">
-                                <div className="input_data">
-                                    <label htmlFor="businessAddrss">Business Address</label>
-                                    <div className="get_location">
-                                        <div onClick={getUserLocation}>
-                                            <i className='bx bxs-map'></i>
-                                            <p>Get Current Location</p>
-                                        </div>
-                                        {userLocation && (
-                                            <a href={userLocation} target='_blank' rel="noopener noreferrer">
-                                                View on Google Maps
-                                            </a>
-                                        )}
-                                    </div>
-                                    <input
-                                        type="text"
-                                        name="business_address"
-                                        // value={formData.business_address}
-                                        onChange={handleChange}
-                                        placeholder='Address'
-                                    />
-                                    <input
-                                        type="hidden"
-                                        name="gmap_link"
-                                    // value={formData.gmap_link}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="submit_form">
-                            <input type="submit" value="Submit Form" />
-                        </div>
-                    </form>
+                    </div>
                 )}
-            </div>
+
+                {currentStep === 2 && (
+                    <div className="wizard_step_content">
+                        <h3>2. Location details</h3>
+                        <div className="form_grid">
+                            <div className="input_group">
+                                <label>City</label>
+                                <input type="text" name="city" value={formData.city} onChange={handleChange} placeholder="Jalgaon" />
+                            </div>
+                            <div className="input_group full_width">
+                                <label>Full Address *</label>
+                                <textarea name="business_address" value={formData.business_address} onChange={handleChange} required placeholder="Enter full address..."></textarea>
+                            </div>
+                            <div className="input_group full_width">
+                                <label>Google Maps Link</label>
+                                <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
+                                    <input type="text" name="gmap_link" value={formData.gmap_link} onChange={handleChange} style={{flex: 1}} placeholder="Paste URL here..." />
+                                    <button type="button" className="location_btn" onClick={getUserLocation}>
+                                        <i className='bx bx-target-lock'></i> Auto Detect
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {currentStep === 3 && (
+                    <div className="wizard_step_content">
+                        <h3>3. About Business</h3>
+                        <div className="form_grid">
+                            <div className="input_group full_width">
+                                <label>Business Description *</label>
+                                <textarea name="business_description" value={formData.business_description} onChange={handleChange} required placeholder="Tell customers what you offer..."></textarea>
+                            </div>
+                            <div className="input_group">
+                                <label>Year of Establishment</label>
+                                <input type="text" name="business_dob" value={formData.business_dob} onChange={handleChange} placeholder="E.g. 2015" />
+                            </div>
+                            <div className="input_group">
+                                <label>GST Number (Optional)</label>
+                                <input type="text" name="business_gst" value={formData.business_gst} onChange={handleChange} placeholder="27XXXXX..." />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {currentStep === 4 && (
+                    <div className="wizard_step_content">
+                        <h3>4. Web & Social Media</h3>
+                        <div className="form_grid">
+                            <div className="input_group full_width">
+                                <label>Website URL</label>
+                                <input type="url" name="website_link" value={formData.website_link} onChange={handleChange} placeholder="https://www.yourwebsite.com" />
+                            </div>
+                            <div className="input_group">
+                                <label>Instagram Link</label>
+                                <input type="url" name="insta_link" value={formData.insta_link} onChange={handleChange} placeholder="https://instagram.com/..." />
+                            </div>
+                            <div className="input_group">
+                                <label>Facebook Link</label>
+                                <input type="url" name="facebook_link" value={formData.facebook_link} onChange={handleChange} placeholder="https://facebook.com/..." />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {currentStep === 5 && (
+                    <div className="wizard_step_content">
+                        <h3>5. Media Gallery</h3>
+                        <div className="form_grid">
+                            <div className="input_group full_width">
+                                <label>Business Cover/Banner Image *</label>
+                                <div className="file_upload_wrapper" onClick={() => document.getElementById('banner_upload').click()}>
+                                    <i className='bx bx-cloud-upload' style={{fontSize: '48px', color: '#0081C7'}}></i>
+                                    <p style={{marginTop: '10px', color: '#64748b'}}>
+                                        {formData.business_banner ? formData.business_banner.name : 'Click to browse and upload cover image'}
+                                    </p>
+                                    <input 
+                                        type="file" 
+                                        id="banner_upload" 
+                                        onChange={handleFileChange} 
+                                        style={{display: 'none'}} 
+                                        accept="image/*"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                <div className="wizard_actions">
+                    {currentStep > 1 ? (
+                        <button type="button" className="btn_prev" onClick={prevStep}>Back</button>
+                    ) : <div></div>}
+
+                    {currentStep < totalSteps ? (
+                        <button type="button" className="btn_next" onClick={nextStep}>Next Step</button>
+                    ) : (
+                        <button type="submit" className="btn_next">Submit Listing</button>
+                    )}
+                </div>
+            </form>
         </div>
     );
 }
