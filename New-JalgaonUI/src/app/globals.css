@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0081C7;
+  --color-primary-container: #0081C7;
+  --color-on-primary: #ffffff;
+  --color-surface: #f9f9fd;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f3f3f7;
+  --color-surface-container-high: #e8e8ec;
+  --color-on-surface: #1a1c1f;
+  --color-on-surface-variant: #424754;
+  --color-secondary: #5e5e5e;
+  --color-outline: #727786;
+  --color-outline-variant: #c2c6d6;
+  --color-hairline-soft: #DEE3E9;
+  --color-ink-deep: #0A1317;
+  --color-primary-deep: #006aa4;
+
+  --radius-DEFAULT: 1rem;
+  --radius-lg: 2rem;
+  --radius-xl: 32px;
+  --radius-full: 9999px;
+
+  --spacing-xxs: 4px;
+  --spacing-xs: 8px;
+  --spacing-sm: 10px;
+  --spacing-md: 12px;
+  --spacing-base: 16px;
+  --spacing-lg: 20px;
+  --spacing-xl: 24px;
+  --spacing-xxl: 32px;
+  --spacing-xxxl: 40px;
+  --spacing-section: 80px;
+  --spacing-container-max: 1280px;
+
+  --font-sans: "Plus Jakarta Sans", "sans-serif";
+  --font-heading: "Plus Jakarta Sans", "sans-serif";
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer utilities {
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  .hero-gradient {
+    background: radial-gradient(circle at top right, rgba(0, 100, 224, 0.05), transparent),
+                radial-gradient(circle at bottom left, rgba(0, 100, 224, 0.02), transparent);
+  }
+  .hide-scrollbar::-webkit-scrollbar { display: none; }
+  .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Event card lift-on-hover shadow */
+  .event-card-shadow {
+    box-shadow: 0 10px 30px -12px rgba(0, 129, 199, 0.1);
+    transition: all 0.3s ease;
+  }
+  .event-card-shadow:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px -12px rgba(0, 129, 199, 0.18);
+  }
+
+  /* Article card image zoom on hover */
+  .article-card:hover img {
+    transform: scale(1.05);
+  }
+}
+
+.market-ticker {
+  mask-image: linear-gradient(to right, transparent, black 3%, black 97%, transparent);
+}
+.market-ticker-track {
+  animation: market-ticker-scroll 38s linear infinite;
+}
+.market-ticker:hover .market-ticker-track {
+  animation-play-state: paused;
+}
+
+@keyframes market-ticker-scroll {
+  to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .market-ticker {
+    overflow-x: auto;
+    mask-image: none;
+  }
+  .market-ticker-track {
+    animation: none;
+  }
+  .market-ticker-track > :last-child {
+    display: none;
+  }
+}
