@@ -6,7 +6,7 @@ interface Category { id: number; main_category: string; category_img: string | n
 interface SubCategory { id: number; sub_category: string; sub_category_img: string | null; }
 
 export default function AdminCategoriesPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);

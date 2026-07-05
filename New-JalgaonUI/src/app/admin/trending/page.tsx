@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 interface TrendingListing { id: number; business_name: string; category_name: string; is_trending: boolean; trending_priority: number; trending_until: string | null; }
 
 export default function AdminTrendingPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const [listings, setListings] = useState<TrendingListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");

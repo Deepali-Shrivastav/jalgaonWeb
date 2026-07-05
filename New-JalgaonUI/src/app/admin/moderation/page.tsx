@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 interface ModerationItem { id: number; content_type_name: string; content_preview: { error?: string; name?: string; address?: string } | null; submitted_by_phone: string; submitted_at: string; status: string; }
 
 export default function AdminModerationPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const [queue, setQueue] = useState<ModerationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("pending");

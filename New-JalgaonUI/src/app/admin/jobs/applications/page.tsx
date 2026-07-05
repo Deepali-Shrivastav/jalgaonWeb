@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 interface JobApplication { id: number; applicant_name: string; applicant_email: string; job_title: string; status: string; applied_at: string; resume: string | null; }
 
 export default function AdminJobApplicationsPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const [applications, setApplications] = useState<JobApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");

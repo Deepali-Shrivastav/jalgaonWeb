@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 interface Listing { id: number; business_name: string; business_address: string; category_name: string; owner_name: string; owner_phone: string; status: string; business_banner?: string; business_no?: string; business_email?: string; city?: string; business_dob?: string; business_gst?: string; business_description?: string; main_category_name?: string; sub_category_name?: string; }
 
 export default function AdminListingsPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");

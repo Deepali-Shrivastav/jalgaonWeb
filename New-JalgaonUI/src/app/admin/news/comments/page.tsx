@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 interface Comment { id: number; user_name: string; article_title: string; body: string; status: string; }
 
 export default function AdminNewsCommentsPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
 

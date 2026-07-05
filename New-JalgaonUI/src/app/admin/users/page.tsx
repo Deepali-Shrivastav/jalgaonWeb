@@ -20,7 +20,7 @@ const roles = [
 
 export default function AdminUsersPage() {
   const { user } = useContext(AuthContext);
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const isSuperAdmin = user?.role === "super_admin";
 
   const [users, setUsers] = useState<UserData[]>([]);
@@ -31,7 +31,7 @@ export default function AdminUsersPage() {
   const fetchUsers = async () => {
     setLoading(true);
     const token = localStorage.getItem("token");
-    const safeBaseUrl = baseUrl || "http://127.0.0.1:8000";
+    const safeBaseUrl = baseUrl || "http://localhost:8000";
     try {
       const res = await fetch(`${safeBaseUrl}/api/v1/admin-panel/users/?search=${searchTerm}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -61,7 +61,7 @@ export default function AdminUsersPage() {
 
   const handleRoleChange = async (userId: number, newRole: string) => {
     const token = localStorage.getItem("token");
-    const safeBaseUrl = baseUrl || "http://127.0.0.1:8000";
+    const safeBaseUrl = baseUrl || "http://localhost:8000";
     try {
       const res = await fetch(`${safeBaseUrl}/api/v1/admin-panel/users/${userId}/role/`, {
         method: "PATCH",

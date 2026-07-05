@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 interface Job { id: number; title: string; company: string; status: string; created_at: string; }
 
 export default function AdminJobsPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");

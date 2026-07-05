@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 interface NewsCategory { id: number; name: string; slug: string; description?: string; sort_order: number; }
 
 export default function AdminNewsCategoriesPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const [categories, setCategories] = useState<NewsCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);

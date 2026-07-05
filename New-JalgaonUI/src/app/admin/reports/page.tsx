@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 interface Report { id: number; business_name: string; reporter_name: string; reporter_phone: string; reason: string; description: string; created_at: string; status: string; }
 
 export default function AdminReportsPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("pending");

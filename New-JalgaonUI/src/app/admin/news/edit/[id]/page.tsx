@@ -6,7 +6,7 @@ import { useRouter, useParams } from "next/navigation";
 interface NewsCategory { id: number; name: string; }
 
 export default function AdminNewsEditPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const router = useRouter();
   const params = useParams();
   const id = params.id;
