@@ -87,7 +87,7 @@ export default function TrendingListings({ selectedCity }: TrendingListingsProps
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-xl">
             {displayListings.map((listing, idx) => (
-              <div key={listing.id || idx} className="group cursor-pointer">
+              <Link href={`/directory/${listing.id}`} key={listing.id || idx} className="group cursor-pointer block">
                 <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-base shadow-sm group-hover:shadow-xl transition-all duration-500">
                   {listing.image ? (
                     <img 
@@ -122,7 +122,7 @@ export default function TrendingListings({ selectedCity }: TrendingListingsProps
                     <span className="material-symbols-outlined text-sm text-primary">location_on</span> {listing.location || 'Jalgaon'}
                   </p>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}

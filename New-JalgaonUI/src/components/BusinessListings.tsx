@@ -20,15 +20,34 @@ export interface Listing {
   city?: string;
 }
 
-interface BusinessListingsProps {
+import { useRouter } from 'next/navigation';
+
+export interface BusinessListingsProps {
   category?: string | null;
   searchQuery?: string | null;
   selectedCity?: string | null;
-  onBack: () => void;
-  onSelectListing: (id: string, name: string) => void;
+  onBack?: () => void;
+  onSelectListing?: (id: string, name: string) => void;
 }
 
 export default function BusinessListings({ category, searchQuery, selectedCity, onBack, onSelectListing }: BusinessListingsProps) {
+  const router = useRouter();
+  
+  const handleSelect = (id: string, name: string) => {
+    if (onSelectListing) {
+      onSelectListing(id, name);
+    } else {
+      router.push(`/directory/${id}`);
+    }
+  };
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      router.push('/');
+    }
+  };
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -174,9 +193,9 @@ export default function BusinessListings({ category, searchQuery, selectedCity, 
     <div className="max-w-container-max mx-auto px-xxl py-12">
       {/* Breadcrumb */}
       <nav className="mb-8 flex items-center gap-2 text-sm font-medium text-secondary">
-        <button onClick={onBack} className="hover:text-primary transition-colors cursor-pointer flex items-center">Home</button>
+        <button onClick={handleBack} className="hover:text-primary transition-colors cursor-pointer flex items-center">Home</button>
         <span className="material-symbols-outlined text-base text-secondary/40 select-none flex items-center">chevron_right</span>
-        <button onClick={onBack} className="hover:text-primary transition-colors cursor-pointer flex items-center">Business Directory</button>
+        <button onClick={handleBack} className="hover:text-primary transition-colors cursor-pointer flex items-center">Business Directory</button>
         <span className="material-symbols-outlined text-base text-secondary/40 select-none flex items-center">chevron_right</span>
         <span className="text-primary font-bold flex items-center capitalize">{(category || searchQuery || "").replace(/-/g, ' ')}</span>
       </nav>
@@ -333,7 +352,7 @@ export default function BusinessListings({ category, searchQuery, selectedCity, 
               filteredListings.map((listing) => (
                 <article 
                   key={listing.id}
-                  onClick={() => onSelectListing(listing.id, listing.name)}
+                  onClick={() => handleSelect(listing.id, listing.name)}
                   className={`group bg-white rounded-xl border p-2 shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 flex flex-col md:flex-row relative cursor-pointer ${
                     listing.featured ? 'border-primary' : 'border-hairline-soft'
                   }`}
@@ -411,7 +430,7 @@ export default function BusinessListings({ category, searchQuery, selectedCity, 
                         WhatsApp
                       </a>
                       <button
-                        onClick={(e) => { e.stopPropagation(); onSelectListing(listing.id, listing.name); }}
+                        onClick={(e) => { e.stopPropagation(); handleSelect(listing.id, listing.name); }}
                         className="ml-auto flex items-center gap-1 text-primary text-sm font-bold hover:underline cursor-pointer"
                       >
                         View Profile

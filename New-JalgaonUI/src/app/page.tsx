@@ -15,70 +15,25 @@ import IndustryGrids from '@/components/IndustryGrids';
 import CallToAction from '@/components/CallToAction';
 import ContactForm from '@/components/ContactForm';
 import Footer from '@/components/Footer';
-import BusinessListings from '@/components/BusinessListings';
-import BusinessProfile from '@/components/BusinessProfile';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState<string | null>(null);
-  const [selectedListing, setSelectedListing] = useState<{ id: string; name: string } | null>(null);
+  const router = useRouter();
   const [selectedCity, setSelectedCity] = useState<string>('Jalgaon');
 
   const handleSelectCategory = (cat: string) => {
-    setSelectedCategory(cat);
-    setSearchQuery(null);
-    setSelectedListing(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    router.push(`/category/${cat}`);
   };
 
   const handleSearch = (query: string) => {
     if (!query.trim()) return;
-    setSearchQuery(query);
-    setSelectedCategory(null);
-    setSelectedListing(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleSelectListing = (id: string, name: string) => {
-    setSelectedListing({ id, name });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleBackToListings = () => {
-    setSelectedListing(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleBackToHome = () => {
-    setSelectedCategory(null);
-    setSearchQuery(null);
-    setSelectedListing(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    router.push(`/search?q=${encodeURIComponent(query)}`);
   };
 
   return (
     <>
       <Header />
-      {selectedListing ? (
-        <main>
-          <BusinessProfile
-            listingId={selectedListing.id}
-            listingName={selectedListing.name}
-            onBack={handleBackToListings}
-          />
-        </main>
-      ) : (selectedCategory || searchQuery) ? (
-        <main>
-          <BusinessListings
-            category={selectedCategory}
-            searchQuery={searchQuery}
-            selectedCity={selectedCity}
-            onBack={handleBackToHome}
-            onSelectListing={handleSelectListing}
-          />
-        </main>
-      ) : (
-        <main>
+      <main>
           <MarketWeatherDashboard />
           <Hero selectedCity={selectedCity} onCityChange={setSelectedCity} onSearch={handleSearch} />
           <TrendingListings selectedCity={selectedCity} />
@@ -91,8 +46,7 @@ export default function Home() {
           <BlogSection />
           <CallToAction />
           <ContactForm />
-        </main>
-      )}
+      </main>
       <Footer />
     </>
   );
