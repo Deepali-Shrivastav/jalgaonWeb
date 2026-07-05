@@ -146,10 +146,22 @@ jobs:
             echo "✅ Next.js build complete"
 
             echo "=== [5/6] Restarting Next.js systemd service ==="
+            # Remove any legacy PM2-managed UI process that occupies port 3000.
+            # PM2 aggressively respawns processes, so it must be stopped BEFORE
+            # the systemd service tries to bind port 3000.
+            pm2 stop UI 2>/dev/null || true
+            pm2 delete UI 2>/dev/null || true
+            pm2 save 2>/dev/null || true
+
+            # Kill any remaining orphan next-server processes (from prior crash loops)
+            sudo pkill -9 -f "next-server" 2>/dev/null || true
+            sudo pkill -9 -f "next start" 2>/dev/null || true
+            sleep 2
+
             sudo systemctl stop nextjs_jalgaon || true
             sleep 2
             sudo systemctl start nextjs_jalgaon
-            sleep 5  # Give the server time to start listening on port 3000
+            sleep 8  # Give Next.js time to fully initialize on port 3000
 
             echo "=== [6/6] Health check — verifying service is running ==="
             if sudo systemctl is-active --quiet nextjs_jalgaon; then
