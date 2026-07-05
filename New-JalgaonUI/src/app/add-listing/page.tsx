@@ -34,6 +34,23 @@ export const metadata: Metadata = {
 };
 
 export default function AddListingPage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Add Business Listing | Jalgaon.com",
+    "description": "List your business on Jalgaon.com to connect with thousands of local customers.",
+    "url": "https://jalgaon.com/add-listing",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Jalgaon.com",
+      "url": "https://jalgaon.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://jalgaon.com/icon.png"
+      }
+    }
+  };
+
   return (
     <>
       <script

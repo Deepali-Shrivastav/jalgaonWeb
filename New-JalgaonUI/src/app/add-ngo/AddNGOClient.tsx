@@ -82,7 +82,8 @@ export default function AddNGOClient() {
 
       if (!res.ok) {
         const errorData = await res.json();
-        const errorMsg = errorData.detail || errorData.non_field_errors?.[0] || Object.values(errorData)[0]?.[0] || 'Failed to submit NGO registration.';
+        const errorValues = Object.values(errorData) as any[];
+        const errorMsg = errorData.detail || errorData.non_field_errors?.[0] || (errorValues.length > 0 ? errorValues[0]?.[0] : null) || 'Failed to submit NGO registration.';
         throw new Error(errorMsg);
       }
 
