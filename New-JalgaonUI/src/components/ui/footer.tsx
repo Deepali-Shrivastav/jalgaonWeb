@@ -12,28 +12,28 @@ import {
 
 const links = [
     {
-        title: 'Features',
-        href: '#',
+        title: 'News',
+        href: '/news',
     },
     {
-        title: 'Solution',
-        href: '#',
+        title: 'Events',
+        href: '/events',
     },
     {
-        title: 'Customers',
-        href: '#',
+        title: 'Jobs',
+        href: '/jobs',
     },
     {
-        title: 'Pricing',
-        href: '#',
+        title: 'Add Listing',
+        href: '/add-listing',
     },
     {
-        title: 'Help',
-        href: '#',
+        title: 'Advertise',
+        href: '/advertise',
     },
     {
-        title: 'About',
-        href: '#',
+        title: 'NGOs',
+        href: '/ngo',
     },
 ]
 
@@ -45,7 +45,7 @@ export default function FooterSection() {
                     href="/"
                     aria-label="go home"
                     className="mx-auto block size-fit">
-                    <img alt="Jalgaon.com Logo" className="h-8 w-auto" src="/logo.png" />
+                    <img alt="Jalgaon.com Logo" className="h-8 w-auto" src="/main-logo.png" />
                 </Link>
 
                 <div className="my-8 flex flex-wrap justify-center gap-6 text-sm">

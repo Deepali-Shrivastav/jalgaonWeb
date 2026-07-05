@@ -167,7 +167,7 @@ export default function LoginSignup() {
             <div className="text-center mb-8">
               <div className="flex items-center justify-center mx-auto mb-6">
                 <img
-                  src="/logo.png"
+                  src="/main-logo.png"
                   alt="Jalgaon Logo"
                   className="h-12 w-auto object-contain"
                 />
@@ -285,7 +285,7 @@ export default function LoginSignup() {
             <div className="text-center mb-8">
               <div className="flex items-center justify-center mx-auto mb-6">
                 <img
-                  src="/logo.png"
+                  src="/main-logo.png"
                   alt="Jalgaon Logo"
                   className="h-12 w-auto object-contain"
                 />

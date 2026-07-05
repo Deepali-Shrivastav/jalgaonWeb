@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image, { type StaticImageData } from "next/image";
+import Link from "next/link";
 
 type NewsStory = {
   id?: number;
@@ -104,7 +105,7 @@ export default function LatestNews() {
         </div>
 
         <div className="grid grid-cols-1 items-stretch gap-xl lg:grid-cols-[1.05fr_1fr]">
-          <article className="group relative min-h-[500px] overflow-hidden rounded-xl bg-ink-deep shadow-xl lg:min-h-full">
+          <Link href={`/news/${(featuredStory as any).slug || featuredStory.id}`} className="group relative min-h-[500px] overflow-hidden rounded-xl bg-ink-deep shadow-xl lg:min-h-full block">
             {(featuredStory.image || featuredStory.featured_image) && (
               <img
                 src={((featuredStory.image || featuredStory.featured_image) as any).src || (featuredStory.image || featuredStory.featured_image)}
@@ -127,14 +128,15 @@ export default function LatestNews() {
                 {featuredStory.summary || featuredStory.excerpt || featuredStory.short_description}
               </p>
             </div>
-          </article>
+          </Link>
 
           <div className="grid grid-cols-1 gap-base sm:grid-cols-2 lg:auto-rows-fr">
             {newsList.map((story) => (
-              <article
+              <Link
                 key={story.id || story.title}
-                className="group flex h-full flex-col overflow-hidden rounded-xl border border-hairline-soft bg-white transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl"
-              >
+                href={`/news/${(story as any).slug || story.id}`}
+                className="group flex h-full flex-col overflow-hidden rounded-xl border border-hairline-soft bg-white transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl">
+
                 <div className="relative aspect-[16/9] overflow-hidden bg-surface-container-low flex justify-center items-center">
                   {(story.image || story.featured_image) ? (
                     <img
@@ -159,7 +161,7 @@ export default function LatestNews() {
                     {story.summary || story.excerpt || story.short_description}
                   </p>
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
         </div>

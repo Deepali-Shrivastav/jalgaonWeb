@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 export interface TrendingListing {
   id?: number | string;
@@ -70,9 +71,9 @@ export default function TrendingListings({ selectedCity }: TrendingListingsProps
             <h2 className="text-3xl font-extrabold text-ink-deep mb-xxs">Trending Listings</h2>
             <p className="text-secondary">The most visited local hotspots this week</p>
           </div>
-          <a className="text-primary font-bold flex items-center gap-xxs hover:underline group" href="#">
+          <Link className="text-primary font-bold flex items-center gap-xxs hover:underline group" href="/">
             View All <span className="material-symbols-outlined transition-transform group-hover:translate-x-1">arrow_forward</span>
-          </a>
+          </Link>
         </div>
         
         {loading ? (
