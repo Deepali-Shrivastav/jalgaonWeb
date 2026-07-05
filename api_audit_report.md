@@ -1,0 +1,118 @@
+# API Audit Report
+This artifact tracks the connection status of all Django backend APIs to the Next.js 15 frontend.
+
+## 🟢 Implemented in Frontend:
+- [x] /api/v1/admin-panel/ads/
+- [x] /api/v1/admin-panel/ads/{ad_id}/
+- [x] /api/v1/admin-panel/business-claims/
+- [x] /api/v1/admin-panel/business-claims/{claim_id}/
+- [x] /api/v1/admin-panel/business-reports/
+- [x] /api/v1/admin-panel/business-reports/{report_id}/
+- [x] /api/v1/admin-panel/categories/
+- [x] /api/v1/admin-panel/categories/{category_id}/
+- [x] /api/v1/admin-panel/listings/
+- [x] /api/v1/admin-panel/listings/{listing_id}/
+- [x] /api/v1/admin-panel/listings/{listing_id}/trending/
+- [x] /api/v1/admin-panel/moderation/
+- [x] /api/v1/admin-panel/moderation/{item_id}/
+- [x] /api/v1/admin-panel/stats/
+- [x] /api/v1/admin-panel/subcategories/
+- [x] /api/v1/admin-panel/subcategories/{subcategory_id}/
+- [x] /api/v1/admin-panel/users/
+- [x] /api/v1/admin-panel/users/{user_id}/
+- [x] /api/v1/admin-panel/users/{user_id}/role/
+- [x] /api/v1/ads/by-slot/
+- [x] /api/v1/ads/submit/
+- [x] /api/v1/ads/{ad_id}/track-click/
+- [x] /api/v1/ads/{ad_id}/track-impression/
+- [x] /api/v1/auth/login/
+- [x] /api/v1/auth/logout/
+- [x] /api/v1/auth/register/
+- [x] /api/v1/events/
+- [x] /api/v1/events/admin/events/
+- [x] /api/v1/events/admin/events/{id}/
+- [x] /api/v1/events/admin/events/{id}/approve/
+- [x] /api/v1/events/admin/events/{id}/feature/
+- [x] /api/v1/events/admin/events/{id}/reject/
+- [x] /api/v1/events/categories/
+- [x] /api/v1/events/{slug}/
+- [x] /api/v1/jobs/
+- [x] /api/v1/jobs/admin/applications/
+- [x] /api/v1/jobs/admin/categories/
+- [x] /api/v1/jobs/admin/categories/{id}/
+- [x] /api/v1/jobs/admin/jobs/
+- [x] /api/v1/jobs/admin/jobs/{id}/
+- [x] /api/v1/jobs/admin/jobs/{id}/status/
+- [x] /api/v1/jobs/categories/
+- [x] /api/v1/jobs/featured/
+- [x] /api/v1/jobs/my-applications/
+- [x] /api/v1/jobs/my-jobs/
+- [x] /api/v1/jobs/saved/
+- [x] /api/v1/jobs/{slug}/
+- [x] /api/v1/listings/
+- [x] /api/v1/listings/categories/
+- [x] /api/v1/listings/create/
+- [x] /api/v1/listings/trending/
+- [x] /api/v1/listings/user/favorites/
+- [x] /api/v1/listings/user/my-listings/
+- [x] /api/v1/listings/{slug}/
+- [x] /api/v1/listings/{slug}/reviews/
+- [x] /api/v1/listings/{slug}/reviews/create/
+- [x] /api/v1/news/
+- [x] /api/v1/news/admin/articles/
+- [x] /api/v1/news/admin/articles/{id}/
+- [x] /api/v1/news/admin/articles/{id}/status/
+- [x] /api/v1/news/admin/categories/
+- [x] /api/v1/news/admin/categories/{id}/
+- [x] /api/v1/news/admin/comments/
+- [x] /api/v1/news/admin/comments/{id}/
+- [x] /api/v1/news/breaking/
+- [x] /api/v1/news/categories/
+- [x] /api/v1/news/trending/
+- [x] /api/v1/news/{slug}/
+- [x] /api/v1/ngo/
+- [x] /api/v1/ngo/{slug}/
+- [x] /api/v1/search/
+
+## 🔴 Missing/Not Found in Frontend:
+- [ ] /api/v1/admin-panel/ad-slots/
+- [ ] /api/v1/admin-panel/ad-slots/{slot_id}/
+- [ ] /api/v1/ads/banners/
+- [ ] /api/v1/ads/carousel/
+- [ ] /api/v1/ads/list/
+- [ ] /api/v1/ads/my-ads/
+- [ ] /api/v1/ads/my-analytics/
+- [ ] /api/v1/auth/logout-all/
+- [ ] /api/v1/auth/token/
+- [ ] /api/v1/auth/token/refresh/
+- [ ] /api/v1/auth/user/
+- [ ] /api/v1/events/admin/categories/
+- [ ] /api/v1/events/admin/categories/{id}/
+- [ ] /api/v1/events/my-events/
+- [ ] /api/v1/events/past/
+- [ ] /api/v1/events/submit/
+- [ ] /api/v1/finance/data/
+- [ ] /api/v1/jobs/admin/applications/{id}/
+- [ ] /api/v1/jobs/my-jobs/{id}/applications/
+- [ ] /api/v1/jobs/my-jobs/{id}/applications/{app_id}/status/
+- [ ] /api/v1/jobs/submit/
+- [ ] /api/v1/jobs/{slug}/apply/
+- [ ] /api/v1/jobs/{slug}/save/
+- [ ] /api/v1/listings/search/
+- [ ] /api/v1/listings/{slug}/claim/
+- [ ] /api/v1/listings/{slug}/delete/
+- [ ] /api/v1/listings/{slug}/report/
+- [ ] /api/v1/listings/{slug}/update/
+- [ ] /api/v1/news/active/
+- [ ] /api/v1/news/admin/articles/{id}/breaking/
+- [ ] /api/v1/news/articles/
+- [ ] /api/v1/news/{slug}/comments/
+- [ ] /api/v1/ngo/admin/categories/
+- [ ] /api/v1/ngo/admin/categories/{id}/
+- [ ] /api/v1/ngo/admin/ngos/
+- [ ] /api/v1/ngo/admin/ngos/{id}/
+- [ ] /api/v1/ngo/categories/
+- [ ] /api/v1/ngo/my-ngos/
+- [ ] /api/v1/ngo/submit/
+- [ ] /api/v1/reviews/
+- [ ] /api/v1/reviews/by-shop/
