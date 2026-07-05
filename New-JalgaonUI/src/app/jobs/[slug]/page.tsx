@@ -5,10 +5,11 @@ import Footer from '@/components/Footer';
 import JobDetailClient from './JobDetailClient';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const resolvedParams = await params;
   try {
     const { slug } = await params;
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-    const res = await fetch(`${baseUrl}/api/v1/jobs/${slug}/`);
+    const res = await fetch(`${baseUrl}/api/v1/jobs/${resolvedParams.slug}/`);
     if (res.ok) {
       const data = await res.json();
       return {
@@ -23,13 +24,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 export default async function JobPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+  const resolvedParams = await params;
   return (
     <>
       <Header />
       <main className="flex-grow py-section px-base bg-surface">
         <div className="max-w-4xl mx-auto py-xl">
-          <JobDetailClient slug={slug} />
+          <JobDetailClient slug={resolvedParams.slug} />
         </div>
       </main>
       <Footer />

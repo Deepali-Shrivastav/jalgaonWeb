@@ -1,9 +1,9 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import AddEventClient from './AddEventClient';
 
 export const metadata: Metadata = {
   title: 'Submit an Event | Jalgaon.com',
-  description: 'Host and promote your local events in Jalgaon.',
+  description: 'List your local event on Jalgaon.com to connect with thousands of local residents.',
 };
 
 export default function AddEventPage() {

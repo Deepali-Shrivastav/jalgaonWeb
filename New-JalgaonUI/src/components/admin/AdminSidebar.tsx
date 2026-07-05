@@ -15,6 +15,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed }) => {
 
   const [isNewsExpanded, setIsNewsExpanded] = useState(false);
   const [isJobsExpanded, setIsJobsExpanded] = useState(false);
+  const [isEventsExpanded, setIsEventsExpanded] = useState(false);
 
   const userRole = user?.role || "";
   const isAdmin = ["super_admin", "admin"].includes(userRole);
@@ -31,9 +32,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed }) => {
 
   const navLinkClass = (path: string, exact = false) => {
     const isActive = exact ? pathname === path : pathname?.startsWith(path);
-    return `flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+    return `flex items-center ${
+      isCollapsed ? "justify-center w-12 h-12 mx-auto" : "gap-3 px-4 py-3"
+    } text-sm font-medium rounded-xl transition-all duration-200 ${
       isActive
-        ? "bg-primary text-white"
+        ? "bg-primary text-white shadow-md shadow-primary/20"
         : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
     }`;
   };
@@ -43,14 +46,26 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed }) => {
       className={`bg-white border-r border-slate-200 h-screen overflow-y-auto flex-shrink-0 transition-all duration-300 ${
         isCollapsed ? "w-20" : "w-64"
       }`}
+      style={{
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
+      }}
     >
+      {/* Scrollbar hide style */}
+      <style jsx global>{`
+        aside::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
       <div className="h-16 flex items-center justify-center border-b border-slate-200 px-4 sticky top-0 bg-white z-10">
-        <h2 className="font-bold text-xl text-ink-deep truncate">
-          {isCollapsed ? "J" : "Jalgaon Admin"}
-        </h2>
+        {isCollapsed ? (
+          <img src="/title-logo.png" alt="Logo" className="h-8 w-auto object-contain" />
+        ) : (
+          <img src="/logo.png" alt="Jalgaon Admin" className="h-9 w-auto object-contain" />
+        )}
       </div>
 
-      <nav className="p-4 space-y-1">
+      <nav className={`p-4 ${isCollapsed ? "space-y-3" : "space-y-1"}`}>
         {/* Dashboard */}
         <Link href="/admin" className={navLinkClass("/admin", true)}>
           <span className="material-symbols-outlined">dashboard</span>
@@ -102,9 +117,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed }) => {
           <div className="space-y-1">
             <button
               onClick={() => setIsNewsExpanded(!isNewsExpanded)}
-              className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
+              className={`w-full flex items-center ${
+                isCollapsed ? "justify-center w-12 h-12 mx-auto" : "justify-between px-4 py-3"
+              } text-sm font-medium rounded-xl text-slate-600 hover:bg-slate-100 transition-all duration-200`}
             >
-              <div className="flex items-center gap-3">
+              <div className={`flex items-center ${isCollapsed ? "" : "gap-3"}`}>
                 <span className="material-symbols-outlined">article</span>
                 {!isCollapsed && <span>News Module</span>}
               </div>
@@ -137,9 +154,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed }) => {
           <div className="space-y-1">
             <button
               onClick={() => setIsJobsExpanded(!isJobsExpanded)}
-              className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
+              className={`w-full flex items-center ${
+                isCollapsed ? "justify-center w-12 h-12 mx-auto" : "justify-between px-4 py-3"
+              } text-sm font-medium rounded-xl text-slate-600 hover:bg-slate-100 transition-all duration-200`}
             >
-              <div className="flex items-center gap-3">
+              <div className={`flex items-center ${isCollapsed ? "" : "gap-3"}`}>
                 <span className="material-symbols-outlined">work</span>
                 {!isCollapsed && <span>Job Portal</span>}
               </div>
@@ -165,12 +184,36 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed }) => {
           </div>
         )}
 
-        {/* Events */}
+        {/* Events (dropdown) */}
         {canSeeEvents && (
-          <Link href="/admin/events" className={navLinkClass("/admin/events")}>
-            <span className="material-symbols-outlined">event</span>
-            {!isCollapsed && <span>Events</span>}
-          </Link>
+          <div className="space-y-1">
+            <button
+              onClick={() => setIsEventsExpanded(!isEventsExpanded)}
+              className={`w-full flex items-center ${
+                isCollapsed ? "justify-center w-12 h-12 mx-auto" : "justify-between px-4 py-3"
+              } text-sm font-medium rounded-xl text-slate-600 hover:bg-slate-100 transition-all duration-200`}
+            >
+              <div className={`flex items-center ${isCollapsed ? "" : "gap-3"}`}>
+                <span className="material-symbols-outlined">event</span>
+                {!isCollapsed && <span>Events</span>}
+              </div>
+              {!isCollapsed && (
+                <span className="material-symbols-outlined text-sm">
+                  {isEventsExpanded ? "expand_less" : "expand_more"}
+                </span>
+              )}
+            </button>
+            {isEventsExpanded && !isCollapsed && (
+              <div className="pl-11 space-y-1">
+                <Link href="/admin/events" className={navLinkClass("/admin/events", true)}>
+                  Event Listings
+                </Link>
+                <Link href="/admin/events/categories" className={navLinkClass("/admin/events/categories")}>
+                  Categories
+                </Link>
+              </div>
+            )}
+          </div>
         )}
 
         {/* NGOs */}

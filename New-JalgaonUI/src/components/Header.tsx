@@ -24,9 +24,10 @@ export default function Header() {
   };
 
   return (
-    <header className="w-full sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-hairline-soft">
+    <>
+      <header className="w-full sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-hairline-soft">
       <div className="max-w-container-max mx-auto px-xxl flex justify-between items-center h-20">
-        <div className="flex items-center gap-xxxl">
+        <div className="flex items-center gap-4 md:gap-xxxl">
           <Link href="/" className="flex-shrink-0">
             <img 
               alt="Jalgaon.com Logo" 
@@ -50,118 +51,163 @@ export default function Header() {
               </Link>
             ))}
             <Link href="/add-listing" className="text-secondary hover:text-primary transition-colors font-medium">Add Listing</Link>
+            <Link href="/add-event" className="text-secondary hover:text-primary transition-colors font-medium">Add Event</Link>
             <Link href="/advertise" className="text-secondary hover:text-primary transition-colors font-medium">Advertise</Link>
           </nav>
         </div>
          
         <div className="flex items-center gap-base">
-          <button className="material-symbols-outlined text-secondary hover:text-primary transition-colors p-2 hidden sm:block">favorite</button>
-          <button className="material-symbols-outlined text-secondary hover:text-primary transition-colors p-2 hidden sm:block">shopping_cart</button>
-          
-          {isLogin ? (
-            <div className="flex items-center gap-3 hidden sm:flex">
-              <Link href="/account" className="flex items-center gap-2 bg-surface-container-low text-ink-deep px-4 py-2 rounded-full font-bold hover:bg-surface-container-high transition-all">
-                <span className="material-symbols-outlined text-[20px]">person</span>
-                Account
-              </Link>
-              <button 
-                onClick={logout}
-                className="bg-red-500 text-white px-xl py-2 rounded-full font-bold text-sm hover:bg-red-600 transition-all shadow-sm active:scale-95"
-              >
-                Logout
-              </button>
-            </div>
-          ) : (
-            <button 
-              onClick={() => setIsLoginFormOpen(true)}
-              className="bg-primary text-white px-xl py-3 rounded-full font-bold text-sm hover:bg-primary-deep transition-all shadow-sm active:scale-95 hidden sm:block"
-            >
-              Signup/Login
-            </button>
-          )}
-          
-          <button 
-            className="material-symbols-outlined text-ink-deep p-2 md:hidden"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={isMobileMenuOpen}
-          >
-            {isMobileMenuOpen ? 'close' : 'menu'}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
-        <div className="absolute top-20 left-0 w-full bg-white shadow-xl flex flex-col border-b border-hairline-soft md:hidden z-40">
-          {navLinks.map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className={`px-xxl py-4 border-b border-hairline-soft ${
-                isActive(href)
-                  ? 'text-primary font-bold bg-surface-container-low'
-                  : 'text-secondary hover:bg-surface-container-low'
-              }`}
-              onClick={() => setIsMobileMenuOpen(false)}
-              aria-current={isActive(href) ? 'page' : undefined}
-            >
-              {label}
-            </Link>
-          ))}
-          <Link
-            href="/add-listing"
-            className="px-xxl py-4 border-b border-hairline-soft text-secondary hover:bg-surface-container-low"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            Add Listing
-          </Link>
-          <Link
-            href="/advertise"
-            className="px-xxl py-4 border-b border-hairline-soft text-secondary hover:bg-surface-container-low"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            Advertise
-          </Link>
-          <div className="p-xxl flex gap-4 justify-between items-center">
-            <div className="flex gap-2">
-              <button className="material-symbols-outlined text-secondary p-2">favorite</button>
-              <button className="material-symbols-outlined text-secondary p-2">shopping_cart</button>
-            </div>
+          <div className="hidden md:flex items-center gap-base">
             {isLogin ? (
-              <div className="flex flex-col gap-3 w-full">
-                <Link 
-                  href="/account" 
-                  className="w-full flex justify-center items-center gap-2 bg-surface-container-low text-ink-deep py-3 rounded-full font-bold shadow-sm"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
+              <div className="flex items-center gap-3">
+                <Link href="/account" className="flex items-center gap-2 bg-surface-container-low text-ink-deep px-4 py-2 rounded-full font-bold hover:bg-surface-container-high transition-all">
                   <span className="material-symbols-outlined text-[20px]">person</span>
-                  My Account
+                  Account
                 </Link>
                 <button 
-                  onClick={() => {
-                    logout();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full bg-red-500 text-white py-3 rounded-full font-bold shadow-sm"
+                  onClick={logout}
+                  className="bg-red-500 text-white px-xl py-2 rounded-full font-bold text-sm hover:bg-red-600 transition-all shadow-sm active:scale-95"
                 >
                   Logout
                 </button>
               </div>
             ) : (
               <button 
-                onClick={() => {
-                  setIsLoginFormOpen(true);
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full bg-primary text-white py-3 rounded-full font-bold shadow-sm"
+                onClick={() => setIsLoginFormOpen(true)}
+                className="bg-primary text-white px-xl py-3 rounded-full font-bold text-sm hover:bg-primary-deep transition-all shadow-sm active:scale-95"
               >
                 Signup/Login
               </button>
             )}
           </div>
+          <button 
+            className="md:hidden p-2 text-ink-deep hover:bg-surface-container-low rounded-full transition-colors flex items-center justify-center -mr-2"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle mobile menu"
+          >
+            <span className="material-symbols-outlined text-[28px]">menu</span>
+          </button>
         </div>
+      </div>
+      </header>
+ 
+      {/* Mobile Sidebar Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-[60] md:hidden transition-opacity duration-300" 
+          onClick={() => setIsMobileMenuOpen(false)}
+          aria-hidden="true"
+        />
       )}
-    </header>
+
+      {/* Mobile Sidebar Dashboard */}
+      <div 
+        className={`fixed top-0 right-0 h-[100dvh] w-[85%] max-w-sm bg-white shadow-2xl z-[70] transform transition-transform duration-300 ease-in-out md:hidden flex flex-col ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        aria-label="Mobile Sidebar"
+      >
+        <div className="p-xl flex justify-between items-center border-b border-hairline-soft bg-surface/50">
+          <button 
+            className="p-2 text-ink-deep hover:bg-surface-container-low rounded-full transition-colors flex items-center justify-center bg-white shadow-sm"
+            onClick={() => setIsMobileMenuOpen(false)}
+            aria-label="Close menu"
+          >
+            <span className="material-symbols-outlined">close</span>
+          </button>
+          <img alt="Jalgaon.com Logo" className="h-7 w-auto" src="/logo.png" />
+        </div>
+        
+        <div className="flex-1 overflow-y-auto pb-safe-area">
+          <div className="flex flex-col py-2">
+            <div className="px-xl py-3 text-xs font-bold text-outline tracking-wider uppercase">Navigation</div>
+            {navLinks.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                className={`px-xl py-4 flex items-center gap-4 ${
+                  isActive(href)
+                    ? 'text-primary font-bold bg-primary/5 border-l-4 border-primary'
+                    : 'text-secondary hover:bg-surface-container-low border-l-4 border-transparent'
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+                aria-current={isActive(href) ? 'page' : undefined}
+              >
+                {label}
+              </Link>
+            ))}
+            
+            <div className="px-xl py-3 mt-4 text-xs font-bold text-outline tracking-wider uppercase border-t border-hairline-soft">Services</div>
+            <Link
+              href="/add-listing"
+              className="px-xl py-4 flex items-center gap-4 text-secondary hover:bg-surface-container-low border-l-4 border-transparent"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <span className="material-symbols-outlined text-[20px]">storefront</span>
+              Add Listing
+            </Link>
+            <Link
+              href="/add-event"
+              className="px-xl py-4 flex items-center gap-4 text-secondary hover:bg-surface-container-low border-l-4 border-transparent"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <span className="material-symbols-outlined text-[20px]">event</span>
+              Add Event
+            </Link>
+            <Link
+              href="/advertise"
+              className="px-xl py-4 flex items-center gap-4 text-secondary hover:bg-surface-container-low border-l-4 border-transparent"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <span className="material-symbols-outlined text-[20px]">campaign</span>
+              Advertise
+            </Link>
+          </div>
+        </div>
+
+        <div className="p-xl border-t border-hairline-soft bg-surface-container-lowest">
+          <div className="flex gap-4 mb-4">
+            <button className="flex-1 bg-surface-container-low hover:bg-surface-container-high transition-colors text-ink-deep rounded-xl py-3 flex items-center justify-center gap-2 font-medium">
+              <span className="material-symbols-outlined text-[20px]">favorite</span>
+              Saved
+            </button>
+            <button className="flex-1 bg-surface-container-low hover:bg-surface-container-high transition-colors text-ink-deep rounded-xl py-3 flex items-center justify-center gap-2 font-medium">
+              <span className="material-symbols-outlined text-[20px]">shopping_cart</span>
+              Cart
+            </button>
+          </div>
+          
+          {isLogin ? (
+            <div className="flex flex-col gap-3">
+              <Link 
+                href="/account" 
+                className="w-full flex justify-center items-center gap-2 bg-primary/10 text-primary py-3.5 rounded-xl font-bold transition-colors hover:bg-primary/20"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <span className="material-symbols-outlined text-[20px]">person</span>
+                My Account
+              </Link>
+              <button 
+                onClick={() => {
+                  logout();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full bg-red-50 text-red-600 hover:bg-red-100 py-3.5 rounded-xl font-bold transition-colors"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <button 
+              onClick={() => {
+                setIsLoginFormOpen(true);
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full bg-primary text-white py-3.5 rounded-xl font-bold shadow-md hover:bg-primary-deep transition-all shadow-primary/20"
+            >
+              Signup / Login
+            </button>
+          )}
+        </div>
+      </div>
+    </>
   );
 }

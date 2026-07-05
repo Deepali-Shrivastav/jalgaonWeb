@@ -22,6 +22,7 @@ import BusinessProfile from '@/components/BusinessProfile';
 export default function Homepage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedListing, setSelectedListing] = useState<{ id: string; name: string } | null>(null);
+  const [selectedCity, setSelectedCity] = useState<string>('Jalgaon');
 
   const handleSelectCategory = (cat: string) => {
     setSelectedCategory(cat);
@@ -60,16 +61,17 @@ export default function Homepage() {
         <main>
           <BusinessListings
             category={selectedCategory}
+            selectedCity={selectedCity}
             onBack={handleBackToHome}
             onSelectListing={handleSelectListing}
           />
         </main>
       ) : (
         <main>
-          <Hero />
+          <Hero selectedCity={selectedCity} onCityChange={setSelectedCity} />
           <MarketWeatherDashboard />
           <BreakingNews />
-          <TrendingListings />
+          <TrendingListings selectedCity={selectedCity} />
           <IndustryGrids onSelectCategory={handleSelectCategory} />
           <LatestNews />
           <UpcomingEvents />

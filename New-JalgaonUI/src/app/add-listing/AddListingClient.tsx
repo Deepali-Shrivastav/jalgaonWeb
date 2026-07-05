@@ -18,7 +18,7 @@ export default function AddListingClient() {
   // Form State
   const [formData, setFormData] = useState({
     business_name: '',
-    legal_name: '', // optional, won't map exactly to backend if not supported
+    legal_name: '',
     business_email: '',
     business_no: '',
     main_category: '',
@@ -40,10 +40,6 @@ export default function AddListingClient() {
   const [bannerFile, setBannerFile] = useState<File | null>(null);
 
   useEffect(() => {
-    // Redirect to login if not logged in
-    // However, if we want to allow unauthenticated users to see the page and prompt later, we can skip
-    
-    // Fetch categories
     const fetchCategories = async () => {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -97,7 +93,6 @@ export default function AddListingClient() {
     const token = localStorage.getItem("token");
 
     const submitData = new FormData();
-    // Append all string fields
     Object.keys(formData).forEach(key => {
       if (key !== 'legal_name' && key !== 'country' && formData[key as keyof typeof formData]) {
         submitData.append(key, formData[key as keyof typeof formData]);
@@ -359,7 +354,7 @@ export default function AddListingClient() {
 
             {/* Final CTA */}
             <div className="pt-xl mt-xxxl border-t border-hairline-soft">
-              <button disabled={submitting || loading} className="w-full bg-primary text-white py-5 rounded-2xl font-bold text-xl hover:bg-primary-deep shadow-lg transition-all duration-300 transform hover:-translate-y-1 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed" type="submit">
+              <button disabled={submitting} className="w-full bg-primary text-white py-5 rounded-2xl font-bold text-xl hover:bg-primary-deep shadow-lg transition-all duration-300 transform hover:-translate-y-1 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed" type="submit">
                 {submitting ? 'Submitting...' : 'Submit Form'}
               </button>
               <p className="text-center text-sm text-secondary mt-4 italic">By submitting, you agree to our Terms of Service and Business Listing Policies.</p>

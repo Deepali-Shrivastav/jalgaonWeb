@@ -450,8 +450,12 @@ function IndustryCard({ ind, onSelectCategory }: { ind: any; onSelectCategory: (
               onClick={() => onSelectCategory(ind.slug || ind.title)}
               className="flex flex-col items-center text-center group/item cursor-pointer w-[120px] sm:w-[150px] shrink-0 snap-start"
             >
-              <div className="w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center mb-base group-hover/item:bg-primary/10 transition-colors overflow-hidden">
-                <span className="material-symbols-outlined text-4xl text-primary/40">{item.icon}</span>
+              <div className="w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center mb-base group-hover/item:bg-primary/10 transition-colors overflow-hidden p-2">
+                {item.image ? (
+                  <img src={`${process.env.NEXT_PUBLIC_API_URL || ""}${item.image}`} alt={item.name} className="w-full h-full object-contain rounded-lg" />
+                ) : (
+                  <span className="material-symbols-outlined text-4xl text-primary/40">{item.icon}</span>
+                )}
               </div>
               <span className="font-bold text-sm text-ink-deep leading-snug">{item.name}</span>
             </div>
@@ -494,7 +498,8 @@ export default function IndustryGrids({ onSelectCategory }: { onSelectCategory: 
               return {
                 name: sub.sub_category,
                 slug: sub.slug,
-                icon: subMeta?.icon || "category"
+                icon: subMeta?.icon || "category",
+                image: sub.sub_category_img
               };
             })
           };
@@ -514,7 +519,7 @@ export default function IndustryGrids({ onSelectCategory }: { onSelectCategory: 
   }, []);
 
   return (
-    <section className="py-section bg-surface-container-low">
+    <section id="explore-categories" className="py-section bg-surface-container-low">
       <div className="max-w-container-max mx-auto px-xxl">
         <h2 className="text-center text-4xl font-extrabold text-ink-deep mb-section">Explore Local Industries</h2>
         

@@ -1,51 +1,54 @@
-"use client";
+'use client';
 
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useRouter } from 'next/navigation';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import { AuthContext } from '@/context/AuthContext';
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function AddEventClient() {
   const router = useRouter();
-  const { user, isLogin } = useContext(AuthContext);
-  
+  const { user } = useContext(AuthContext);
+  const isAuthenticated = !!user;
+
   const [categories, setCategories] = useState<any[]>([]);
+  const [loadingCats, setLoadingCats] = useState(true);
+  
   const [formData, setFormData] = useState({
     title: '',
-    short_description: '',
-    description: '',
-    organizer_name: '',
-    organizer_contact: '',
-    venue_name: '',
-    venue_address: '',
-    maps_url: '',
+    category: '',
     start_datetime: '',
     end_datetime: '',
+    venue_name: '',
+    venue_address: '',
+    organizer_name: '',
+    organizer_contact: '',
     registration_link: '',
-    category: ''
+    short_description: '',
+    description: ''
   });
   
-  const [featuredImage, setFeaturedImage] = useState<File | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
-
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
   useEffect(() => {
-    fetch(`${baseUrl}/api/v1/events/categories/`)
-      .then(res => res.json())
-      .then(data => setCategories(data.results || data))
-      .catch(err => console.error(err));
-  }, [baseUrl]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!isLogin) {
-        router.push('/login?redirect=/add-event');
+    const fetchCategories = async () => {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+        const res = await fetch(`${baseUrl}/api/v1/events/categories/`);
+        if (res.ok) {
+          const json = await res.json();
+          setCategories(json.results || json);
+        }
+      } catch (err) {
+        console.error("Failed to load categories", err);
+      } finally {
+        setLoadingCats(false);
       }
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [isLogin, router]);
+    };
+    fetchCategories();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -53,318 +56,382 @@ export default function AddEventClient() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFeaturedImage(e.target.files[0]);
+      const file = e.target.files[0];
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image size must be less than 5MB");
+        return;
+      }
+      setImageFile(file);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAuthenticated) {
+      toast.error("You must be logged in to submit an event.");
+      return;
+    }
+    
+    if (!formData.title || !formData.start_datetime) {
+      toast.error("Please fill in required fields (Title, Start Time).");
+      return;
+    }
+
     setSubmitting(true);
-    setError('');
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+    const token = localStorage.getItem("token");
+
+    const submitData = new FormData();
+    Object.keys(formData).forEach(key => {
+      const value = formData[key as keyof typeof formData];
+      if (value) {
+        submitData.append(key, value);
+      }
+    });
+
+    if (imageFile) {
+      submitData.append('featured_image', imageFile);
+    }
 
     try {
-      const token = localStorage.getItem('token');
-      const submitData = new FormData();
-      
-      Object.entries(formData).forEach(([key, value]) => {
-        if (value) {
-          submitData.append(key, value);
-        }
-      });
-      
-      if (featuredImage) {
-        submitData.append('featured_image', featuredImage);
-      }
-
-      const res = await fetch(`${baseUrl}/api/v1/events/submit/`, {
+      let res = await fetch(`${baseUrl}/api/v1/events/submit/`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
         body: submitData
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        // Check for specific field errors
-        let errorMsg = 'Failed to submit event.';
-        if (errorData.start_datetime) errorMsg = errorData.start_datetime[0];
-        else if (errorData.end_datetime) errorMsg = errorData.end_datetime[0];
-        else if (errorData.featured_image) errorMsg = errorData.featured_image[0];
-        else if (errorData.detail) errorMsg = errorData.detail;
-        else if (errorData.non_field_errors) errorMsg = errorData.non_field_errors[0];
-        else if (Array.isArray(errorData) && errorData[0]) errorMsg = errorData[0];
-        
-        throw new Error(errorMsg);
+      if (res.status === 401) {
+        const refreshToken = localStorage.getItem("refresh_token");
+        if (refreshToken) {
+          const refreshRes = await fetch(`${baseUrl}/api/v1/auth/token/refresh/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ refresh: refreshToken })
+          });
+          
+          if (refreshRes.ok) {
+            const refreshData = await refreshRes.json();
+            localStorage.setItem("token", refreshData.access);
+            // Retry with new token
+            res = await fetch(`${baseUrl}/api/v1/events/submit/`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${refreshData.access}`
+              },
+              body: submitData
+            });
+          } else {
+            toast.error("Your session has expired. Please log in again.");
+            setSubmitting(false);
+            return;
+          }
+        } else {
+          toast.error("Your session has expired. Please log in again.");
+          setSubmitting(false);
+          return;
+        }
       }
 
-      setSuccess(true);
-      setTimeout(() => {
-        router.push('/events');
-      }, 3000);
-    } catch (err: any) {
-      setError(err.message);
+      if (res.ok) {
+        toast.success("Event submitted successfully! Awaiting admin approval.");
+        setTimeout(() => {
+          router.push('/events');
+        }, 2000);
+      } else {
+        const errorData = await res.json().catch(() => null);
+        console.error("Submission error:", errorData);
+        
+        let errorMessage = "Failed to submit event. Please check required fields.";
+        
+        if (errorData) {
+          if (errorData.detail) {
+            errorMessage = errorData.detail;
+          } else if (typeof errorData === 'object') {
+            // Find the first array containing string error messages (typical DRF validation format)
+            const firstErrorField = Object.values(errorData).find(val => Array.isArray(val) && val.length > 0 && typeof val[0] === 'string');
+            if (firstErrorField && Array.isArray(firstErrorField)) {
+              errorMessage = firstErrorField[0];
+            } else if (errorData.non_field_errors && Array.isArray(errorData.non_field_errors)) {
+              errorMessage = errorData.non_field_errors[0];
+            }
+          }
+        }
+        
+        toast.error(errorMessage);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("An error occurred during submission.");
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (!isLogin) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <span className="material-symbols-outlined animate-spin text-5xl text-primary mb-4">progress_activity</span>
-        <h2 className="text-xl font-bold text-ink-deep">Checking Authorization...</h2>
-      </div>
-    );
-  }
+  const isLoading = false;
 
-  if (success) {
+  if (isLoading) {
     return (
-      <div className="max-w-3xl mx-auto py-20 px-4 text-center">
-        <span className="material-symbols-outlined text-7xl text-emerald-500 mb-6 animate-bounce">celebration</span>
-        <h1 className="text-4xl font-extrabold text-ink-deep mb-4">Event Submitted!</h1>
-        <p className="text-lg text-secondary mb-8">Your event has been successfully sent for review.</p>
-        <p className="text-sm text-secondary animate-pulse">Redirecting to Events page...</p>
-      </div>
+      <>
+        <Header />
+        <div className="min-h-screen flex items-center justify-center bg-surface">
+          <span className="material-symbols-outlined animate-spin text-4xl text-primary">progress_activity</span>
+        </div>
+        <Footer />
+      </>
     );
   }
 
   return (
-    <div className="bg-surface-container-lowest min-h-screen py-12">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="mb-10 text-center">
-          <h1 className="text-4xl font-extrabold text-ink-deep mb-4">Host an Event</h1>
-          <p className="text-secondary text-lg">Promote your upcoming event to the Jalgaon community.</p>
+    <>
+      <Header />
+      <Toaster position="top-center" />
+      <main className="py-xxxl mb-12 px-base md:px-xxl max-w-container-max mx-auto bg-surface">
+        
+        {/* Header Section */}
+        <div className="mb-xl text-center">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-ink-deep tracking-tight mb-sm">
+            List Your <span className="text-primary">Local Event</span>
+          </h1>
+          <p className="text-lg text-secondary max-w-2xl mx-auto">
+            Connect with thousands of residents by publishing your event on Jalgaon&apos;s leading local directory.
+          </p>
         </div>
 
-        {error && (
-          <div className="bg-red-50 text-red-600 border border-red-200 p-4 rounded-xl mb-8 flex items-center gap-3 font-medium shadow-sm">
-            <span className="material-symbols-outlined">error</span>
-            {error}
+        {!isAuthenticated ? (
+          <div className="max-w-3xl mx-auto bg-amber-50 border border-amber-200 rounded-xl p-8 text-center shadow-sm">
+            <span className="material-symbols-outlined text-4xl text-amber-500 mb-4 block">lock</span>
+            <h2 className="text-xl font-bold text-ink-deep mb-2">Authentication Required</h2>
+            <p className="text-secondary mb-6">You must be logged in to submit an event to the directory.</p>
+            <button 
+              onClick={() => router.push('/account')}
+              className="bg-primary text-white px-8 py-3 rounded-full font-bold shadow-md hover:bg-primary-deep transition-colors"
+            >
+              Sign In or Register
+            </button>
           </div>
-        )}
+        ) : (
+          <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-lg">
+            {/* 1. Basic Details */}
+            <div className="bg-white rounded-2xl p-6 md:p-10 shadow-sm border border-hairline-soft">
+              <h2 className="text-xl font-bold text-ink-deep mb-6 flex items-center gap-2 border-b border-hairline-soft pb-4">
+                <span className="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">event</span>
+                Basic Event Details
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="col-span-1 md:col-span-2">
+                  <label className="block text-sm font-bold text-ink-deep mb-2">Event Title *</label>
+                  <input 
+                    type="text" 
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    required
+                    className="w-full bg-surface-container-low border border-outline rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                    placeholder="e.g., Jalgaon Tech Meetup 2026"
+                  />
+                </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-3xl shadow-sm border border-hairline-soft overflow-hidden">
-          {/* Basic Details */}
-          <div className="p-8 md:p-10 border-b border-hairline-soft">
-            <h3 className="text-xl font-bold text-ink-deep mb-6 flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary">event</span> Event Details
-            </h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-ink-deep mb-2">Event Title *</label>
-                <input 
-                  type="text" 
-                  name="title" 
-                  value={formData.title} 
-                  onChange={handleChange} 
-                  required 
-                  placeholder="e.g. Jalgaon Tech Meetup 2026"
-                  className="w-full p-4 rounded-xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                />
-              </div>
+                <div className="col-span-1">
+                  <label className="block text-sm font-bold text-ink-deep mb-2">Category</label>
+                  <div className="relative">
+                    <select 
+                      name="category"
+                      value={formData.category}
+                      onChange={handleChange}
+                      className="w-full bg-surface-container-low border border-outline rounded-xl px-4 py-3 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                    >
+                      <option value="">Select a Category</option>
+                      {!loadingCats && categories.map(cat => (
+                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                      ))}
+                    </select>
+                    <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-secondary pointer-events-none">expand_more</span>
+                  </div>
+                </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-ink-deep mb-2">Category</label>
-                <div className="relative">
-                  <select 
-                    name="category" 
-                    value={formData.category} 
-                    onChange={handleChange} 
-                    className="w-full p-4 rounded-xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all appearance-none"
-                  >
-                    <option value="">Select Category...</option>
-                    {categories.map(cat => (
-                      <option key={cat.id} value={cat.id}>{cat.name}</option>
-                    ))}
-                  </select>
-                  <span className="material-symbols-outlined absolute right-4 top-4 text-secondary pointer-events-none">expand_more</span>
+                <div className="col-span-1">
+                  <label className="block text-sm font-bold text-ink-deep mb-2">Featured Image</label>
+                  <input 
+                    type="file" 
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="w-full bg-surface-container-low border border-outline rounded-xl px-4 py-2.5 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-all cursor-pointer"
+                  />
+                  <p className="text-xs text-secondary mt-1">Max size: 5MB</p>
                 </div>
               </div>
+            </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-ink-deep mb-2">Featured Image</label>
-                <input 
-                  type="file" 
-                  accept="image/*"
-                  onChange={handleFileChange} 
-                  className="w-full p-3.5 rounded-xl border border-outline-variant bg-surface file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-all cursor-pointer"
-                />
-                <p className="text-xs text-secondary mt-2">Max size: 5MB</p>
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-ink-deep mb-2">Short Description *</label>
-                <input 
-                  type="text" 
-                  name="short_description" 
-                  value={formData.short_description} 
-                  onChange={handleChange} 
-                  required 
-                  maxLength={150}
-                  placeholder="Brief summary (max 150 characters)"
-                  className="w-full p-4 rounded-xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-ink-deep mb-2">Full Description *</label>
-                <textarea 
-                  name="description" 
-                  value={formData.description} 
-                  onChange={handleChange} 
-                  required 
-                  rows={6}
-                  placeholder="Detailed information about the event agenda, speakers, etc."
-                  className="w-full p-4 rounded-xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-y"
-                />
+            {/* 2. Schedule */}
+            <div className="bg-white rounded-2xl p-6 md:p-10 shadow-sm border border-hairline-soft">
+              <h2 className="text-xl font-bold text-ink-deep mb-6 flex items-center gap-2 border-b border-hairline-soft pb-4">
+                <span className="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">schedule</span>
+                Date & Time
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-bold text-ink-deep mb-2">Start Date & Time *</label>
+                  <input 
+                    type="datetime-local" 
+                    name="start_datetime"
+                    value={formData.start_datetime}
+                    onChange={handleChange}
+                    required
+                    className="w-full bg-surface-container-low border border-outline rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-ink-deep mb-2">End Date & Time</label>
+                  <input 
+                    type="datetime-local" 
+                    name="end_datetime"
+                    value={formData.end_datetime}
+                    onChange={handleChange}
+                    className="w-full bg-surface-container-low border border-outline rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Schedule */}
-          <div className="p-8 md:p-10 border-b border-hairline-soft bg-surface-container-lowest">
-            <h3 className="text-xl font-bold text-ink-deep mb-6 flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary">schedule</span> Date & Time
-            </h3>
+            {/* 3. Venue & Organizer */}
+            <div className="bg-white rounded-2xl p-6 md:p-10 shadow-sm border border-hairline-soft">
+              <h2 className="text-xl font-bold text-ink-deep mb-6 flex items-center gap-2 border-b border-hairline-soft pb-4">
+                <span className="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">location_on</span>
+                Venue & Organizer
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="col-span-1 md:col-span-2">
+                  <label className="block text-sm font-bold text-ink-deep mb-2">Venue Name</label>
+                  <input 
+                    type="text" 
+                    name="venue_name"
+                    value={formData.venue_name}
+                    onChange={handleChange}
+                    className="w-full bg-surface-container-low border border-outline rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                    placeholder="e.g., Jalgaon Central Hall"
+                  />
+                </div>
+                
+                <div className="col-span-1 md:col-span-2">
+                  <label className="block text-sm font-bold text-ink-deep mb-2">Venue Address</label>
+                  <textarea 
+                    name="venue_address"
+                    value={formData.venue_address}
+                    onChange={handleChange}
+                    rows={2}
+                    className="w-full bg-surface-container-low border border-outline rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
+                    placeholder="Full street address..."
+                  ></textarea>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-ink-deep mb-2">Organizer Name</label>
+                  <input 
+                    type="text" 
+                    name="organizer_name"
+                    value={formData.organizer_name}
+                    onChange={handleChange}
+                    className="w-full bg-surface-container-low border border-outline rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                    placeholder="Who is organizing?"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-bold text-ink-deep mb-2">Organizer Contact</label>
+                  <input 
+                    type="text" 
+                    name="organizer_contact"
+                    value={formData.organizer_contact}
+                    onChange={handleChange}
+                    className="w-full bg-surface-container-low border border-outline rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                    placeholder="Email or Phone"
+                  />
+                </div>
+                
+                <div className="col-span-1 md:col-span-2">
+                  <label className="block text-sm font-bold text-ink-deep mb-2">Registration Link (Optional)</label>
+                  <input 
+                    type="url" 
+                    name="registration_link"
+                    value={formData.registration_link}
+                    onChange={handleChange}
+                    className="w-full bg-surface-container-low border border-outline rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                    placeholder="https://..."
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 4. Details */}
+            <div className="bg-white rounded-2xl p-6 md:p-10 shadow-sm border border-hairline-soft">
+              <h2 className="text-xl font-bold text-ink-deep mb-6 flex items-center gap-2 border-b border-hairline-soft pb-4">
+                <span className="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">description</span>
+                Description
+              </h2>
+              
+              <div className="grid grid-cols-1 gap-6">
+                <div>
+                  <label className="block text-sm font-bold text-ink-deep mb-2">Short Description</label>
+                  <textarea 
+                    name="short_description"
+                    value={formData.short_description}
+                    onChange={handleChange}
+                    rows={2}
+                    maxLength={160}
+                    className="w-full bg-surface-container-low border border-outline rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
+                    placeholder="A brief summary (max 160 characters)..."
+                  ></textarea>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-bold text-ink-deep mb-2">Full Description</label>
+                  <textarea 
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    rows={6}
+                    className="w-full bg-surface-container-low border border-outline rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
+                    placeholder="Tell us more about the event..."
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            {/* Submit Actions */}
+            <div className="pt-4 flex flex-col md:flex-row items-center justify-between gap-4">
+              <p className="text-xs text-secondary font-medium order-2 md:order-1">
+                By submitting, you agree to our <a href="#" className="text-primary hover:underline">Terms of Service</a>. All events are subject to admin review.
+              </p>
+              <button 
+                type="submit" 
+                disabled={submitting}
+                className="w-full md:w-auto bg-primary text-white px-10 py-4 rounded-full font-bold shadow-xl hover:bg-primary-deep transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 order-1 md:order-2"
+              >
+                {submitting ? (
+                  <>
+                    <span className="material-symbols-outlined animate-spin">progress_activity</span>
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined">send</span>
+                    Submit Event
+                  </>
+                )}
+              </button>
+            </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold text-ink-deep mb-2">Start Date & Time *</label>
-                <input 
-                  type="datetime-local" 
-                  name="start_datetime" 
-                  value={formData.start_datetime} 
-                  onChange={handleChange} 
-                  required 
-                  className="w-full p-4 rounded-xl border border-outline-variant bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-ink-deep mb-2">End Date & Time</label>
-                <input 
-                  type="datetime-local" 
-                  name="end_datetime" 
-                  value={formData.end_datetime} 
-                  onChange={handleChange} 
-                  className="w-full p-4 rounded-xl border border-outline-variant bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Location & Contact */}
-          <div className="p-8 md:p-10 border-b border-hairline-soft">
-            <h3 className="text-xl font-bold text-ink-deep mb-6 flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary">location_on</span> Location & Contact
-            </h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-ink-deep mb-2">Venue Name *</label>
-                <input 
-                  type="text" 
-                  name="venue_name" 
-                  value={formData.venue_name} 
-                  onChange={handleChange} 
-                  required 
-                  placeholder="e.g. Rotary Bhavan"
-                  className="w-full p-4 rounded-xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-ink-deep mb-2">Venue Address *</label>
-                <textarea 
-                  name="venue_address" 
-                  value={formData.venue_address} 
-                  onChange={handleChange} 
-                  required 
-                  rows={2}
-                  placeholder="Complete physical address of the venue..."
-                  className="w-full p-4 rounded-xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-y"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-ink-deep mb-2">Google Maps URL</label>
-                <input 
-                  type="url" 
-                  name="maps_url" 
-                  value={formData.maps_url} 
-                  onChange={handleChange} 
-                  placeholder="https://maps.google.com/..."
-                  className="w-full p-4 rounded-xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-ink-deep mb-2">External Registration Link</label>
-                <input 
-                  type="url" 
-                  name="registration_link" 
-                  value={formData.registration_link} 
-                  onChange={handleChange} 
-                  placeholder="https://eventbrite.com/..."
-                  className="w-full p-4 rounded-xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-ink-deep mb-2">Organizer Name *</label>
-                <input 
-                  type="text" 
-                  name="organizer_name" 
-                  value={formData.organizer_name} 
-                  onChange={handleChange} 
-                  required 
-                  placeholder="Name of the person or organization"
-                  className="w-full p-4 rounded-xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-ink-deep mb-2">Organizer Contact *</label>
-                <input 
-                  type="text" 
-                  name="organizer_contact" 
-                  value={formData.organizer_contact} 
-                  onChange={handleChange} 
-                  required 
-                  placeholder="Phone or Email"
-                  className="w-full p-4 rounded-xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="p-8 md:p-10 bg-surface-container-lowest flex items-center justify-end gap-4">
-            <button 
-              type="button"
-              onClick={() => router.back()}
-              className="px-8 py-4 font-bold text-ink-deep hover:text-primary transition-colors"
-            >
-              Cancel
-            </button>
-            <button 
-              type="submit" 
-              disabled={submitting}
-              className="bg-primary hover:bg-primary-deep text-white font-bold py-4 px-10 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:transform-none"
-            >
-              {submitting ? (
-                <>
-                  <span className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>
-                  Submitting...
-                </>
-              ) : (
-                <>
-                  <span className="material-symbols-outlined text-[20px]">send</span>
-                  Submit Event
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+          </form>
+        )}
+      </main>
+      <Footer />
+    </>
   );
 }

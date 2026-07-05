@@ -94,8 +94,8 @@ const BUSINESS_DATA: Record<string, BusinessData> = {
   },
 };
 
-export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
-  const { id } = await context.params;
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   
   // Use specific data if exists, otherwise return default mock
   const data = BUSINESS_DATA[id] || { ...BUSINESS_DATA.default, id, name: `Business ${id}` };
