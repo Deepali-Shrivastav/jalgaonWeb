@@ -31,7 +31,7 @@ export default function Header() {
               <img
                 alt="Jalgaon.com Logo"
                 className="h-8 w-auto"
-                src="/logo.png"
+                src="/main-logo.png"
               />
             </Link>
             <nav
