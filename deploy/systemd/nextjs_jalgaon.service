@@ -14,8 +14,10 @@ WorkingDirectory=/home/ubuntu/jalgaonWeb/New-JalgaonUI
 # Written by the CI/CD deploy workflow — never committed to git.
 EnvironmentFile=/home/ubuntu/jalgaonWeb/New-JalgaonUI/.env.production
 
-# Clean up any orphaned processes on port 3000 before starting
-ExecStartPre=-/bin/bash -c 'kill -9 $(lsof -t -i:3000) 2>/dev/null || true'
+# Clean up any orphaned processes on port 3000 before starting.
+# Uses 'fuser' which correctly finds processes on both IPv4 AND IPv6 sockets.
+# (lsof -i :3000 misses IPv6 listeners — fuser handles both reliably)
+ExecStartPre=-/usr/bin/fuser -k 3000/tcp
 
 # Run Next.js production server on port 3000.
 ExecStart=/usr/bin/node node_modules/next/dist/bin/next start -p 3000

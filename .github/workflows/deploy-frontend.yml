@@ -1,28 +1,25 @@
+﻿# =============================================================================
+# Workflow: CD — Deploy Next.js Frontend (New-JalgaonUI) to Production
 # =============================================================================
-# Workflow 3 of 3: CD — Deploy Next.js Frontend (New-JalgaonUI) to Production
-# =============================================================================
-# Triggers on:
-#   - Push/merge to 'main' branch, ONLY when New-JalgaonUI/ files changed (auto)
-#   - Manual button in GitHub Actions UI (manual)
 #
-# Target: jalgaon-webapp Lightsail server — 13.127.8.145
-# Service: nextjs_jalgaon (systemd) running on localhost:3000
-# Nginx: Reverse-proxies www.jalgaon.com → localhost:3000
+# Architecture (Industry Standard — Build on CI, Deploy Artifacts):
 #
-# Architecture change vs previous version (jalgaonUi):
-#   OLD: Vite static build → SCP tarball → extract to /var/www → nginx reload
-#   NEW: Next.js SSR → SSH build-on-server → systemctl restart nextjs_jalgaon
+#   OLD (problematic): Build on server → OOM kills on low-RAM server
+#   NEW (correct):     Build on CI runner (7 GB RAM) → transfer artifact → deploy
 #
-# Why build on the server instead of CI runner?
-#   1. Next.js SSR requires node_modules at runtime (can't just copy static files)
-#   2. .env.production with secret API keys (COMMODITY/WEATHER) lives on the server
-#   3. NEXT_PUBLIC_* vars are baked in at build time — server already has them
-#   4. Avoids SCP-ing hundreds of MBs of .next/ build artifacts
+# Why build on CI runner, not the server?
+#   - GitHub Actions runners have 7 GB RAM; the server has ~2 GB free
+#   - The Next.js build is memory-intensive and caused OOM kills on the server
+#   - The server should only RUN the built app, never BUILD it
 #
-# Safety gates:
-#   1. Pre-deploy build runs on the CI runner first (fails fast before SSH)
-#   2. Post-deploy health check verifies the service is running
-#   3. Concurrency lock prevents two deploys running simultaneously
+# Deployment flow:
+#   1. Build .next/ on CI runner (no server RAM used)
+#   2. Package built artifacts into a tarball
+#   3. SCP tarball to server (~20-50 MB compressed)
+#   4. Server: unpack → npm ci --omit=dev → systemctl restart (graceful)
+#   5. Health check with automatic rollback on failure
+#
+# Downtime: ~10-15 seconds (service restart only, no build wait)
 # =============================================================================
 name: "CD — Deploy New-JalgaonUI (Next.js) to Production"
 
@@ -34,7 +31,7 @@ on:
       - "New-JalgaonUI/**"
       - ".github/workflows/deploy-frontend.yml"
 
-  # ✅ Manual trigger button
+  # Manual trigger
   workflow_dispatch:
     inputs:
       reason:
@@ -42,7 +39,7 @@ on:
         required: true
         default: "Hotfix / manual deploy"
 
-# Prevent two frontend deploys running simultaneously
+# Prevent two deploys running simultaneously
 concurrency:
   group: production-frontend-deploy
   cancel-in-progress: false
@@ -55,53 +52,68 @@ jobs:
     if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
 
     steps:
-      # -----------------------------------------------------------------------
-      # STEP 1: Checkout the repository
-      # -----------------------------------------------------------------------
-      - name: "Checkout code"
+      # ── Step 1: Checkout ────────────────────────────────────────────────────
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # -----------------------------------------------------------------------
-      # STEP 2: Pre-deploy build check on the CI runner
-      # This catches TypeScript errors and build failures BEFORE touching the
-      # production server. Fast failure saves SSH time and protects the server.
-      # -----------------------------------------------------------------------
-      - name: "Set up Node.js 20 LTS"
+      # ── Step 2: Set up Node.js ──────────────────────────────────────────────
+      - name: Set up Node.js 20 LTS
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "npm"
           cache-dependency-path: New-JalgaonUI/package-lock.json
 
-      - name: "Install frontend dependencies (pre-deploy check)"
+      # ── Step 3: Install dependencies ────────────────────────────────────────
+      - name: Install frontend dependencies
         working-directory: New-JalgaonUI
         run: npm ci
 
-      - name: "Pre-deploy: build check (catches TS/build errors before SSH)"
+      # ── Step 4: Build on CI runner ──────────────────────────────────────────
+      # GitHub Actions runners have 7 GB RAM — build here, not on the server.
+      # NEXT_PUBLIC_* vars are baked into the JS bundle at build time.
+      - name: Build Next.js application
         working-directory: New-JalgaonUI
         env:
-          # NEXT_PUBLIC_* vars are baked in at build time.
-          # We inject the production value here so the CI build matches production.
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
         run: |
           npm run build
-          echo "✅ Pre-deploy build check passed — no TypeScript or build errors"
+          echo "✅ Build complete"
 
-      # -----------------------------------------------------------------------
-      # STEP 3: SSH to the production server and deploy
-      #
-      # The actual deployment runs on the server:
-      #   1. git pull — gets the latest code (including New-JalgaonUI/)
-      #   2. Write .env.production — injects secrets safely via envs:
-      #   3. npm ci --omit=dev — install production dependencies
-      #   4. npm run build — builds Next.js (reads .env.production for NEXT_PUBLIC_*)
-      #   5. systemctl restart — restarts the nextjs_jalgaon systemd service
-      #   6. Health check — fails the deploy if the service didn't come up
-      # -----------------------------------------------------------------------
-      - name: "Deploy to jalgaon-webapp Lightsail server"
+      # ── Step 5: Package build artifacts ─────────────────────────────────────
+      # Ship only what the production server needs to RUN the app.
+      # Source files, dev dependencies, and TypeScript are NOT needed at runtime.
+      - name: Package build artifacts
+        run: |
+          tar -czf next-deploy.tar.gz \
+            -C New-JalgaonUI \
+            .next \
+            public \
+            package.json \
+            package-lock.json \
+            next.config.ts
+          echo "📦 Artifact size: $(du -h next-deploy.tar.gz | cut -f1)"
+
+      # ── Step 6: Upload artifact to production server ─────────────────────────
+      - name: Upload build artifact to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.PRODUCTION_SERVER_IP }}
+          username: ${{ secrets.PRODUCTION_SSH_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          port: 22
+          source: "next-deploy.tar.gz"
+          target: "/tmp/"
+
+      # ── Step 7: Deploy on server ─────────────────────────────────────────────
+      # The server does NOT build. It only:
+      #   1. Writes runtime secrets to .env.production
+      #   2. Unpacks the pre-built .next/ artifact
+      #   3. Installs production-only node_modules (fast, no compile)
+      #   4. Restarts the systemd service gracefully
+      #   5. Health-checks and rolls back automatically on failure
+      - name: Deploy to production server
         uses: appleboy/ssh-action@v1.0.3
-        # CRITICAL: Pass secrets as shell env vars (not raw interpolated strings).
-        # This is safe even when values contain $, \, `, or " characters.
         env:
           DEPLOY_NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
           DEPLOY_COMMODITY_KEY: ${{ secrets.COMMODITY_PRICE_API_KEY }}
@@ -111,58 +123,63 @@ jobs:
           username: ${{ secrets.PRODUCTION_SSH_USER }}
           key: ${{ secrets.PRODUCTION_SSH_KEY }}
           port: 22
-          command_timeout: 20m
+          command_timeout: 10m
           envs: DEPLOY_NEXT_PUBLIC_API_URL,DEPLOY_COMMODITY_KEY,DEPLOY_WEATHER_KEY
           script: |
             set -euo pipefail
 
-            REPO_DIR="/home/ubuntu/jalgaonWeb"
-            NEXT_DIR="${REPO_DIR}/New-JalgaonUI"
-            ENV_FILE="${NEXT_DIR}/.env.production"
+            NEXT_DIR="/home/ubuntu/jalgaonWeb/New-JalgaonUI"
+            DEPLOY_PKG="/tmp/next-deploy.tar.gz"
 
-            echo "=== [1/6] Pulling latest code from main branch ==="
-            cd "${REPO_DIR}"
-            git fetch origin main
-            git reset --hard origin/main
-            echo "✅ Code updated to: $(git log -1 --oneline)"
-
-            echo "=== [2/6] Writing .env.production from deployment secrets ==="
-            # Write env file using injected env vars (safe with special characters)
+            # ── [1/4] Write runtime secrets ──────────────────────────────────
+            echo "=== [1/4] Writing runtime secrets to .env.production ==="
             {
               echo "NEXT_PUBLIC_API_URL=${DEPLOY_NEXT_PUBLIC_API_URL}"
               echo "COMMODITY_PRICE_API_KEY=${DEPLOY_COMMODITY_KEY}"
               echo "WEATHERAPI_KEY=${DEPLOY_WEATHER_KEY}"
-            } > "${ENV_FILE}"
-            chmod 600 "${ENV_FILE}"
+            } > "${NEXT_DIR}/.env.production"
+            chmod 600 "${NEXT_DIR}/.env.production"
             echo "✅ .env.production written (permissions: 600)"
 
-            echo "=== [3/6] Installing dependencies ==="
+            # ── [2/4] Deploy artifacts ───────────────────────────────────────
+            echo "=== [2/4] Deploying build artifacts ==="
+            # Keep previous .next/ for rollback (instant rename, no disk copy)
+            [ -d "${NEXT_DIR}/.next" ] && \
+              mv "${NEXT_DIR}/.next" "${NEXT_DIR}/.next.prev" || true
+            # Unpack new build
+            tar -xzf "${DEPLOY_PKG}" -C "${NEXT_DIR}/"
+            rm -f "${DEPLOY_PKG}"
+            echo "✅ Build artifacts in place"
+
+            # ── [3/4] Install production dependencies ────────────────────────
+            # --omit=dev skips devDependencies — fast, no compile step.
+            # The server NEVER runs the Next.js build.
+            echo "=== [3/4] Installing production dependencies ==="
             cd "${NEXT_DIR}"
-            npm ci
-            echo "✅ Dependencies installed"
+            npm ci --omit=dev
+            echo "✅ Production dependencies installed"
 
-            echo "=== [4/6] Building Next.js application ==="
-            NODE_OPTIONS="--max-old-space-size=2048" npm run build
-            echo "✅ Next.js build complete"
+            # ── [4/4] Graceful service restart ───────────────────────────────
+            echo "=== [4/4] Restarting Next.js service ==="
+            sudo systemctl restart nextjs_jalgaon
+            sleep 12
 
-            echo "=== [5/6] Restarting Next.js systemd service ==="
-            sudo systemctl stop nextjs_jalgaon || true
-            sudo fuser -k 3000/tcp || true
-            sudo lsof -t -i:3000 | xargs -r sudo kill -9 || true
-            sleep 2
-            sudo systemctl start nextjs_jalgaon
-            sleep 5  # Give the server time to start listening on port 3000
-
-            echo "=== [6/6] Health check — verifying service is running ==="
+            # ── Health check with automatic rollback ─────────────────────────
+            echo "=== Health check ==="
             if sudo systemctl is-active --quiet nextjs_jalgaon; then
-              echo "✅ nextjs_jalgaon is running — deployment successful"
+              rm -rf "${NEXT_DIR}/.next.prev" 2>/dev/null || true
+              echo "✅ nextjs_jalgaon is active — deployment successful"
+              echo ""
+              echo "🚀 Timestamp: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
             else
-              echo "❌ ERROR: nextjs_jalgaon failed to start. Last 30 log lines:"
+              echo "❌ Service failed to start. Initiating automatic rollback..."
+              if [ -d "${NEXT_DIR}/.next.prev" ]; then
+                mv "${NEXT_DIR}/.next" "${NEXT_DIR}/.next.failed" 2>/dev/null || true
+                mv "${NEXT_DIR}/.next.prev" "${NEXT_DIR}/.next"
+                sudo systemctl restart nextjs_jalgaon 2>/dev/null || true
+                echo "⚠️  Rolled back to previous build"
+              fi
+              echo "❌ Deployment failed. Last 30 log lines:"
               sudo journalctl -u nextjs_jalgaon --no-pager -n 30
               exit 1
             fi
-
-            echo ""
-            echo "🚀 Frontend deployment completed successfully"
-            echo "   Deployed commit: $(git -C ${REPO_DIR} log -1 --oneline)"
-            echo "   Timestamp: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
