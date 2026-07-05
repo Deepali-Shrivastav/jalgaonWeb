@@ -12,7 +12,11 @@ export interface TrendingListing {
   verified?: boolean;
 }
 
-export default function TrendingListings() {
+interface TrendingListingsProps {
+  selectedCity?: string;
+}
+
+export default function TrendingListings({ selectedCity }: TrendingListingsProps) {
   const [listings, setListings] = useState<TrendingListing[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -42,7 +46,7 @@ export default function TrendingListings() {
           verified: true
         }));
         
-        setListings(mappedResults.slice(0, 4));
+        setListings(mappedResults);
       } catch (err) {
         // Silently swallow network errors so Next.js doesn't pop up the dev overlay
       } finally {
@@ -51,6 +55,12 @@ export default function TrendingListings() {
     };
     fetchListings();
   }, []);
+
+  const filteredListings = selectedCity
+    ? listings.filter(item => item.location.toLowerCase() === selectedCity.toLowerCase())
+    : listings;
+
+  const displayListings = filteredListings.slice(0, 4);
 
   return (
     <section className="py-section bg-white">
@@ -71,11 +81,11 @@ export default function TrendingListings() {
               <div key={i} className="aspect-[4/3] rounded-xl bg-surface-container-low animate-pulse"></div>
             ))}
           </div>
-        ) : listings.length === 0 ? (
-          <p className="text-secondary text-center py-8">No trending listings right now.</p>
+        ) : displayListings.length === 0 ? (
+          <p className="text-secondary text-center py-8">No trending listings in {selectedCity || 'Jalgaon'} right now.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-xl">
-            {listings.map((listing, idx) => (
+            {displayListings.map((listing, idx) => (
               <div key={listing.id || idx} className="group cursor-pointer">
                 <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-base shadow-sm group-hover:shadow-xl transition-all duration-500">
                   {listing.image ? (

@@ -17,15 +17,18 @@ export interface Listing {
   timingColor: string;
   image: string;
   phone: string;
+  city?: string;
 }
 
 interface BusinessListingsProps {
-  category: string;
+  category?: string | null;
+  searchQuery?: string | null;
+  selectedCity?: string | null;
   onBack: () => void;
   onSelectListing: (id: string, name: string) => void;
 }
 
-export default function BusinessListings({ category, onBack, onSelectListing }: BusinessListingsProps) {
+export default function BusinessListings({ category, searchQuery, selectedCity, onBack, onSelectListing }: BusinessListingsProps) {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,13 +38,50 @@ export default function BusinessListings({ category, onBack, onSelectListing }: 
       setLoading(true);
       setError(null);
       try {
+        let endpoint = '';
+        if (searchQuery) {
+          endpoint = `/api/v1/search/?search=${encodeURIComponent(searchQuery)}`;
+        } else if (category) {
+          endpoint = `/api/v1/listings/?category=${encodeURIComponent(category)}`;
+        } else {
+          endpoint = `/api/v1/listings/`; // Fallback
+        }
+
         const url = process.env.NEXT_PUBLIC_API_URL 
-          ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/search/?search=${encodeURIComponent(category)}`
-          : `/api/v1/search/?search=${encodeURIComponent(category)}`;
+          ? `${process.env.NEXT_PUBLIC_API_URL}${endpoint}`
+          : endpoint;
         const res = await fetch(url);
         if (!res.ok) throw new Error('Failed to fetch');
         const json = await res.json();
-        setListings(json.results || json.data || json || []);
+        
+        const backendResults = json.results || json.data || json || [];
+        
+        // Map backend fields to frontend interface
+        const mappedListings: Listing[] = backendResults.map((item: any) => ({
+          id: item.slug || item.id,
+          name: item.business_name || '',
+          category: item.main_category_name || '',
+          displayCategory: item.main_category_name || '',
+          rating: parseFloat(item.avg_rating) || 0,
+          ratingCount: item.review_count || 0,
+          featured: item.is_trending || false,
+          verified: item.is_verified || false,
+          address: item.business_address || '',
+          distance: 0, // Backend handles distance if lat/lng are provided
+          timing: 'Open',
+          timingColor: 'text-green-500',
+          image: item.business_banner || 'https://via.placeholder.com/400x300?text=No+Image',
+          phone: item.business_no || '',
+          city: item.city || 'Jalgaon'
+        }));
+        
+        setListings(mappedListings);
+        
+        // Dynamically set categories based on results
+        const uniqueCategories = Array.from(new Set(mappedListings.map(l => l.category))) as string[];
+        setSelectedCategories(uniqueCategories);
+        setAppliedCategories(uniqueCategories);
+
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -51,15 +91,15 @@ export default function BusinessListings({ category, onBack, onSelectListing }: 
     fetchListings();
   }, [category]);
 
-  // Filters State
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(['Hospitals', 'Clinics', 'Pharmacies', 'Diagnostics']);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [minRating, setMinRating] = useState<number | null>(null);
   const [maxDistance, setMaxDistance] = useState<number>(20);
   const [openNowOnly, setOpenNowOnly] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<string>('Relevance');
 
   // Interactive filtering states (applied on click of Apply Filters or live-updated)
-  const [appliedCategories, setAppliedCategories] = useState<string[]>(['Hospitals', 'Clinics', 'Pharmacies', 'Diagnostics']);
+  const [appliedCategories, setAppliedCategories] = useState<string[]>([]);
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const [appliedMinRating, setAppliedMinRating] = useState<number | null>(null);
   const [appliedMaxDistance, setAppliedMaxDistance] = useState<number>(20);
   const [appliedOpenNowOnly, setAppliedOpenNowOnly] = useState<boolean>(false);
@@ -80,12 +120,12 @@ export default function BusinessListings({ category, onBack, onSelectListing }: 
   };
 
   const clearFilters = () => {
-    setSelectedCategories(['Hospitals', 'Clinics', 'Pharmacies', 'Diagnostics']);
+    setSelectedCategories(availableCategories);
     setMinRating(null);
     setMaxDistance(20);
     setOpenNowOnly(false);
     
-    setAppliedCategories(['Hospitals', 'Clinics', 'Pharmacies', 'Diagnostics']);
+    setAppliedCategories(availableCategories);
     setAppliedMinRating(null);
     setAppliedMaxDistance(20);
     setAppliedOpenNowOnly(false);
@@ -94,8 +134,10 @@ export default function BusinessListings({ category, onBack, onSelectListing }: 
   // Filter & Sort Logic
   const filteredListings = listings
     .filter(item => {
+      // City filter
+      if (selectedCity && item.city && item.city.toLowerCase() !== selectedCity.toLowerCase()) return false;
       // Category filter
-      if (!appliedCategories.includes(item.category)) return false;
+      if (!appliedCategories.includes(item.category) && appliedCategories.length > 0) return false;
       // Rating filter
       if (appliedMinRating !== null && item.rating < appliedMinRating) return false;
       // Distance filter
@@ -117,6 +159,17 @@ export default function BusinessListings({ category, onBack, onSelectListing }: 
       return 0;
     });
 
+  // Dynamically set categories when listings change
+  useEffect(() => {
+      if (listings.length > 0 && availableCategories.length === 0) {
+          const uniqueCategories = Array.from(new Set(listings.map(l => l.category))) as string[];
+          setAvailableCategories(uniqueCategories);
+          setSelectedCategories(uniqueCategories);
+          setAppliedCategories(uniqueCategories);
+      }
+  }, [listings, availableCategories.length]);
+
+
   return (
     <div className="max-w-container-max mx-auto px-xxl py-12">
       {/* Breadcrumb */}
@@ -125,14 +178,16 @@ export default function BusinessListings({ category, onBack, onSelectListing }: 
         <span className="material-symbols-outlined text-base text-secondary/40 select-none flex items-center">chevron_right</span>
         <button onClick={onBack} className="hover:text-primary transition-colors cursor-pointer flex items-center">Business Directory</button>
         <span className="material-symbols-outlined text-base text-secondary/40 select-none flex items-center">chevron_right</span>
-        <span className="text-primary font-bold flex items-center">{category}</span>
+        <span className="text-primary font-bold flex items-center capitalize">{(category || searchQuery || "").replace(/-/g, ' ')}</span>
       </nav>
 
       {/* Main Header */}
       <header className="mb-10">
-        <h1 className="text-4xl font-extrabold text-ink-deep mb-xs">{category} Services in Jalgaon</h1>
+        <h1 className="text-4xl font-extrabold text-ink-deep mb-xs capitalize">
+          {searchQuery ? `Search Results for "${searchQuery}" in ${selectedCity || 'Jalgaon'}` : `${(category || "").replace(/-/g, ' ')} in ${selectedCity || 'Jalgaon'}`}
+        </h1>
         <p className="text-secondary max-w-2xl">
-          Find trusted hospitals, diagnostic centers, pharmacies, and specialty clinics near you. Verified listings with reviews and direct contact options.
+          {searchQuery ? `Showing results for your search query in ${selectedCity || 'Jalgaon'}.` : `Find trusted ${(category || "").replace(/-/g, ' ')} and services near you. Verified listings with reviews and direct contact options.`}
         </p>
       </header>
 
@@ -145,22 +200,24 @@ export default function BusinessListings({ category, onBack, onSelectListing }: 
           </div>
 
           {/* Category Filter */}
-          <div className="mb-8">
-            <h3 className="font-bold text-ink-deep mb-4 text-sm">Category</h3>
-            <div className="space-y-3">
-              {['Hospitals', 'Clinics', 'Pharmacies', 'Diagnostics'].map((cat) => (
-                <label key={cat} className="flex items-center gap-3 cursor-pointer group">
-                  <input 
-                    type="checkbox"
-                    checked={selectedCategories.includes(cat)}
-                    onChange={() => handleCategoryChange(cat)}
-                    className="w-5 h-5 rounded border-outline text-primary focus:ring-primary cursor-pointer accent-primary" 
-                  />
-                  <span className="text-sm font-medium text-secondary group-hover:text-primary transition-colors">{cat}</span>
-                </label>
-              ))}
+          {availableCategories.length > 0 && (
+            <div className="mb-8">
+              <h3 className="font-bold text-ink-deep mb-4 text-sm">Category</h3>
+              <div className="space-y-3">
+                {availableCategories.map((cat) => (
+                  <label key={cat} className="flex items-center gap-3 cursor-pointer group">
+                    <input 
+                      type="checkbox"
+                      checked={selectedCategories.includes(cat)}
+                      onChange={() => handleCategoryChange(cat)}
+                      className="w-5 h-5 rounded border-outline text-primary focus:ring-primary cursor-pointer accent-primary" 
+                    />
+                    <span className="text-sm font-medium text-secondary group-hover:text-primary transition-colors">{cat}</span>
+                  </label>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Rating Filter */}
           <div className="mb-8">
@@ -244,7 +301,7 @@ export default function BusinessListings({ category, onBack, onSelectListing }: 
         <div className="lg:col-span-9">
           <div className="flex justify-between items-center mb-6">
             <span className="text-sm text-secondary">
-              Showing <strong>{filteredListings.length}</strong> results in Jalgaon
+              Showing <strong>{filteredListings.length}</strong> results in {selectedCity || 'Jalgaon'}
             </span>
             <div className="flex items-center gap-xs">
               <span className="text-xs text-secondary font-semibold">Sort by:</span>
@@ -369,7 +426,7 @@ export default function BusinessListings({ category, onBack, onSelectListing }: 
                 <span className="material-symbols-outlined text-5xl text-secondary/40 mb-4">search_off</span>
                 <h3 className="text-lg font-bold text-ink-deep mb-2">No listings found</h3>
                 <p className="text-secondary text-sm mx-auto w-full max-w-[400px]">
-                  Try adjusting your filters or category selection to find services in Jalgaon.
+                  Try adjusting your filters or category selection to find services in {selectedCity || 'Jalgaon'}.
                 </p>
               </div>
             )}

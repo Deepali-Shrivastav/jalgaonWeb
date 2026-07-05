@@ -7,6 +7,7 @@ class EventCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = EventCategory
         fields = ['id', 'name', 'slug', 'description', 'sort_order']
+        read_only_fields = ['slug']
 
 
 class EventListSerializer(serializers.ModelSerializer):

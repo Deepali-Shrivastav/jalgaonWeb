@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import NgoClient from './NgoClient';
+import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
   title: 'Jalgaon NGOs | Volunteer, Donate & Support Local Charities',
@@ -35,34 +36,6 @@ export const metadata: Metadata = {
 };
 
 export default function NgoPage() {
-  const [activeFaq, setActiveFaq] = useState<number>(0);
-  const [ngos, setNgos] = useState<NgoItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchNgos = async () => {
-      try {
-        const url = process.env.NEXT_PUBLIC_API_URL 
-          ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/ngo/`
-          : '/api/v1/ngo/';
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('Failed to fetch NGOs');
-        const json = await res.json();
-        const rawNgos = json.results || json.data || json || [];
-        const mappedNgos = rawNgos.map((ngo: any) => ({
-          id: ngo.id,
-          name: ngo.name,
-          category: ngo.category?.name || 'General',
-          location: ngo.address || 'Jalgaon, India',
-          icon: ngo.logo || undefined,
-          verified: ngo.is_verified,
-        }));
-        setNgos(mappedNgos);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -87,6 +60,7 @@ export default function NgoPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <NgoClient />
+      <Footer />
     </>
   );
 }
