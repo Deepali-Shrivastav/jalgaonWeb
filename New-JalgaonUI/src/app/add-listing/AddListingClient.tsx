@@ -18,7 +18,7 @@ export default function AddListingClient() {
   // Form State
   const [formData, setFormData] = useState({
     business_name: '',
-    legal_name: '',
+    legal_name: '', // optional, won't map exactly to backend if not supported
     business_email: '',
     business_no: '',
     main_category: '',
@@ -40,6 +40,7 @@ export default function AddListingClient() {
   const [bannerFile, setBannerFile] = useState<File | null>(null);
 
   useEffect(() => {
+    // Fetch categories
     const fetchCategories = async () => {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -93,6 +94,7 @@ export default function AddListingClient() {
     const token = localStorage.getItem("token");
 
     const submitData = new FormData();
+    // Append all string fields
     Object.keys(formData).forEach(key => {
       if (key !== 'legal_name' && key !== 'country' && formData[key as keyof typeof formData]) {
         submitData.append(key, formData[key as keyof typeof formData]);
