@@ -21,8 +21,14 @@ export default function LoginSignup() {
       const response = await fetch(url, {
         credentials: "include",
       });
-      const data = await response.json();
-      return data.csrfToken;
+      if (!response.ok) return "";
+      const text = await response.text();
+      try {
+        const data = JSON.parse(text);
+        return data.csrfToken || "";
+      } catch (e) {
+        return "";
+      }
     } catch (error) {
       console.error("Error fetching CSRF token:", error);
       return "";
@@ -107,7 +113,13 @@ export default function LoginSignup() {
         }),
       });
 
-      const data = await res.json();
+      const responseText = await res.text();
+      let data: any = {};
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        // Ignored, not JSON
+      }
 
       if (!res.ok) {
         throw new Error(data.error || "Invalid credentials. Please try again.");

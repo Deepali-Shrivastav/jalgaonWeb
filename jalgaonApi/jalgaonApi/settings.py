@@ -121,8 +121,8 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    # Access token: 15 minutes (industry standard — short window limits damage if stolen)
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    # Access token: 1 day (extended for development convenience)
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
 
     # Refresh token: 7 days (PRD FR-AUTH-06 default)
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),

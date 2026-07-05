@@ -6,11 +6,11 @@ import { usePathname } from "next/navigation";
 import { AuthContext } from "@/context/AuthContext";
 
 const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/news", label: "News" },
-  { href: "/events", label: "Events" },
-  { href: "/jobs", label: "Jobs" },
-  { href: "/ngo", label: "NGOs" },
+  { href: '/', label: 'Home' },
+  { href: '/news', label: 'News' },
+  { href: '/events', label: 'Events' },
+  { href: '/jobs', label: 'Jobs' },
+  { href: '/ngo', label: 'NGOs' },
 ];
 
 export default function Header() {

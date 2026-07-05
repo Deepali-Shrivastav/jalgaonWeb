@@ -1,0 +1,7 @@
+{
+    "github-actions.workflows.pinned.workflows": [],
+    "python.analysis.exclude": [
+        "**/__pyrefly_virtual__/**",
+        "d:/__pyrefly_virtual__/**"
+    ]
+}
