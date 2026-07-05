@@ -142,8 +142,14 @@ jobs:
             echo "✅ Dependencies installed"
 
             echo "=== [4/6] Building Next.js application ==="
-            NODE_OPTIONS="--max-old-space-size=2048" npm run build
+            NODE_OPTIONS="--max-old-space-size=1536" npm run build
             echo "✅ Next.js build complete"
+
+            # Force OS to reclaim memory from the build process before starting
+            # the new next-server. Prevents OOM kill (exit 137) on low-RAM servers.
+            sync
+            sudo sh -c 'echo 1 > /proc/sys/vm/drop_caches' 2>/dev/null || true
+            sleep 5
 
             echo "=== [5/6] Restarting Next.js systemd service ==="
             # Remove any legacy PM2-managed UI process that occupies port 3000.
@@ -153,17 +159,19 @@ jobs:
             pm2 delete UI 2>/dev/null || true
             pm2 save 2>/dev/null || true
 
-            # Kill any remaining orphan next-server processes (from prior crash loops)
+            # Kill orphan next-server processes — but NOT during the running
+            # service's active window (service stop below handles that cleanly).
+            # Only kill truly orphaned processes not tracked by systemd.
+            sudo systemctl stop nextjs_jalgaon 2>/dev/null || true
+            sleep 3
             sudo pkill -9 -f "next-server" 2>/dev/null || true
             sudo pkill -9 -f "next start" 2>/dev/null || true
-            sleep 2
+            sleep 3
 
-            sudo systemctl stop nextjs_jalgaon || true
-            sudo fuser -k 3000/tcp || true
-            sudo lsof -t -i:3000 | xargs -r sudo kill -9 || true
-            sleep 2
+            sudo fuser -k 3000/tcp 3000/tcp6 2>/dev/null || true
+            sleep 3
             sudo systemctl start nextjs_jalgaon
-            sleep 8  # Give Next.js time to fully initialize on port 3000
+            sleep 12  # Give Next.js time to fully initialize on low-RAM server
 
             echo "=== [6/6] Health check — verifying service is running ==="
             if sudo systemctl is-active --quiet nextjs_jalgaon; then
