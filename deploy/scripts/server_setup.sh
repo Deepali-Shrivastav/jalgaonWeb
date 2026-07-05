@@ -169,6 +169,8 @@ ubuntu ALL=(ALL) NOPASSWD: /bin/journalctl -u gunicorn_jalgaon *
 
 # Next.js frontend (nextjs_jalgaon)
 ubuntu ALL=(ALL) NOPASSWD: /bin/systemctl restart nextjs_jalgaon
+ubuntu ALL=(ALL) NOPASSWD: /bin/systemctl start nextjs_jalgaon
+ubuntu ALL=(ALL) NOPASSWD: /bin/systemctl stop nextjs_jalgaon
 ubuntu ALL=(ALL) NOPASSWD: /bin/systemctl is-active nextjs_jalgaon
 ubuntu ALL=(ALL) NOPASSWD: /bin/journalctl -u nextjs_jalgaon *
 

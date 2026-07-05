@@ -142,13 +142,15 @@ jobs:
             echo "✅ Dependencies installed"
 
             echo "=== [4/6] Building Next.js application ==="
-            # npm run build reads .env.production for NEXT_PUBLIC_* vars and bakes them in.
-            # COMMODITY_PRICE_API_KEY and WEATHERAPI_KEY are runtime-only (no NEXT_PUBLIC_ prefix).
-            npm run build
+            NODE_OPTIONS="--max-old-space-size=2048" npm run build
             echo "✅ Next.js build complete"
 
             echo "=== [5/6] Restarting Next.js systemd service ==="
-            sudo systemctl restart nextjs_jalgaon
+            sudo systemctl stop nextjs_jalgaon || true
+            sudo fuser -k 3000/tcp || true
+            sudo lsof -t -i:3000 | xargs -r sudo kill -9 || true
+            sleep 2
+            sudo systemctl start nextjs_jalgaon
             sleep 5  # Give the server time to start listening on port 3000
 
             echo "=== [6/6] Health check — verifying service is running ==="

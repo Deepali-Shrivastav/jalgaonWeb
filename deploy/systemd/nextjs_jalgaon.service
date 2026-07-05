@@ -14,9 +14,11 @@ WorkingDirectory=/home/ubuntu/jalgaonWeb/New-JalgaonUI
 # Written by the CI/CD deploy workflow — never committed to git.
 EnvironmentFile=/home/ubuntu/jalgaonWeb/New-JalgaonUI/.env.production
 
+# Clean up any orphaned processes on port 3000 before starting
+ExecStartPre=-/bin/bash -c 'kill -9 $(lsof -t -i:3000) 2>/dev/null || true'
+
 # Run Next.js production server on port 3000.
-# Uses the local node_modules/.bin/next to ensure correct version.
-ExecStart=/usr/bin/env node_modules/.bin/next start -p 3000
+ExecStart=/usr/bin/node node_modules/next/dist/bin/next start -p 3000
 
 # Restart policy — restart on any failure, wait 10s between attempts.
 # This covers crashes, OOM kills, and build-related restarts.
