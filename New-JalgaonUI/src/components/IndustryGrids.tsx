@@ -476,7 +476,12 @@ export default function IndustryGrids({ onSelectCategory }: { onSelectCategory: 
       try {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
         const res = await fetch(`${baseUrl}/api/v1/listings/categories/`);
-        if (!res.ok) throw new Error("Failed to fetch categories");
+        if (!res.ok) {
+          console.warn("Categories API not available yet, using fallback data.");
+          setCategories(industries);
+          setLoading(false);
+          return;
+        }
         const data = await res.json();
         
         const mapped = data.map((cat: any, index: number) => {
