@@ -24,7 +24,7 @@ export default function BreakingNews() {
           setBreakingNews(data.results || data);
         }
       } catch (err) {
-        console.error('Failed to fetch breaking news:', err);
+        console.warn('Failed to fetch breaking news:', err);
       } finally {
         setLoading(false);
       }

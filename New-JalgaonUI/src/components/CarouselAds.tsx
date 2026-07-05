@@ -25,7 +25,7 @@ export default function CarouselAds({ slot = 'hero_banner' }: { slot?: string })
           }
         }
       } catch (err) {
-        console.error('Failed to fetch ads:', err);
+        console.warn('Failed to fetch ads (using fallback):', err);
       } finally {
         setLoading(false);
       }
@@ -43,7 +43,7 @@ export default function CarouselAds({ slot = 'hero_banner' }: { slot?: string })
 
   const handleAdClick = (adId: number) => {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-    fetch(`${baseUrl}/api/v1/ads/${adId}/track-click/`, { method: 'POST' }).catch(console.error);
+    fetch(`${baseUrl}/api/v1/ads/${adId}/track-click/`, { method: 'POST' }).catch(err => console.warn('Track click error:', err));
   };
 
   useEffect(() => {
@@ -51,7 +51,7 @@ export default function CarouselAds({ slot = 'hero_banner' }: { slot?: string })
       const currentAd = ads[currentIndex];
       if (currentAd) {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        fetch(`${baseUrl}/api/v1/ads/${currentAd.id}/track-impression/`, { method: 'POST' }).catch(console.error);
+        fetch(`${baseUrl}/api/v1/ads/${currentAd.id}/track-impression/`, { method: 'POST' }).catch(err => console.warn('Track impression error:', err));
       }
     }
   }, [currentIndex, ads]);
