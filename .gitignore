@@ -48,7 +48,7 @@ htmlcov/
 venv/
 .venv
 env/
-node_modules/
+node_modules/``
 dist/
 .DS_Store
 *.xlsx
