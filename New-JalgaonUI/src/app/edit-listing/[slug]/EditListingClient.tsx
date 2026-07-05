@@ -1,0 +1,329 @@
+'use client';
+
+import React, { useState, useEffect, useContext } from 'react';
+import { useRouter } from 'next/navigation';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import { AuthContext } from '@/context/AuthContext';
+import toast, { Toaster } from 'react-hot-toast';
+
+export default function EditListingClient({ slug }: { slug: string }) {
+  const { isLogin } = useContext(AuthContext);
+  const router = useRouter();
+
+  const [categories, setCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Form State
+  const [formData, setFormData] = useState({
+    business_name: '',
+    legal_name: '',
+    business_email: '',
+    business_no: '',
+    main_category: '',
+    sub_category: '',
+    business_description: '',
+    sub_domain_one: '',
+    sub_domain_two: '',
+    sub_domain_three: '',
+    sub_domain_four: '',
+    country: 'India',
+    business_dob: '',
+    business_gst: '',
+    insta_link: '',
+    facebook_link: '',
+    business_address: '',
+    city: 'Jalgaon'
+  });
+  
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [existingBannerUrl, setExistingBannerUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const initData = async () => {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        
+        // Fetch categories
+        const catRes = await fetch(`${baseUrl}/api/v1/listings/categories/`);
+        if (catRes.ok) {
+          const catData = await catRes.json();
+          setCategories(catData);
+        }
+
+        // Fetch existing listing
+        const listRes = await fetch(`${baseUrl}/api/v1/listings/${slug}/`);
+        if (listRes.ok) {
+          const listData = await listRes.json();
+          
+          setFormData({
+            business_name: listData.business_name || '',
+            legal_name: listData.legal_name || '',
+            business_email: listData.business_email || '',
+            business_no: listData.business_no || '',
+            main_category: listData.main_category?.id?.toString() || listData.main_category?.toString() || '',
+            sub_category: listData.sub_category?.id?.toString() || listData.sub_category?.toString() || '',
+            business_description: listData.business_description || '',
+            sub_domain_one: listData.sub_domain_one || '',
+            sub_domain_two: listData.sub_domain_two || '',
+            sub_domain_three: listData.sub_domain_three || '',
+            sub_domain_four: listData.sub_domain_four || '',
+            country: listData.country || 'India',
+            business_dob: listData.business_dob || '',
+            business_gst: listData.business_gst || '',
+            insta_link: listData.insta_link || '',
+            facebook_link: listData.facebook_link || '',
+            business_address: listData.business_address || '',
+            city: listData.city || 'Jalgaon'
+          });
+
+          if (listData.business_banner) {
+            setExistingBannerUrl(listData.business_banner);
+          }
+        } else {
+          toast.error("Failed to load listing details");
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Error loading data");
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    initData();
+  }, [slug]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!loading && !isLogin) {
+        router.push(`/login?redirect=/edit-listing/${slug}`);
+      }
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [isLogin, loading, router, slug]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setBannerFile(e.target.files[0]);
+    }
+  };
+
+  const selectedMainCategory = categories.find(c => c.id.toString() === formData.main_category);
+  const subCategories = selectedMainCategory ? selectedMainCategory.subcategories : [];
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!isLogin) {
+      toast.error("Please login to update this listing.");
+      return;
+    }
+
+    if (!formData.main_category || !formData.sub_category) {
+      toast.error("Please select a main category and sub-category.");
+      return;
+    }
+
+    setSubmitting(true);
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const token = localStorage.getItem("token");
+
+    const submitData = new FormData();
+    Object.keys(formData).forEach(key => {
+      if (key !== 'legal_name' && key !== 'country' && formData[key as keyof typeof formData] !== null) {
+        submitData.append(key, formData[key as keyof typeof formData] as string);
+      }
+    });
+
+    if (bannerFile) {
+      submitData.append('business_banner', bannerFile);
+    }
+
+    try {
+      const res = await fetch(`${baseUrl}/api/v1/listings/${slug}/update/`, {
+        method: 'PATCH', // or PUT depending on DRF setup
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: submitData
+      });
+
+      if (res.ok) {
+        toast.success("Listing updated successfully!");
+        setTimeout(() => {
+          router.push('/account'); // Go back to dashboard
+        }, 2000);
+      } else {
+        const errorData = await res.json();
+        console.error("Update error:", errorData);
+        toast.error(errorData.detail || errorData.non_field_errors?.[0] || "Failed to update listing.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("An error occurred during update.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <span className="material-symbols-outlined animate-spin text-5xl text-primary mb-4">progress_activity</span>
+        <h2 className="text-xl font-bold text-ink-deep">Loading Profile...</h2>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <Header />
+      <Toaster position="top-center" />
+      <main className="py-xxxl mb-12 px-base md:px-xxl max-w-container-max mx-auto bg-surface">
+        <section className="text-center mb-xxl mt-xl">
+          <h1 className="text-4xl md:text-5xl font-bold text-primary mb-sm">Edit Your Business Profile</h1>
+          <p className="text-lg text-secondary max-w-2xl mx-auto">
+            Update your business details to keep your customers informed.
+          </p>
+        </section>
+
+        <div className="bg-surface-container-lowest rounded-[32px] p-base md:p-xxxl shadow-lg border border-hairline-soft">
+          <form className="space-y-xxl" onSubmit={handleSubmit}>
+            
+            {/* Business Details */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-xl">
+              <div className="md:col-span-4">
+                <h2 className="text-xl font-bold text-primary flex items-center gap-xs">
+                  <span className="material-symbols-outlined">store</span>
+                  Business Details
+                </h2>
+              </div>
+              <div className="md:col-span-8 grid grid-cols-1 gap-md">
+                <div className="group">
+                  <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Business Name *</label>
+                  <input required name="business_name" value={formData.business_name} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" type="text"/>
+                </div>
+              </div>
+            </div>
+
+            <div className="h-px bg-gradient-to-r from-transparent via-outline-variant to-transparent my-xl"></div>
+
+            {/* Contact Info */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-xl">
+              <div className="md:col-span-4">
+                <h2 className="text-xl font-bold text-primary flex items-center gap-xs">
+                  <span className="material-symbols-outlined">contact_phone</span>
+                  Contact Info
+                </h2>
+              </div>
+              <div className="md:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-md">
+                <div className="group">
+                  <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Contact Email *</label>
+                  <input required name="business_email" value={formData.business_email} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" type="email"/>
+                </div>
+                <div className="group">
+                  <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Phone Number *</label>
+                  <input required name="business_no" value={formData.business_no} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" type="tel"/>
+                </div>
+              </div>
+            </div>
+
+            <div className="h-px bg-gradient-to-r from-transparent via-outline-variant to-transparent my-xl"></div>
+
+            {/* Category & Description */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-xl">
+              <div className="md:col-span-4">
+                <h2 className="text-xl font-bold text-primary flex items-center gap-xs">
+                  <span className="material-symbols-outlined">category</span>
+                  Classification
+                </h2>
+              </div>
+              <div className="md:col-span-8 space-y-md">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+                  <div className="group">
+                    <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Main Category *</label>
+                    <select required name="main_category" value={formData.main_category} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+                      <option disabled value="">Select a main category...</option>
+                      {categories.map(cat => (
+                        <option key={cat.id} value={cat.id}>{cat.main_category}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="group">
+                    <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Sub-category *</label>
+                    <select required name="sub_category" value={formData.sub_category} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" disabled={!formData.main_category}>
+                      <option disabled value="">Select a sub category...</option>
+                      {subCategories.map((sub: any) => (
+                        <option key={sub.id} value={sub.id}>{sub.sub_category}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div className="group">
+                  <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Description *</label>
+                  <textarea required name="business_description" value={formData.business_description} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" rows={4}></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div className="h-px bg-gradient-to-r from-transparent via-outline-variant to-transparent my-xl"></div>
+
+            {/* Media & Address */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-xl">
+              <div className="md:col-span-4">
+                <h2 className="text-xl font-bold text-primary flex items-center gap-xs">
+                  <span className="material-symbols-outlined">image</span>
+                  Media & Location
+                </h2>
+              </div>
+              <div className="md:col-span-8 space-y-xl">
+                <div className="border-2 border-dashed border-outline-variant p-8 rounded-xl text-center bg-surface relative">
+                  {bannerFile ? (
+                    <div className="mb-2">
+                      <p className="text-sm font-bold text-primary">{bannerFile.name}</p>
+                      <button type="button" onClick={() => setBannerFile(null)} className="text-xs text-red-500 mt-1 hover:underline">Remove</button>
+                    </div>
+                  ) : existingBannerUrl ? (
+                     <div className="mb-4">
+                       <img src={existingBannerUrl} alt="Current Banner" className="h-32 object-contain mx-auto rounded-lg mb-2" />
+                       <p className="text-xs text-secondary">Upload a new file to replace this banner</p>
+                     </div>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-4xl text-outline mb-2">upload_file</span>
+                      <p className="text-sm font-bold text-on-surface-variant mb-2">Upload New Business Banner</p>
+                    </>
+                  )}
+                  <input className="hidden" id="bannerUpload" type="file" accept="image/*" onChange={handleFileChange} />
+                  <label className="inline-block bg-surface-container-high px-6 py-2 rounded-full text-sm font-bold cursor-pointer hover:bg-primary hover:text-white transition-all" htmlFor="bannerUpload">
+                    {bannerFile ? 'Change File' : 'Choose File'}
+                  </label>
+                </div>
+                
+                <div className="group">
+                  <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Detailed Address *</label>
+                  <textarea required name="business_address" value={formData.business_address} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" rows={3}></textarea>
+                </div>
+              </div>
+            </div>
+
+            {/* Final CTA */}
+            <div className="pt-xl mt-xxxl border-t border-hairline-soft">
+              <button disabled={submitting || loading} className="w-full bg-primary text-white py-5 rounded-2xl font-bold text-xl hover:bg-primary-deep shadow-lg transition-all" type="submit">
+                {submitting ? 'Updating...' : 'Update Business Profile'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </main>
+      <Footer />
+    </>
+  );
+}

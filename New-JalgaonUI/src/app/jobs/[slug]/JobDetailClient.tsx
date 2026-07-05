@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Link from 'next/link';
 import DOMPurify from 'isomorphic-dompurify';
+import JobApplyModal from '@/components/JobApplyModal';
+import { AuthContext } from '@/context/AuthContext';
 
 interface JobDetail {
   id: number;
@@ -27,11 +29,46 @@ export default function JobDetailClient({ slug }: { slug: string }) {
   const [job, setJob] = useState<JobDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  const { isLogin } = useContext(AuthContext);
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveActionMsg, setSaveActionMsg] = useState("");
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+  const handleSaveJob = async () => {
+    if (!isLogin) {
+      setSaveActionMsg("Please login to save this job.");
+      return;
+    }
+    
+    setIsSaving(true);
+    setSaveActionMsg("");
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${baseUrl}/api/v1/jobs/${job?.slug}/save/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        setSaveActionMsg("Job saved successfully!");
+      } else {
+        const errorData = await res.json();
+        setSaveActionMsg(errorData[0] || errorData.error || "Failed to save job.");
+      }
+    } catch (err: any) {
+      setSaveActionMsg("Failed to save job.");
+    } finally {
+      setIsSaving(false);
+      setTimeout(() => setSaveActionMsg(""), 5000);
+    }
+  };
 
   useEffect(() => {
     const fetchJob = async () => {
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
         const res = await fetch(`${baseUrl}/api/v1/jobs/${encodeURIComponent(slug)}/`);
         if (!res.ok) {
           if (res.status === 404) throw new Error('Job not found');
@@ -106,6 +143,12 @@ export default function JobDetailClient({ slug }: { slug: string }) {
           <p className="text-lg text-secondary font-medium">{job.company}</p>
         </div>
       </div>
+      
+      {saveActionMsg && (
+        <div className={`p-4 rounded-xl mb-6 shadow-sm font-medium ${saveActionMsg.includes('success') ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-600 border border-red-200'}`}>
+          {saveActionMsg}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
         <div className="flex items-center gap-3 bg-surface-container-lowest p-4 rounded-xl border border-hairline-soft">
@@ -152,7 +195,7 @@ export default function JobDetailClient({ slug }: { slug: string }) {
       )}
 
       {!isExpired && (
-        <div className="flex justify-center pt-8 border-t border-hairline-soft">
+        <div className="flex justify-center items-center gap-4 pt-8 border-t border-hairline-soft">
           {job.apply_url ? (
             <a 
               href={job.apply_url}
@@ -163,15 +206,30 @@ export default function JobDetailClient({ slug }: { slug: string }) {
               Apply Externally <span className="material-symbols-outlined">open_in_new</span>
             </a>
           ) : (
-            <Link 
-              href={`/jobs/${job.slug}/apply`}
+            <button 
+              onClick={() => setIsApplyModalOpen(true)}
               className="bg-primary hover:bg-primary-deep text-white px-10 py-4 rounded-full font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1"
             >
               Apply Now
-            </Link>
+            </button>
           )}
+          <button 
+            onClick={handleSaveJob}
+            disabled={isSaving}
+            className="bg-surface text-primary border-2 border-primary hover:bg-primary/5 px-6 py-4 rounded-full font-bold text-lg shadow-sm transition-all flex items-center gap-2 disabled:opacity-50"
+          >
+            <span className="material-symbols-outlined text-[20px]">{isSaving ? 'progress_activity' : 'bookmark'}</span> 
+            {isSaving ? 'Saving...' : 'Save Job'}
+          </button>
         </div>
       )}
+
+      <JobApplyModal 
+        isOpen={isApplyModalOpen} 
+        onClose={() => setIsApplyModalOpen(false)} 
+        job={job} 
+        baseUrl={baseUrl} 
+      />
     </article>
   );
 }

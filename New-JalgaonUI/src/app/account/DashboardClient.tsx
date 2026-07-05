@@ -10,6 +10,31 @@ export default function DashboardClient() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleteMsg, setDeleteMsg] = useState("");
+
+  const handleDeleteListing = async (slug: string) => {
+    if (!confirm('Are you sure you want to delete this listing? This action cannot be undone.')) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const res = await fetch(`${baseUrl}/api/v1/listings/${slug}/delete/`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (res.ok) {
+        setDeleteMsg("Listing deleted successfully.");
+        setData(prev => prev.filter(item => item.slug !== slug));
+      } else {
+        setDeleteMsg("Failed to delete listing.");
+      }
+    } catch (err) {
+      setDeleteMsg("Error deleting listing.");
+    } finally {
+      setTimeout(() => setDeleteMsg(""), 4000);
+    }
+  };
 
   useEffect(() => {
     if (!isLogin) return;
@@ -29,6 +54,8 @@ export default function DashboardClient() {
         else if (activeTab === 'my-jobs') endpoint = '/api/v1/jobs/my-jobs/';
         else if (activeTab === 'saved-jobs') endpoint = '/api/v1/jobs/saved/';
         else if (activeTab === 'applications') endpoint = '/api/v1/jobs/my-applications/';
+        else if (activeTab === 'events') endpoint = '/api/v1/events/my-events/';
+        else if (activeTab === 'ngos') endpoint = '/api/v1/ngo/my-ngos/';
 
         if (endpoint) {
           const res = await fetch(`${baseUrl}${endpoint}`, {
@@ -67,6 +94,8 @@ export default function DashboardClient() {
     { id: 'my-jobs', label: 'My Jobs', icon: 'work' },
     { id: 'saved-jobs', label: 'Saved Jobs', icon: 'bookmark' },
     { id: 'applications', label: 'My Applications', icon: 'description' },
+    { id: 'events', label: 'My Events', icon: 'event' },
+    { id: 'ngos', label: 'My NGOs', icon: 'volunteer_activism' },
   ];
 
   return (
@@ -137,6 +166,12 @@ export default function DashboardClient() {
             </div>
           )}
 
+          {deleteMsg && (
+            <div className="bg-red-50 text-red-600 border border-red-200 p-4 rounded-xl mb-6 font-medium text-center">
+              {deleteMsg}
+            </div>
+          )}
+
           {activeTab !== 'overview' && !loading && !error && data.length === 0 && (
             <div className="text-center py-20 bg-surface-container-lowest rounded-xl border border-dashed border-hairline-soft flex flex-col items-center justify-center">
               <span className="material-symbols-outlined text-5xl text-secondary/50 mb-3 block">search_off</span>
@@ -147,8 +182,18 @@ export default function DashboardClient() {
                 </Link>
               )}
               {(activeTab === 'saved-listings' || activeTab === 'my-jobs' || activeTab === 'saved-jobs' || activeTab === 'applications') && (
-                <Link href={activeTab.includes('job') || activeTab === 'applications' ? "/jobs" : "/directory"} className="bg-primary hover:bg-primary-deep text-white font-bold px-6 py-2 rounded-full transition-all text-sm">
+                <Link href={activeTab.includes('job') || activeTab === 'applications' ? "/jobs" : "/"} className="bg-primary hover:bg-primary-deep text-white font-bold px-6 py-2 rounded-full transition-all text-sm">
                   Explore {activeTab.includes('job') || activeTab === 'applications' ? "Jobs" : "Directory"}
+                </Link>
+              )}
+              {activeTab === 'events' && (
+                <Link href="/add-event" className="bg-primary hover:bg-primary-deep text-white font-bold px-6 py-2 rounded-full transition-all text-sm">
+                  Add New Event
+                </Link>
+              )}
+              {activeTab === 'ngos' && (
+                <Link href="/add-ngo" className="bg-primary hover:bg-primary-deep text-white font-bold px-6 py-2 rounded-full transition-all text-sm">
+                  Register NGO
                 </Link>
               )}
             </div>
@@ -163,9 +208,21 @@ export default function DashboardClient() {
                     <>
                       <h4 className="font-bold text-ink-deep mb-2">{item.business_name || item.shop_listing?.business_name}</h4>
                       <p className="text-sm text-secondary mb-4 line-clamp-2">{item.business_description || item.shop_listing?.business_description}</p>
-                      <Link href={`/directory/${item.slug || item.shop_listing?.slug}`} className="text-primary font-bold text-sm hover:underline">
-                        View Listing &rarr;
-                      </Link>
+                      <div className="flex justify-between items-center mt-4 pt-4 border-t border-hairline-soft">
+                        <Link href={`/directory/${item.slug || item.shop_listing?.slug}`} className="text-primary font-bold text-sm hover:underline flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[16px]">visibility</span> View
+                        </Link>
+                        {activeTab === 'listings' && (
+                          <div className="flex gap-3">
+                            <Link href={`/edit-listing/${item.slug}`} className="text-emerald-600 font-bold text-sm hover:underline flex items-center gap-1">
+                              <span className="material-symbols-outlined text-[16px]">edit</span> Edit
+                            </Link>
+                            <button onClick={() => handleDeleteListing(item.slug)} className="text-red-500 font-bold text-sm hover:underline flex items-center gap-1">
+                              <span className="material-symbols-outlined text-[16px]">delete</span> Delete
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </>
                   )}
                   {(activeTab === 'my-jobs' || activeTab === 'saved-jobs') && (
@@ -182,6 +239,20 @@ export default function DashboardClient() {
                       <h4 className="font-bold text-ink-deep mb-2">Job: {item.job_title}</h4>
                       <p className="text-sm text-secondary mb-4">Status: <span className="font-bold uppercase text-primary">{item.status}</span></p>
                       <span className="text-xs text-secondary">Applied on: {new Date(item.applied_at).toLocaleDateString()}</span>
+                    </>
+                  )}
+                  {activeTab === 'events' && (
+                    <>
+                      <h4 className="font-bold text-ink-deep mb-2">{item.title}</h4>
+                      <p className="text-sm text-secondary mb-4 line-clamp-2">{item.short_description}</p>
+                      <span className="text-xs font-bold text-primary px-2 py-1 bg-primary/10 rounded-md">Status: {item.status}</span>
+                    </>
+                  )}
+                  {activeTab === 'ngos' && (
+                    <>
+                      <h4 className="font-bold text-ink-deep mb-2">{item.name}</h4>
+                      <p className="text-sm text-secondary mb-4 line-clamp-2">{item.description}</p>
+                      <span className="text-xs font-bold px-2 py-1 rounded-md text-emerald-700 bg-emerald-100">Verified: {item.is_verified ? 'Yes' : 'Pending'}</span>
                     </>
                   )}
                 </div>
