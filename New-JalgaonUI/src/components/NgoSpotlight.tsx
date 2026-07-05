@@ -44,7 +44,16 @@ export default function NgoSpotlight() {
         {loading ? (
           <div className="grid grid-cols-1 gap-base md:grid-cols-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="min-h-[260px] rounded-[24px] bg-surface-container-low animate-pulse"></div>
+              <div key={i} className="flex min-h-[260px] flex-col rounded-[24px] border border-hairline-soft bg-surface-container-low/50 p-xl sm:p-xxl animate-pulse">
+                <div className="mb-xl h-14 w-14 rounded-full bg-surface-container-low"></div>
+                <div className="h-6 w-3/4 rounded bg-surface-container-low mb-base"></div>
+                <div className="space-y-2 mb-xl">
+                  <div className="h-4 w-full rounded bg-surface-container-low"></div>
+                  <div className="h-4 w-5/6 rounded bg-surface-container-low"></div>
+                  <div className="h-4 w-4/6 rounded bg-surface-container-low"></div>
+                </div>
+                <div className="mt-auto h-4 w-1/3 rounded bg-surface-container-low pt-xl"></div>
+              </div>
             ))}
           </div>
         ) : organisations.length === 0 ? (

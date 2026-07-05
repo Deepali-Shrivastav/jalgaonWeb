@@ -529,8 +529,28 @@ export default function IndustryGrids({ onSelectCategory }: { onSelectCategory: 
         <h2 className="text-center text-4xl font-extrabold text-ink-deep mb-section">Explore Local Industries</h2>
         
         {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <span className="material-symbols-outlined animate-spin text-5xl text-primary">progress_activity</span>
+          <div className="space-y-xl">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className={`bg-white rounded-xl overflow-hidden border border-hairline-soft flex flex-col ${i % 2 === 0 ? 'lg:flex-row-reverse' : 'lg:flex-row'} animate-pulse`}>
+                <div className={`lg:w-1/3 p-xxxl flex flex-col justify-center shrink-0 z-10 border-hairline-soft ${i % 2 === 0 ? 'lg:border-l' : 'lg:border-r'}`}>
+                  <div className="w-12 h-12 bg-surface-container-low rounded-full mb-xl"></div>
+                  <div className="h-8 bg-surface-container-low rounded-lg w-3/4 mb-base"></div>
+                  <div className="h-4 bg-surface-container-low rounded w-full mb-2"></div>
+                  <div className="h-4 bg-surface-container-low rounded w-5/6 mb-xxxl"></div>
+                  <div className="h-12 bg-surface-container-low rounded-full w-40"></div>
+                </div>
+                <div className="lg:w-2/3 p-xl flex items-center overflow-hidden">
+                  <div className="flex flex-row gap-xl min-w-max">
+                    {[1, 2, 3, 4, 5].map((j) => (
+                      <div key={j} className="flex flex-col items-center w-[120px] sm:w-[150px] shrink-0">
+                        <div className="w-full aspect-square rounded-xl bg-surface-container-low mb-base"></div>
+                        <div className="h-4 bg-surface-container-low rounded w-3/4"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           <div className="space-y-xl">

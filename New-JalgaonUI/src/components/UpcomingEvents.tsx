@@ -62,9 +62,16 @@ export default function UpcomingEvents() {
         <h2 id="events-heading" className="mb-xl text-2xl font-extrabold text-ink-deep sm:text-3xl">Upcoming Events</h2>
 
         {loading ? (
-          <div className="flex gap-base overflow-x-auto pb-xs">
-            <div className="min-h-[108px] w-[310px] shrink-0 rounded-[22px] bg-white/50 animate-pulse"></div>
-            <div className="min-h-[108px] w-[310px] shrink-0 rounded-[22px] bg-white/50 animate-pulse"></div>
+          <div className="hide-scrollbar flex gap-base overflow-x-auto pb-xs">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="flex min-h-[108px] w-[310px] shrink-0 items-center gap-base rounded-[22px] border border-hairline-soft bg-white p-base animate-pulse">
+                <div className="h-16 w-16 rounded-full bg-surface-container-low shrink-0"></div>
+                <div className="flex-1 space-y-3">
+                  <div className="h-4 bg-surface-container-low rounded w-3/4"></div>
+                  <div className="h-3 bg-surface-container-low rounded w-1/2"></div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : events.length === 0 ? (
           <p className="text-secondary">No upcoming events currently.</p>

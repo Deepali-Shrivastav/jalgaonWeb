@@ -55,7 +55,19 @@ export default function JobOpenings() {
         {loading ? (
           <div className="grid grid-cols-1 gap-xl md:grid-cols-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-64 rounded-xl bg-surface-container-low animate-pulse"></div>
+              <div key={i} className="rounded-xl border border-hairline-soft bg-surface p-xl sm:p-xxl animate-pulse">
+                <div className="mb-xl flex items-center justify-between gap-base">
+                  <div className="h-12 w-12 rounded-xl bg-surface-container-low"></div>
+                  <div className="h-6 w-20 rounded-full bg-surface-container-low"></div>
+                </div>
+                <div className="h-6 w-3/4 rounded bg-surface-container-low mb-2"></div>
+                <div className="h-4 w-1/2 rounded bg-surface-container-low mb-6"></div>
+                <div className="mt-xl space-y-3 border-t border-hairline-soft pt-base">
+                  <div className="h-4 w-2/3 rounded bg-surface-container-low"></div>
+                  <div className="h-4 w-1/2 rounded bg-surface-container-low"></div>
+                </div>
+                <div className="mt-xl h-5 w-1/3 rounded bg-surface-container-low"></div>
+              </div>
             ))}
           </div>
         ) : jobs.length === 0 ? (

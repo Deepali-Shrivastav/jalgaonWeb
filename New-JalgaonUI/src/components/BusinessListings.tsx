@@ -339,9 +339,30 @@ export default function BusinessListings({ category, searchQuery, selectedCity, 
           {/* Results List */}
           <div className="space-y-6">
             {loading ? (
-              <div className="text-center py-16 bg-white rounded-xl border border-hairline-soft p-8">
-                <span className="material-symbols-outlined animate-spin text-4xl text-primary mb-4">progress_activity</span>
-                <h3 className="text-lg font-bold text-ink-deep">Loading listings...</h3>
+              <div className="space-y-6">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="bg-white rounded-xl border border-hairline-soft p-2 shadow-sm flex flex-col md:flex-row animate-pulse">
+                    <div className="md:w-72 h-48 md:h-full min-h-[200px] bg-surface-container-low rounded-lg m-1 shrink-0"></div>
+                    <div className="flex-1 p-5 md:p-6 flex flex-col justify-between">
+                      <div>
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="h-7 bg-surface-container-low rounded-md w-1/2"></div>
+                          <div className="h-6 w-12 bg-surface-container-low rounded-full"></div>
+                        </div>
+                        <div className="h-4 bg-surface-container-low rounded w-1/4 mb-4"></div>
+                        <div className="space-y-3 mb-6">
+                          <div className="h-4 bg-surface-container-low rounded w-3/4"></div>
+                          <div className="h-4 bg-surface-container-low rounded w-1/2"></div>
+                          <div className="h-4 bg-surface-container-low rounded w-1/3"></div>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-3 items-center mt-4 md:mt-0">
+                        <div className="h-10 bg-surface-container-low rounded-full flex-1 md:flex-none md:w-32"></div>
+                        <div className="h-10 bg-surface-container-low rounded-full flex-1 md:flex-none md:w-32"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : error ? (
               <div className="text-center py-16 bg-white rounded-xl border border-hairline-soft p-8">
