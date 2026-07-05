@@ -42,7 +42,7 @@ const AdminTopbar: React.FC<AdminTopbarProps> = ({ toggleSidebar, title = "Dashb
 
   const handleLogout = async () => {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
       await fetch(`${baseUrl}/api/v1/auth/logout/`, {
         method: "POST",
       });

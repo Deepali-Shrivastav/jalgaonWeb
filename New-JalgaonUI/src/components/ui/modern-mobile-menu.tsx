@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Home, Newspaper, CalendarDays, Briefcase, HeartHandshake } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 type IconComponentType = React.ElementType<{ className?: string }>;
 export interface InteractiveMenuItem {
@@ -28,23 +28,34 @@ const defaultAccentColor = 'var(--component-active-color-default)';
 
 const InteractiveMenu: React.FC<InteractiveMenuProps> = ({ items, accentColor }) => {
   const router = useRouter();
+  const pathname = usePathname();
 
   const finalItems = useMemo(() => {
      const isValid = items && Array.isArray(items) && items.length >= 2 && items.length <= 5;
      if (!isValid) {
-        console.warn("InteractiveMenu: 'items' prop is invalid or missing. Using default items.", items);
         return defaultItems;
      }
      return items;
   }, [items]);
 
-  const [activeIndex, setActiveIndex] = useState(0);
+  const initialIndex = useMemo(() => {
+    if (!pathname) return 2; // Default to 'home' index
+    const index = finalItems.findIndex(item => {
+      if (item.href === '/') {
+        return pathname === '/';
+      }
+      return item.href && pathname.startsWith(item.href);
+    });
+    if (index !== -1) return index;
+    const homeIndex = finalItems.findIndex(item => item.label === 'home');
+    return homeIndex !== -1 ? homeIndex : 0;
+  }, [pathname, finalItems]);
+
+  const [activeIndex, setActiveIndex] = useState(initialIndex);
 
   useEffect(() => {
-      if (activeIndex >= finalItems.length) {
-          setActiveIndex(0);
-      }
-  }, [finalItems, activeIndex]);
+      setActiveIndex(initialIndex);
+  }, [initialIndex]);
 
   const textRefs = useRef<(HTMLElement | null)[]>([]);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -82,7 +93,7 @@ const InteractiveMenu: React.FC<InteractiveMenuProps> = ({ items, accentColor })
 
   return (
     <nav
-      className="menu block md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--component-bg)] shadow-[0_-2px_10px_var(--component-shadow)] pb-safe-area"
+      className="menu block md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white shadow-[0_-2px_10px_rgba(194,198,214,0.5)] pb-[env(safe-area-inset-bottom)]"
       role="navigation"
       style={navStyle}
     >

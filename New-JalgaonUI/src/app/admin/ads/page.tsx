@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 interface Ad { id: number; name: string; ad_type: string; contact_number: string; contact_email: string; status: string; created_at: string; ad_image: string; }
 
 export default function AdminAdsPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
   const [ads, setAds] = useState<Ad[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("pending");

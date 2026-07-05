@@ -28,10 +28,8 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
   return (
     <>
       <Header />
-      <main className="flex-grow py-section px-base bg-surface">
-        <div className="max-w-4xl mx-auto py-xl">
-          <NewsDetailClient slug={resolvedParams.slug} />
-        </div>
+      <main className="flex-grow bg-white">
+        <NewsDetailClient slug={resolvedParams.slug} />
       </main>
       <Footer />
     </>

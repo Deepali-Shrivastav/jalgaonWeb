@@ -64,78 +64,100 @@ export default function NewsDetailClient({ slug }: { slug: string }) {
   }
 
   return (
-    <article className="bg-white rounded-2xl shadow-sm border border-hairline-soft overflow-hidden">
-      {article.featured_image && (
-        <div className="w-full h-[400px] overflow-hidden">
+    <article className="w-full bg-white pb-24">
+      {/* Immersive Hero */}
+      <div className="relative w-full h-[50vh] md:h-[70vh] min-h-[400px] bg-slate-900 overflow-hidden">
+        {article.featured_image ? (
           <img
             src={article.featured_image}
             alt={article.title}
-            className="w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover"
           />
+        ) : (
+          <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-slate-800 to-slate-900" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+        
+        <div className="absolute bottom-0 left-0 w-full p-6 md:p-12 lg:px-24">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex flex-wrap items-center gap-4 mb-6">
+              {article.category && (
+                <span className="bg-primary text-white px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest shadow-lg">
+                  {article.category.name}
+                </span>
+              )}
+              <span className="text-white/90 text-sm flex items-center gap-1.5 font-medium bg-black/30 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+                <span className="material-symbols-outlined text-[16px]">schedule</span>
+                {new Date(article.published_at || new Date()).toLocaleDateString('en-US', {
+                  year: 'numeric', month: 'long', day: 'numeric'
+                })}
+              </span>
+              <span className="text-white/90 text-sm flex items-center gap-1.5 font-medium bg-black/30 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+                <span className="material-symbols-outlined text-[16px]">visibility</span>
+                {article.view_count} views
+              </span>
+            </div>
+            
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-8 leading-[1.1] drop-shadow-xl tracking-tight">
+              {article.title}
+            </h1>
+            
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-inner">
+                {(article.author_name || 'A')[0]}
+              </div>
+              <div>
+                <p className="font-bold text-white text-lg">{article.author_name || 'Editorial Team'}</p>
+                <p className="text-sm text-white/60 font-semibold tracking-wide uppercase">Author</p>
+              </div>
+            </div>
+          </div>
         </div>
-      )}
+      </div>
       
-      <div className="p-8 md:p-12">
-        <div className="flex items-center gap-3 mb-6">
-          {article.category && (
-            <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
-              {article.category.name}
-            </span>
-          )}
-          <span className="text-secondary text-sm flex items-center gap-1">
-            <span className="material-symbols-outlined text-[16px]">schedule</span>
-            {new Date(article.published_at || new Date()).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            })}
-          </span>
-          <span className="text-secondary text-sm flex items-center gap-1 ml-4">
-            <span className="material-symbols-outlined text-[16px]">visibility</span>
-            {article.view_count} views
-          </span>
-        </div>
-
-        <h1 className="text-3xl md:text-4xl font-extrabold text-ink-deep mb-6 leading-tight">
-          {article.title}
-        </h1>
-
-        <div className="flex items-center gap-3 mb-10 pb-10 border-b border-hairline-soft">
-          <div className="w-12 h-12 bg-surface-container-high rounded-full flex items-center justify-center text-primary font-bold text-lg">
-            {(article.author_name || 'A')[0]}
-          </div>
-          <div>
-            <p className="font-bold text-ink-deep">{article.author_name || 'Admin'}</p>
-            <p className="text-sm text-secondary">Author</p>
-          </div>
-        </div>
-
+      {/* Article Content */}
+      <div className="max-w-4xl mx-auto px-6 pt-12 md:pt-16">
         <div 
-          className="prose prose-lg max-w-none prose-headings:font-bold prose-a:text-primary prose-img:rounded-xl"
+          className="prose prose-lg md:prose-xl prose-slate max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-img:rounded-3xl prose-img:shadow-xl prose-p:leading-relaxed prose-p:text-slate-700"
           dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content || '') }}
         />
         
-        {/* Comments Section placeholder */}
-        <div className="mt-16 pt-10 border-t border-hairline-soft">
-          <h3 className="text-2xl font-bold text-ink-deep mb-6">
-            Comments ({article.comments?.length || 0})
+        {/* Divider */}
+        <div className="my-20 flex items-center justify-center">
+           <div className="h-1.5 w-24 bg-primary/20 rounded-full"></div>
+        </div>
+        
+        {/* Comments Section */}
+        <div className="bg-surface-container-lowest rounded-[2rem] p-8 md:p-12 shadow-sm border border-hairline-soft">
+          <h3 className="text-3xl font-black text-ink-deep mb-8 flex items-center gap-3">
+            <span className="material-symbols-outlined text-primary text-3xl">forum</span>
+            Discussion ({article.comments?.length || 0})
           </h3>
+          
           {article.comments && article.comments.length > 0 ? (
             <div className="space-y-6">
               {article.comments.map((comment: any) => (
-                <div key={comment.id} className="bg-surface-container-lowest p-6 rounded-xl border border-hairline-soft">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="font-bold text-ink-deep">{comment.user_name}</span>
-                    <span className="text-sm text-secondary">
-                      {new Date(comment.created_at).toLocaleDateString()}
-                    </span>
+                <div key={comment.id} className="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/40 flex flex-col sm:flex-row gap-5 transition-transform hover:-translate-y-1 hover:shadow-md duration-300">
+                  <div className="w-12 h-12 shrink-0 bg-gradient-to-br from-primary/20 to-primary/5 rounded-full flex items-center justify-center text-primary font-bold text-xl border border-primary/10">
+                    {(comment.user_name || 'U')[0].toUpperCase()}
                   </div>
-                  <p className="text-ink-deep leading-relaxed">{comment.body}</p>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="font-bold text-ink-deep text-lg">{comment.user_name}</span>
+                      <span className="text-sm font-semibold text-secondary bg-surface-container-low px-4 py-1.5 rounded-full">
+                        {new Date(comment.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="text-slate-600 text-base md:text-lg leading-relaxed">{comment.body}</p>
+                  </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-secondary italic">No comments yet. Be the first to share your thoughts!</p>
+            <div className="text-center py-16 bg-white rounded-3xl border-2 border-dashed border-outline-variant/60">
+              <span className="material-symbols-outlined text-6xl text-secondary/30 mb-4 block">maps_ugc</span>
+              <p className="text-secondary font-semibold text-xl">No comments yet. Be the first to share your thoughts!</p>
+            </div>
           )}
         </div>
       </div>

@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 
-interface Listing { id: number; business_name: string; business_address: string; category_name: string; owner_name: string; owner_phone: string; status: string; business_banner?: string; business_no?: string; business_email?: string; city?: string; business_dob?: string; business_gst?: string; business_description?: string; main_category_name?: string; sub_category_name?: string; }
+interface Listing { id: number; business_name: string; business_address: string; category_name: string; owner_name: string; owner_phone: string; status: string; business_banner?: string; business_no?: string; business_email?: string; city?: string; business_dob?: string; business_gst?: string; business_description?: string; main_category_name?: string; sub_category_name?: string; is_trending?: boolean; }
 
 export default function AdminListingsPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -17,6 +17,12 @@ export default function AdminListingsPage() {
   const [targetRejectId, setTargetRejectId] = useState<number | null>(null);
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [previewData, setPreviewData] = useState<Listing | null>(null);
+  
+  // Trending Modal State
+  const [trendingModalOpen, setTrendingModalOpen] = useState(false);
+  const [targetTrendingListing, setTargetTrendingListing] = useState<Listing | null>(null);
+  const [trendingPriority, setTrendingPriority] = useState(0);
+  const [trendingUntil, setTrendingUntil] = useState("");
 
   const fetchListings = async () => {
     setLoading(true);
@@ -69,6 +75,37 @@ export default function AdminListingsPage() {
 
   const openRejectModal = (id: number | null = null) => { setTargetRejectId(id); setRejectionReason(""); setRejectModalOpen(true); };
   const submitReject = () => { if (targetRejectId) handleAction(targetRejectId, "reject", rejectionReason); else handleBulkAction("reject", rejectionReason); setRejectModalOpen(false); };
+
+  const openTrendingModal = (listing: Listing) => {
+    setTargetTrendingListing(listing);
+    setTrendingPriority(0);
+    setTrendingUntil("");
+    setTrendingModalOpen(true);
+  };
+
+  const submitTrending = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!targetTrendingListing) return;
+    const token = localStorage.getItem("token");
+    try {
+      await fetch(`${baseUrl}/api/v1/admin-panel/listings/${targetTrendingListing.id}/trending/`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          is_trending: true,
+          trending_priority: trendingPriority,
+          trending_until: trendingUntil ? new Date(trendingUntil).toISOString() : null
+        })
+      });
+      setStatusMsg(`Added ${targetTrendingListing.business_name} to trending!`);
+      setTrendingModalOpen(false);
+      setTimeout(() => setStatusMsg(""), 3000);
+      fetchListings();
+    } catch {
+      setStatusMsg("Error marking as trending");
+      setTimeout(() => setStatusMsg(""), 3000);
+    }
+  };
 
   const openPreview = async (id: number) => {
     const token = localStorage.getItem("token");
@@ -128,6 +165,7 @@ export default function AdminListingsPage() {
                       <div className="flex gap-1">
                         <button onClick={() => openPreview(l.id)} className="p-1.5 rounded hover:bg-slate-100" title="Preview"><span className="material-symbols-outlined text-lg text-slate-500">visibility</span></button>
                         {l.status !== "active" && <button onClick={() => handleAction(l.id, "approve")} className="p-1.5 rounded hover:bg-green-50" title="Approve"><span className="material-symbols-outlined text-lg text-green-600">check_circle</span></button>}
+                        {l.status === "active" && !l.is_trending && <button onClick={() => openTrendingModal(l)} className="p-1.5 rounded hover:bg-yellow-50" title="Make Trending"><span className="material-symbols-outlined text-lg text-yellow-500">star</span></button>}
                         {l.status !== "rejected" && <button onClick={() => openRejectModal(l.id)} className="p-1.5 rounded hover:bg-red-50" title="Reject"><span className="material-symbols-outlined text-lg text-red-500">cancel</span></button>}
                         <button onClick={() => handleAction(l.id, "delete")} className="p-1.5 rounded hover:bg-red-50" title="Delete"><span className="material-symbols-outlined text-lg text-red-400">delete</span></button>
                       </div>
@@ -173,6 +211,29 @@ export default function AdminListingsPage() {
               </div>
               <div><h4 className="font-semibold text-slate-500 mb-1">Description</h4><p className="text-sm bg-slate-50 p-4 rounded-lg leading-relaxed">{previewData.business_description}</p></div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Trending Modal */}
+      {trendingModalOpen && targetTrendingListing && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl w-full max-w-[500px] mx-4">
+            <h3 className="text-lg font-semibold mb-4">Make Trending: {targetTrendingListing.business_name}</h3>
+            <form onSubmit={submitTrending} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-600 mb-1">Priority (Higher = Top)</label>
+                <input type="number" value={trendingPriority} onChange={(e) => setTrendingPriority(parseInt(e.target.value) || 0)} className="w-full p-2 border border-slate-200 rounded-lg text-sm" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-600 mb-1">Trending Until (Optional)</label>
+                <input type="date" value={trendingUntil} onChange={(e) => setTrendingUntil(e.target.value)} className="w-full p-2 border border-slate-200 rounded-lg text-sm" />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button type="button" onClick={() => setTrendingModalOpen(false)} className="px-4 py-2 bg-slate-100 rounded-lg text-sm font-medium hover:bg-slate-200">Cancel</button>
+                <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:opacity-90">Make Trending</button>
+              </div>
+            </form>
           </div>
         </div>
       )}

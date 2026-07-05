@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 
 export interface NewsArticle {
   id: number;
+  slug?: string;
   category: any;
   readTime?: string;
   title: string;
@@ -19,18 +20,56 @@ export interface NewsArticle {
 
 export default function NewsPortal() {
   const [newsArticles, setNewsArticles] = React.useState<NewsArticle[]>([]);
+  const [recentNews, setRecentNews] = React.useState<NewsArticle[]>([]);
+  const [categories, setCategories] = React.useState<any[]>([]);
+  const [activeCategory, setActiveCategory] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [activeTab, setActiveTab] = React.useState<'recent' | 'picks'>('recent');
+
+  React.useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const catsRes = await fetch(`${baseUrl}/api/v1/news/categories/`);
+        if (catsRes.ok) {
+          const catsData = await catsRes.json();
+          setCategories(catsData);
+        }
+      } catch (err) {
+        console.error("Failed to fetch categories", err);
+      }
+    };
+    fetchInitialData();
+  }, []);
 
   React.useEffect(() => {
     const fetchNews = async () => {
+      setLoading(true);
+      setError(null);
       try {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        const url = `${baseUrl}/api/v1/news/trending/`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('Failed to fetch news');
-        const json = await res.json();
-        setNewsArticles(json.results || json.data || json || []);
+        
+        let trendingUrl = `${baseUrl}/api/v1/news/trending/`;
+        let recentUrl = `${baseUrl}/api/v1/news/latest/`;
+
+        if (activeCategory) {
+          // If category is selected, we use the latest list for both to show category specific news
+          // since trending endpoint might not support category filtering in backend.
+          recentUrl = `${baseUrl}/api/v1/news/latest/?category=${activeCategory}`;
+          trendingUrl = recentUrl; 
+        }
+
+        const trendingRes = await fetch(trendingUrl);
+        const recentRes = await fetch(recentUrl);
+        
+        if (!trendingRes.ok || !recentRes.ok) throw new Error('Failed to fetch news');
+        
+        const trendingJson = await trendingRes.json();
+        const recentJson = await recentRes.json();
+        
+        setNewsArticles(trendingJson.results || trendingJson.data || trendingJson || []);
+        setRecentNews(recentJson.results || recentJson.data || recentJson || []);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -38,170 +77,152 @@ export default function NewsPortal() {
       }
     };
     fetchNews();
-  }, []);
+  }, [activeCategory]);
+
+  const displaySidebarNews = activeTab === 'recent' ? recentNews.slice(0, 5) : newsArticles.slice(0, 5);
 
   return (
     <>
       <Header />
-      <main className="pt-6 pb-16">
-        {/* ─── Hero: Featured / Top Story ─── */}
-        <section
-          id="news-hero"
-          className="max-w-container-max mx-auto px-xxl mb-16"
-          aria-label="Featured news story"
-        >
-          <div className="relative w-full min-h-[420px] md:min-h-[500px] flex items-center justify-center overflow-hidden bg-white rounded-xl">
-            <div className="absolute inset-0 hero-gradient" />
-            <div className="relative z-10 w-full max-w-4xl px-base flex flex-col items-center text-center gap-8 py-16">
-              <div className="space-y-4">
-
-                <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-ink-deep tracking-tight leading-tight">
-                  Revolutionizing Local Trade:{' '}
-                  <span className="text-primary">
-                    Jalgaon&apos;s Digital Transformation
-                  </span>
-                </h1>
-                <p className="text-secondary text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-                  How local businesses are leveraging the new directory ecosystem
-                  to reach global markets while maintaining their deep roots in
-                  the Khandesh region&apos;s rich commercial heritage.
-                </p>
-              </div>
-              <button className="bg-primary text-white px-10 py-4 rounded-full font-bold tracking-wide hover:bg-primary-deep transition-all active:scale-95 flex items-center gap-3 shadow-md">
-                Read Full Article
-                <span className="material-symbols-outlined">
-                  arrow_forward
-                </span>
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {/* ─── Community & Business Updates Grid ─── */}
-        <section
-          id="news-grid"
-          className="max-w-container-max mx-auto px-xxl"
-          aria-label="Community and business news articles"
-        >
-          <div className="flex items-baseline justify-between mb-8 border-b border-hairline-soft pb-4">
-            <h2 className="text-2xl md:text-3xl font-bold text-ink-deep">
-              Community &amp; Business Updates
-            </h2>
-            <Link
-              href="/news"
-              className="text-primary font-semibold text-sm hover:underline flex items-center gap-1"
+      
+      {/* Category Navbar */}
+      <div className="border-b border-gray-200 bg-white">
+        <div className="max-w-7xl mx-auto px-4 flex items-center gap-6 py-4 overflow-x-auto text-[15px] font-bold text-gray-800 scrollbar-none">
+          <span 
+            onClick={() => setActiveCategory(null)}
+            className={`cursor-pointer whitespace-nowrap ${!activeCategory ? 'text-red-600 border-b-2 border-red-600 pb-[18px] -mb-[18px]' : 'hover:text-red-600'}`}
+          >
+            All News
+          </span>
+          {categories.map(cat => (
+            <span 
+              key={cat.id} 
+              onClick={() => setActiveCategory(cat.slug)}
+              className={`cursor-pointer whitespace-nowrap capitalize ${activeCategory === cat.slug ? 'text-red-600 border-b-2 border-red-600 pb-[18px] -mb-[18px]' : 'hover:text-red-600'}`}
             >
-              View All News
-              <span className="material-symbols-outlined text-[18px]">
-                keyboard_double_arrow_right
-              </span>
-            </Link>
-          </div>
+              {cat.name}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <main className="pt-10 pb-20 bg-white min-h-screen">
+        <div className="max-w-7xl mx-auto px-4">
+          <h1 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-8">
+            Breaking News
+          </h1>
 
           {loading ? (
-            <div className="text-center py-16">
-              <span className="material-symbols-outlined animate-spin text-4xl text-primary mb-4">progress_activity</span>
-              <h3 className="text-lg font-bold text-ink-deep">Loading news...</h3>
+            <div className="text-center py-20">
+              <span className="material-symbols-outlined animate-spin text-5xl text-red-600 mb-4 block">progress_activity</span>
+              <p className="text-gray-500 font-medium">Loading latest news...</p>
             </div>
           ) : error ? (
-            <div className="text-center py-16 text-red-500">
-              <span className="material-symbols-outlined text-4xl mb-4">error</span>
-              <h3 className="text-lg font-bold">Failed to load news</h3>
+            <div className="text-center py-20 bg-gray-50 rounded-lg">
+              <span className="material-symbols-outlined text-5xl text-red-400 mb-4 block">error</span>
+              <p className="text-gray-700 font-medium">{error}</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-xl">
-              {newsArticles.map((article: any) => (
-                <Link
-                  href={`/news/${article.slug || article.id}`}
-                  key={article.id}
-                  className="article-card flex flex-col group bg-white p-6 rounded-xl border border-hairline-soft hover:border-primary transition-all duration-300 hover:shadow-lg"
-                >
-                  <div className="overflow-hidden rounded-lg aspect-[4/3] mb-6 bg-surface-container-low flex items-center justify-center">
-                    {(article.image || article.featured_image) ? (
-                      <img
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        src={article.image || article.featured_image}
-                        alt={article.alt || article.title}
-                        loading="lazy"
+            <div className="flex flex-col lg:flex-row gap-10">
+              
+              {/* LEFT SIDE (Featured + Grid) */}
+              <div className="lg:w-[65%]">
+                {newsArticles.length > 0 && (
+                  <Link href={`/news/${newsArticles[0].slug || newsArticles[0].id}`} className="group block mb-10">
+                    <div className="w-full aspect-[16/8] md:aspect-[2/1] overflow-hidden mb-5 bg-gray-100">
+                      <img 
+                        src={newsArticles[0].image || newsArticles[0].featured_image || 'https://via.placeholder.com/800x400'} 
+                        alt={newsArticles[0].title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
-                    ) : (
-                      <span className="material-symbols-outlined text-4xl text-secondary">image</span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-primary font-bold text-[10px] uppercase tracking-widest">
-                      {typeof article.category === 'object' && article.category !== null ? article.category.name : (article.category || 'News')}
-                    </span>
-                    <span className="text-secondary text-xs">
-                      • {article.readTime || '3 min read'}
-                    </span>
-                  </div>
-                  <h3 className="text-ink-deep font-bold text-lg mb-3 group-hover:text-primary transition-colors leading-snug">
-                    {article.title}
-                  </h3>
-                  <p className="text-secondary text-sm line-clamp-3 mb-6 leading-relaxed">
-                    {article.excerpt || article.short_description || 'Read the full story to learn more about this recent update.'}
-                  </p>
-                  <div className="mt-auto">
-                    <span className="block w-full text-center py-3 px-6 rounded-full border-2 border-primary text-primary font-semibold text-sm group-hover:bg-primary group-hover:text-white transition-all">
-                      Read More
-                    </span>
-                  </div>
-                </Link>
-              ))}
+                    </div>
+                    <h2 className="text-2xl md:text-[32px] leading-tight font-serif font-bold text-gray-900 mb-3 group-hover:text-red-600 transition-colors">
+                      {newsArticles[0].title}
+                    </h2>
+                    <p className="text-gray-500 text-[15px] line-clamp-2 leading-relaxed">
+                      {newsArticles[0].excerpt || newsArticles[0].short_description}
+                    </p>
+                  </Link>
+                )}
+
+                {/* Grid of 2 below featured */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {newsArticles.slice(1, 3).map((article: any) => (
+                    <Link href={`/news/${article.slug || article.id}`} key={article.id} className="group block">
+                      <div className="relative w-full aspect-[16/10] overflow-hidden mb-4 bg-gray-100">
+                        <img 
+                          src={article.image || article.featured_image || 'https://via.placeholder.com/400x250'} 
+                          alt={article.title}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                        <div className="absolute top-3 left-3 bg-red-600 text-white text-[11px] font-bold px-2 py-1 flex items-center gap-2 rounded-sm shadow-sm">
+                          <span className="uppercase">{typeof article.category === 'object' && article.category !== null ? article.category.name : (article.category || 'News')}</span>
+                          <span className="opacity-60 font-normal">|</span>
+                          <span className="font-medium flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[12px]">schedule</span>
+                            {new Date(article.published_at || Date.now()).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                          </span>
+                        </div>
+                      </div>
+                      <h3 className="text-xl font-serif font-bold text-gray-900 leading-snug group-hover:text-red-600 transition-colors line-clamp-3">
+                        {article.title}
+                      </h3>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              {/* RIGHT SIDE (Sidebar) */}
+              <div className="lg:w-[35%] flex flex-col">
+                <div className="flex items-center gap-6 border-b-2 border-gray-100 mb-6 font-bold text-[15px]">
+                  <span 
+                    onClick={() => setActiveTab('recent')} 
+                    className={`cursor-pointer transition-colors pb-3 border-b-2 -mb-[2px] ${activeTab === 'recent' ? 'text-red-600 border-red-600' : 'text-gray-800 border-transparent hover:text-red-600'}`}
+                  >
+                    Most Recent
+                  </span>
+                  <span 
+                    onClick={() => setActiveTab('picks')} 
+                    className={`cursor-pointer transition-colors pb-3 border-b-2 -mb-[2px] ${activeTab === 'picks' ? 'text-red-600 border-red-600' : 'text-gray-800 border-transparent hover:text-red-600'}`}
+                  >
+                    Today's Picks
+                  </span>
+                </div>
+
+                <div className="flex flex-col gap-6">
+                  {displaySidebarNews.map((article: any) => (
+                    <Link href={`/news/${article.slug || article.id}`} key={article.id} className="group flex gap-4 items-start">
+                      <div className="w-28 h-[84px] shrink-0 overflow-hidden bg-gray-100">
+                        <img 
+                          src={article.image || article.featured_image || 'https://via.placeholder.com/150'} 
+                          alt={article.title}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-[17px] font-serif font-bold text-gray-900 group-hover:text-red-600 line-clamp-3 leading-snug mb-1.5 transition-colors">
+                          {article.title}
+                        </h4>
+                        <div className="text-[12px] text-gray-500 flex flex-col gap-0.5">
+                          <span>
+                            {article.author_name || 'Admin'} - {new Date(article.published_at || Date.now()).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </span>
+                          <span className="text-gray-400 capitalize">
+                            {typeof article.category === 'object' && article.category !== null ? article.category.name : (article.category || 'Local')}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                  {displaySidebarNews.length === 0 && (
+                    <div className="text-gray-500 text-sm">No articles available.</div>
+                  )}
+                </div>
+              </div>
+              
             </div>
           )}
-        </section>
-
-        {/* ─── Newsletter Subscription ─── */}
-        <section
-          id="news-newsletter"
-          className="max-w-container-max mx-auto px-xxl mt-section"
-          aria-label="Newsletter subscription"
-        >
-          <div className="bg-surface-container-high rounded-xl p-8 md:p-12 flex flex-col lg:flex-row items-center gap-8 lg:gap-12 w-full overflow-hidden">
-            <div className="flex-1 text-center lg:text-left min-w-0 w-full">
-              <h2 className="text-2xl md:text-3xl font-bold text-ink-deep mb-3">
-                Stay Updated with Jalgaon News
-              </h2>
-              <p className="text-secondary text-base md:text-lg leading-relaxed">
-                Get the latest business leads and community updates delivered
-                directly to your inbox every morning.
-              </p>
-            </div>
-            <div className="w-full lg:w-auto flex-none max-w-md lg:min-w-[450px]">
-              <form
-                className="flex flex-col sm:flex-row gap-3 w-full"
-                onSubmit={(e) => e.preventDefault()}
-              >
-                <input
-                  className="flex-1 w-full px-6 py-4 rounded-full border border-outline-variant focus:ring-2 focus:ring-primary focus:outline-none bg-white text-sm"
-                  placeholder="Enter your email"
-                  type="email"
-                  aria-label="Email address for newsletter"
-                  required
-                />
-                <button
-                  type="submit"
-                  className="bg-primary text-white px-8 py-4 rounded-full font-bold hover:bg-primary-deep transition-colors active:scale-95 whitespace-nowrap shrink-0"
-                >
-                  Subscribe
-                </button>
-              </form>
-              <p className="text-[11px] text-secondary mt-3 text-center lg:text-left">
-                By subscribing, you agree to our{' '}
-                <Link href="#" className="underline hover:text-primary">
-                  Privacy Policy
-                </Link>{' '}
-                and{' '}
-                <Link href="#" className="underline hover:text-primary">
-                  Terms of Service
-                </Link>
-                .
-              </p>
-            </div>
-          </div>
-        </section>
+        </div>
       </main>
       <Footer />
     </>

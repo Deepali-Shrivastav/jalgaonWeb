@@ -165,11 +165,11 @@ export default function LoginSignup() {
         {isSignUp && (
           <form onSubmit={handleSubmit} className="animate-in fade-in zoom-in-95 duration-300">
             <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <div className="flex items-center justify-center mx-auto mb-6">
                 <img
                   src="/logo.png"
                   alt="Jalgaon Logo"
-                  className="w-10 h-auto"
+                  className="h-12 w-auto object-contain"
                 />
               </div>
               <h1 className="text-2xl font-bold text-slate-900 mb-2">
@@ -198,6 +198,8 @@ export default function LoginSignup() {
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   required
+                  pattern="[0-9]{10}"
+                  title="Please enter a valid 10-digit phone number without spaces or country code"
                   className="flex-1 bg-transparent border-none py-3.5 px-3 text-base text-slate-900 outline-none placeholder-slate-400"
                 />
               </div>
@@ -281,11 +283,11 @@ export default function LoginSignup() {
         {!isSignUp && (
           <form onSubmit={handleLoginSubmit} className="animate-in fade-in zoom-in-95 duration-300">
             <div className="text-center mb-8">
-              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <div className="flex items-center justify-center mx-auto mb-6">
                 <img
                   src="/logo.png"
                   alt="Jalgaon Logo"
-                  className="w-12 h-auto object-contain"
+                  className="h-12 w-auto object-contain"
                 />
               </div>
               <h1 className="text-2xl font-bold text-slate-900 mb-2">
@@ -314,6 +316,8 @@ export default function LoginSignup() {
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   required
+                  pattern="[0-9]{10}"
+                  title="Please enter a valid 10-digit phone number without spaces or country code"
                   className="flex-1 bg-transparent border-none py-3.5 px-3 text-base text-slate-900 outline-none placeholder-slate-400"
                 />
               </div>

@@ -165,7 +165,7 @@ export default function AddListingClient() {
               <div className="md:col-span-8 grid grid-cols-1 gap-md">
                 <div className="group">
                   <label className="block text-sm font-semibold text-on-surface-variant mb-xs transition-colors group-focus-within:text-primary">Business Name *</label>
-                  <input required name="business_name" value={formData.business_name} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="e.g. Jalgaon Tech Solutions" type="text"/>
+                  <input required minLength={3} maxLength={100} name="business_name" value={formData.business_name} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="e.g. Jalgaon Tech Solutions" type="text"/>
                 </div>
                 <div className="group">
                   <label className="block text-sm font-semibold text-on-surface-variant mb-xs transition-colors group-focus-within:text-primary">Legal Business Name</label>
@@ -192,7 +192,7 @@ export default function AddListingClient() {
                 </div>
                 <div className="group">
                   <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Phone Number *</label>
-                  <input required name="business_no" value={formData.business_no} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="+91 98765 43210" type="tel"/>
+                  <input required pattern="[0-9]{10}" title="Please enter a valid 10-digit phone number without country code or spaces" name="business_no" value={formData.business_no} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="9876543210" type="tel"/>
                 </div>
               </div>
             </div>
@@ -231,7 +231,7 @@ export default function AddListingClient() {
                 </div>
                 <div className="group">
                   <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Description *</label>
-                  <textarea required name="business_description" value={formData.business_description} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="Tell us about your business, your mission, and what sets you apart..." rows={4}></textarea>
+                  <textarea required minLength={10} name="business_description" value={formData.business_description} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="Tell us about your business, your mission, and what sets you apart..." rows={4}></textarea>
                 </div>
               </div>
             </div>
@@ -273,11 +273,11 @@ export default function AddListingClient() {
                 </div>
                 <div className="group">
                   <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Year Established</label>
-                  <input name="business_dob" value={formData.business_dob} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="2020" type="number"/>
+                  <input name="business_dob" min="1800" max="2026" value={formData.business_dob} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="2020" type="number"/>
                 </div>
                 <div className="group">
                   <label className="block text-sm font-semibold text-on-surface-variant mb-xs">GST Number</label>
-                  <input name="business_gst" value={formData.business_gst} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="27XXXXX..." type="text"/>
+                  <input name="business_gst" pattern="^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$" title="Please enter a valid 15-character GSTIN" value={formData.business_gst} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="27XXXXX..." type="text"/>
                 </div>
               </div>
             </div>
@@ -297,11 +297,11 @@ export default function AddListingClient() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
                   <div className="group">
                     <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Instagram</label>
-                    <input name="insta_link" value={formData.insta_link} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="@yourbusiness" type="text"/>
+                    <input name="insta_link" pattern="https?://.*" title="Please enter a valid URL starting with http:// or https://" value={formData.insta_link} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="https://instagram.com/yourbusiness" type="url"/>
                   </div>
                   <div className="group">
                     <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Facebook</label>
-                    <input name="facebook_link" value={formData.facebook_link} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="fb.com/yourbusiness" type="text"/>
+                    <input name="facebook_link" pattern="https?://.*" title="Please enter a valid URL starting with http:// or https://" value={formData.facebook_link} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="https://fb.com/yourbusiness" type="url"/>
                   </div>
                 </div>
                 <div className="border-2 border-dashed border-outline-variant p-8 rounded-xl text-center transition-colors hover:border-primary group bg-surface relative">

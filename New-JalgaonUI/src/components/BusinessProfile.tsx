@@ -190,6 +190,29 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
         if (!res.ok) throw new Error('Failed to fetch profile');
         const drfData = await res.json();
         
+        const mappedReviews = drfData.reviews?.map((r: any) => ({
+          id: r.id?.toString(),
+          name: r.user_name || 'User',
+          initials: (r.user_name || 'U').substring(0, 1).toUpperCase(),
+          timeAgo: new Date(r.timestamp).toLocaleDateString(),
+          rating: r.rating || 5,
+          comment: r.comment || ''
+        })) || [];
+
+        const totalReviews = mappedReviews.length;
+        const ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+        mappedReviews.forEach((r: any) => {
+          const rating = Math.round(r.rating);
+          if (rating >= 1 && rating <= 5) {
+            ratingCounts[rating as keyof typeof ratingCounts]++;
+          }
+        });
+
+        const computedRatingBreakdown = [5, 4, 3, 2, 1].map(stars => ({
+          stars,
+          pct: totalReviews > 0 ? Math.round((ratingCounts[stars as keyof typeof ratingCounts] / totalReviews) * 100) : 0
+        }));
+
         // Map DRF fields to BusinessData
         const mappedBiz: BusinessData = {
           id: drfData.id?.toString() || id,
@@ -212,21 +235,8 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
             : [
                 { src: drfData.business_banner, alt: 'Banner' } // Fallback to banner if no gallery
               ],
-          reviews: drfData.reviews?.map((r: any) => ({
-            id: r.id?.toString(),
-            name: r.user_name || 'User',
-            initials: (r.user_name || 'U').substring(0, 1).toUpperCase(),
-            timeAgo: new Date(r.timestamp).toLocaleDateString(),
-            rating: r.rating || 5,
-            comment: r.comment || ''
-          })) || [],
-          ratingBreakdown: [
-            { stars: 5, pct: 80 },
-            { stars: 4, pct: 15 },
-            { stars: 3, pct: 5 },
-            { stars: 2, pct: 0 },
-            { stars: 1, pct: 0 },
-          ]
+          reviews: mappedReviews,
+          ratingBreakdown: computedRatingBreakdown
         };
         setBiz(mappedBiz);
       } catch (err: any) {
@@ -383,52 +393,7 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
               </div>
             </section>
 
-            {/* Gallery */}
-            <section>
-              <div className="flex justify-between items-center mb-5">
-                <h2 className="text-2xl font-extrabold text-ink-deep">Gallery</h2>
-                <button
-                  onClick={() => setShowAllGallery(!showAllGallery)}
-                  className="flex items-center gap-2 bg-primary hover:bg-primary-deep text-white text-sm font-bold px-5 py-2.5 rounded-full transition-all cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-lg">grid_view</span>
-                  {showAllGallery ? 'Show Less' : 'View All'}
-                </button>
-              </div>
 
-              <div className="grid grid-cols-3 grid-rows-2 gap-3 auto-rows-[180px]">
-                {displayedGallery.slice(0, 4).map((img, i) => (
-                  <div
-                    key={i}
-                    className={`relative overflow-hidden rounded-xl group ${i === 2 ? 'row-span-2' : ''}`}
-                  >
-                    <img
-                      src={img.src}
-                      alt={img.alt}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                ))}
-                {/* Last item with View All overlay */}
-                {biz.gallery.length > 4 && (
-                  <div
-                    className="relative overflow-hidden rounded-xl group col-span-2 cursor-pointer"
-                    onClick={() => setShowAllGallery(true)}
-                  >
-                    <img
-                      src={biz.gallery[4].src}
-                      alt={biz.gallery[4].alt}
-                      className="w-full h-full object-cover blur-sm scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                      <div className="bg-black/30 backdrop-blur-md px-6 py-3 rounded-full border border-white/30">
-                        <span className="text-white font-extrabold text-lg">View All</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </section>
 
             {/* Reviews */}
             <section className="bg-white rounded-2xl border border-hairline-soft p-8">
@@ -562,7 +527,7 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
       {/* Review Modal */}
       {showReviewModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
+          <div className="bg-white rounded-2xl w-[95vw] md:w-full max-w-lg p-6 shadow-2xl relative">
             <button onClick={() => setShowReviewModal(false)} className="absolute top-4 right-4 text-secondary hover:text-ink-deep">
               <span className="material-symbols-outlined">close</span>
             </button>
@@ -586,6 +551,7 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
                 <label className="block text-sm font-semibold mb-2">Your Review</label>
                 <textarea 
                   required 
+                  minLength={5}
                   className="w-full border border-hairline-soft rounded-lg p-3 outline-none min-h-[120px]" 
                   placeholder="Share your experience..."
                   value={reviewForm.comment}
@@ -603,7 +569,7 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
       {/* Claim Modal */}
       {showClaimModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
+          <div className="bg-white rounded-2xl w-[95vw] md:w-full max-w-lg p-6 shadow-2xl relative">
             <button onClick={() => setShowClaimModal(false)} className="absolute top-4 right-4 text-secondary hover:text-ink-deep">
               <span className="material-symbols-outlined">close</span>
             </button>
@@ -615,6 +581,8 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
                 <input 
                   type="tel" 
                   required 
+                  pattern="[0-9]{10}"
+                  title="Please enter a valid 10-digit phone number"
                   className="w-full border border-hairline-soft rounded-lg p-3 outline-none" 
                   placeholder="Your mobile number"
                   value={claimForm.contact_number}
@@ -625,6 +593,7 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
                 <label className="block text-sm font-semibold mb-2">Message *</label>
                 <textarea 
                   required 
+                  minLength={10}
                   className="w-full border border-hairline-soft rounded-lg p-3 outline-none min-h-[100px]" 
                   placeholder="Tell us about your ownership..."
                   value={claimForm.message}

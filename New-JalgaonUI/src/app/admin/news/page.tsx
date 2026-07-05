@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 interface Article { id: number; title: string; slug: string; status: string; created_at: string; view_count: number; is_breaking: boolean; }
 
 export default function AdminNewsPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
   const router = useRouter();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);

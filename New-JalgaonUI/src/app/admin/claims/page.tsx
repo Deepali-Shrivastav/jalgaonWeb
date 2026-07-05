@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 interface Claim { id: number; business_name: string; user_name: string; user_phone: string; contact_number: string; message: string; created_at: string; status: string; }
 
 export default function AdminClaimsPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
   const [claims, setClaims] = useState<Claim[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("pending");

@@ -450,9 +450,9 @@ function IndustryCard({ ind, onSelectCategory }: { ind: any; onSelectCategory: (
               onClick={() => onSelectCategory(ind.slug || ind.title)}
               className="flex flex-col items-center text-center group/item cursor-pointer w-[120px] sm:w-[150px] shrink-0 snap-start"
             >
-              <div className="w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center mb-base group-hover/item:bg-primary/10 transition-colors overflow-hidden p-2">
+              <div className="w-full aspect-square rounded-xl bg-surface-container-low flex items-center justify-center mb-base group-hover/item:bg-primary/10 transition-colors overflow-hidden">
                 {item.image ? (
-                  <img src={`${process.env.NEXT_PUBLIC_API_URL || ""}${item.image}`} alt={item.name} className="w-full h-full object-contain rounded-lg" />
+                  <img src={`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}${item.image}`} alt={item.name} className="w-full h-full object-cover" />
                 ) : (
                   <span className="material-symbols-outlined text-4xl text-primary/40">{item.icon}</span>
                 )}
@@ -474,7 +474,7 @@ export default function IndustryGrids({ onSelectCategory }: { onSelectCategory: 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
         const res = await fetch(`${baseUrl}/api/v1/listings/categories/`);
         if (!res.ok) throw new Error("Failed to fetch categories");
         const data = await res.json();

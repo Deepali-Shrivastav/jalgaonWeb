@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 interface JobCategory { id: number; name: string; slug: string; is_active: boolean; sort_order: number; }
 
 export default function AdminJobCategoriesPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
   const [categories, setCategories] = useState<JobCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);

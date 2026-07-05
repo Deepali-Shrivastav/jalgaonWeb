@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 interface Event { id: number; title: string; slug: string; venue_name: string; start_datetime: string; organizer_name: string; is_featured: boolean; status: string; rejection_reason?: string; }
 
 export default function AdminEventsPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

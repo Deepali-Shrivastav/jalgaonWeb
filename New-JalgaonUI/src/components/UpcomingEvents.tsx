@@ -31,7 +31,22 @@ export default function UpcomingEvents() {
         }
         const json = await res.json();
         const results = json.results || json.data || json || [];
-        setEvents(results.slice(0, 4));
+        
+        const mappedEvents = results.slice(0, 4).map((item: any) => {
+          const startDate = item.start_datetime ? new Date(item.start_datetime) : new Date();
+          return {
+            id: item.id,
+            slug: item.slug,
+            month: startDate.toLocaleString('en-US', { month: 'short' }),
+            day: startDate.getDate().toString().padStart(2, '0'),
+            isoDate: item.start_datetime || '',
+            title: item.title,
+            location: item.venue_name || item.venue_address || 'TBA',
+            venue: item.venue_name || item.venue_address || 'TBA'
+          };
+        });
+        
+        setEvents(mappedEvents);
       } catch (err) {
         // Silently swallow network errors so Next.js doesn't pop up the dev overlay
       } finally {
