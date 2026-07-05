@@ -199,7 +199,7 @@ class ListingReviewCreateView(generics.CreateAPIView):
     def perform_create(self, serializer):
         slug = self.kwargs.get('slug')
         shop = get_object_or_404(ShopListing, slug=slug, status='active')
-        serializer.save(user=self.request.user, shop_listing=shop, status='pending')
+        serializer.save(user=self.request.user, shop_listing=shop, status='approved')
 
 # --- Favorites / Liked Shops ---
 

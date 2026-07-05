@@ -22,7 +22,7 @@ def submit_review(request):
     }
     serializer = ShopReviewCreateSerializer(data=data)
     if serializer.is_valid():
-        serializer.save(user=user)
+        serializer.save(user=user, status='approved')
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

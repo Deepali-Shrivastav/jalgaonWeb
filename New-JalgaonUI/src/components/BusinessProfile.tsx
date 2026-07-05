@@ -24,6 +24,7 @@ export interface BusinessData {
   isOpen: boolean;
   about: string;
   tags: string[];
+  address: string;
   phone: string;
   whatsapp: string;
   website?: string;
@@ -131,14 +132,20 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(reviewForm)
+        body: JSON.stringify({
+          rating_star: reviewForm.rating,
+          user_review: reviewForm.comment
+        })
       });
       if (res.ok) {
         toast.success('Review submitted successfully');
         setShowReviewModal(false);
         setReviewForm({ rating: 5, comment: '' });
+      } else if (res.status === 401) {
+        toast.error('Session expired. Please login again.');
       } else {
-        toast.error('Failed to submit review');
+        const errorData = await res.json().catch(() => ({}));
+        toast.error(errorData.detail || errorData.error || 'Failed to submit review');
       }
     } catch (err) {
       toast.error('An error occurred');
@@ -195,8 +202,8 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
           name: r.user_name || 'User',
           initials: (r.user_name || 'U').substring(0, 1).toUpperCase(),
           timeAgo: new Date(r.timestamp).toLocaleDateString(),
-          rating: r.rating || 5,
-          comment: r.comment || ''
+          rating: r.rating_star || r.rating || 5,
+          comment: r.user_review || r.comment || ''
         })) || [];
 
         const totalReviews = mappedReviews.length;
@@ -213,23 +220,29 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
           pct: totalReviews > 0 ? Math.round((ratingCounts[stars as keyof typeof ratingCounts] / totalReviews) * 100) : 0
         }));
 
-        // Map DRF fields to BusinessData
-        const mappedBiz: BusinessData = {
-          id: drfData.id?.toString() || id,
-          name: drfData.business_name || 'Unknown Business',
-          category: drfData.main_category_name || 'Category',
-          displayCategory: drfData.sub_category_name || drfData.main_category_name || 'Category',
-          verified: true, // can be mapped from is_claimed if available
-          rating: drfData.avg_rating || 0,
-          reviewCount: drfData.review_count || 0,
-          timing: '9:00 AM - 6:00 PM', // can be parsed from business_hours later
-          isOpen: true,
-          about: drfData.business_description || 'No description available.',
-          tags: [drfData.main_category_name, drfData.sub_category_name].filter(Boolean) as string[],
-          phone: drfData.business_no || '',
-          whatsapp: drfData.whatsapp || drfData.business_no || '',
-          website: drfData.website_link || drfData.sub_domain_one || undefined,
-          heroImage: drfData.business_banner || 'https://via.placeholder.com/1200x600?text=No+Image',
+          // Map DRF fields to BusinessData
+          const rawWebsite = drfData.website_link || drfData.sub_domain_one || '';
+          const formattedWebsite = rawWebsite 
+            ? (rawWebsite.startsWith('http') ? rawWebsite : `https://${rawWebsite}`) 
+            : undefined;
+
+          const mappedBiz: BusinessData = {
+            id: drfData.id?.toString() || id,
+            name: drfData.business_name || 'Unknown Business',
+            category: drfData.main_category_name || 'Category',
+            displayCategory: drfData.sub_category_name || drfData.main_category_name || 'Category',
+            verified: drfData.is_claimed || true,
+            rating: drfData.avg_rating || 0,
+            reviewCount: drfData.review_count || 0,
+            timing: drfData.business_hours || 'Contact for hours',
+            isOpen: true,
+            about: drfData.business_description || 'No description available.',
+            tags: [drfData.main_category_name, drfData.sub_category_name].filter(Boolean) as string[],
+            address: `${drfData.business_address || ''}, ${drfData.city || ''}`.replace(/^, |^,$/, '').trim() || 'Address not available',
+            phone: drfData.business_no || '',
+            whatsapp: drfData.whatsapp || drfData.business_no || '',
+            website: formattedWebsite,
+            heroImage: drfData.business_banner || 'https://via.placeholder.com/1200x600?text=No+Image',
           gallery: drfData.gallery_photos?.length > 0 
             ? drfData.gallery_photos.map((p: any) => ({ src: p.image, alt: p.caption || 'Gallery Image' }))
             : [
@@ -424,7 +437,6 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <span className="w-8 text-xs text-secondary">{pct}%</span>
                   </div>
                 ))}
               </div>
@@ -460,14 +472,13 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
               <div className="space-y-4 text-sm text-secondary">
                 <div className="flex gap-3">
                   <span className="material-symbols-outlined text-primary text-lg mt-0.5">location_on</span>
-                  <span>MG Road, Jalgaon, Maharashtra 425001</span>
+                  <span>{biz.address}</span>
                 </div>
                 <div className="flex gap-3">
                   <span className="material-symbols-outlined text-primary text-lg">schedule</span>
                   <div>
                     <p className="font-bold text-emerald-600">{biz.isOpen ? 'Open Now' : 'Closed'}</p>
-                    <p>Mon–Sat: 9:00 AM – 6:00 PM</p>
-                    <p>Sunday: Closed</p>
+                    <p>{biz.timing}</p>
                   </div>
                 </div>
                 <div className="flex gap-3">
@@ -527,7 +538,7 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
       {/* Review Modal */}
       {showReviewModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl w-[95vw] md:w-full max-w-lg p-6 shadow-2xl relative">
+          <div className="bg-white rounded-2xl p-6 shadow-2xl relative animate-fade-in flex flex-col" style={{ width: '90%', maxWidth: '500px' }}>
             <button onClick={() => setShowReviewModal(false)} className="absolute top-4 right-4 text-secondary hover:text-ink-deep">
               <span className="material-symbols-outlined">close</span>
             </button>
@@ -569,7 +580,7 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
       {/* Claim Modal */}
       {showClaimModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl w-[95vw] md:w-full max-w-lg p-6 shadow-2xl relative">
+          <div className="bg-white rounded-2xl p-6 shadow-2xl relative animate-fade-in flex flex-col" style={{ width: '90%', maxWidth: '500px' }}>
             <button onClick={() => setShowClaimModal(false)} className="absolute top-4 right-4 text-secondary hover:text-ink-deep">
               <span className="material-symbols-outlined">close</span>
             </button>
