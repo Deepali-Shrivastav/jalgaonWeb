@@ -131,9 +131,10 @@ export default function NewsPortal() {
                   <Link href={`/news/${newsArticles[0].slug || newsArticles[0].id}`} className="group block mb-10">
                     <div className="w-full aspect-[16/8] md:aspect-[2/1] overflow-hidden mb-5 bg-gray-100">
                       <img 
-                        src={newsArticles[0].image || newsArticles[0].featured_image || 'https://via.placeholder.com/800x400'} 
+                        src={newsArticles[0].image || newsArticles[0].featured_image || ''} 
                         alt={newsArticles[0].title}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
                       />
                     </div>
                     <h2 className="text-2xl md:text-[32px] leading-tight font-serif font-bold text-gray-900 mb-3 group-hover:text-red-600 transition-colors">
@@ -151,9 +152,10 @@ export default function NewsPortal() {
                     <Link href={`/news/${article.slug || article.id}`} key={article.id} className="group block">
                       <div className="relative w-full aspect-[16/10] overflow-hidden mb-4 bg-gray-100">
                         <img 
-                          src={article.image || article.featured_image || 'https://via.placeholder.com/400x250'} 
+                          src={article.image || article.featured_image || ''} 
                           alt={article.title}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
                         />
                         <div className="absolute top-3 left-3 bg-red-600 text-white text-[11px] font-bold px-2 py-1 flex items-center gap-2 rounded-sm shadow-sm">
                           <span className="uppercase">{typeof article.category === 'object' && article.category !== null ? article.category.name : (article.category || 'News')}</span>
@@ -194,9 +196,10 @@ export default function NewsPortal() {
                     <Link href={`/news/${article.slug || article.id}`} key={article.id} className="group flex gap-4 items-start">
                       <div className="w-28 h-[84px] shrink-0 overflow-hidden bg-gray-100">
                         <img 
-                          src={article.image || article.featured_image || 'https://via.placeholder.com/150'} 
+                          src={article.image || article.featured_image || ''} 
                           alt={article.title}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
                         />
                       </div>
                       <div className="flex-1 min-w-0">
