@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import NgoClient from './NgoClient';
+import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
   title: 'Jalgaon NGOs | Volunteer, Donate & Support Local Charities',
@@ -59,6 +60,7 @@ export default function NgoPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <NgoClient />
+      <Footer />
     </>
   );
 }

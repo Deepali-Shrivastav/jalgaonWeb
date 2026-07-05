@@ -3,6 +3,8 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import LoginSignup from "@/components/LoginSignup";
+import FooterSection from "@/components/ui/footer";
+import { InteractiveMenu } from "@/components/ui/modern-mobile-menu";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-sans",
@@ -63,6 +65,8 @@ export default function RootLayout({
         <AuthProvider>
           {children}
           <LoginSignup />
+          <FooterSection />
+          <InteractiveMenu />
         </AuthProvider>
       </body>
     </html>

@@ -21,10 +21,21 @@ import BusinessProfile from '@/components/BusinessProfile';
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string | null>(null);
   const [selectedListing, setSelectedListing] = useState<{ id: string; name: string } | null>(null);
+  const [selectedCity, setSelectedCity] = useState<string>('Jalgaon');
 
   const handleSelectCategory = (cat: string) => {
     setSelectedCategory(cat);
+    setSearchQuery(null);
+    setSelectedListing(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSearch = (query: string) => {
+    if (!query.trim()) return;
+    setSearchQuery(query);
+    setSelectedCategory(null);
     setSelectedListing(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -41,6 +52,7 @@ export default function Home() {
 
   const handleBackToHome = () => {
     setSelectedCategory(null);
+    setSearchQuery(null);
     setSelectedListing(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -56,10 +68,12 @@ export default function Home() {
             onBack={handleBackToListings}
           />
         </main>
-      ) : selectedCategory ? (
+      ) : (selectedCategory || searchQuery) ? (
         <main>
           <BusinessListings
             category={selectedCategory}
+            searchQuery={searchQuery}
+            selectedCity={selectedCity}
             onBack={handleBackToHome}
             onSelectListing={handleSelectListing}
           />
@@ -67,9 +81,9 @@ export default function Home() {
       ) : (
         <main>
           <MarketWeatherDashboard />
-          <Hero />
+          <Hero selectedCity={selectedCity} onCityChange={setSelectedCity} onSearch={handleSearch} />
           <CarouselAds slot="hero_banner" />
-          <TrendingListings />
+          <TrendingListings selectedCity={selectedCity} />
           <CarouselAds slot="listing_interstitial" />
           <IndustryGrids onSelectCategory={handleSelectCategory} />
           <LatestNews />

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+// import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -8,7 +9,7 @@ import Footer from '@/components/Footer';
 
 export interface EventItem {
   id: number;
-  category: string;
+  category: any;
   month: string;
   day: string;
   title: string;
@@ -60,10 +61,27 @@ export default function EventsPortal() {
         if (!res.ok) throw new Error('Failed to fetch events');
         const json = await res.json();
         const results = json.results || json.data || json || [];
+        const mappedResults = results.map((item: any) => {
+          const startDate = item.start_datetime ? new Date(item.start_datetime) : new Date();
+          return {
+            id: item.id,
+            category: item.category,
+            month: startDate.toLocaleString('default', { month: 'short' }),
+            day: startDate.getDate().toString(),
+            title: item.title,
+            venue: item.venue_name || item.venue_address || 'Online',
+            time: startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            excerpt: item.short_description,
+            price: 'Free',
+            cta: 'View Details',
+            image: item.featured_image || '/placeholder-event.jpg',
+            alt: item.title
+          };
+        });
         
-        if (results.length > 0) {
-          setFeaturedEvents(results.slice(0, 3));
-          setUpcomingEvents(results.slice(3, 9).length > 0 ? results.slice(3, 9) : results);
+        if (mappedResults.length > 0) {
+          setFeaturedEvents(mappedResults.slice(0, 3));
+          setUpcomingEvents(mappedResults.slice(3, 9).length > 0 ? mappedResults.slice(3, 9) : mappedResults);
         } else {
           setFeaturedEvents([]);
           setUpcomingEvents([]);
@@ -116,6 +134,13 @@ export default function EventsPortal() {
                 Search
               </button>
             </div>
+            {/* <Link 
+              href="/add-event" 
+              className="bg-white/85 hover:bg-white text-primary border border-primary/20 px-8 py-3 rounded-full font-bold transition-all text-sm flex items-center gap-2 shadow-sm hover:shadow-md active:scale-95"
+            >
+              <span className="material-symbols-outlined text-[20px]">add_circle</span>
+              Submit Your Event
+            </Link> */}
           </div>
         </section>
 
@@ -179,7 +204,7 @@ export default function EventsPortal() {
                       height={260}
                     />
                     <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-extrabold text-primary shadow-sm">
-                      {event.category}
+                      {event.category?.name || 'Uncategorized'}
                     </div>
                     <div className="absolute top-4 right-4 bg-primary text-white flex flex-col items-center justify-center w-14 h-14 rounded-2xl font-bold leading-none shadow-lg">
                       <span className="text-[10px] uppercase">
@@ -267,7 +292,7 @@ export default function EventsPortal() {
                     />
                     <div className="absolute bottom-4 left-4">
                       <span className="bg-white text-ink-deep px-4 py-1 rounded-full text-[10px] font-black shadow-md tracking-wider">
-                        {event.category}
+                        {event.category?.name || 'Uncategorized'}
                       </span>
                     </div>
                   </div>

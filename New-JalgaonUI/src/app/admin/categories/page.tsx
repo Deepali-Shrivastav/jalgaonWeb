@@ -66,11 +66,30 @@ export default function AdminCategoriesPage() {
     finally { setSubmitting(false); }
   };
 
+  const handleDeleteCategory = async (catId: number) => {
+    if (!window.confirm("Are you sure you want to delete this category?")) return;
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch(`${baseUrl}/api/v1/admin-panel/categories/${catId}/`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        fetchCategories();
+        if (expandedCategory === catId) setExpandedCategory(null);
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to delete category");
+      }
+    } catch {
+      alert("Failed to delete category");
+    }
+  };
+
   const openEditModal = (cat: Category) => { setEditingCategory(cat); setNewCategoryName(cat.main_category); setNewCategoryImage(null); setIsEditModalOpen(true); setErrorMsg(""); };
 
-  const toggleExpand = async (catId: number) => {
-    if (expandedCategory === catId) { setExpandedCategory(null); return; }
-    setExpandedCategory(catId); setLoadingSubcategories(true);
+  const fetchSubcategories = async (catId: number) => {
+    setLoadingSubcategories(true);
     const token = localStorage.getItem("token");
     try {
       const res = await fetch(`${baseUrl}/api/v1/admin-panel/categories/${catId}/`, { headers: { Authorization: `Bearer ${token}` } });
@@ -78,6 +97,12 @@ export default function AdminCategoriesPage() {
       setSubcategories(data.subcategories || []);
     } catch { console.error("Failed to fetch subcategories"); }
     finally { setLoadingSubcategories(false); }
+  };
+
+  const toggleExpand = async (catId: number) => {
+    if (expandedCategory === catId) { setExpandedCategory(null); return; }
+    setExpandedCategory(catId); 
+    await fetchSubcategories(catId);
   };
 
   const handleSubCategorySubmit = async (e: React.FormEvent) => {
@@ -96,10 +121,30 @@ export default function AdminCategoriesPage() {
         await fetch(`${baseUrl}/api/v1/admin-panel/subcategories/`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: formData });
       }
       setIsSubModalOpen(false); setEditingSubCategory(null); setNewSubCategoryName(""); setNewSubCategoryImage(null);
-      if (expandedCategory) toggleExpand(expandedCategory);
+      if (expandedCategory) await fetchSubcategories(expandedCategory);
       fetchCategories();
     } catch { setErrorMsg("Failed to save subcategory"); }
     finally { setSubmitting(false); }
+  };
+
+  const handleDeleteSubCategory = async (subId: number) => {
+    if (!window.confirm("Are you sure you want to delete this subcategory?")) return;
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch(`${baseUrl}/api/v1/admin-panel/subcategories/${subId}/`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        if (expandedCategory) await fetchSubcategories(expandedCategory);
+        fetchCategories();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to delete subcategory");
+      }
+    } catch {
+      alert("Failed to delete subcategory");
+    }
   };
 
   const openAddSubModal = () => { setEditingSubCategory(null); setNewSubCategoryName(""); setNewSubCategoryImage(null); setIsSubModalOpen(true); setErrorMsg(""); };
@@ -152,7 +197,10 @@ export default function AdminCategoriesPage() {
                       <td className="px-4 py-3">{cat.category_img ? <img src={`${baseUrl}${cat.category_img}`} alt={cat.main_category} className="w-10 h-10 object-cover rounded" /> : <div className="w-10 h-10 bg-slate-200 rounded" />}</td>
                       <td className="px-4 py-3 font-medium">{cat.main_category}</td>
                       <td className="px-4 py-3"><button onClick={() => toggleExpand(cat.id)} className="px-3 py-1 border border-slate-200 rounded text-xs hover:bg-slate-100">{expandedCategory === cat.id ? "Hide" : "View"} {cat.subcategories_count} subcategories</button></td>
-                      <td className="px-4 py-3"><button onClick={() => openEditModal(cat)} className="p-1.5 rounded hover:bg-slate-100"><span className="material-symbols-outlined text-lg text-slate-500">edit</span></button></td>
+                      <td className="px-4 py-3 flex items-center gap-2 h-[64px]">
+                        <button onClick={() => openEditModal(cat)} className="p-1.5 rounded hover:bg-slate-100 text-slate-500"><span className="material-symbols-outlined text-lg">edit</span></button>
+                        <button onClick={() => handleDeleteCategory(cat.id)} className="p-1.5 rounded hover:bg-red-50 text-red-500"><span className="material-symbols-outlined text-lg">delete</span></button>
+                      </td>
                     </tr>
                     {expandedCategory === cat.id && (
                       <tr><td colSpan={5} className="p-0">
@@ -167,6 +215,7 @@ export default function AdminCategoriesPage() {
                                 {sub.sub_category_img && <img src={`${baseUrl}${sub.sub_category_img}`} className="w-8 h-8 rounded object-cover" alt={sub.sub_category} />}
                                 <span className="text-sm font-medium flex-1">{sub.sub_category}</span>
                                 <button onClick={() => openEditSubModal(sub)} className="text-slate-400 hover:text-slate-600"><span className="material-symbols-outlined text-lg">edit</span></button>
+                                <button onClick={() => handleDeleteSubCategory(sub.id)} className="text-red-400 hover:text-red-600"><span className="material-symbols-outlined text-lg">delete</span></button>
                               </div>
                             ))}</div>
                           ) : <p className="text-sm text-slate-400">No subcategories found.</p>}
@@ -187,3 +236,4 @@ export default function AdminCategoriesPage() {
     </div>
   );
 }
+
