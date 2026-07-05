@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 export default function CallToAction() {
   return (
@@ -16,12 +17,12 @@ export default function CallToAction() {
               Join the premier directory of Jalgaon and connect with thousands of local customers daily.
             </p>
             <div className="mt-xxxl flex flex-col gap-base sm:flex-row">
-              <button className="rounded-full bg-primary px-xxxl py-md font-bold text-white shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5 hover:bg-primary-deep">
+              <Link href="/add-listing" className="rounded-full bg-primary px-xxxl py-md font-bold text-white shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5 hover:bg-primary-deep text-center">
                 Add Your Business
-              </button>
-              <button className="rounded-full border border-white/15 bg-white/10 px-xxxl py-md font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-white/15">
+              </Link>
+              <Link href="/advertise" className="rounded-full border border-white/15 bg-white/10 px-xxxl py-md font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-white/15 text-center">
                 Contact Support
-              </button>
+              </Link>
             </div>
           </div>
 

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 interface NewsCategory { id: number; name: string; }
 
 export default function AdminNewsCreatePage() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
   const router = useRouter();
   const [categories, setCategories] = useState<NewsCategory[]>([]);
   const [saving, setSaving] = useState(false);

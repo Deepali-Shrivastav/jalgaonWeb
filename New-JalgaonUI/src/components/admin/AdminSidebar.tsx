@@ -61,7 +61,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed }) => {
         {isCollapsed ? (
           <img src="/title-logo.png" alt="Logo" className="h-8 w-auto object-contain" />
         ) : (
-          <img src="/logo.png" alt="Jalgaon Admin" className="h-9 w-auto object-contain" />
+          <img src="/main-logo.png" alt="Jalgaon Admin" className="h-9 w-auto object-contain" />
         )}
       </div>
 

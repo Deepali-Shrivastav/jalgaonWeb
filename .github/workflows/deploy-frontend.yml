@@ -159,6 +159,8 @@ jobs:
             sleep 2
 
             sudo systemctl stop nextjs_jalgaon || true
+            sudo fuser -k 3000/tcp || true
+            sudo lsof -t -i:3000 | xargs -r sudo kill -9 || true
             sleep 2
             sudo systemctl start nextjs_jalgaon
             sleep 8  # Give Next.js time to fully initialize on port 3000

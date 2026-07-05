@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 interface NewsCategory { id: number; name: string; slug: string; description?: string; sort_order: number; }
 
 export default function AdminNewsCategoriesPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
   const [categories, setCategories] = useState<NewsCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -32,11 +32,20 @@ export default function AdminNewsCategoriesPage() {
     e.preventDefault();
     const token = localStorage.getItem("token");
     try {
+      let res;
       if (formData.id) {
-        await fetch(`${baseUrl}/api/v1/news/admin/categories/${formData.id}/`, { method: "PUT", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify(formData) });
+        res = await fetch(`${baseUrl}/api/v1/news/admin/categories/${formData.id}/`, { method: "PUT", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify(formData) });
       } else {
-        await fetch(`${baseUrl}/api/v1/news/admin/categories/`, { method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify(formData) });
+        const { id, ...postData } = formData;
+        res = await fetch(`${baseUrl}/api/v1/news/admin/categories/`, { method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify(postData) });
       }
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        alert("Failed to save category: " + (errorData.detail || JSON.stringify(errorData)));
+        return;
+      }
+      
       fetchCategories(); setIsFormOpen(false); setFormData({ id: null, name: "", slug: "", description: "", sort_order: 0 });
     } catch { alert("Failed to save category."); }
   };

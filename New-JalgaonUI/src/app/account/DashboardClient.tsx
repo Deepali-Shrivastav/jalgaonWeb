@@ -5,7 +5,7 @@ import { AuthContext } from '@/context/AuthContext';
 import Link from 'next/link';
 
 export default function DashboardClient() {
-  const { user, isLogin } = useContext(AuthContext);
+  const { user, isLogin, logout } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState('overview');
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -65,6 +65,11 @@ export default function DashboardClient() {
           const res = await fetch(`${baseUrl}${endpoint}`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
+          if (res.status === 401 || res.status === 403) {
+            logout();
+            window.location.href = '/';
+            return;
+          }
           if (!res.ok) throw new Error(`Failed to fetch ${activeTab}`);
           const result = await res.json();
           if (activeTab === 'settings') {

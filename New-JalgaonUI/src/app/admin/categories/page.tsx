@@ -6,7 +6,7 @@ interface Category { id: number; main_category: string; category_img: string | n
 interface SubCategory { id: number; sub_category: string; sub_category_img: string | null; }
 
 export default function AdminCategoriesPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -45,7 +45,12 @@ export default function AdminCategoriesPage() {
     formData.append("main_category", newCategoryName);
     if (newCategoryImage) formData.append("category_img", newCategoryImage);
     try {
-      await fetch(`${baseUrl}/api/v1/admin-panel/categories/`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: formData });
+      const res = await fetch(`${baseUrl}/api/v1/admin-panel/categories/`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: formData });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        setErrorMsg(errData.error || "Failed to create category");
+        return;
+      }
       setIsAddModalOpen(false); setNewCategoryName(""); setNewCategoryImage(null); fetchCategories();
     } catch (error: any) { setErrorMsg("Failed to create category"); }
     finally { setSubmitting(false); }
@@ -60,7 +65,12 @@ export default function AdminCategoriesPage() {
     formData.append("main_category", newCategoryName);
     if (newCategoryImage) formData.append("category_img", newCategoryImage);
     try {
-      await fetch(`${baseUrl}/api/v1/admin-panel/categories/${editingCategory?.id}/`, { method: "PATCH", headers: { Authorization: `Bearer ${token}` }, body: formData });
+      const res = await fetch(`${baseUrl}/api/v1/admin-panel/categories/${editingCategory?.id}/`, { method: "PATCH", headers: { Authorization: `Bearer ${token}` }, body: formData });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        setErrorMsg(errData.error || "Failed to edit category");
+        return;
+      }
       setIsEditModalOpen(false); setEditingCategory(null); setNewCategoryName(""); setNewCategoryImage(null); fetchCategories();
     } catch { setErrorMsg("Failed to edit category"); }
     finally { setSubmitting(false); }
@@ -108,18 +118,28 @@ export default function AdminCategoriesPage() {
   const handleSubCategorySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newSubCategoryName) { setErrorMsg("Subcategory name is required"); return; }
+    if (!editingSubCategory && !newSubCategoryImage) { setErrorMsg("Subcategory image is required"); return; }
+    
     setSubmitting(true); setErrorMsg("");
     const token = localStorage.getItem("token");
     const formData = new FormData();
     formData.append("sub_category", newSubCategoryName);
     if (newSubCategoryImage) formData.append("sub_category_img", newSubCategoryImage);
     try {
+      let res;
       if (editingSubCategory) {
-        await fetch(`${baseUrl}/api/v1/admin-panel/subcategories/${editingSubCategory.id}/`, { method: "PATCH", headers: { Authorization: `Bearer ${token}` }, body: formData });
+        res = await fetch(`${baseUrl}/api/v1/admin-panel/subcategories/${editingSubCategory.id}/`, { method: "PATCH", headers: { Authorization: `Bearer ${token}` }, body: formData });
       } else {
         formData.append("main_category", String(expandedCategory));
-        await fetch(`${baseUrl}/api/v1/admin-panel/subcategories/`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: formData });
+        res = await fetch(`${baseUrl}/api/v1/admin-panel/subcategories/`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: formData });
       }
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        setErrorMsg(errorData.error || "Failed to save subcategory");
+        return;
+      }
+      
       setIsSubModalOpen(false); setEditingSubCategory(null); setNewSubCategoryName(""); setNewSubCategoryImage(null);
       if (expandedCategory) await fetchSubcategories(expandedCategory);
       fetchCategories();
@@ -150,7 +170,7 @@ export default function AdminCategoriesPage() {
   const openAddSubModal = () => { setEditingSubCategory(null); setNewSubCategoryName(""); setNewSubCategoryImage(null); setIsSubModalOpen(true); setErrorMsg(""); };
   const openEditSubModal = (sub: SubCategory) => { setEditingSubCategory(sub); setNewSubCategoryName(sub.sub_category); setNewSubCategoryImage(null); setIsSubModalOpen(true); setErrorMsg(""); };
 
-  const renderModal = (isOpen: boolean, title: string, onClose: () => void, onSubmit: (e: React.FormEvent) => void, nameVal: string, setName: (v: string) => void, setImg: (f: File | null) => void, btnLabel: string) => {
+  const renderModal = (isOpen: boolean, title: string, onClose: () => void, onSubmit: (e: React.FormEvent) => void, nameVal: string, setName: (v: string) => void, setImg: (f: File | null) => void, btnLabel: string, isImageRequired: boolean = false) => {
     if (!isOpen) return null;
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -160,7 +180,7 @@ export default function AdminCategoriesPage() {
           <form onSubmit={onSubmit} className="space-y-4">
             <div><label className="block text-sm font-medium text-slate-600 mb-1">Name *</label>
               <input type="text" value={nameVal} onChange={(e) => setName(e.target.value)} required className="w-full p-2 border border-slate-200 rounded-lg text-sm" /></div>
-            <div><label className="block text-sm font-medium text-slate-600 mb-1">Image (Optional)</label>
+            <div><label className="block text-sm font-medium text-slate-600 mb-1">{isImageRequired ? "Image *" : "Image (Optional)"}</label>
               <input type="file" accept="image/*" onChange={(e) => setImg(e.target.files?.[0] || null)} className="w-full p-2 border border-slate-200 rounded-lg text-sm" /></div>
             <div className="flex justify-end gap-3">
               <button type="button" onClick={onClose} className="px-4 py-2 bg-slate-100 rounded-lg text-sm font-medium hover:bg-slate-200">Cancel</button>
@@ -232,7 +252,7 @@ export default function AdminCategoriesPage() {
 
       {renderModal(isAddModalOpen, "Add New Category", () => setIsAddModalOpen(false), handleAddCategory, newCategoryName, setNewCategoryName, setNewCategoryImage, "Create Category")}
       {renderModal(isEditModalOpen, "Edit Category", () => setIsEditModalOpen(false), handleEditCategory, newCategoryName, setNewCategoryName, setNewCategoryImage, "Save Changes")}
-      {renderModal(isSubModalOpen, editingSubCategory ? "Edit Subcategory" : "Add Subcategory", () => setIsSubModalOpen(false), handleSubCategorySubmit, newSubCategoryName, setNewSubCategoryName, setNewSubCategoryImage, editingSubCategory ? "Save Subcategory" : "Add Subcategory")}
+      {renderModal(isSubModalOpen, editingSubCategory ? "Edit Subcategory" : "Add Subcategory", () => setIsSubModalOpen(false), handleSubCategorySubmit, newSubCategoryName, setNewSubCategoryName, setNewSubCategoryImage, editingSubCategory ? "Save Subcategory" : "Add Subcategory", !editingSubCategory)}
     </div>
   );
 }

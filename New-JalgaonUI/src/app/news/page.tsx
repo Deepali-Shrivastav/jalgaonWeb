@@ -53,7 +53,7 @@ export default function NewsPage() {
       url: 'https://jalgaon.com',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://jalgaon.com/logo.png',
+        url: 'https://jalgaon.com/main-logo.png',
       },
     },
     mainEntity: {

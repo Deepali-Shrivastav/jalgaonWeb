@@ -20,7 +20,7 @@ const roles = [
 
 export default function AdminUsersPage() {
   const { user } = useContext(AuthContext);
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
   const isSuperAdmin = user?.role === "super_admin";
 
   const [users, setUsers] = useState<UserData[]>([]);

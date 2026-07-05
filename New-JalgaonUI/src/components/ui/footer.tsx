@@ -12,28 +12,28 @@ import {
 
 const links = [
     {
-        title: 'Features',
-        href: '#',
+        title: 'News',
+        href: '/news',
     },
     {
-        title: 'Solution',
-        href: '#',
+        title: 'Events',
+        href: '/events',
     },
     {
-        title: 'Customers',
-        href: '#',
+        title: 'Jobs',
+        href: '/jobs',
     },
     {
-        title: 'Pricing',
-        href: '#',
+        title: 'Add Listing',
+        href: '/add-listing',
     },
     {
-        title: 'Help',
-        href: '#',
+        title: 'Advertise',
+        href: '/advertise',
     },
     {
-        title: 'About',
-        href: '#',
+        title: 'NGOs',
+        href: '/ngo',
     },
 ]
 
@@ -45,6 +45,7 @@ export default function FooterSection() {
                     href="/"
                     aria-label="go home"
                     className="mx-auto block size-fit">
+                    <img alt="Jalgaon.com Logo" className="h-8 w-auto" src="/main-logo.png" />
                 </Link>
 
                 <div className="my-8 flex flex-wrap justify-center gap-6 text-sm">
@@ -108,7 +109,7 @@ export default function FooterSection() {
                         <Feather className="size-6" /> {/* Generic "Feather" (post/write) icon */}
                     </Link>
                 </div>
-                <span className="text-muted-foreground block text-center text-sm"> © {new Date().getFullYear()} Tailark, All rights reserved</span>
+                <span className="text-muted-foreground block text-center text-sm"> © {new Date().getFullYear()} Jalgaon.com, All rights reserved</span>
             </div>
         </footer>
     )

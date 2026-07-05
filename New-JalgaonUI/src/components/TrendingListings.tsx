@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 export interface TrendingListing {
   id?: number | string;
@@ -70,9 +71,9 @@ export default function TrendingListings({ selectedCity }: TrendingListingsProps
             <h2 className="text-3xl font-extrabold text-ink-deep mb-xxs">Trending Listings</h2>
             <p className="text-secondary">The most visited local hotspots this week</p>
           </div>
-          <a className="text-primary font-bold flex items-center gap-xxs hover:underline group" href="#">
+          <Link className="text-primary font-bold flex items-center gap-xxs hover:underline group" href="/">
             View All <span className="material-symbols-outlined transition-transform group-hover:translate-x-1">arrow_forward</span>
-          </a>
+          </Link>
         </div>
         
         {loading ? (
@@ -86,7 +87,7 @@ export default function TrendingListings({ selectedCity }: TrendingListingsProps
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-xl">
             {displayListings.map((listing, idx) => (
-              <div key={listing.id || idx} className="group cursor-pointer">
+              <Link href={`/directory/${listing.id}`} key={listing.id || idx} className="group cursor-pointer block">
                 <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-base shadow-sm group-hover:shadow-xl transition-all duration-500">
                   {listing.image ? (
                     <img 
@@ -121,7 +122,7 @@ export default function TrendingListings({ selectedCity }: TrendingListingsProps
                     <span className="material-symbols-outlined text-sm text-primary">location_on</span> {listing.location || 'Jalgaon'}
                   </p>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}

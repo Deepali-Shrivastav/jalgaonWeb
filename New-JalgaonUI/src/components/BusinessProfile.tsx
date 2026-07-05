@@ -24,6 +24,7 @@ export interface BusinessData {
   isOpen: boolean;
   about: string;
   tags: string[];
+  address: string;
   phone: string;
   whatsapp: string;
   website?: string;
@@ -131,14 +132,20 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(reviewForm)
+        body: JSON.stringify({
+          rating_star: reviewForm.rating,
+          user_review: reviewForm.comment
+        })
       });
       if (res.ok) {
         toast.success('Review submitted successfully');
         setShowReviewModal(false);
         setReviewForm({ rating: 5, comment: '' });
+      } else if (res.status === 401) {
+        toast.error('Session expired. Please login again.');
       } else {
-        toast.error('Failed to submit review');
+        const errorData = await res.json().catch(() => ({}));
+        toast.error(errorData.detail || errorData.error || 'Failed to submit review');
       }
     } catch (err) {
       toast.error('An error occurred');
@@ -190,43 +197,59 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
         if (!res.ok) throw new Error('Failed to fetch profile');
         const drfData = await res.json();
         
-        // Map DRF fields to BusinessData
-        const mappedBiz: BusinessData = {
-          id: drfData.id?.toString() || id,
-          name: drfData.business_name || 'Unknown Business',
-          category: drfData.main_category_name || 'Category',
-          displayCategory: drfData.sub_category_name || drfData.main_category_name || 'Category',
-          verified: true, // can be mapped from is_claimed if available
-          rating: drfData.avg_rating || 0,
-          reviewCount: drfData.review_count || 0,
-          timing: '9:00 AM - 6:00 PM', // can be parsed from business_hours later
-          isOpen: true,
-          about: drfData.business_description || 'No description available.',
-          tags: [drfData.main_category_name, drfData.sub_category_name].filter(Boolean) as string[],
-          phone: drfData.business_no || '',
-          whatsapp: drfData.whatsapp || drfData.business_no || '',
-          website: drfData.website_link || drfData.sub_domain_one || undefined,
-          heroImage: drfData.business_banner || 'https://via.placeholder.com/1200x600?text=No+Image',
+        const mappedReviews = drfData.reviews?.map((r: any) => ({
+          id: r.id?.toString(),
+          name: r.user_name || 'User',
+          initials: (r.user_name || 'U').substring(0, 1).toUpperCase(),
+          timeAgo: new Date(r.timestamp).toLocaleDateString(),
+          rating: r.rating_star || r.rating || 5,
+          comment: r.user_review || r.comment || ''
+        })) || [];
+
+        const totalReviews = mappedReviews.length;
+        const ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+        mappedReviews.forEach((r: any) => {
+          const rating = Math.round(r.rating);
+          if (rating >= 1 && rating <= 5) {
+            ratingCounts[rating as keyof typeof ratingCounts]++;
+          }
+        });
+
+        const computedRatingBreakdown = [5, 4, 3, 2, 1].map(stars => ({
+          stars,
+          pct: totalReviews > 0 ? Math.round((ratingCounts[stars as keyof typeof ratingCounts] / totalReviews) * 100) : 0
+        }));
+
+          // Map DRF fields to BusinessData
+          const rawWebsite = drfData.website_link || drfData.sub_domain_one || '';
+          const formattedWebsite = rawWebsite 
+            ? (rawWebsite.startsWith('http') ? rawWebsite : `https://${rawWebsite}`) 
+            : undefined;
+
+          const mappedBiz: BusinessData = {
+            id: drfData.id?.toString() || id,
+            name: drfData.business_name || 'Unknown Business',
+            category: drfData.main_category_name || 'Category',
+            displayCategory: drfData.sub_category_name || drfData.main_category_name || 'Category',
+            verified: drfData.is_claimed || true,
+            rating: drfData.avg_rating || 0,
+            reviewCount: drfData.review_count || 0,
+            timing: drfData.business_hours || 'Contact for hours',
+            isOpen: true,
+            about: drfData.business_description || 'No description available.',
+            tags: [drfData.main_category_name, drfData.sub_category_name].filter(Boolean) as string[],
+            address: `${drfData.business_address || ''}, ${drfData.city || ''}`.replace(/^, |^,$/, '').trim() || 'Address not available',
+            phone: drfData.business_no || '',
+            whatsapp: drfData.whatsapp || drfData.business_no || '',
+            website: formattedWebsite,
+            heroImage: drfData.business_banner || 'https://via.placeholder.com/1200x600?text=No+Image',
           gallery: drfData.gallery_photos?.length > 0 
             ? drfData.gallery_photos.map((p: any) => ({ src: p.image, alt: p.caption || 'Gallery Image' }))
             : [
                 { src: drfData.business_banner, alt: 'Banner' } // Fallback to banner if no gallery
               ],
-          reviews: drfData.reviews?.map((r: any) => ({
-            id: r.id?.toString(),
-            name: r.user_name || 'User',
-            initials: (r.user_name || 'U').substring(0, 1).toUpperCase(),
-            timeAgo: new Date(r.timestamp).toLocaleDateString(),
-            rating: r.rating || 5,
-            comment: r.comment || ''
-          })) || [],
-          ratingBreakdown: [
-            { stars: 5, pct: 80 },
-            { stars: 4, pct: 15 },
-            { stars: 3, pct: 5 },
-            { stars: 2, pct: 0 },
-            { stars: 1, pct: 0 },
-          ]
+          reviews: mappedReviews,
+          ratingBreakdown: computedRatingBreakdown
         };
         setBiz(mappedBiz);
       } catch (err: any) {
@@ -240,8 +263,76 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
 
   if (loading) {
     return (
-      <div className="w-full flex justify-center items-center h-[60vh]">
-        <span className="material-symbols-outlined animate-spin text-5xl text-primary">progress_activity</span>
+      <div className="w-full relative animate-pulse">
+        {/* Hero Section Skeleton */}
+        <section className="relative w-full h-[380px] md:h-[460px] bg-black/10 overflow-hidden">
+          <div className="absolute bottom-0 left-0 w-full px-6 md:px-12 pb-8 max-w-7xl mx-auto">
+            <div className="h-6 w-24 bg-white/20 rounded-full mb-3"></div>
+            <div className="h-12 w-3/4 md:w-1/2 bg-white/30 rounded-lg mb-4"></div>
+            <div className="h-6 w-1/3 bg-white/20 rounded-md"></div>
+          </div>
+        </section>
+
+        {/* Action Bar Skeleton */}
+        <div className="max-w-7xl mx-auto px-6 md:px-12">
+          <div className="flex flex-wrap gap-3 py-6 border-b border-hairline-soft">
+            <div className="h-12 w-32 bg-black/5 rounded-full"></div>
+            <div className="h-12 w-32 bg-black/5 rounded-full"></div>
+            <div className="h-12 w-32 bg-black/5 rounded-full"></div>
+            <div className="h-12 w-32 bg-black/5 rounded-full"></div>
+          </div>
+
+          {/* Main Grid Skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 py-10">
+            {/* Left Content */}
+            <div className="lg:col-span-8 space-y-12">
+              <section>
+                <div className="h-8 w-1/3 bg-black/5 rounded-lg mb-4"></div>
+                <div className="space-y-3">
+                  <div className="h-4 w-full bg-black/5 rounded"></div>
+                  <div className="h-4 w-full bg-black/5 rounded"></div>
+                  <div className="h-4 w-3/4 bg-black/5 rounded"></div>
+                </div>
+              </section>
+              <section className="bg-white rounded-2xl border border-hairline-soft p-8">
+                <div className="h-8 w-1/3 bg-black/5 rounded-lg mb-8"></div>
+                <div className="space-y-6">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="pb-6 border-b border-hairline-soft last:border-0 last:pb-0">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-full bg-black/5"></div>
+                        <div className="space-y-2">
+                          <div className="h-4 w-24 bg-black/5 rounded"></div>
+                          <div className="h-3 w-16 bg-black/5 rounded"></div>
+                        </div>
+                      </div>
+                      <div className="h-4 w-full bg-black/5 rounded mb-2"></div>
+                      <div className="h-4 w-2/3 bg-black/5 rounded"></div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </div>
+
+            {/* Right Sidebar */}
+            <aside className="lg:col-span-4 space-y-6">
+              <div className="bg-white rounded-2xl border border-hairline-soft p-6">
+                <div className="h-6 w-1/2 bg-black/5 rounded mb-5"></div>
+                <div className="space-y-4">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="flex gap-3">
+                      <div className="w-6 h-6 rounded-full bg-black/5"></div>
+                      <div className="flex-1 h-5 bg-black/5 rounded"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="bg-white rounded-2xl border border-hairline-soft overflow-hidden h-48 flex items-center justify-center">
+                <div className="w-full h-full bg-black/5"></div>
+              </div>
+            </aside>
+          </div>
+        </div>
       </div>
     );
   }
@@ -383,52 +474,7 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
               </div>
             </section>
 
-            {/* Gallery */}
-            <section>
-              <div className="flex justify-between items-center mb-5">
-                <h2 className="text-2xl font-extrabold text-ink-deep">Gallery</h2>
-                <button
-                  onClick={() => setShowAllGallery(!showAllGallery)}
-                  className="flex items-center gap-2 bg-primary hover:bg-primary-deep text-white text-sm font-bold px-5 py-2.5 rounded-full transition-all cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-lg">grid_view</span>
-                  {showAllGallery ? 'Show Less' : 'View All'}
-                </button>
-              </div>
 
-              <div className="grid grid-cols-3 grid-rows-2 gap-3 auto-rows-[180px]">
-                {displayedGallery.slice(0, 4).map((img, i) => (
-                  <div
-                    key={i}
-                    className={`relative overflow-hidden rounded-xl group ${i === 2 ? 'row-span-2' : ''}`}
-                  >
-                    <img
-                      src={img.src}
-                      alt={img.alt}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                ))}
-                {/* Last item with View All overlay */}
-                {biz.gallery.length > 4 && (
-                  <div
-                    className="relative overflow-hidden rounded-xl group col-span-2 cursor-pointer"
-                    onClick={() => setShowAllGallery(true)}
-                  >
-                    <img
-                      src={biz.gallery[4].src}
-                      alt={biz.gallery[4].alt}
-                      className="w-full h-full object-cover blur-sm scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                      <div className="bg-black/30 backdrop-blur-md px-6 py-3 rounded-full border border-white/30">
-                        <span className="text-white font-extrabold text-lg">View All</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </section>
 
             {/* Reviews */}
             <section className="bg-white rounded-2xl border border-hairline-soft p-8">
@@ -459,7 +505,6 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <span className="w-8 text-xs text-secondary">{pct}%</span>
                   </div>
                 ))}
               </div>
@@ -495,14 +540,13 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
               <div className="space-y-4 text-sm text-secondary">
                 <div className="flex gap-3">
                   <span className="material-symbols-outlined text-primary text-lg mt-0.5">location_on</span>
-                  <span>MG Road, Jalgaon, Maharashtra 425001</span>
+                  <span>{biz.address}</span>
                 </div>
                 <div className="flex gap-3">
                   <span className="material-symbols-outlined text-primary text-lg">schedule</span>
                   <div>
                     <p className="font-bold text-emerald-600">{biz.isOpen ? 'Open Now' : 'Closed'}</p>
-                    <p>Mon–Sat: 9:00 AM – 6:00 PM</p>
-                    <p>Sunday: Closed</p>
+                    <p>{biz.timing}</p>
                   </div>
                 </div>
                 <div className="flex gap-3">
@@ -562,7 +606,7 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
       {/* Review Modal */}
       {showReviewModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
+          <div className="bg-white rounded-2xl p-6 shadow-2xl relative animate-fade-in flex flex-col" style={{ width: '90%', maxWidth: '500px' }}>
             <button onClick={() => setShowReviewModal(false)} className="absolute top-4 right-4 text-secondary hover:text-ink-deep">
               <span className="material-symbols-outlined">close</span>
             </button>
@@ -586,6 +630,7 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
                 <label className="block text-sm font-semibold mb-2">Your Review</label>
                 <textarea 
                   required 
+                  minLength={5}
                   className="w-full border border-hairline-soft rounded-lg p-3 outline-none min-h-[120px]" 
                   placeholder="Share your experience..."
                   value={reviewForm.comment}
@@ -603,7 +648,7 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
       {/* Claim Modal */}
       {showClaimModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
+          <div className="bg-white rounded-2xl p-6 shadow-2xl relative animate-fade-in flex flex-col" style={{ width: '90%', maxWidth: '500px' }}>
             <button onClick={() => setShowClaimModal(false)} className="absolute top-4 right-4 text-secondary hover:text-ink-deep">
               <span className="material-symbols-outlined">close</span>
             </button>
@@ -615,6 +660,8 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
                 <input 
                   type="tel" 
                   required 
+                  pattern="[0-9]{10}"
+                  title="Please enter a valid 10-digit phone number"
                   className="w-full border border-hairline-soft rounded-lg p-3 outline-none" 
                   placeholder="Your mobile number"
                   value={claimForm.contact_number}
@@ -625,6 +672,7 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
                 <label className="block text-sm font-semibold mb-2">Message *</label>
                 <textarea 
                   required 
+                  minLength={10}
                   className="w-full border border-hairline-soft rounded-lg p-3 outline-none min-h-[100px]" 
                   placeholder="Tell us about your ownership..."
                   value={claimForm.message}
