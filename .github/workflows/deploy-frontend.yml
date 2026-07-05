@@ -136,9 +136,9 @@ jobs:
             chmod 600 "${ENV_FILE}"
             echo "✅ .env.production written (permissions: 600)"
 
-            echo "=== [3/6] Installing production dependencies ==="
+            echo "=== [3/6] Installing dependencies ==="
             cd "${NEXT_DIR}"
-            npm ci --omit=dev
+            npm ci
             echo "✅ Dependencies installed"
 
             echo "=== [4/6] Building Next.js application ==="
