@@ -43,6 +43,19 @@ if csrf_trusted_origins_env:
 else:
     CSRF_TRUSTED_ORIGINS = ['https://api.jalgaon.com', 'https://www.jalgaon.com']
 
+# ─────────────────────────────────────────────────────────────────────────────
+# HTTPS / PROXY TRUST
+# The server sits behind Nginx which terminates SSL and forwards requests to
+# Gunicorn over HTTP. Without this setting, Django thinks requests are HTTP
+# and builds image URLs like http://api.jalgaon.com/media/... — which browsers
+# block as mixed content on the HTTPS frontend.
+#
+# Nginx already sets: proxy_set_header X-Forwarded-Proto $scheme;
+# (see deploy/nginx/jalgaon-api.conf)
+# ─────────────────────────────────────────────────────────────────────────────
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+
 
 # Application definition
 INSTALLED_APPS = [
