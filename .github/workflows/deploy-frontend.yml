@@ -142,9 +142,7 @@ jobs:
             echo "✅ Dependencies installed"
 
             echo "=== [4/6] Building Next.js application ==="
-            # npm run build reads .env.production for NEXT_PUBLIC_* vars and bakes them in.
-            # COMMODITY_PRICE_API_KEY and WEATHERAPI_KEY are runtime-only (no NEXT_PUBLIC_ prefix).
-            npm run build
+            NODE_OPTIONS="--max-old-space-size=2048" npm run build
             echo "✅ Next.js build complete"
 
             echo "=== [5/6] Restarting Next.js systemd service ==="
