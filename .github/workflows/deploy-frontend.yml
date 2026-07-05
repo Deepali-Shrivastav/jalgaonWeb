@@ -147,6 +147,7 @@ jobs:
 
             echo "=== [5/6] Restarting Next.js systemd service ==="
             sudo systemctl stop nextjs_jalgaon || true
+            sudo fuser -k 3000/tcp || true
             sleep 2
             sudo systemctl start nextjs_jalgaon
             sleep 5  # Give the server time to start listening on port 3000
