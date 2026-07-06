@@ -25,6 +25,7 @@ export interface JobListing {
   created_at: string;
   job_type: string;
   company_logo: string;
+  typeBg?: string;
 }
 
 export default function JobsPortal() {
@@ -299,7 +300,7 @@ export default function JobsPortal() {
                               <span className="material-symbols-outlined text-[14px]">
                                 payments
                               </span>
-                              {job.salary}
+                              {job.salary_min && job.salary_max ? `₹${job.salary_min} - ₹${job.salary_max}` : 'Not specified'}
                             </span>
                           </div>
                         </div>
