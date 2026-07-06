@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 import AddJobClient from './AddJobClient';
 
 export const metadata: Metadata = {
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function AddJobPage() {
-  return <AddJobClient />;
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><span className="material-symbols-outlined animate-spin text-5xl text-primary">progress_activity</span></div>}>
+      <AddJobClient />
+    </Suspense>
+  );
 }

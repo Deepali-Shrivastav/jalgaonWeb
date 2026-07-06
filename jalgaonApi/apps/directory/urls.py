@@ -3,7 +3,7 @@ from .views import (
     CategoryListView, ListingListView, ListingDetailView, ListingCreateView,
     ListingUpdateView, ListingDeleteView, ListingSearchView, TrendingListingsView,
     ListingReviewListView, ListingReviewCreateView, LikedShopsView, UserListedShops,
-    BusinessClaimCreateView, BusinessReportCreateView
+    BusinessClaimCreateView, BusinessReportCreateView, ReviewManageView, UserBusinessReviewsView
 )
 
 urlpatterns = [
@@ -22,6 +22,7 @@ urlpatterns = [
     # Reviews
     path('<slug:slug>/reviews/', ListingReviewListView.as_view(), name='listing-reviews'),
     path('<slug:slug>/reviews/create/', ListingReviewCreateView.as_view(), name='listing-review-create'),
+    path('reviews/<int:pk>/manage/', ReviewManageView.as_view(), name='review-manage'),
     
     # Claims
     path('<slug:slug>/claim/', BusinessClaimCreateView.as_view(), name='listing-claim'),
@@ -32,4 +33,5 @@ urlpatterns = [
     # User Specific
     path('user/my-listings/', UserListedShops.as_view(), name='my-listings'),
     path('user/favorites/', LikedShopsView.as_view(), name='favorites'),
+    path('user/business-reviews/', UserBusinessReviewsView.as_view(), name='user-business-reviews'),
 ]

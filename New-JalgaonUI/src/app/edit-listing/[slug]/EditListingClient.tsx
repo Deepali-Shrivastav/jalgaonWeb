@@ -15,6 +15,9 @@ export default function EditListingClient({ slug }: { slug: string }) {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [loadingReviews, setLoadingReviews] = useState(true);
+
   // Form State
   const [formData, setFormData] = useState({
     business_name: '',
@@ -90,6 +93,22 @@ export default function EditListingClient({ slug }: { slug: string }) {
       } finally {
         setLoading(false);
       }
+
+      // Fetch reviews for owner
+      try {
+        const token = localStorage.getItem("token");
+        const revRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/listings/${slug}/reviews/`, {
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        });
+        if (revRes.ok) {
+          const revData = await revRes.json();
+          setReviews(revData.results || revData);
+        }
+      } catch (e) {
+        console.error("Failed to load reviews");
+      } finally {
+        setLoadingReviews(false);
+      }
     };
     
     initData();
@@ -112,6 +131,29 @@ export default function EditListingClient({ slug }: { slug: string }) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setBannerFile(e.target.files[0]);
+    }
+  };
+
+  const handleReviewStatus = async (reviewId: number, status: string) => {
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${baseUrl}/api/v1/listings/reviews/${reviewId}/manage/`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status })
+      });
+      if (res.ok) {
+        toast.success(`Review ${status} successfully!`);
+        setReviews(reviews.map(r => r.id === reviewId ? { ...r, status } : r));
+      } else {
+        toast.error("Failed to update review status.");
+      }
+    } catch (err) {
+      toast.error("An error occurred while updating review.");
     }
   };
 
@@ -311,6 +353,58 @@ export default function EditListingClient({ slug }: { slug: string }) {
                   <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Detailed Address *</label>
                   <textarea required name="business_address" value={formData.business_address} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" rows={3}></textarea>
                 </div>
+              </div>
+            </div>
+
+            {/* Reviews Section */}
+            <div className="h-px bg-gradient-to-r from-transparent via-outline-variant to-transparent my-xl"></div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-xl">
+              <div className="md:col-span-4">
+                <h2 className="text-xl font-bold text-primary flex items-center gap-xs">
+                  <span className="material-symbols-outlined">reviews</span>
+                  Customer Reviews
+                </h2>
+                <p className="text-sm text-secondary mt-2">Manage customer feedback on your listing. You can hide reviews if they violate policies.</p>
+              </div>
+              <div className="md:col-span-8 space-y-md">
+                {loadingReviews ? (
+                  <div className="text-center py-8"><span className="material-symbols-outlined animate-spin text-3xl text-primary">progress_activity</span></div>
+                ) : reviews.length > 0 ? (
+                  <div className="space-y-4">
+                    {reviews.map((review) => (
+                      <div key={review.id} className="bg-surface-container-lowest p-4 rounded-xl border border-hairline-soft relative">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <p className="font-bold text-ink-deep">{review.user_name || 'Anonymous'}</p>
+                            <p className="text-xs text-secondary">{new Date(review.timestamp).toLocaleDateString()}</p>
+                          </div>
+                          <div className="flex text-yellow-500">
+                            {Array(review.rating_star).fill(0).map((_, i) => <span key={i} className="material-symbols-outlined text-[16px]" style={{fontVariationSettings: "'FILL' 1"}}>star</span>)}
+                          </div>
+                        </div>
+                        <p className="text-sm text-secondary mb-4">{review.user_review}</p>
+                        <div className="flex items-center gap-2 border-t border-hairline-soft pt-3 mt-2">
+                          <span className={`text-xs font-bold px-2 py-1 rounded-full ${review.status === 'approved' ? 'bg-green-100 text-green-700' : review.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                            {review.status ? review.status.toUpperCase() : 'UNKNOWN'}
+                          </span>
+                          <div className="flex-1"></div>
+                          {review.status !== 'approved' && (
+                            <button type="button" onClick={() => handleReviewStatus(review.id, 'approved')} className="text-xs bg-green-50 text-green-600 hover:bg-green-100 px-3 py-1.5 rounded-lg font-bold transition-colors border border-green-200">Approve</button>
+                          )}
+                          {review.status !== 'rejected' && (
+                            <button type="button" onClick={() => handleReviewStatus(review.id, 'rejected')} className="text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded-lg font-bold transition-colors border border-red-200">Hide</button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-surface-container-lowest border border-dashed border-outline-variant rounded-xl p-8 text-center">
+                    <span className="material-symbols-outlined text-4xl text-outline mb-2">rate_review</span>
+                    <p className="text-sm font-semibold text-on-surface-variant">No reviews found for this listing yet.</p>
+                  </div>
+                )}
               </div>
             </div>
 

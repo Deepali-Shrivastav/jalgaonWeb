@@ -63,7 +63,7 @@ export default function BusinessDetailClient({ slug }: BusinessDetailClientProps
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ rating: reviewRating, review_text: reviewText })
+        body: JSON.stringify({ rating_star: reviewRating, user_review: reviewText })
       });
       if (res.ok) {
         setActionMsg('Review submitted successfully! It is pending moderation.');

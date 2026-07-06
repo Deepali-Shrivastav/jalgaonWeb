@@ -5,6 +5,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import LoginSignup from "@/components/LoginSignup";
 import { Toaster } from "react-hot-toast";
 import { InteractiveMenu } from "@/components/ui/modern-mobile-menu";
+import EngagementTrigger from "@/components/EngagementTrigger";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-sans",
@@ -65,6 +66,7 @@ export default function RootLayout({
         <AuthProvider>
           {children}
           <LoginSignup />
+          <EngagementTrigger />
           <Toaster position="bottom-right" toastOptions={{ className: 'font-sans' }} />
           <InteractiveMenu />
         </AuthProvider>
