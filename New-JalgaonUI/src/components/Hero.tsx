@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import SearchBar from '@/components/SearchBar';
 
 interface HeroProps {
   onSearch?: (query: string) => void;
@@ -85,8 +86,8 @@ export default function Hero({ onSearch, selectedCity: propCity, onCityChange }:
         </p>
 
         {/* Professional Search Pill */}
-        <div className="max-w-3xl mx-auto bg-white rounded-[1.5rem] md:rounded-full p-2 border border-outline-variant flex flex-col md:flex-row items-stretch md:items-center shadow-xl focus-within:ring-2 focus-within:ring-primary/20 transition-all gap-y-1 md:gap-y-0">
-          <div ref={dropdownRef} className="relative w-full md:w-auto md:flex-[0.4]">
+        <div className="max-w-3xl mx-auto flex flex-col md:flex-row gap-3 items-stretch md:items-center bg-white rounded-[1.5rem] md:rounded-full p-2 border border-outline-variant shadow-xl">
+          <div ref={dropdownRef} className="relative w-full md:w-auto md:flex-[0.3] shrink-0">
             <button 
               type="button"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -130,25 +131,13 @@ export default function Hero({ onSearch, selectedCity: propCity, onCityChange }:
             )}
           </div>
           
-          <div className="w-full md:w-auto md:flex-1 flex items-center px-4 md:px-6 py-4 md:py-0 gap-3">
-            <span className="material-symbols-outlined text-slate-400 text-[22px]">search</span>
-            <input 
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="w-full border-none focus:ring-0 font-medium text-on-surface placeholder:text-outline text-left bg-transparent outline-none text-base md:text-base" 
-              placeholder={`Search restaurants, services, shops in ${selectedCity}...`} 
-              type="text" 
+          <div className="w-full md:w-auto md:flex-1">
+            <SearchBar 
+              flat
+              placeholder={`Search restaurants, services, shops in ${selectedCity}...`}
+              onSearch={onSearch}
             />
           </div>
-          
-          <button 
-            onClick={handleSearchClick}
-            className="w-full md:w-auto bg-primary text-white rounded-xl md:rounded-full p-4 md:p-3 flex items-center justify-center gap-2 hover:bg-primary-deep transition-colors shadow-md mt-1 md:mt-0 cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[24px]">search</span>
-            <span className="font-bold text-lg md:hidden">Search</span>
-          </button>
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-base mt-xxxl">

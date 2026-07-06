@@ -35,11 +35,14 @@ class BusinessPhotoSerializer(serializers.ModelSerializer):
 class ListingListSerializer(serializers.ModelSerializer):
     main_category_name = serializers.CharField(source='main_category.main_category', read_only=True)
     main_category_slug = serializers.CharField(source='main_category.slug', read_only=True)
+    sub_category_name = serializers.CharField(source='sub_category.sub_category', read_only=True)
+    sub_category_slug = serializers.CharField(source='sub_category.slug', read_only=True)
     
     class Meta:
         model = ShopListing
         fields = [
-            'id', 'slug', 'business_name', 'main_category_name', 'main_category_slug', 'business_banner', 
+            'id', 'slug', 'business_name', 'main_category_name', 'main_category_slug', 
+            'sub_category_name', 'sub_category_slug', 'business_banner', 
             'city', 'business_address', 'business_no', 'whatsapp', 
             'is_trending', 'avg_rating', 'review_count'
         ]

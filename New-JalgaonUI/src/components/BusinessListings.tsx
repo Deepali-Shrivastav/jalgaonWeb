@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import CarouselAds from "@/components/CarouselAds";
 import Pagination from "@/components/Pagination";
+import { useLocation } from "@/hooks/useLocation";
 
 export interface Listing {
   id: string;
@@ -60,18 +61,46 @@ export default function BusinessListings({
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [minRating, setMinRating] = useState<number | null>(null);
+  const [sortBy, setSortBy] = useState<string>("relevance");
+  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
+
+  // Geolocation and Subcategory filtering states
+  const { lat, lng, hasLocation, error: locationError, isLoading: isLocationLoading, requestLocation } = useLocation();
+  const [radius, setRadius] = useState<number>(10);
+  const [subcategories, setSubcategories] = useState<Array<{sub_category: string, slug: string}>>([]);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
+
+  // Interactive filtering states (applied on click of Apply Filters or live-updated)
+  const [appliedCategories, setAppliedCategories] = useState<string[]>([]);
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const [appliedMinRating, setAppliedMinRating] = useState<number | null>(null);
+
   useEffect(() => {
     const fetchListings = async () => {
       setLoading(true);
       setError(null);
       try {
         let endpoint = "";
+        const categoryParam = selectedCategories.length === 1
+          ? `&category=${encodeURIComponent(selectedCategories[0])}`
+          : "";
+
+        const subcategoryParam = selectedSubcategory
+          ? `&subcategory=${encodeURIComponent(selectedSubcategory)}`
+          : "";
+
+        const locationParam = hasLocation && lat && lng
+          ? `&lat=${lat}&lng=${lng}&radius=${radius}`
+          : "";
+
         if (searchQuery) {
-          endpoint = `/api/v1/search/?search=${encodeURIComponent(searchQuery)}&page=${page}`;
+          endpoint = `/api/v1/search/?q=${encodeURIComponent(searchQuery)}&page=${page}&sort=${sortBy}${categoryParam}${subcategoryParam}${locationParam}`;
         } else if (category) {
-          endpoint = `/api/v1/listings/?category=${encodeURIComponent(category)}&page=${page}`;
+          endpoint = `/api/v1/listings/?category=${encodeURIComponent(category)}&page=${page}&sort=${sortBy}${subcategoryParam}${locationParam}`;
         } else {
-          endpoint = `/api/v1/listings/?page=${page}`; // Fallback
+          endpoint = `/api/v1/listings/?page=${page}&sort=${sortBy}${categoryParam}${subcategoryParam}${locationParam}`;
         }
 
         const url = process.env.NEXT_PUBLIC_API_URL
@@ -104,12 +133,6 @@ export default function BusinessListings({
 
         setListings(mappedListings);
 
-        // Dynamically set categories based on results
-        const uniqueCategories = Array.from(
-          new Set(mappedListings.map((l) => l.category)),
-        ) as string[];
-        setSelectedCategories(uniqueCategories);
-        setAppliedCategories(uniqueCategories);
         if (json.count !== undefined) {
           setTotalPages(Math.ceil(json.count / 20));
         } else {
@@ -122,21 +145,36 @@ export default function BusinessListings({
       }
     };
     fetchListings();
-  }, [category, searchQuery, page]);
+  }, [category, searchQuery, page, sortBy, selectedCategories, selectedSubcategory, hasLocation, lat, lng, radius]);
 
   useEffect(() => {
     setPage(1);
-  }, [category, searchQuery]);
+  }, [category, searchQuery, sortBy]);
 
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [minRating, setMinRating] = useState<number | null>(null);
-  const [sortBy, setSortBy] = useState<string>("Relevance");
-  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
-
-  // Interactive filtering states (applied on click of Apply Filters or live-updated)
-  const [appliedCategories, setAppliedCategories] = useState<string[]>([]);
-  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
-  const [appliedMinRating, setAppliedMinRating] = useState<number | null>(null);
+  useEffect(() => {
+    const fetchSubcategories = async () => {
+      const activeCategory = category || (selectedCategories.length === 1 ? selectedCategories[0] : null);
+      if (!activeCategory) {
+        setSubcategories([]);
+        setSelectedSubcategory(null);
+        return;
+      }
+      try {
+        const catSlug = activeCategory.toLowerCase().replace(/\s+/g, "-");
+        const url = process.env.NEXT_PUBLIC_API_URL
+          ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/search/subcategories/?category=${encodeURIComponent(catSlug)}`
+          : `/api/v1/search/subcategories/?category=${encodeURIComponent(catSlug)}`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const json = await res.json();
+          setSubcategories(json.subcategories || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch subcategories:", err);
+      }
+    };
+    fetchSubcategories();
+  }, [category, selectedCategories]);
 
   const handleCategoryChange = (cat: string) => {
     if (selectedCategories.includes(cat)) {
@@ -154,6 +192,7 @@ export default function BusinessListings({
   const clearFilters = () => {
     setSelectedCategories(availableCategories);
     setMinRating(null);
+    setSelectedSubcategory(null);
 
     setAppliedCategories(availableCategories);
     setAppliedMinRating(null);
@@ -169,25 +208,16 @@ export default function BusinessListings({
         item.city.toLowerCase() !== selectedCity.toLowerCase()
       )
         return false;
-      // Category filter
+      // Category filter (client-side backup when multiple checked)
       if (
-        !appliedCategories.includes(item.category) &&
-        appliedCategories.length > 0
+        selectedCategories.length > 1 &&
+        !selectedCategories.includes(item.category)
       )
         return false;
       // Rating filter
       if (appliedMinRating !== null && item.rating < appliedMinRating)
         return false;
       return true;
-    })
-    .sort((a, b) => {
-      if (sortBy === "Highest Rated") {
-        return b.rating - a.rating;
-      }
-      // Relevance / Default: Featured first
-      if (a.featured && !b.featured) return -1;
-      if (!a.featured && b.featured) return 1;
-      return 0;
     });
 
   // Dynamically set categories when listings change
@@ -201,6 +231,7 @@ export default function BusinessListings({
       setAppliedCategories(uniqueCategories);
     }
   }, [listings, availableCategories.length]);
+
 
   return (
     <div className="max-w-container-max mx-auto px-xxl py-12">
@@ -275,9 +306,65 @@ export default function BusinessListings({
             </button>
           </div>
 
+          {/* Location Filter - FR-SRCH-04 */}
+          <div className="mb-8 border-b border-hairline-soft pb-6">
+            <h3 className="font-bold text-ink-deep mb-4 text-sm flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary text-base">my_location</span>
+              Search Nearby
+            </h3>
+            {!hasLocation ? (
+              <button
+                type="button"
+                onClick={requestLocation}
+                disabled={isLocationLoading}
+                className="w-full flex items-center justify-center gap-2 border-2 border-primary text-primary rounded-full py-2.5 text-xs font-bold hover:bg-primary/5 active:scale-95 transition-all cursor-pointer"
+              >
+                {isLocationLoading ? 'Detecting Location...' : 'Use My Location'}
+              </button>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-green-600 font-bold flex items-center gap-1">
+                    <span className="material-symbols-outlined text-sm">check_circle</span>
+                    Location Active
+                  </span>
+                  <button
+                    type="button"
+                    onClick={requestLocation}
+                    className="text-xs text-secondary hover:text-primary font-bold underline cursor-pointer"
+                  >
+                    Refresh
+                  </button>
+                </div>
+                <div>
+                  <label className="block text-xs text-secondary font-semibold mb-2">Distance Radius:</label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {[1, 5, 10, 25].map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setRadius(r)}
+                        className={`py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center ${
+                          radius === r
+                            ? 'bg-primary text-white border-primary shadow-sm'
+                            : 'border-hairline-soft bg-white text-secondary hover:border-primary'
+                        }`}
+                      >
+                        {r}km
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+            {locationError && (
+              <p className="text-[10px] text-red-500 font-bold mt-2">{locationError}</p>
+            )}
+          </div>
+
           {/* Category Filter */}
           {availableCategories.length > 0 && (
-            <div className="mb-8">
+            <div className="mb-8 border-b border-hairline-soft pb-6">
               <h3 className="font-bold text-ink-deep mb-4 text-sm">Category</h3>
               <div className="space-y-3">
                 {availableCategories.map((cat) => (
@@ -295,6 +382,40 @@ export default function BusinessListings({
                       {cat}
                     </span>
                   </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Subcategory Filter - FR-SRCH-08 */}
+          {subcategories.length > 0 && (
+            <div className="mb-8 border-b border-hairline-soft pb-6">
+              <h3 className="font-bold text-ink-deep mb-4 text-sm">Subcategory</h3>
+              <div className="space-y-2 max-h-48 overflow-y-auto pr-2 scrollbar-thin">
+                <button
+                  type="button"
+                  onClick={() => setSelectedSubcategory(null)}
+                  className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    selectedSubcategory === null
+                      ? 'bg-primary/5 text-primary border border-primary/20'
+                      : 'text-secondary hover:bg-slate-50 border border-transparent'
+                  }`}
+                >
+                  All Subcategories
+                </button>
+                {subcategories.map((sub) => (
+                  <button
+                    key={sub.slug}
+                    type="button"
+                    onClick={() => setSelectedSubcategory(sub.slug)}
+                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      selectedSubcategory === sub.slug
+                        ? 'bg-primary/5 text-primary border border-primary/20'
+                        : 'text-secondary hover:bg-slate-50 border border-transparent'
+                    }`}
+                  >
+                    {sub.sub_category}
+                  </button>
                 ))}
               </div>
             </div>
@@ -382,11 +503,84 @@ export default function BusinessListings({
                 onChange={(e) => setSortBy(e.target.value)}
                 className="bg-transparent border-none text-sm font-bold text-primary focus:ring-0 cursor-pointer outline-none"
               >
-                <option value="Relevance">Relevance</option>
-                <option value="Highest Rated">Highest Rated</option>
+                <option value="relevance">Relevance</option>
+                <option value="rating">Highest Rated</option>
+                <option value="newest">Newest First</option>
+                <option value="distance" disabled={!hasLocation}>
+                  Nearest First{!hasLocation ? " (enable location)" : ""}
+                </option>
               </select>
             </div>
           </div>
+
+          {/* Category Filter Chips - FR-SRCH-08 */}
+          {availableCategories.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-6">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedCategories(availableCategories);
+                  setSelectedSubcategory(null);
+                }}
+                className={`px-4 py-2 rounded-full text-xs font-bold border transition-all cursor-pointer ${
+                  selectedCategories.length === availableCategories.length
+                    ? 'bg-primary text-white border-primary shadow-sm'
+                    : 'border-hairline-soft bg-white text-secondary hover:border-primary'
+                }`}
+              >
+                All Categories
+              </button>
+              {availableCategories.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => {
+                    setSelectedCategories([cat]);
+                    setSelectedSubcategory(null);
+                  }}
+                  className={`px-4 py-2 rounded-full text-xs font-bold border transition-all cursor-pointer ${
+                    selectedCategories.length === 1 && selectedCategories[0] === cat
+                      ? 'bg-primary text-white border-primary shadow-sm'
+                      : 'border-hairline-soft bg-white text-secondary hover:border-primary'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Subcategory Filter Chips - FR-SRCH-08 */}
+          {selectedCategories.length === 1 && subcategories.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-6 bg-slate-50 p-3 rounded-2xl border border-hairline-soft/60">
+              <span className="text-xs text-secondary font-bold self-center mr-2">Subcategories:</span>
+              <button
+                type="button"
+                onClick={() => setSelectedSubcategory(null)}
+                className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all cursor-pointer ${
+                  selectedSubcategory === null
+                    ? 'bg-primary/10 text-primary border-primary/20'
+                    : 'border-hairline-soft bg-white text-secondary hover:border-primary'
+                }`}
+              >
+                All
+              </button>
+              {subcategories.map((sub) => (
+                <button
+                  key={sub.slug}
+                  type="button"
+                  onClick={() => setSelectedSubcategory(sub.slug)}
+                  className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all cursor-pointer ${
+                    selectedSubcategory === sub.slug
+                      ? 'bg-primary text-white border-primary shadow-sm'
+                      : 'border-hairline-soft bg-white text-secondary hover:border-primary'
+                  }`}
+                >
+                  {sub.sub_category}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Results List */}
           <div className="space-y-6">

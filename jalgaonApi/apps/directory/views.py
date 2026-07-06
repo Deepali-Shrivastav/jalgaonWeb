@@ -85,11 +85,21 @@ class ListingSearchView(generics.ListAPIView):
     def get_queryset(self):
         q = self.request.query_params.get('q', '')
         category = self.request.query_params.get('category', '')
+        subcategory = self.request.query_params.get('subcategory', '')
+        sort_by = self.request.query_params.get('sort', 'relevance')
         
+        # Record search query count for Popular Searches
+        if q:
+            from apps.search.models import SearchQuery
+            SearchQuery.record(q)
+
         queryset = ShopListing.objects.filter(status='active')
         
         if category:
             queryset = queryset.filter(main_category__slug=category)
+            
+        if subcategory:
+            queryset = queryset.filter(sub_category__slug=subcategory)
             
         lat = self.request.query_params.get('lat')
         lng = self.request.query_params.get('lng')
@@ -113,18 +123,87 @@ class ListingSearchView(generics.ListAPIView):
                 pass
 
         if q:
-            queryset = queryset.filter(
-                Q(business_name__icontains=q) | 
-                Q(business_description__icontains=q) |
-                Q(main_category__main_category__icontains=q)
-            )
+            # Expand query with synonyms (FR-SRCH-07)
+            from apps.search.models import SearchSynonym
+            try:
+                term_clean = q.strip().lower()
+                
+                # Simple normalization (stemming) to handle basic plurals
+                normalized_q = term_clean
+                if term_clean.endswith('ies') and len(term_clean) > 4:
+                    normalized_q = term_clean[:-3] + 'y'   # pharmacies -> pharmacy
+                elif term_clean.endswith('ves') and len(term_clean) > 4:
+                    normalized_q = term_clean[:-3] + 'f'   # knives -> knife
+                elif term_clean.endswith('es') and len(term_clean) > 3:
+                    normalized_q = term_clean[:-2]          # clinics -> clinic
+                elif term_clean.endswith('s') and len(term_clean) > 3:
+                    normalized_q = term_clean[:-1]          # doctors -> doctor
+
+                synonym_obj = SearchSynonym.objects.filter(
+                    is_active=True
+                ).filter(
+                    Q(term__iexact=term_clean) | Q(term__iexact=normalized_q)
+                ).first()
+                
+                if synonym_obj:
+                    all_terms = [q] + synonym_obj.synonyms
+                else:
+                    all_terms = [q]
+            except Exception:
+                all_terms = [q]
+
+            # Try PostgreSQL trigram similarity for typo tolerance (FR-SRCH-02)
+            # Fall back to standard icontains if pg_trgm is not active/available (e.g. SQLite)
+            try:
+                from django.contrib.postgres.search import TrigramSimilarity
+                queryset = queryset.annotate(
+                    name_sim=TrigramSimilarity('business_name', q),
+                    desc_sim=TrigramSimilarity('business_description', q),
+                )
+                
+                q_filter = Q()
+                for term in all_terms:
+                    q_filter |= (
+                        Q(name_sim__gte=0.15) |
+                        Q(desc_sim__gte=0.10) |
+                        Q(business_name__icontains=term) |
+                        Q(business_description__icontains=term) |
+                        Q(main_category__main_category__icontains=term) |
+                        Q(sub_category__sub_category__icontains=term)
+                    )
+                queryset = queryset.filter(q_filter)
+            except Exception:
+                # Standard icontains fallback (compatible with SQLite)
+                q_filter = Q()
+                for term in all_terms:
+                    q_filter |= (
+                        Q(business_name__icontains=term) |
+                        Q(business_description__icontains=term) |
+                        Q(main_category__main_category__icontains=term) |
+                        Q(sub_category__sub_category__icontains=term)
+                    )
+                queryset = queryset.filter(q_filter)
         elif not category and not (lat and lng):
             # If neither q, category, nor location is provided, return empty
             return ShopListing.objects.none()
             
         if lat and lng:
-            return queryset.order_by('distance', '-avg_rating', '-created_at')
-        return queryset.order_by('-avg_rating', '-created_at')
+            if sort_by == 'distance':
+                return queryset.order_by('distance', '-avg_rating')
+            elif sort_by == 'rating':
+                return queryset.order_by('-avg_rating', '-review_count', 'distance')
+            elif sort_by == 'newest':
+                return queryset.order_by('-created_at', 'distance')
+            else: # relevance
+                return queryset.order_by('-is_trending', 'distance', '-avg_rating')
+        else:
+            if sort_by == 'rating':
+                return queryset.order_by('-avg_rating', '-review_count')
+            elif sort_by == 'newest':
+                return queryset.order_by('-created_at')
+            else: # relevance (default)
+                return queryset.order_by('-is_trending', '-avg_rating', '-created_at')
+
 
 class TrendingListingsView(generics.ListAPIView):
     permission_classes = [AllowAny]
