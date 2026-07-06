@@ -3,7 +3,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import LoginSignup from "@/components/LoginSignup";
-import FooterSection from "@/components/ui/footer";
+import { Toaster } from "react-hot-toast";
 import { InteractiveMenu } from "@/components/ui/modern-mobile-menu";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -65,7 +65,7 @@ export default function RootLayout({
         <AuthProvider>
           {children}
           <LoginSignup />
-          <FooterSection />
+          <Toaster position="bottom-right" toastOptions={{ className: 'font-sans' }} />
           <InteractiveMenu />
         </AuthProvider>
       </body>

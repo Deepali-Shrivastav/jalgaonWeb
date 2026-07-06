@@ -3,6 +3,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthContext } from '@/context/AuthContext';
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function AddJobClient() {
   const router = useRouter();
@@ -64,6 +65,7 @@ export default function AddJobClient() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.preventDefault();
     setSubmitting(true);
     setError('');
 
@@ -105,11 +107,13 @@ export default function AddJobClient() {
       }
 
       setSuccess(true);
+      toast.success("Job Posted Successfully!");
       setTimeout(() => {
         router.push('/account');
       }, 3000);
     } catch (err: any) {
       setError(err.message);
+      toast.error(err.message);
     } finally {
       setSubmitting(false);
     }
@@ -137,6 +141,7 @@ export default function AddJobClient() {
 
   return (
     <div className="bg-surface-container-lowest min-h-screen py-12">
+      <Toaster position="top-center" />
       <div className="max-w-4xl mx-auto px-4">
         <div className="mb-10 text-center">
           <h1 className="text-4xl font-extrabold text-ink-deep mb-4">Post a New Job</h1>

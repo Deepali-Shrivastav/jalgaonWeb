@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
+import Pagination from "@/components/Pagination";
 
 interface EventCategory {
   id: number;
@@ -19,12 +20,14 @@ export default function AdminEventCategoriesPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchCategories = async () => {
     setLoading(true);
     const token = localStorage.getItem("token");
     try {
-      let res = await fetch(`${baseUrl}/api/v1/events/admin/categories/`, {
+      let res = await fetch(`${baseUrl}/api/v1/events/admin/categories/?page=${page}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -37,7 +40,7 @@ export default function AdminEventCategoriesPage() {
         if (refreshRes.ok) {
           const refreshData = await refreshRes.json();
           localStorage.setItem('token', refreshData.access);
-          res = await fetch(`${baseUrl}/api/v1/events/admin/categories/`, {
+          res = await fetch(`${baseUrl}/api/v1/events/admin/categories/?page=${page}`, {
             headers: { Authorization: `Bearer ${refreshData.access}` }
           });
         }
@@ -46,6 +49,11 @@ export default function AdminEventCategoriesPage() {
       if (res.ok) {
         const data = await res.json();
         setCategories(data.results || data);
+        if (data.count !== undefined) {
+          setTotalPages(Math.ceil(data.count / 20));
+        } else {
+          setTotalPages(1);
+        }
       } else {
         const errorText = await res.text();
         console.error("Failed to fetch event categories. Status:", res.status, "Response:", errorText);
@@ -61,7 +69,7 @@ export default function AdminEventCategoriesPage() {
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [page]);
 
   const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -174,6 +182,12 @@ export default function AdminEventCategoriesPage() {
             </table>
           )}
         </div>
+        
+        <Pagination 
+          currentPage={page} 
+          totalPages={totalPages} 
+          onPageChange={setPage} 
+        />
       </div>
 
       {/* Add Modal */}

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Pagination from "@/components/Pagination";
 
 interface Report { id: number; business_name: string; reporter_name: string; reporter_phone: string; reason: string; description: string; created_at: string; status: string; }
 
@@ -10,19 +11,27 @@ export default function AdminReportsPage() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("pending");
   const [statusMsg, setStatusMsg] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchReports = async () => {
     setLoading(true);
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch(`${baseUrl}/api/v1/admin-panel/business-reports/?status=${statusFilter}`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`${baseUrl}/api/v1/admin-panel/business-reports/?status=${statusFilter}&page=${page}`, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       setReports(data.results || data);
+      if (data.count !== undefined) {
+        setTotalPages(Math.ceil(data.count / 20));
+      } else {
+        setTotalPages(1);
+      }
     } catch { console.error("Failed to fetch reports"); }
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchReports(); }, [statusFilter]);
+  useEffect(() => { setPage(1); }, [statusFilter]);
+  useEffect(() => { fetchReports(); }, [statusFilter, page]);
 
   const handleAction = async (id: number, action: string) => {
     if (!window.confirm(`Are you sure you want to ${action} this report?`)) return;
@@ -81,6 +90,12 @@ export default function AdminReportsPage() {
             </table>
           )}
         </div>
+        
+        <Pagination 
+          currentPage={page} 
+          totalPages={totalPages} 
+          onPageChange={setPage} 
+        />
       </div>
     </div>
   );

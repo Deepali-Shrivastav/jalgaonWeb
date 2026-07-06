@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Pagination from "@/components/Pagination";
 
 interface TrendingListing { id: number; business_name: string; category_name: string; is_trending: boolean; trending_priority: number; trending_until: string | null; }
 
@@ -11,6 +12,8 @@ export default function AdminTrendingPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusMsg, setStatusMsg] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [selectedListing, setSelectedListing] = useState<TrendingListing | null>(null);
   const [trendingPriority, setTrendingPriority] = useState(0);
   const [trendingUntil, setTrendingUntil] = useState("");
@@ -20,14 +23,20 @@ export default function AdminTrendingPage() {
     setLoading(true);
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch(`${baseUrl}/api/v1/admin-panel/listings/?search=${searchTerm}&trending=true`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`${baseUrl}/api/v1/admin-panel/listings/?search=${searchTerm}&trending=true&page=${page}`, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       setListings(data.results || data);
+      if (data.count !== undefined) {
+        setTotalPages(Math.ceil(data.count / 20));
+      } else {
+        setTotalPages(1);
+      }
     } catch (error) { console.error("Failed to fetch trending listings", error); }
     finally { setLoading(false); }
   };
 
-  useEffect(() => { const d = setTimeout(() => fetchListings(), 300); return () => clearTimeout(d); }, [searchTerm]);
+  useEffect(() => { setPage(1); }, [searchTerm]);
+  useEffect(() => { const d = setTimeout(() => fetchListings(), 300); return () => clearTimeout(d); }, [searchTerm, page]);
 
   const openTrendingModal = (listing: TrendingListing) => {
     setSelectedListing(listing);
@@ -105,6 +114,12 @@ export default function AdminTrendingPage() {
             </table>
           )}
         </div>
+        
+        <Pagination 
+          currentPage={page} 
+          totalPages={totalPages} 
+          onPageChange={setPage} 
+        />
       </div>
 
       {isModalOpen && selectedListing && (

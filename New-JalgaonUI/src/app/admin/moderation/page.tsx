@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Pagination from "@/components/Pagination";
 
 interface ModerationItem { id: number; content_type_name: string; content_preview: { error?: string; name?: string; address?: string } | null; submitted_by_phone: string; submitted_at: string; status: string; }
 
@@ -10,19 +11,27 @@ export default function AdminModerationPage() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("pending");
   const [statusMsg, setStatusMsg] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchQueue = async () => {
     setLoading(true);
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch(`${baseUrl}/api/v1/admin-panel/moderation/?status=${statusFilter}`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`${baseUrl}/api/v1/admin-panel/moderation/?status=${statusFilter}&page=${page}`, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       setQueue(data.results || data);
+      if (data.count !== undefined) {
+        setTotalPages(Math.ceil(data.count / 20));
+      } else {
+        setTotalPages(1);
+      }
     } catch { console.error("Failed to fetch moderation queue"); }
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchQueue(); }, [statusFilter]);
+  useEffect(() => { setPage(1); }, [statusFilter]);
+  useEffect(() => { fetchQueue(); }, [statusFilter, page]);
 
   const handleAction = async (id: number, action: string) => {
     const token = localStorage.getItem("token");
@@ -79,6 +88,12 @@ export default function AdminModerationPage() {
             </table>
           )}
         </div>
+        
+        <Pagination 
+          currentPage={page} 
+          totalPages={totalPages} 
+          onPageChange={setPage} 
+        />
       </div>
     </div>
   );

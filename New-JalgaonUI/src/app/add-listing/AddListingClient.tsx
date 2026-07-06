@@ -356,8 +356,18 @@ export default function AddListingClient() {
 
             {/* Final CTA */}
             <div className="pt-xl mt-xxxl border-t border-hairline-soft">
-              <button disabled={submitting} className="w-full bg-primary text-white py-5 rounded-2xl font-bold text-xl hover:bg-primary-deep shadow-lg transition-all duration-300 transform hover:-translate-y-1 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed" type="submit">
-                {submitting ? 'Submitting...' : 'Submit Form'}
+              <button disabled={submitting} className="w-full bg-primary text-white py-5 rounded-2xl font-bold text-xl hover:bg-primary-deep shadow-lg transition-all duration-300 transform hover:-translate-y-1 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3" type="submit">
+                {submitting ? (
+                  <>
+                    <span className="material-symbols-outlined animate-spin">progress_activity</span>
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined">send</span>
+                    Submit Form
+                  </>
+                )}
               </button>
               <p className="text-center text-sm text-secondary mt-4 italic">By submitting, you agree to our Terms of Service and Business Listing Policies.</p>
             </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Pagination from "@/components/Pagination";
 
 interface JobApplication { id: number; applicant_name: string; applicant_email: string; job_title: string; status: string; applied_at: string; resume: string | null; }
 
@@ -9,18 +10,26 @@ export default function AdminJobApplicationsPage() {
   const [applications, setApplications] = useState<JobApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchApplications = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${baseUrl}/api/v1/jobs/admin/applications/`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`${baseUrl}/api/v1/jobs/admin/applications/?search=${searchTerm}&page=${page}`, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       setApplications(data.results || data);
+      if (data.count !== undefined) {
+        setTotalPages(Math.ceil(data.count / 20));
+      } else {
+        setTotalPages(1);
+      }
     } catch { console.error("Error fetching job applications"); }
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchApplications(); }, []);
+  useEffect(() => { setPage(1); }, [searchTerm]);
+  useEffect(() => { fetchApplications(); }, [searchTerm, page]);
 
   const filtered = applications.filter(a => a.job_title.toLowerCase().includes(searchTerm.toLowerCase()) || a.applicant_name.toLowerCase().includes(searchTerm.toLowerCase()));
   const badgeClass = (s: string) => { const sl = s.toLowerCase(); return sl === "accepted" || sl === "hired" ? "bg-green-100 text-green-700" : sl === "rejected" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"; };
@@ -59,6 +68,12 @@ export default function AdminJobApplicationsPage() {
             </table>
           )}
         </div>
+        
+        <Pagination 
+          currentPage={page} 
+          totalPages={totalPages} 
+          onPageChange={setPage} 
+        />
       </div>
     </div>
   );

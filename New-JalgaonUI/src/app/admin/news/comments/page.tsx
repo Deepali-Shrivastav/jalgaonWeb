@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Pagination from "@/components/Pagination";
 
 interface Comment { id: number; user_name: string; article_title: string; body: string; status: string; }
 
@@ -8,18 +9,25 @@ export default function AdminNewsCommentsPage() {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchComments = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${baseUrl}/api/v1/news/admin/comments/`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`${baseUrl}/api/v1/news/admin/comments/?page=${page}`, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       setComments(data.results || data);
+      if (data.count !== undefined) {
+        setTotalPages(Math.ceil(data.count / 20));
+      } else {
+        setTotalPages(1);
+      }
     } catch { console.error("Error fetching comments"); }
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchComments(); }, []);
+  useEffect(() => { fetchComments(); }, [page]);
 
   const handleStatusUpdate = async (id: number, status: string) => {
     const token = localStorage.getItem("token");
@@ -68,6 +76,12 @@ export default function AdminNewsCommentsPage() {
           </tbody>
         </table>
       </div>
+      
+      <Pagination 
+        currentPage={page} 
+        totalPages={totalPages} 
+        onPageChange={setPage} 
+      />
     </div>
   );
 }

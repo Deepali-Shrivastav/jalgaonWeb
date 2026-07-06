@@ -29,6 +29,31 @@ class NewsArticleListSerializer(serializers.ModelSerializer):
     category = NewsCategorySerializer(read_only=True)
     tags = NewsTagSerializer(many=True, read_only=True)
     author_name = serializers.CharField(source='author.get_full_name', read_only=True, default='Admin')
+    featured_image = serializers.SerializerMethodField()
+
+    def get_featured_image(self, obj):
+        """
+        Always return an absolute HTTPS URL for the featured image.
+
+        Django behind Nginx may incorrectly build http:// URLs when
+        SECURE_PROXY_SSL_HEADER is not trusted. This method is explicit
+        and never depends on the proxy header chain being configured correctly.
+        """
+        if not obj.featured_image:
+            return None
+        request = self.context.get('request')
+        url = obj.featured_image.url          # e.g. /media/news/featured/img.jpg
+        if request is not None:
+            # build_absolute_uri gives us the full URL (scheme + host + path)
+            absolute = request.build_absolute_uri(url)
+        else:
+            absolute = url
+        # Guarantee HTTPS — regardless of proxy header configuration
+        if absolute.startswith('http://'):
+            absolute = 'https://' + absolute[7:]
+        return absolute
+
+
 
     class Meta:
         model = NewsArticle

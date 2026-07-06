@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Pagination from "@/components/Pagination";
 
 interface NewsCategory { id: number; name: string; slug: string; description?: string; sort_order: number; }
 
@@ -9,19 +10,26 @@ export default function AdminNewsCategoriesPage() {
   const [categories, setCategories] = useState<NewsCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [formData, setFormData] = useState<{ id: number | null; name: string; slug: string; description: string; sort_order: number }>({ id: null, name: "", slug: "", description: "", sort_order: 0 });
 
   const fetchCategories = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${baseUrl}/api/v1/news/admin/categories/`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`${baseUrl}/api/v1/news/admin/categories/?page=${page}`, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       setCategories(data.results || data);
+      if (data.count !== undefined) {
+        setTotalPages(Math.ceil(data.count / 20));
+      } else {
+        setTotalPages(1);
+      }
     } catch { console.error("Error fetching news categories"); }
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchCategories(); }, []);
+  useEffect(() => { fetchCategories(); }, [page]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -101,6 +109,12 @@ export default function AdminNewsCategoriesPage() {
             </tbody>
           </table>
         </div>
+        
+        <Pagination 
+          currentPage={page} 
+          totalPages={totalPages} 
+          onPageChange={setPage} 
+        />
       </div>
     </div>
   );

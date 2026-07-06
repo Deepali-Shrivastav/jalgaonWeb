@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Pagination from "@/components/Pagination";
 
 interface Article { id: number; title: string; slug: string; status: string; created_at: string; view_count: number; is_breaking: boolean; }
 
@@ -11,18 +12,25 @@ export default function AdminNewsPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchArticles = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${baseUrl}/api/v1/news/admin/articles/`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`${baseUrl}/api/v1/news/admin/articles/?page=${page}`, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       setArticles(data.results || data);
+      if (data.count !== undefined) {
+        setTotalPages(Math.ceil(data.count / 20));
+      } else {
+        setTotalPages(1);
+      }
     } catch { setError("Failed to load articles."); }
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchArticles(); }, []);
+  useEffect(() => { fetchArticles(); }, [page]);
 
   const handleDelete = async (id: number) => {
     if (!window.confirm("Delete this article? This cannot be undone.")) return;
@@ -88,6 +96,12 @@ export default function AdminNewsPage() {
             </tbody>
           </table>
         </div>
+        
+        <Pagination 
+          currentPage={page} 
+          totalPages={totalPages} 
+          onPageChange={setPage} 
+        />
       </div>
     </div>
   );

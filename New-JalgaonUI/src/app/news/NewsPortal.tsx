@@ -4,6 +4,9 @@ import React from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import CarouselAds from '@/components/CarouselAds';
+import Pagination from '@/components/Pagination';
+import SkeletonCard from '@/components/SkeletonCard';
 
 export interface NewsArticle {
   id: number;
@@ -26,6 +29,9 @@ export default function NewsPortal() {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [activeTab, setActiveTab] = React.useState<'recent' | 'picks'>('recent');
+  const [page, setPage] = React.useState(1);
+  const [totalPages, setTotalPages] = React.useState(1);
+  const [moreNews, setMoreNews] = React.useState<NewsArticle[]>([]);
 
   React.useEffect(() => {
     const fetchInitialData = async () => {
@@ -51,13 +57,11 @@ export default function NewsPortal() {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
         
         let trendingUrl = `${baseUrl}/api/v1/news/trending/`;
-        let recentUrl = `${baseUrl}/api/v1/news/latest/`;
+        let recentUrl = `${baseUrl}/api/v1/news/latest/?page=${page}`;
 
         if (activeCategory) {
-          // If category is selected, we use the latest list for both to show category specific news
-          // since trending endpoint might not support category filtering in backend.
-          recentUrl = `${baseUrl}/api/v1/news/latest/?category=${activeCategory}`;
-          trendingUrl = recentUrl; 
+          recentUrl = `${baseUrl}/api/v1/news/latest/?category=${activeCategory}&page=${page}`;
+          trendingUrl = `${baseUrl}/api/v1/news/latest/?category=${activeCategory}`; 
         }
 
         const trendingRes = await fetch(trendingUrl);
@@ -69,7 +73,21 @@ export default function NewsPortal() {
         const recentJson = await recentRes.json();
         
         setNewsArticles(trendingJson.results || trendingJson.data || trendingJson || []);
-        setRecentNews(recentJson.results || recentJson.data || recentJson || []);
+        
+        const recentResults = recentJson.results || recentJson.data || recentJson || [];
+        setRecentNews(recentResults);
+        
+        if (page === 1) {
+            setMoreNews(recentResults.slice(5)); // The rest goes to more news
+        } else {
+            setMoreNews(recentResults);
+        }
+        
+        if (recentJson.count !== undefined) {
+          setTotalPages(Math.ceil(recentJson.count / 20));
+        } else {
+          setTotalPages(1);
+        }
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -77,7 +95,9 @@ export default function NewsPortal() {
       }
     };
     fetchNews();
-  }, [activeCategory]);
+  }, [activeCategory, page]);
+  
+  React.useEffect(() => { setPage(1); }, [activeCategory]);
 
   const displaySidebarNews = activeTab === 'recent' ? recentNews.slice(0, 5) : newsArticles.slice(0, 5);
 
@@ -113,9 +133,8 @@ export default function NewsPortal() {
           </h1>
 
           {loading ? (
-            <div className="text-center py-20">
-              <span className="material-symbols-outlined animate-spin text-5xl text-red-600 mb-4 block">progress_activity</span>
-              <p className="text-gray-500 font-medium">Loading latest news...</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map(i => <SkeletonCard key={i} />)}
             </div>
           ) : error ? (
             <div className="text-center py-20 bg-gray-50 rounded-lg">
@@ -131,9 +150,10 @@ export default function NewsPortal() {
                   <Link href={`/news/${newsArticles[0].slug || newsArticles[0].id}`} className="group block mb-10">
                     <div className="w-full aspect-[16/8] md:aspect-[2/1] overflow-hidden mb-5 bg-gray-100">
                       <img 
-                        src={newsArticles[0].image || newsArticles[0].featured_image || 'https://via.placeholder.com/800x400'} 
+                        src={newsArticles[0].image || newsArticles[0].featured_image || ''} 
                         alt={newsArticles[0].title}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
                       />
                     </div>
                     <h2 className="text-2xl md:text-[32px] leading-tight font-serif font-bold text-gray-900 mb-3 group-hover:text-red-600 transition-colors">
@@ -151,9 +171,10 @@ export default function NewsPortal() {
                     <Link href={`/news/${article.slug || article.id}`} key={article.id} className="group block">
                       <div className="relative w-full aspect-[16/10] overflow-hidden mb-4 bg-gray-100">
                         <img 
-                          src={article.image || article.featured_image || 'https://via.placeholder.com/400x250'} 
+                          src={article.image || article.featured_image || ''} 
                           alt={article.title}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
                         />
                         <div className="absolute top-3 left-3 bg-red-600 text-white text-[11px] font-bold px-2 py-1 flex items-center gap-2 rounded-sm shadow-sm">
                           <span className="uppercase">{typeof article.category === 'object' && article.category !== null ? article.category.name : (article.category || 'News')}</span>
@@ -194,9 +215,10 @@ export default function NewsPortal() {
                     <Link href={`/news/${article.slug || article.id}`} key={article.id} className="group flex gap-4 items-start">
                       <div className="w-28 h-[84px] shrink-0 overflow-hidden bg-gray-100">
                         <img 
-                          src={article.image || article.featured_image || 'https://via.placeholder.com/150'} 
+                          src={article.image || article.featured_image || ''} 
                           alt={article.title}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
                         />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -218,8 +240,45 @@ export default function NewsPortal() {
                     <div className="text-gray-500 text-sm">No articles available.</div>
                   )}
                 </div>
+                
+                {/* Advertisement in Sidebar */}
+                <div className="mt-8 w-full -mx-4 md:mx-0">
+                  <CarouselAds slot="sidebar" />
+                </div>
               </div>
               
+            </div>
+          )}
+          
+          {/* More News Section (Paginated) */}
+          {!loading && !error && (moreNews.length > 0 || page > 1) && (
+            <div className="mt-16 border-t border-gray-200 pt-12">
+              <h2 className="text-2xl font-serif font-bold text-gray-900 mb-8">More News</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                {moreNews.map((article: any) => (
+                  <Link href={`/news/${article.slug || article.id}`} key={article.id} className="group block">
+                    <div className="w-full aspect-[16/10] overflow-hidden mb-4 bg-gray-100 rounded-lg">
+                      <img 
+                        src={article.image || article.featured_image || 'https://via.placeholder.com/400x250'} 
+                        alt={article.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    </div>
+                    <h3 className="text-lg font-serif font-bold text-gray-900 leading-snug group-hover:text-red-600 transition-colors line-clamp-2 mb-2">
+                      {article.title}
+                    </h3>
+                    <div className="text-[12px] text-gray-500">
+                      {new Date(article.published_at || Date.now()).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+              
+              <Pagination 
+                currentPage={page} 
+                totalPages={totalPages} 
+                onPageChange={setPage} 
+              />
             </div>
           )}
         </div>

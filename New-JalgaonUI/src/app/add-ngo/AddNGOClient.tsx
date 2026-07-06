@@ -3,6 +3,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthContext } from '@/context/AuthContext';
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function AddNGOClient() {
   const router = useRouter();
@@ -88,11 +89,13 @@ export default function AddNGOClient() {
       }
 
       setSuccess(true);
+      toast.success("NGO Registered Successfully!");
       setTimeout(() => {
         router.push('/ngo');
       }, 3000);
     } catch (err: any) {
       setError(err.message);
+      toast.error(err.message);
     } finally {
       setSubmitting(false);
     }
@@ -120,6 +123,7 @@ export default function AddNGOClient() {
 
   return (
     <div className="bg-surface-container-lowest min-h-screen py-12">
+      <Toaster position="top-center" />
       <div className="max-w-4xl mx-auto px-4">
         <div className="mb-10 text-center">
           <h1 className="text-4xl font-extrabold text-ink-deep mb-4">Register Your NGO</h1>

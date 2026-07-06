@@ -132,6 +132,7 @@ export default function LatestNews() {
                 src={((featuredStory.image || featuredStory.featured_image) as any).src || (featuredStory.image || featuredStory.featured_image)}
                 alt={featuredStory.imageAlt || featuredStory.alt || featuredStory.title}
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
               />
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/35 to-black/5" />
@@ -164,8 +165,15 @@ export default function LatestNews() {
                       src={((story.image || story.featured_image) as any).src || (story.image || story.featured_image)}
                       alt={story.imageAlt || story.alt || story.title}
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      onError={(e) => {
+                        const img = e.currentTarget as HTMLImageElement;
+                        img.style.display = 'none';
+                        img.parentElement?.querySelector('.img-fallback')?.classList.remove('hidden');
+                      }}
                     />
-                  ) : (
+                  ) : null}
+                  <span className="img-fallback material-symbols-outlined text-4xl text-secondary hidden">image</span>
+                  {!(story.image || story.featured_image) && (
                     <span className="material-symbols-outlined text-4xl text-secondary">image</span>
                   )}
                 </div>
