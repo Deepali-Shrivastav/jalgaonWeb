@@ -430,8 +430,8 @@ export default function BusinessListings({
               filteredListings.map((listing, index) => (
                 <React.Fragment key={listing.id}>
                   {index > 0 && index % 5 === 0 && (
-                    <div className="my-8 flex justify-center w-full">
-                      <CarouselAds slot="listing_interstitial" className="w-[300px] h-[250px]" />
+                    <div className="my-8 flex justify-center w-full overflow-hidden">
+                      <CarouselAds slot="listing_interstitial" className="w-full max-w-[900px] h-[200px]" />
                     </div>
                   )}
                   <article
