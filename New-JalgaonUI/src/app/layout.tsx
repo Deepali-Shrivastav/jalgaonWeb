@@ -67,7 +67,6 @@ export default function RootLayout({
           {children}
           <LoginSignup />
           <EngagementTrigger />
-          <FooterSection />
           <Toaster position="bottom-right" toastOptions={{ className: 'font-sans' }} />
           <InteractiveMenu />
         </AuthProvider>

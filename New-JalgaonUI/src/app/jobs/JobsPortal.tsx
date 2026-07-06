@@ -369,7 +369,7 @@ export default function JobsPortal() {
                             {job.title}
                           </Link>
                           <span
-                            className={`${job.typeBg || "bg-blue-50 text-primary"} px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap`}
+                            className="bg-blue-50 text-primary px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap"
                           >
                             {job.job_type?.replace('_', ' ')}
                           </span>
