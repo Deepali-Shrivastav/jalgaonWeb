@@ -8,7 +8,7 @@ export default function ForgotPasswordPage() {
     <>
       <Header />
       <main className="min-h-screen bg-slate-50 flex items-center justify-center py-20 px-4">
-        <div className="bg-white p-8 md:p-12 rounded-3xl shadow-xl max-w-md w-full border border-slate-100 text-center">
+        <div className="bg-white p-8 md:p-12 rounded-3xl shadow-xl max-w-[448px] w-full border border-slate-100 text-center">
           <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-6">
             <span className="material-symbols-outlined text-3xl">lock_reset</span>
           </div>

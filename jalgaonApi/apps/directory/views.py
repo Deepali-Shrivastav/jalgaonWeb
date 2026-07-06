@@ -246,6 +246,16 @@ class LikedShopsView(generics.ListCreateAPIView):
             return Response(LikedShopsSerializer(liked_shop).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def delete(self, request, *args, **kwargs):
+        shop_id = request.data.get('shop_listing_id') or request.query_params.get('shop_listing_id')
+        if not shop_id:
+            return Response({"error": "shop_listing_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+        liked_shop = LikedShops.objects.filter(user=request.user, shop_listing_id=shop_id).first()
+        if not liked_shop:
+            return Response({"error": "Not favorited"}, status=status.HTTP_404_NOT_FOUND)
+        liked_shop.delete()
+        return Response({"message": "Successfully removed from favorites"}, status=status.HTTP_200_OK)
+
 class UserListedShops(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ListingListSerializer
