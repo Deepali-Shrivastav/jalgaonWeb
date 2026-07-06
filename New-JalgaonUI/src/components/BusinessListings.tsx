@@ -361,8 +361,8 @@ export default function BusinessListings({
             Apply Filters
           </button>
 
-          <div className="mt-8 -mx-4 md:mx-0">
-            <CarouselAds slot="sidebar" />
+          <div className="mt-8 flex justify-center w-full">
+            <CarouselAds slot="sidebar" className="w-[300px] h-[250px]" />
           </div>
         </aside>
 
@@ -429,9 +429,9 @@ export default function BusinessListings({
             ) : filteredListings.length > 0 ? (
               filteredListings.map((listing, index) => (
                 <React.Fragment key={listing.id}>
-                  {index > 0 && index % 3 === 0 && (
-                    <div className="my-4 -mx-4 md:mx-0">
-                      <CarouselAds slot="listing_interstitial" />
+                  {index > 0 && index % 5 === 0 && (
+                    <div className="my-8 flex justify-center w-full">
+                      <CarouselAds slot="listing_interstitial" className="w-[300px] h-[250px]" />
                     </div>
                   )}
                   <article
@@ -449,7 +449,7 @@ export default function BusinessListings({
                     )}
 
                     {/* Image Container */}
-                    <div className="md:w-72 h-48 md:h-auto overflow-hidden rounded-lg m-1 relative shrink-0">
+                    <div className="w-[290px] h-[240px] overflow-hidden rounded-lg m-1 relative shrink-0">
                       <img
                         src={listing.image}
                         alt={listing.name}

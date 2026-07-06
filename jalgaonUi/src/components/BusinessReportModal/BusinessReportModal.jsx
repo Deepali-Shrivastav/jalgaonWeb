@@ -41,7 +41,7 @@ const BusinessReportModal = ({ isOpen, onClose, business, djangoApi }) => {
 
     return (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999 }}>
-            <div style={{ background: '#fff', padding: '30px', borderRadius: '12px', width: '90%', maxWidth: '500px', position: 'relative' }}>
+            <div style={{ background: '#fff', padding: '30px', borderRadius: '12px', width: '90%', maxWidth: '500px', position: 'relative', boxSizing: 'border-box' }}>
                 <button onClick={onClose} style={{ position: 'absolute', top: '15px', right: '15px', background: 'transparent', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#64748b' }}>
                     <MdClose />
                 </button>
@@ -53,7 +53,7 @@ const BusinessReportModal = ({ isOpen, onClose, business, djangoApi }) => {
                         <div style={{ fontSize: '48px', color: '#22c55e', marginBottom: '10px' }}><i className='bx bxs-check-circle'></i></div>
                         <h3 style={{ margin: '0 0 10px 0', color: '#0f172a' }}>Report Submitted</h3>
                         <p style={{ color: '#475569', marginBottom: '20px' }}>Thank you for helping us maintain a safe community. Our moderation team will review this listing.</p>
-                        <button onClick={onClose} style={{ padding: '10px 20px', background: '#0f172a', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', width: '100%', fontWeight: 'bold' }}>
+                        <button onClick={onClose} style={{ padding: '10px 20px', background: '#0f172a', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', width: '100%', fontWeight: 'bold', boxSizing: 'border-box' }}>
                             Close Window
                         </button>
                     </div>
@@ -64,7 +64,7 @@ const BusinessReportModal = ({ isOpen, onClose, business, djangoApi }) => {
                         </p>
 
                         {error && (
-                            <div style={{ background: '#fef2f2', color: '#dc2626', padding: '12px', borderRadius: '6px', marginBottom: '20px', fontSize: '14px' }}>
+                            <div style={{ background: '#fef2f2', color: '#dc2626', padding: '12px', borderRadius: '6px', marginBottom: '20px', fontSize: '14px', boxSizing: 'border-box' }}>
                                 {error}
                             </div>
                         )}
@@ -77,7 +77,7 @@ const BusinessReportModal = ({ isOpen, onClose, business, djangoApi }) => {
                                     value={formData.reason} 
                                     onChange={handleInputChange} 
                                     required 
-                                    style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#fff' }}
+                                    style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#fff', boxSizing: 'border-box' }}
                                 >
                                     <option value="fake">Fake/Spam Business</option>
                                     <option value="inappropriate">Inappropriate Content</option>
@@ -95,14 +95,14 @@ const BusinessReportModal = ({ isOpen, onClose, business, djangoApi }) => {
                                     onChange={handleInputChange} 
                                     rows="4"
                                     placeholder="Please provide any additional details..."
-                                    style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', resize: 'vertical' }}
+                                    style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', resize: 'vertical', boxSizing: 'border-box' }}
                                 />
                             </div>
 
                             <button 
                                 type="submit" 
                                 disabled={submitting}
-                                style={{ padding: '12px 20px', background: '#dc2626', color: '#fff', border: 'none', borderRadius: '6px', cursor: submitting ? 'not-allowed' : 'pointer', width: '100%', fontWeight: 'bold', fontSize: '16px', opacity: submitting ? 0.7 : 1 }}
+                                style={{ padding: '12px 20px', background: '#dc2626', color: '#fff', border: 'none', borderRadius: '6px', cursor: submitting ? 'not-allowed' : 'pointer', width: '100%', fontWeight: 'bold', fontSize: '16px', opacity: submitting ? 0.7 : 1, boxSizing: 'border-box' }}
                             >
                                 {submitting ? 'Submitting...' : 'Submit Report'}
                             </button>
