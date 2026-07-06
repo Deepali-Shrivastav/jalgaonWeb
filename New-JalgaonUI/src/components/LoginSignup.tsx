@@ -2,10 +2,19 @@
 
 import React, { useState, useContext, useEffect } from "react";
 import { AuthContext } from "@/context/AuthContext";
+import { snoozeEngagementPrompt, neverShowEngagementPrompt } from "@/lib/engagementStorage";
 
 export default function LoginSignup() {
-  const { setUser, setIsLogin, isLoginFormOpen, setIsLoginFormOpen } =
+  const { setUser, setIsLogin, isLoginFormOpen, setIsLoginFormOpen, engagementTriggered, setEngagementTriggered } =
     useContext(AuthContext);
+
+  const handleClose = () => {
+    if (engagementTriggered) {
+      snoozeEngagementPrompt(7);
+      setEngagementTriggered(false);
+    }
+    setIsLoginFormOpen(false);
+  };
   const [phoneNumber, setPhoneNumber] = useState("");
   const [userPassword, setUserPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false); // false = Login, true = SignUp
@@ -139,6 +148,7 @@ export default function LoginSignup() {
       ) {
         window.location.href = "/admin";
       } else {
+        setEngagementTriggered(false);
         setIsLoginFormOpen(false);
       }
     } catch (error: any) {
@@ -166,7 +176,7 @@ export default function LoginSignup() {
     <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-slate-900/40 backdrop-blur-md transition-all duration-300">
       <div className="relative w-full max-w-[450px] bg-white p-6 sm:p-10 shadow-2xl transition-transform duration-300 ease-out transform translate-y-0 h-full sm:h-auto sm:rounded-3xl flex flex-col justify-center">
         <button
-          onClick={() => setIsLoginFormOpen(false)}
+          onClick={handleClose}
           className="absolute top-4 right-4 sm:top-5 sm:right-5 w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors"
           aria-label="Close"
         >
@@ -188,7 +198,9 @@ export default function LoginSignup() {
                 Create Account
               </h1>
               <p className="text-sm text-slate-500">
-                Join Jalgaon.com to get started
+                {engagementTriggered
+                  ? "Join Jalgaon.com to save listings, post events, and connect with your city"
+                  : "Join Jalgaon.com to get started"}
               </p>
             </div>
 
@@ -288,6 +300,33 @@ export default function LoginSignup() {
                 </button>
               </p>
             </div>
+
+            {engagementTriggered && (
+              <div className="mt-5 pt-4 border-t border-slate-100 flex flex-col gap-2 text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    snoozeEngagementPrompt(7);
+                    setEngagementTriggered(false);
+                    setIsLoginFormOpen(false);
+                  }}
+                  className="text-sm text-slate-500 hover:text-slate-700 underline font-medium cursor-pointer"
+                >
+                  Remind me later (7 days)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    neverShowEngagementPrompt();
+                    setEngagementTriggered(false);
+                    setIsLoginFormOpen(false);
+                  }}
+                  className="text-xs text-slate-400 hover:text-slate-600 font-medium cursor-pointer"
+                >
+                  Don't show this again
+                </button>
+              </div>
+            )}
           </form>
         )}
 
@@ -306,7 +345,9 @@ export default function LoginSignup() {
                 Welcome Back
               </h1>
               <p className="text-sm text-slate-500">
-                Log in to your account or admin portal
+                {engagementTriggered
+                  ? "Join Jalgaon.com to save listings, post events, and connect with your city"
+                  : "Log in to your account or admin portal"}
               </p>
             </div>
 
@@ -408,6 +449,33 @@ export default function LoginSignup() {
                 </button>
               </p>
             </div>
+
+            {engagementTriggered && (
+              <div className="mt-5 pt-4 border-t border-slate-100 flex flex-col gap-2 text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    snoozeEngagementPrompt(7);
+                    setEngagementTriggered(false);
+                    setIsLoginFormOpen(false);
+                  }}
+                  className="text-sm text-slate-500 hover:text-slate-700 underline font-medium cursor-pointer"
+                >
+                  Remind me later (7 days)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    neverShowEngagementPrompt();
+                    setEngagementTriggered(false);
+                    setIsLoginFormOpen(false);
+                  }}
+                  className="text-xs text-slate-400 hover:text-slate-600 font-medium cursor-pointer"
+                >
+                  Don't show this again
+                </button>
+              </div>
+            )}
           </form>
         )}
       </div>

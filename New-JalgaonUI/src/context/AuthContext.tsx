@@ -16,6 +16,8 @@ interface AuthContextType {
   setIsLogin: React.Dispatch<React.SetStateAction<boolean>>;
   isLoginFormOpen: boolean;
   setIsLoginFormOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  engagementTriggered: boolean;
+  setEngagementTriggered: React.Dispatch<React.SetStateAction<boolean>>;
   logout: () => void;
 }
 
@@ -26,6 +28,8 @@ export const AuthContext = createContext<AuthContextType>({
   setIsLogin: () => {},
   isLoginFormOpen: false,
   setIsLoginFormOpen: () => {},
+  engagementTriggered: false,
+  setEngagementTriggered: () => {},
   logout: () => {},
 });
 
@@ -33,6 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLogin, setIsLogin] = useState<boolean>(false);
   const [isLoginFormOpen, setIsLoginFormOpen] = useState<boolean>(false);
+  const [engagementTriggered, setEngagementTriggered] = useState<boolean>(false);
 
   useEffect(() => {
     // Check local storage for user session on mount
@@ -67,6 +72,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsLogin,
         isLoginFormOpen,
         setIsLoginFormOpen,
+        engagementTriggered,
+        setEngagementTriggered,
         logout,
       }}
     >
