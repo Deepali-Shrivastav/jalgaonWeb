@@ -268,11 +268,11 @@ export default function JobsPortal() {
                     >
                       <div className="flex gap-4 items-start">
                         <div className="w-12 h-12 rounded-lg bg-white flex items-center justify-center p-2 border border-amber-100 shrink-0">
-                          {job.logo ? (
+                          {job.company_logo ? (
                             <img
                               className="w-full h-full object-contain"
-                              src={job.logo}
-                              alt={job.logoAlt || job.company}
+                              src={job.company_logo}
+                              alt={job.company}
                               loading="lazy"
                             />
                           ) : (
