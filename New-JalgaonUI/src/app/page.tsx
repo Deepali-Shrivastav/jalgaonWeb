@@ -43,7 +43,7 @@ export default function Home() {
           <LocalWonders />
           <JobOpenings />
           <NgoSpotlight />
-          <BlogSection />
+          {/* <BlogSection /> */}
           <CallToAction />
           <ContactForm />
       </main>

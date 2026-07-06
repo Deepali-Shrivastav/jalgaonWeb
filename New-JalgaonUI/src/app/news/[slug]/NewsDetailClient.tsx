@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Link from 'next/link';
 import DOMPurify from 'isomorphic-dompurify';
+import { AuthContext } from '@/context/AuthContext';
+import CarouselAds from '@/components/CarouselAds';
 
 interface NewsDetail {
   id: number;
@@ -19,14 +21,54 @@ interface NewsDetail {
 }
 
 export default function NewsDetailClient({ slug }: { slug: string }) {
+  const { isLogin, setIsLoginFormOpen } = useContext(AuthContext);
   const [article, setArticle] = useState<NewsDetail | null>(null);
+  const [trendingNews, setTrendingNews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [commentText, setCommentText] = useState("");
+  const [submittingComment, setSubmittingComment] = useState(false);
+  const [commentMsg, setCommentMsg] = useState("");
+
+  const handleCommentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!commentText.trim()) return;
+    
+    setSubmittingComment(true);
+    setCommentMsg("");
+    
+    try {
+      const token = localStorage.getItem("token");
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      
+      const res = await fetch(`${baseUrl}/api/v1/news/${encodeURIComponent(slug)}/comments/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ body: commentText })
+      });
+      
+      if (res.ok) {
+        setCommentMsg("Comment submitted successfully! It will appear once approved.");
+        setCommentText("");
+      } else {
+        setCommentMsg("Failed to submit comment.");
+      }
+    } catch (err) {
+      setCommentMsg("An error occurred while submitting.");
+    } finally {
+      setSubmittingComment(false);
+      setTimeout(() => setCommentMsg(""), 5000);
+    }
+  };
 
   useEffect(() => {
-    const fetchArticle = async () => {
+    const fetchData = async () => {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        
         const res = await fetch(`${baseUrl}/api/v1/news/${encodeURIComponent(slug)}/`);
         if (!res.ok) {
           if (res.status === 404) throw new Error('Article not found');
@@ -34,13 +76,25 @@ export default function NewsDetailClient({ slug }: { slug: string }) {
         }
         const data = await res.json();
         setArticle(data);
+
+        try {
+          const trendingRes = await fetch(`${baseUrl}/api/v1/news/trending/`);
+          if (trendingRes.ok) {
+            const trendingData = await trendingRes.json();
+            const results = trendingData.results || trendingData.data || trendingData || [];
+            setTrendingNews(results.filter((item: any) => item.id !== data.id).slice(0, 5));
+          }
+        } catch (e) {
+          console.error("Failed to fetch trending news", e);
+        }
+
       } catch (err: any) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-    fetchArticle();
+    fetchData();
   }, [slug]);
 
   if (loading) {
@@ -64,75 +118,152 @@ export default function NewsDetailClient({ slug }: { slug: string }) {
   }
 
   return (
-    <article className="w-full bg-white pb-24">
-      {/* Immersive Hero */}
-      <div className="relative w-full h-[50vh] md:h-[70vh] min-h-[400px] bg-slate-900 overflow-hidden">
-        {article.featured_image ? (
-          <img
-            src={article.featured_image}
-            alt={article.title}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        ) : (
-          <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-slate-800 to-slate-900" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+    <article className="w-full bg-slate-50 min-h-screen pb-24 pt-6 md:pt-10 border-t border-hairline-soft">
+      <div className="max-w-[1200px] mx-auto px-4 md:px-6 lg:px-8">
         
-        <div className="absolute bottom-0 left-0 w-full p-6 md:p-12 lg:px-24">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex flex-wrap items-center gap-4 mb-6">
-              {article.category && (
-                <span className="bg-primary text-white px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest shadow-lg">
-                  {article.category.name}
-                </span>
-              )}
-              <span className="text-white/90 text-sm flex items-center gap-1.5 font-medium bg-black/30 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
-                <span className="material-symbols-outlined text-[16px]">schedule</span>
-                {new Date(article.published_at || new Date()).toLocaleDateString('en-US', {
-                  year: 'numeric', month: 'long', day: 'numeric'
-                })}
-              </span>
-              <span className="text-white/90 text-sm flex items-center gap-1.5 font-medium bg-black/30 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
-                <span className="material-symbols-outlined text-[16px]">visibility</span>
-                {article.view_count} views
-              </span>
-            </div>
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 lg:gap-12 xl:gap-16">
+          
+          {/* Left Column (Main Content) */}
+          <div className="w-full">
             
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-8 leading-[1.1] drop-shadow-xl tracking-tight">
+            {/* Breadcrumb */}
+            <nav className="flex items-center gap-2 text-xs md:text-sm font-semibold text-secondary mb-6 overflow-x-auto whitespace-nowrap pb-2 scrollbar-none">
+              <Link href="/" className="hover:text-primary transition-colors">Home</Link>
+              <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+              <Link href="/news" className="hover:text-primary transition-colors">News</Link>
+              <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+              {article.category && (
+                <>
+                  <Link href={`/news?category=${article.category.slug}`} className="hover:text-primary transition-colors">
+                    {article.category.name}
+                  </Link>
+                  <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+                </>
+              )}
+              <span className="text-ink-deep truncate max-w-[200px] sm:max-w-[300px]">{article.title}</span>
+            </nav>
+
+            {/* Title */}
+            <h1 className="text-3xl sm:text-4xl lg:text-[44px] font-black text-ink-deep mb-6 leading-[1.15] tracking-tight">
               {article.title}
             </h1>
             
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-inner">
-                {(article.author_name || 'A')[0]}
+            {/* Meta Info & Share Buttons */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4 border-y border-hairline-soft mb-8">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+                <span className="text-secondary font-medium">By <span className="font-bold text-ink-deep">{article.author_name || 'Editorial Team'}</span></span>
+                <span className="text-secondary/50">|</span>
+                <span className="text-secondary font-medium flex items-center gap-1.5">
+                   Updated: {new Date(article.published_at || new Date()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                </span>
               </div>
-              <div>
-                <p className="font-bold text-white text-lg">{article.author_name || 'Editorial Team'}</p>
-                <p className="text-sm text-white/60 font-semibold tracking-wide uppercase">Author</p>
+              
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank')}
+                  className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-100 transition-colors" 
+                  title="Share on Facebook"
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" />
+                  </svg>
+                </button>
+                <button 
+                  onClick={() => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(article?.title || '')}`, '_blank')}
+                  className="w-8 h-8 rounded-full bg-sky-50 text-sky-500 flex items-center justify-center hover:bg-sky-100 transition-colors" 
+                  title="Share on Twitter"
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
+                  </svg>
+                </button>
+                <button 
+                  onClick={() => window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent((article?.title || '') + ' ' + window.location.href)}`, '_blank')}
+                  className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-100 transition-colors" 
+                  title="Share on WhatsApp"
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fillRule="evenodd" d="M12.002 0a12.002 12.002 0 1012.002 12.002A12.016 12.016 0 0012.002 0zm6.208 17.15c-.252.71-1.464 1.353-2.019 1.412-.553.06-1.22.18-3.926-.942-3.242-1.344-5.289-4.708-5.442-4.912-.153-.204-1.3-1.733-1.3-3.305 0-1.572.822-2.343 1.118-2.658.297-.315.647-.393.86-.393s.427.003.62.013c.193.01.455-.077.712.542.257.62.88 2.148.956 2.302.076.155.127.335.035.52-.09.183-.138.298-.276.455-.138.158-.29.336-.413.468-.137.147-.282.308-.12.588.16.28 .713 1.183 1.536 1.916 1.063.945 1.95 1.238 2.235 1.385.286.147.453.125.62-.06.168-.186.723-.842.915-1.13.193-.29.387-.242.646-.145.26.096 1.637.77 1.918.913.282.143.47.214.538.334.068.12.068.694-.184 1.404z" clipRule="evenodd" />
+                  </svg>
+                </button>
+                <div className="w-[1px] h-6 bg-outline-variant mx-2"></div>
+                <button 
+                  onClick={() => alert('Article saved!')}
+                  className="text-xs font-bold bg-surface-container-low px-3 py-1.5 rounded-full text-ink-deep border border-outline-variant/50 hover:bg-surface-container-high transition-colors flex items-center gap-1.5"
+                >
+                  <span className="material-symbols-outlined text-[14px]">bookmark_add</span>
+                  Save
+                </button>
               </div>
             </div>
+
+            {/* Featured Image */}
+            {article.featured_image && (
+              <figure className="mb-10">
+                <div className="w-full bg-surface-container-low overflow-hidden shadow-sm border border-hairline-soft">
+                  <img
+                    src={article.featured_image}
+                    alt={article.title}
+                    className="w-full h-auto max-h-[600px] object-cover"
+                  />
+                </div>
+                {article.short_description && (
+                  <figcaption className="mt-3 text-xs md:text-sm text-secondary font-medium italic px-3 border-l-2 border-primary/40">
+                    {article.short_description}
+                  </figcaption>
+                )}
+              </figure>
+            )}
+            
+            {/* Article Content */}
+            <div 
+              className="prose prose-lg md:prose-xl prose-slate max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-img:rounded-none prose-img:shadow-md prose-p:leading-relaxed prose-p:text-slate-800 pb-12 border-b border-hairline-soft mb-12"
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content || '') }}
+            />
+            
+            {/* Comments Section */}
+            <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-10 shadow-sm border border-hairline-soft">
+              <h3 className="text-3xl font-black text-ink-deep mb-8 flex items-center gap-3">
+                <span className="material-symbols-outlined text-primary text-3xl">forum</span>
+                Discussion ({article.comments?.length || 0})
+              </h3>
+          
+          <div className="mb-10 bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/40">
+            {isLogin ? (
+              <form onSubmit={handleCommentSubmit} className="flex flex-col gap-4">
+                <textarea 
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  placeholder="Share your thoughts..."
+                  className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl p-4 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all min-h-[100px] resize-y"
+                  required
+                />
+                <div className="flex justify-between items-center">
+                  <span className={`text-sm font-medium ${commentMsg.includes('success') ? 'text-emerald-600' : 'text-red-500'}`}>
+                    {commentMsg}
+                  </span>
+                  <button 
+                    type="submit" 
+                    disabled={submittingComment || !commentText.trim()}
+                    className="bg-primary hover:bg-primary-deep text-white font-bold py-2.5 px-8 rounded-full transition-colors shadow-sm disabled:opacity-50"
+                  >
+                    {submittingComment ? 'Posting...' : 'Post Comment'}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="text-center py-6">
+                <p className="text-secondary font-medium mb-4">Please log in to join the discussion.</p>
+                <button 
+                  onClick={() => setIsLoginFormOpen(true)}
+                  className="bg-primary hover:bg-primary-deep text-white font-bold py-2.5 px-8 rounded-full transition-colors shadow-sm"
+                >
+                  Log In to Comment
+                </button>
+              </div>
+            )}
           </div>
-        </div>
-      </div>
-      
-      {/* Article Content */}
-      <div className="max-w-4xl mx-auto px-6 pt-12 md:pt-16">
-        <div 
-          className="prose prose-lg md:prose-xl prose-slate max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-img:rounded-3xl prose-img:shadow-xl prose-p:leading-relaxed prose-p:text-slate-700"
-          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content || '') }}
-        />
-        
-        {/* Divider */}
-        <div className="my-20 flex items-center justify-center">
-           <div className="h-1.5 w-24 bg-primary/20 rounded-full"></div>
-        </div>
-        
-        {/* Comments Section */}
-        <div className="bg-surface-container-lowest rounded-[2rem] p-8 md:p-12 shadow-sm border border-hairline-soft">
-          <h3 className="text-3xl font-black text-ink-deep mb-8 flex items-center gap-3">
-            <span className="material-symbols-outlined text-primary text-3xl">forum</span>
-            Discussion ({article.comments?.length || 0})
-          </h3>
           
           {article.comments && article.comments.length > 0 ? (
             <div className="space-y-6">
@@ -160,7 +291,59 @@ export default function NewsDetailClient({ slug }: { slug: string }) {
             </div>
           )}
         </div>
+        </div>
+
+        {/* Right Column (Sidebar) */}
+        <aside className="w-full">
+          <div className="sticky top-28">
+            <div className="flex items-center justify-between mb-5 pb-3 border-b-2 border-ink-deep">
+                <h3 className="text-lg font-black uppercase tracking-wider text-ink-deep flex items-center gap-2">
+                  <span className="material-symbols-outlined text-primary text-xl">bolt</span>
+                  Quick Reads
+                </h3>
+                <Link href="/news" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+                  View All <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                </Link>
+            </div>
+            
+            <div className="flex flex-col gap-4">
+              {trendingNews.length > 0 ? (
+                trendingNews.map((news) => (
+                  <Link key={news.id} href={`/news/${news.slug || news.id}`} className="group flex flex-col gap-3 p-3 -mx-3 hover:bg-white hover:shadow-sm border border-transparent hover:border-hairline-soft transition-all">
+                      {(news.image || news.featured_image) && (
+                        <div className="w-full aspect-[16/9] overflow-hidden bg-surface-container-low relative">
+                          <img 
+                            src={((news.image || news.featured_image) as any).src || (news.image || news.featured_image)} 
+                            alt={news.title} 
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                          />
+                        </div>
+                      )}
+                      <div>
+                        <h4 className="font-bold text-ink-deep leading-snug line-clamp-2 group-hover:text-primary transition-colors mb-1">{news.title}</h4>
+                        <span className="text-xs font-semibold text-secondary flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[12px]">schedule</span>
+                          {new Date(news.published_at || news.date || new Date()).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </span>
+                      </div>
+                  </Link>
+                ))
+              ) : (
+                <div className="py-8 text-center text-secondary text-sm border border-dashed border-outline-variant/60 rounded-xl">
+                    No trending news available.
+                </div>
+              )}
+            </div>
+            
+            {/* Ad / Banner */}
+            <div className="mt-8 w-full -mx-4 md:mx-0">
+                <CarouselAds slot="sidebar" />
+            </div>
+          </div>
+        </aside>
+
       </div>
-    </article>
-  );
+    </div>
+  </article>
+);
 }

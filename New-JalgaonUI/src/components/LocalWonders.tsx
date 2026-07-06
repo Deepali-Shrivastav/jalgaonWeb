@@ -7,13 +7,50 @@ type Wonder = {
   distance: string;
   image: string;
   imageAlt: string;
+  mapLink: string;
 };
 
 const wonders: Wonder[] = [
-  { name: "Ajanta Caves", label: "World Heritage Site", distance: "Approx. 60 km", image: "https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?w=800&q=80", imageAlt: "Ancient rock-cut cave courtyard" },
-  { name: "Padalsare Dam", label: "Scenic escape", distance: "Approx. 55 km", image: "https://images.unsplash.com/photo-1580977276076-ac4df37286d5?w=800&q=80", imageAlt: "Dam surrounded by green hills" },
-  { name: "Mehrun Lake", label: "City sanctuary", distance: "In Jalgaon", image: "https://images.unsplash.com/photo-1558231005-7284ebbf1e11?w=800&q=80", imageAlt: "Quiet lake reflecting a line of trees" },
-  { name: "Patnadevi Temple", label: "Spiritual heritage", distance: "Approx. 70 km", image: "https://images.unsplash.com/photo-1596791244304-4532b270a316?w=800&q=80", imageAlt: "Historic temple glowing at sunset" },
+  {
+    name: "Ajanta Caves",
+    label: "World Heritage Site",
+    distance: "Approx. 60 km",
+    image: "/Wonders-image/Ajanta-caves.png",
+    imageAlt: "Ancient rock-cut cave courtyard",
+    mapLink: "https://www.google.com/maps/search/?api=1&query=Ajanta+Caves",
+  },
+  {
+    name: "Padalsare Dam",
+    label: "Scenic escape",
+    distance: "Approx. 55 km",
+    image: "/Wonders-image/padalsare-dam.png",
+    imageAlt: "Dam surrounded by green hills",
+    mapLink: "https://www.google.com/maps/search/?api=1&query=Padalsare+Dam",
+  },
+  {
+    name: "Mehrun Lake",
+    label: "City sanctuary",
+    distance: "In Jalgaon",
+    image: "/Wonders-image/Mehrun-lake.png",
+    imageAlt: "Quiet lake reflecting a line of trees",
+    mapLink: "https://www.google.com/maps/search/?api=1&query=Mehrun+Lake",
+  },
+  {
+    name: "Patnadevi Temple",
+    label: "Spiritual heritage",
+    distance: "Approx. 70 km",
+    image: "/Wonders-image/patna-devi.png",
+    imageAlt: "Historic temple glowing at sunset",
+    mapLink: "https://www.google.com/maps/search/?api=1&query=Patnadevi+Temple",
+  },
+  {
+    name: "Swinging Tower",
+    label: "Jhulta Minar Farkande",
+    distance: "Approx. 35 km",
+    image: "/Wonders-image/swinging-tower.png",
+    imageAlt: "Historical swinging towers",
+    mapLink: "https://www.google.com/maps/search/?api=1&query=Swinging+Tower+Farkande",
+  },
 ];
 
 export default function LocalWonders() {
@@ -70,7 +107,7 @@ export default function LocalWonders() {
             <p className="mb-xs text-xs font-extrabold uppercase tracking-[0.2em] text-primary">Around Jalgaon</p>
             <h2 id="wonders-heading" className="text-3xl font-extrabold text-ink-deep md:text-4xl">Explore Local Wonders</h2>
           </div>
-          <span className="hidden text-sm font-bold text-secondary sm:block">Four places worth the journey</span>
+          <span className="hidden text-sm font-bold text-secondary sm:block">Places worth the journey</span>
         </div>
 
         <div 
@@ -86,9 +123,12 @@ export default function LocalWonders() {
             className="flex flex-row gap-base min-w-max pb-4 lg:pb-0"
           >
             {wonders.map((wonder) => (
-              <article 
+              <a 
+                href={wonder.mapLink}
+                target="_blank"
+                rel="noopener noreferrer"
                 key={wonder.name} 
-                className="group relative aspect-[4/5] overflow-hidden rounded-xl bg-ink-deep shadow-xl w-[75vw] sm:w-[320px] lg:w-[350px] shrink-0 snap-start"
+                className="group relative aspect-[4/5] overflow-hidden rounded-xl bg-ink-deep shadow-xl w-[75vw] sm:w-[320px] lg:w-[350px] shrink-0 snap-start block cursor-pointer"
               >
                 <img src={wonder.image} alt={wonder.imageAlt} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-gradient-to-t from-ink-deep via-ink-deep/10 to-transparent" />
@@ -97,7 +137,7 @@ export default function LocalWonders() {
                   <h3 className="mt-md text-2xl font-extrabold text-white">{wonder.name}</h3>
                   <p className="mt-xxs text-sm text-white/75">{wonder.label}</p>
                 </div>
-              </article>
+              </a>
             ))}
           </div>
         </div>

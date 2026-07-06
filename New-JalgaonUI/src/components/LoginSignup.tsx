@@ -3,6 +3,8 @@
 import React, { useState, useContext, useEffect } from "react";
 import { AuthContext } from "@/context/AuthContext";
 import { snoozeEngagementPrompt, neverShowEngagementPrompt } from "@/lib/engagementStorage";
+import { toast } from "react-hot-toast";
+import Link from "next/link";
 
 export default function LoginSignup() {
   const { setUser, setIsLogin, isLoginFormOpen, setIsLoginFormOpen, engagementTriggered, setEngagementTriggered } =
@@ -46,6 +48,16 @@ export default function LoginSignup() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (phoneNumber.length !== 10) {
+      toast.error("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+    if (userPassword.length < 6) {
+      toast.error("Password must be at least 6 characters long.");
+      return;
+    }
+
     setIsLoading(true);
     setErrorMessage("");
     const csrfToken = await getCsrfToken();
@@ -90,9 +102,11 @@ export default function LoginSignup() {
       }
 
       // Auto login after register
+      toast.success("Account created successfully!");
       await handleLoginSubmit();
     } catch (error: any) {
       console.error("Registration failed", error);
+      toast.error(error.message || "Registration failed. Please try again.");
       setErrorMessage(error.message);
       setIsLoading(false);
     }
@@ -100,6 +114,12 @@ export default function LoginSignup() {
 
   const handleLoginSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+
+    if (phoneNumber.length !== 10) {
+      toast.error("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+
     setIsLoading(true);
     setErrorMessage("");
     const csrfToken = await getCsrfToken();
@@ -146,13 +166,16 @@ export default function LoginSignup() {
           user.role
         )
       ) {
-        window.location.href = "/admin";
+        toast.success("Login successful. Redirecting to admin...");
+        setTimeout(() => { window.location.href = "/admin"; }, 1000);
       } else {
         setEngagementTriggered(false);
+        toast.success("Logged in successfully!");
         setIsLoginFormOpen(false);
       }
     } catch (error: any) {
       console.error("Login failed", error);
+      toast.error(error.message || "Login failed. Please try again.");
       setErrorMessage(error.message);
     } finally {
       setIsLoading(false);
@@ -264,12 +287,6 @@ export default function LoginSignup() {
             <p className="text-[13px] text-slate-500 mb-5">
               By registering, you accept our terms and conditions.
             </p>
-
-            {errorMessage && (
-              <p className="bg-red-50 text-red-500 p-3 rounded-lg text-sm font-medium mb-5 border border-red-200 text-center">
-                {errorMessage}
-              </p>
-            )}
 
             <button
               type="submit"
@@ -412,13 +429,17 @@ export default function LoginSignup() {
               <span className="text-[13px] text-slate-500">
                 Secure login portal.
               </span>
+              <button 
+                type="button" 
+                onClick={() => {
+                  setIsLoginFormOpen(false);
+                  window.location.href = '/forgot-password';
+                }}
+                className="text-[13px] text-primary font-semibold hover:underline"
+              >
+                Forgot Password?
+              </button>
             </div>
-
-            {errorMessage && (
-              <p className="bg-red-50 text-red-500 p-3 rounded-lg text-sm font-medium mb-5 border border-red-200 text-center">
-                {errorMessage}
-              </p>
-            )}
 
             <button
               type="submit"

@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   description: 'Update your business profile on Jalgaon.com',
 };
 
-export default function EditListingPage({ params }: { params: { slug: string } }) {
-  return <EditListingClient slug={params.slug} />;
+export default async function EditListingPage({ params }: { params: Promise<{ slug: string }> }) {
+  const resolvedParams = await params;
+  return <EditListingClient slug={resolvedParams.slug} />;
 }

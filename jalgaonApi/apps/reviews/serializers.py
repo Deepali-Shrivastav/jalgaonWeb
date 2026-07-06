@@ -5,10 +5,12 @@ from apps.accounts.serializers import UserSerializer
 class ShopReviewSerializer(serializers.ModelSerializer):
     user_name = serializers.SerializerMethodField()
     user_avatar = serializers.SerializerMethodField()
+    business_name = serializers.CharField(source='shop_listing.business_name', read_only=True)
+    business_slug = serializers.CharField(source='shop_listing.slug', read_only=True)
 
     class Meta:
         model = ShopReview
-        fields = ['id', 'user_name', 'user_avatar', 'rating_star', 'user_review', 'timestamp', 'is_helpful_count', 'status']
+        fields = ['id', 'user_name', 'user_avatar', 'rating_star', 'user_review', 'timestamp', 'is_helpful_count', 'status', 'business_name', 'business_slug']
         read_only_fields = ['status', 'is_helpful_count']
 
     def get_user_name(self, obj):

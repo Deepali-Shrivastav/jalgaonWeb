@@ -56,8 +56,17 @@ export default function CarouselAds({ slot = 'hero_banner' }: { slot?: string })
     }
   }, [currentIndex, ads]);
 
-  if (loading || ads.length === 0) return null;
-
+  if (loading) return null;
+  
+  if (ads.length === 0) {
+    return (
+      <div className="relative w-full max-w-container-max mx-auto px-base overflow-hidden rounded-xl my-6 flex flex-col items-center justify-center bg-surface-container-low border border-hairline-soft aspect-[4/3] text-secondary/40">
+        <span className="material-symbols-outlined text-5xl mb-2 opacity-50">ad</span>
+        <span className="text-xs font-bold tracking-widest uppercase opacity-50">Advertisement Space</span>
+        <p className="text-[10px] mt-1 text-center px-4">({slot} slot is empty)</p>
+      </div>
+    );
+  }
   return (
     <div className="relative w-full max-w-container-max mx-auto px-base overflow-hidden rounded-xl my-6 group">
       <div 
