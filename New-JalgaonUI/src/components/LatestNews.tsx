@@ -40,6 +40,18 @@ function StoryMeta({
   );
 }
 
+const getImageUrl = (img: any) => {
+  if (!img) return 'https://via.placeholder.com/600x400';
+  let url = img.src || img;
+  if (typeof url !== 'string') return 'https://via.placeholder.com/600x400';
+  if (url.startsWith('https://127.0.0.1:') || url.startsWith('https://localhost:')) {
+    url = url.replace('https://', 'http://');
+  }
+  if (url.startsWith('http') || url.startsWith('data:')) return url;
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 export default function LatestNews() {
   const [featuredStory, setFeaturedStory] = useState<NewsStory | null>(null);
   const [newsList, setNewsList] = useState<NewsStory[]>([]);
@@ -50,7 +62,7 @@ export default function LatestNews() {
     const fetchNews = async () => {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        const url = `${baseUrl}/api/v1/news/trending/`;
+        const url = `${baseUrl}/api/v1/news/latest/`;
         const res = await fetch(url, { cache: 'no-store' });
         if (!res.ok) throw new Error('Failed to fetch');
         const json = await res.json();
@@ -129,7 +141,7 @@ export default function LatestNews() {
           <Link href={`/news/${(featuredStory as any).slug || featuredStory.id}`} className="group relative min-h-[500px] overflow-hidden rounded-xl bg-ink-deep shadow-xl lg:min-h-full block">
             {(featuredStory.image || featuredStory.featured_image) && (
               <img
-                src={((featuredStory.image || featuredStory.featured_image) as any).src || (featuredStory.image || featuredStory.featured_image)}
+                src={getImageUrl(featuredStory.image || featuredStory.featured_image)}
                 alt={featuredStory.imageAlt || featuredStory.alt || featuredStory.title}
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
@@ -162,7 +174,7 @@ export default function LatestNews() {
                 <div className="relative aspect-[16/9] overflow-hidden bg-surface-container-low flex justify-center items-center">
                   {(story.image || story.featured_image) ? (
                     <img
-                      src={((story.image || story.featured_image) as any).src || (story.image || story.featured_image)}
+                      src={getImageUrl(story.image || story.featured_image)}
                       alt={story.imageAlt || story.alt || story.title}
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       onError={(e) => {

@@ -77,11 +77,11 @@ class AdminListingSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShopListing
         fields = [
-            'id', 'business_name', 'business_address', 'business_banner',
+            'id', 'slug', 'business_name', 'business_address', 'business_banner',
             'is_valid', 'status', 'owner_phone', 'owner_name', 'category_name',
             'main_category', 'sub_category', 'is_trending'
         ]
-        read_only_fields = ['id', 'owner_phone', 'owner_name', 'category_name']
+        read_only_fields = ['id', 'slug', 'owner_phone', 'owner_name', 'category_name']
 
     def get_owner_name(self, obj):
         parts = [obj.user.first_name or '', obj.user.last_name or '']

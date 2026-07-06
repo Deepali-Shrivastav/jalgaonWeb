@@ -21,6 +21,18 @@ export interface NewsArticle {
   alt?: string;
 }
 
+const getImageUrl = (img: any) => {
+  if (!img) return 'https://via.placeholder.com/600x400';
+  let url = img.src || img;
+  if (typeof url !== 'string') return 'https://via.placeholder.com/600x400';
+  if (url.startsWith('https://127.0.0.1:') || url.startsWith('https://localhost:')) {
+    url = url.replace('https://', 'http://');
+  }
+  if (url.startsWith('http') || url.startsWith('data:')) return url;
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 export default function NewsPortal() {
   const [newsArticles, setNewsArticles] = React.useState<NewsArticle[]>([]);
   const [recentNews, setRecentNews] = React.useState<NewsArticle[]>([]);
@@ -56,35 +68,36 @@ export default function NewsPortal() {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
         
+        let latestUrl = `${baseUrl}/api/v1/news/latest/?page=${page}`;
         let trendingUrl = `${baseUrl}/api/v1/news/trending/`;
-        let recentUrl = `${baseUrl}/api/v1/news/latest/?page=${page}`;
 
         if (activeCategory) {
-          recentUrl = `${baseUrl}/api/v1/news/latest/?category=${activeCategory}&page=${page}`;
-          trendingUrl = `${baseUrl}/api/v1/news/latest/?category=${activeCategory}`; 
+          latestUrl = `${baseUrl}/api/v1/news/latest/?category=${activeCategory}&page=${page}`;
+          trendingUrl = `${baseUrl}/api/v1/news/trending/?category=${activeCategory}`; 
         }
 
+        const latestRes = await fetch(latestUrl);
         const trendingRes = await fetch(trendingUrl);
-        const recentRes = await fetch(recentUrl);
         
-        if (!trendingRes.ok || !recentRes.ok) throw new Error('Failed to fetch news');
+        if (!latestRes.ok || !trendingRes.ok) throw new Error('Failed to fetch news');
         
+        const latestJson = await latestRes.json();
         const trendingJson = await trendingRes.json();
-        const recentJson = await recentRes.json();
         
-        setNewsArticles(trendingJson.results || trendingJson.data || trendingJson || []);
+        const latestResults = latestJson.results || latestJson.data || latestJson || [];
+        const trendingResults = trendingJson.results || trendingJson.data || trendingJson || [];
         
-        const recentResults = recentJson.results || recentJson.data || recentJson || [];
-        setRecentNews(recentResults);
+        setNewsArticles(latestResults);
+        setRecentNews(trendingResults); 
         
         if (page === 1) {
-            setMoreNews(recentResults.slice(5)); // The rest goes to more news
+            setMoreNews(latestResults.slice(3)); 
         } else {
-            setMoreNews(recentResults);
+            setMoreNews(latestResults);
         }
         
-        if (recentJson.count !== undefined) {
-          setTotalPages(Math.ceil(recentJson.count / 20));
+        if (latestJson.count !== undefined) {
+          setTotalPages(Math.ceil(latestJson.count / 20));
         } else {
           setTotalPages(1);
         }
@@ -99,7 +112,7 @@ export default function NewsPortal() {
   
   React.useEffect(() => { setPage(1); }, [activeCategory]);
 
-  const displaySidebarNews = activeTab === 'recent' ? recentNews.slice(0, 5) : newsArticles.slice(0, 5);
+  const displaySidebarNews = activeTab === 'recent' ? newsArticles.slice(0, 5) : recentNews.slice(0, 5);
 
   return (
     <>
@@ -150,7 +163,7 @@ export default function NewsPortal() {
                   <Link href={`/news/${newsArticles[0].slug || newsArticles[0].id}`} className="group block mb-10">
                     <div className="w-full aspect-[16/8] md:aspect-[2/1] overflow-hidden mb-5 bg-gray-100">
                       <img 
-                        src={newsArticles[0].image || newsArticles[0].featured_image || ''} 
+                        src={getImageUrl(newsArticles[0].image || newsArticles[0].featured_image)} 
                         alt={newsArticles[0].title}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         onError={(e) => { e.currentTarget.style.display = 'none'; }}
@@ -171,7 +184,7 @@ export default function NewsPortal() {
                     <Link href={`/news/${article.slug || article.id}`} key={article.id} className="group block">
                       <div className="relative w-full aspect-[16/10] overflow-hidden mb-4 bg-gray-100">
                         <img 
-                          src={article.image || article.featured_image || ''} 
+                          src={getImageUrl(article.image || article.featured_image)} 
                           alt={article.title}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                           onError={(e) => { e.currentTarget.style.display = 'none'; }}
@@ -215,7 +228,7 @@ export default function NewsPortal() {
                     <Link href={`/news/${article.slug || article.id}`} key={article.id} className="group flex gap-4 items-start">
                       <div className="w-28 h-[84px] shrink-0 overflow-hidden bg-gray-100">
                         <img 
-                          src={article.image || article.featured_image || ''} 
+                          src={getImageUrl(article.image || article.featured_image)} 
                           alt={article.title}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                           onError={(e) => { e.currentTarget.style.display = 'none'; }}
@@ -259,7 +272,7 @@ export default function NewsPortal() {
                   <Link href={`/news/${article.slug || article.id}`} key={article.id} className="group block">
                     <div className="w-full aspect-[16/10] overflow-hidden mb-4 bg-gray-100 rounded-lg">
                       <img 
-                        src={article.image || article.featured_image || 'https://via.placeholder.com/400x250'} 
+                        src={getImageUrl(article.image || article.featured_image)} 
                         alt={article.title}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />

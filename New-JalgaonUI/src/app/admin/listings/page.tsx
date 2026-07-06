@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import Pagination from "@/components/Pagination";
 
-interface Listing { id: number; business_name: string; business_address: string; category_name: string; owner_name: string; owner_phone: string; status: string; business_banner?: string; business_no?: string; business_email?: string; city?: string; business_dob?: string; business_gst?: string; business_description?: string; main_category_name?: string; sub_category_name?: string; is_trending?: boolean; }
+interface Listing { id: number; slug: string; business_name: string; business_address: string; category_name: string; owner_name: string; owner_phone: string; status: string; business_banner?: string; business_no?: string; business_email?: string; city?: string; business_dob?: string; business_gst?: string; business_description?: string; main_category_name?: string; sub_category_name?: string; is_trending?: boolean; }
 
 export default function AdminListingsPage() {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
@@ -220,6 +221,9 @@ export default function AdminListingsPage() {
                     <td className="px-4 py-3"><span className={`px-2 py-1 rounded-full text-xs font-medium ${badgeClass(l.status)}`}>{l.status === "active" ? "Active" : l.status === "rejected" ? "Rejected" : "Pending"}</span></td>
                     <td className="px-4 py-3">
                       <div className="flex gap-1">
+                        <Link href={`/edit-listing/${l.slug}`} className="p-1.5 rounded hover:bg-slate-100 flex items-center justify-center" title="Edit Listing">
+                          <span className="material-symbols-outlined text-lg text-primary">edit</span>
+                        </Link>
                         <button onClick={() => openPreview(l.id)} className="p-1.5 rounded hover:bg-slate-100" title="Preview"><span className="material-symbols-outlined text-lg text-slate-500">visibility</span></button>
                         {l.status !== "active" && <button onClick={() => handleAction(l.id, "approve")} className="p-1.5 rounded hover:bg-green-50" title="Approve"><span className="material-symbols-outlined text-lg text-green-600">check_circle</span></button>}
                         {l.status === "active" && (

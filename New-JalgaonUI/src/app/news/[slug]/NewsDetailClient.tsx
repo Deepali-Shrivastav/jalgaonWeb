@@ -20,6 +20,18 @@ interface NewsDetail {
   comments: any[];
 }
 
+const getImageUrl = (img: any) => {
+  if (!img) return 'https://via.placeholder.com/600x400';
+  let url = img.src || img;
+  if (typeof url !== 'string') return 'https://via.placeholder.com/600x400';
+  if (url.startsWith('https://127.0.0.1:') || url.startsWith('https://localhost:')) {
+    url = url.replace('https://', 'http://');
+  }
+  if (url.startsWith('http') || url.startsWith('data:')) return url;
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 export default function NewsDetailClient({ slug }: { slug: string }) {
   const { isLogin, setIsLoginFormOpen } = useContext(AuthContext);
   const [article, setArticle] = useState<NewsDetail | null>(null);
@@ -203,7 +215,7 @@ export default function NewsDetailClient({ slug }: { slug: string }) {
               <figure className="mb-10">
                 <div className="w-full bg-surface-container-low overflow-hidden shadow-sm border border-hairline-soft">
                   <img
-                    src={article.featured_image}
+                    src={getImageUrl(article.featured_image)}
                     alt={article.title}
                     className="w-full h-auto max-h-[600px] object-cover"
                   />
@@ -313,7 +325,7 @@ export default function NewsDetailClient({ slug }: { slug: string }) {
                       {(news.image || news.featured_image) && (
                         <div className="w-full aspect-[16/9] overflow-hidden bg-surface-container-low relative">
                           <img 
-                            src={((news.image || news.featured_image) as any).src || (news.image || news.featured_image)} 
+                            src={getImageUrl(news.image || news.featured_image)} 
                             alt={news.title} 
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
                           />
