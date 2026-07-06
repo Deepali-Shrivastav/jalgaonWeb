@@ -6,7 +6,7 @@ async function fetchAll(url: string): Promise<any[]> {
 
   while (nextUrl) {
     try {
-      const res = await fetch(nextUrl, { next: { revalidate: 3600 } });
+      const res: Response = await fetch(nextUrl, { next: { revalidate: 3600 } });
       if (!res.ok) break;
       const data = await res.json();
       if (data.results) {
