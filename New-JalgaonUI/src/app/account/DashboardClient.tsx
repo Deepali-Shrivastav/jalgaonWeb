@@ -5,9 +5,9 @@ import { AuthContext } from '@/context/AuthContext';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 
-export default function DashboardClient() {
+export default function DashboardClient({ initialTab = 'overview' }: { initialTab?: string }) {
   const { user, isLogin, logout } = useContext(AuthContext);
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
