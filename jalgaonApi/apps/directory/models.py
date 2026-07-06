@@ -61,7 +61,7 @@ class ShopListing(models.Model):
     main_category = models.ForeignKey(MainCategory, on_delete=models.CASCADE)
     sub_category = models.ForeignKey(SubCategory, on_delete=models.CASCADE)
 
-    business_name = models.CharField(max_length=50)
+    business_name = models.CharField(max_length=150)
     slug = models.SlugField(max_length=300, unique=True, null=True, blank=True)
     business_rating = models.IntegerField(default=0)
     business_address = models.CharField(max_length=100)
@@ -116,6 +116,11 @@ class ShopListing(models.Model):
     avg_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
     review_count = models.IntegerField(default=0)
     views = models.IntegerField(default=0)
+
+    # SEO Metadata
+    meta_title = models.CharField(max_length=150, blank=True, null=True)
+    meta_description = models.CharField(max_length=300, blank=True, null=True)
+    meta_keywords = models.CharField(max_length=300, blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)

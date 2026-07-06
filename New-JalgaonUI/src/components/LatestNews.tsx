@@ -56,9 +56,14 @@ export default function LatestNews() {
   const [featuredStory, setFeaturedStory] = useState<NewsStory | null>(null);
   const [newsList, setNewsList] = useState<NewsStory[]>([]);
   const [loading, setLoading] = useState(true);
+export default function LatestNews({ initialData }: { initialData?: NewsStory[] }) {
+  const [featuredStory, setFeaturedStory] = useState<NewsStory | null>(initialData && initialData.length > 0 ? initialData[0] : null);
+  const [newsList, setNewsList] = useState<NewsStory[]>(initialData && initialData.length > 1 ? initialData.slice(1, 5) : []);
+  const [loading, setLoading] = useState(!initialData);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (initialData) return;
     const fetchNews = async () => {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -80,7 +85,7 @@ export default function LatestNews() {
       }
     };
     fetchNews();
-  }, []);
+  }, [initialData]);
 
   if (loading) {
     return (

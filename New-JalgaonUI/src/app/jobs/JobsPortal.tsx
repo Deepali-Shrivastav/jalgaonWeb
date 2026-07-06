@@ -25,6 +25,7 @@ export interface JobListing {
   created_at: string;
   job_type: string;
   company_logo: string;
+  typeBg?: string;
 }
 
 export default function JobsPortal() {

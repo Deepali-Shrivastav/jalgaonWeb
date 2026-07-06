@@ -246,9 +246,14 @@ export default function EventsPortal() {
                       <span className="text-primary font-bold text-lg">
                         {event.price}
                       </span>
-                      <button className="bg-primary text-white px-6 py-2 rounded-full text-sm font-bold hover:bg-primary-deep hover:shadow-lg transition-all active:scale-95">
+                      <a 
+                        href={event.venue && event.venue !== 'Online' ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}` : '#'}
+                        target={event.venue && event.venue !== 'Online' ? "_blank" : undefined}
+                        rel={event.venue && event.venue !== 'Online' ? "noopener noreferrer" : undefined}
+                        className="bg-primary text-white px-6 py-2 rounded-full text-sm font-bold hover:bg-primary-deep hover:shadow-lg transition-all active:scale-95 inline-block text-center"
+                      >
                         {event.cta}
-                      </button>
+                      </a>
                     </div>
                   </div>
                 </article>
@@ -343,9 +348,14 @@ export default function EventsPortal() {
                         <span className="text-ink-deep font-bold">
                           {event.price}
                         </span>
-                        <button className="bg-primary text-white px-8 py-3 rounded-full text-sm font-bold hover:bg-primary-deep transition-colors active:scale-95">
+                        <a 
+                          href={event.venue && event.venue !== 'Online' ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}` : '#'}
+                          target={event.venue && event.venue !== 'Online' ? "_blank" : undefined}
+                          rel={event.venue && event.venue !== 'Online' ? "noopener noreferrer" : undefined}
+                          className="bg-primary text-white px-8 py-3 rounded-full text-sm font-bold hover:bg-primary-deep transition-colors active:scale-95 inline-block text-center"
+                        >
                           {event.cta}
-                        </button>
+                        </a>
                       </div>
                     </div>
                   </div>

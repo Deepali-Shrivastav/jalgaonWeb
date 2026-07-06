@@ -68,8 +68,23 @@ export default function AddListingClient() {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setBannerFile(e.target.files[0]);
+    const file = e.target.files?.[0];
+    if (file) {
+      const img = new Image();
+      img.onload = () => {
+        if (img.width > 290 || img.height > 240) {
+          toast.error("Image dimensions must not exceed 290x240 pixels.");
+          setBannerFile(null);
+        } else {
+          setBannerFile(file);
+        }
+        URL.revokeObjectURL(img.src);
+      };
+      img.onerror = () => {
+        toast.error("Invalid image file.");
+        URL.revokeObjectURL(img.src);
+      };
+      img.src = URL.createObjectURL(file);
     }
   };
 
@@ -314,7 +329,7 @@ export default function AddListingClient() {
                     <>
                       <span className="material-symbols-outlined text-4xl text-outline mb-2 group-hover:text-primary transition-colors">upload_file</span>
                       <p className="text-sm font-bold text-on-surface-variant mb-2">Upload Business Banner *</p>
-                      <p className="text-xs text-secondary mb-4">PNG, JPG up to 10MB (Recommended ratio 16:9)</p>
+                      <p className="text-xs text-secondary mb-4">PNG, JPG (Max dimensions: 290x240 px)</p>
                     </>
                   )}
                   <input className="hidden" id="bannerUpload" type="file" accept="image/*" onChange={handleFileChange} />
