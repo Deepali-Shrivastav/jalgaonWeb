@@ -38,6 +38,7 @@ export default function TrendingListings({ selectedCity, initialData }: Trending
         const json = await res.json();
         const results = json.results || json.data || json || [];
         
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
         // Map DRF ListingListSerializer to TrendingListing
         const mappedResults = results.map((item: any) => ({
           id: item.slug || item.id,
@@ -45,7 +46,11 @@ export default function TrendingListings({ selectedCity, initialData }: Trending
           category: item.main_category_name || 'Business',
           rating: item.avg_rating || 4.0,
           location: item.city || 'Jalgaon',
-          image: item.business_banner || '',
+          image: item.business_banner
+            ? (item.business_banner.startsWith('http')
+              ? item.business_banner
+              : `${baseUrl}${item.business_banner.startsWith('/') ? '' : '/'}${item.business_banner}`)
+            : '',
           verified: true
         }));
         

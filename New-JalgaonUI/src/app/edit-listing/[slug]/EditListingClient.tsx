@@ -82,7 +82,10 @@ export default function EditListingClient({ slug }: { slug: string }) {
           });
 
           if (listData.business_banner) {
-            setExistingBannerUrl(listData.business_banner);
+            const bannerUrl = listData.business_banner.startsWith('http')
+              ? listData.business_banner
+              : `${baseUrl}${listData.business_banner.startsWith('/') ? '' : '/'}${listData.business_banner}`;
+            setExistingBannerUrl(bannerUrl);
           }
         } else {
           toast.error("Failed to load listing details");

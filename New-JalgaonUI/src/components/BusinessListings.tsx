@@ -112,6 +112,7 @@ export default function BusinessListings({
 
         const backendResults = json.results || json.data || json || [];
 
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
         // Map backend fields to frontend interface
         const mappedListings: Listing[] = backendResults.map((item: any) => ({
           id: item.slug || item.id,
@@ -123,9 +124,11 @@ export default function BusinessListings({
           featured: item.is_trending || false,
           verified: item.is_verified || false,
           address: item.business_address || "",
-          image:
-            item.business_banner ||
-            "https://via.placeholder.com/400x300?text=No+Image",
+          image: item.business_banner
+            ? (item.business_banner.startsWith("http")
+              ? item.business_banner
+              : `${baseUrl}${item.business_banner.startsWith("/") ? "" : "/"}${item.business_banner}`)
+            : "https://via.placeholder.com/400x300?text=No+Image",
           phone: item.business_no || "",
           email: item.business_email || "",
           city: item.city || "Jalgaon",

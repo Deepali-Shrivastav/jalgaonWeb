@@ -52,7 +52,11 @@ async function getHomeData() {
       category: item.main_category_name || 'Business',
       rating: item.avg_rating || 4.0,
       location: item.city || 'Jalgaon',
-      image: item.business_banner || '',
+      image: item.business_banner
+        ? (item.business_banner.startsWith('http')
+          ? item.business_banner
+          : `${apiUrl}${item.business_banner.startsWith('/') ? '' : '/'}${item.business_banner}`)
+        : '',
       verified: true
     }));
 
