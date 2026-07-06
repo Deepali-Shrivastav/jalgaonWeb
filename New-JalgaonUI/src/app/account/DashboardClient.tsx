@@ -13,6 +13,8 @@ export default function DashboardClient({ initialTab = 'overview' }: { initialTa
   const [error, setError] = useState<string | null>(null);
   const [profileData, setProfileData] = useState({ first_name: '', last_name: '', phone_number: '' });
   const [updatingProfile, setUpdatingProfile] = useState(false);
+  const [passwordData, setPasswordData] = useState({ old_password: '', new_password: '', confirm_password: '' });
+  const [updatingPassword, setUpdatingPassword] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const [overviewCounts, setOverviewCounts] = useState({ listings: 0, jobs: 0, events: 0 });
@@ -43,6 +45,13 @@ export default function DashboardClient({ initialTab = 'overview' }: { initialTa
   useEffect(() => {
     if (!isLogin) return;
     
+    if (activeTab === 'settings') {
+      setData([{ dummy: true }]);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
     const fetchData = async () => {
       setLoading(true);
       setError(null);
@@ -61,7 +70,7 @@ export default function DashboardClient({ initialTab = 'overview' }: { initialTa
         else if (activeTab === 'events') endpoint = '/api/v1/events/my-events/';
         else if (activeTab === 'ngos') endpoint = '/api/v1/ngo/my-ngos/';
         else if (activeTab === 'reviews') endpoint = '/api/v1/listings/user/business-reviews/';
-        else if (activeTab === 'settings') endpoint = '/api/v1/auth/user/';
+        else if (activeTab === 'profile') endpoint = '/api/v1/auth/user/';
 
         if (endpoint) {
           const res = await fetch(`${baseUrl}${endpoint}`, {
@@ -74,11 +83,11 @@ export default function DashboardClient({ initialTab = 'overview' }: { initialTa
           }
           if (!res.ok) throw new Error(`Failed to fetch ${activeTab}`);
           const result = await res.json();
-          if (activeTab === 'settings') {
+          if (activeTab === 'profile') {
             setProfileData({
               first_name: result.first_name || '',
               last_name: result.last_name || '',
-              phone_number: result.phone_number || ''
+              phone_number: result.phone_number || user?.phone_number || ''
             });
             setData([result]); // Hack to bypass the empty state
           } else {
@@ -147,6 +156,7 @@ export default function DashboardClient({ initialTab = 'overview' }: { initialTa
   }
 
   const tabs = [
+    { id: 'profile', label: 'My Profile', icon: 'person' },
     { id: 'overview', label: 'Overview', icon: 'dashboard' },
     { id: 'listings', label: 'My Listings', icon: 'storefront' },
     { id: 'saved-listings', label: 'Saved Listings', icon: 'favorite' },
@@ -210,6 +220,23 @@ export default function DashboardClient({ initialTab = 'overview' }: { initialTa
     } finally {
       setUpdatingProfile(false);
     }
+  };
+
+  const handlePasswordUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setUpdatingPassword(true);
+    
+    if (passwordData.new_password !== passwordData.confirm_password) {
+      toast.error("New passwords do not match!");
+      setUpdatingPassword(false);
+      return;
+    }
+    
+    setTimeout(() => {
+      toast.success("Password update requested! (UI Only)");
+      setPasswordData({ old_password: '', new_password: '', confirm_password: '' });
+      setUpdatingPassword(false);
+    }, 1000);
   };
 
   return (
@@ -333,7 +360,7 @@ export default function DashboardClient({ initialTab = 'overview' }: { initialTa
             </div>
           )}
 
-          {activeTab === 'settings' && data.length > 0 && (
+          {activeTab === 'profile' && data.length > 0 && (
             <form onSubmit={handleProfileUpdate} className="w-full max-w-2xl mt-4 flex flex-col gap-6">
               <div className="flex flex-col sm:flex-row gap-6">
                 <div className="w-full">
@@ -379,7 +406,58 @@ export default function DashboardClient({ initialTab = 'overview' }: { initialTa
             </form>
           )}
 
-          {activeTab !== 'overview' && activeTab !== 'settings' && !loading && !error && data.length === 0 && (
+          {activeTab === 'settings' && (
+            <form onSubmit={handlePasswordUpdate} className="w-full max-w-2xl mt-4 flex flex-col gap-6">
+              <div className="w-full">
+                <label className="block text-sm font-semibold text-ink-deep mb-2">Current Password</label>
+                <input 
+                  type="password" 
+                  required
+                  value={passwordData.old_password}
+                  onChange={(e) => setPasswordData({...passwordData, old_password: e.target.value})}
+                  className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3.5 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+                  placeholder="Enter current password"
+                />
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-6">
+                <div className="w-full">
+                  <label className="block text-sm font-semibold text-ink-deep mb-2">New Password</label>
+                  <input 
+                    type="password" 
+                    required
+                    value={passwordData.new_password}
+                    onChange={(e) => setPasswordData({...passwordData, new_password: e.target.value})}
+                    className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3.5 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+                    placeholder="Enter new password"
+                  />
+                </div>
+                <div className="w-full">
+                  <label className="block text-sm font-semibold text-ink-deep mb-2">Confirm New Password</label>
+                  <input 
+                    type="password" 
+                    required
+                    value={passwordData.confirm_password}
+                    onChange={(e) => setPasswordData({...passwordData, confirm_password: e.target.value})}
+                    className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3.5 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+                    placeholder="Confirm new password"
+                  />
+                </div>
+              </div>
+              
+              <div className="pt-2">
+                <button 
+                  type="submit" 
+                  disabled={updatingPassword}
+                  className="bg-primary hover:bg-primary-deep text-white font-bold py-3.5 px-8 rounded-lg transition-colors shadow-md disabled:opacity-50"
+                >
+                  {updatingPassword ? 'Updating...' : 'Update Password'}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {activeTab !== 'overview' && activeTab !== 'settings' && activeTab !== 'profile' && !loading && !error && data.length === 0 && (
             <div className="text-center py-20 bg-surface-container-lowest rounded-xl border border-dashed border-hairline-soft flex flex-col items-center justify-center">
               <span className="material-symbols-outlined text-5xl text-secondary/50 mb-3 block">search_off</span>
               <p className="text-secondary font-medium mb-4">No records found.</p>
@@ -411,7 +489,7 @@ export default function DashboardClient({ initialTab = 'overview' }: { initialTa
             </div>
           )}
 
-          {activeTab !== 'overview' && activeTab !== 'settings' && !loading && !error && data.length > 0 && (
+          {activeTab !== 'overview' && activeTab !== 'settings' && activeTab !== 'profile' && !loading && !error && data.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {data.map((item: any, i) => (
                 <div key={i} className="bg-white p-5 rounded-xl border border-hairline-soft shadow-sm hover:border-primary transition-all">
