@@ -11,11 +11,12 @@ export interface JobOpening {
   type?: string;
   icon?: string;
 }
-export default function JobOpenings() {
-  const [jobs, setJobs] = useState<JobOpening[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function JobOpenings({ initialData }: { initialData?: JobOpening[] }) {
+  const [jobs, setJobs] = useState<JobOpening[]>(initialData || []);
+  const [loading, setLoading] = useState(!initialData);
 
   useEffect(() => {
+    if (initialData) return;
     const fetchJobs = async () => {
       try {
         const url = process.env.NEXT_PUBLIC_API_URL 
@@ -37,7 +38,7 @@ export default function JobOpenings() {
       }
     };
     fetchJobs();
-  }, []);
+  }, [initialData]);
 
   return (
     <section id="jobs" className="bg-white py-section" aria-labelledby="jobs-heading">

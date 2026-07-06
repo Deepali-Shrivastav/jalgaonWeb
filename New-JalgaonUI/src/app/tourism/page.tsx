@@ -2,7 +2,48 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import TouristPlacesList from '@/components/TouristPlacesList';
 
+import { Metadata } from 'next';
+import Script from 'next/script';
+
+export const metadata: Metadata = {
+  title: 'Jalgaon Tourism & Heritage Places | Explore Ajanta Caves & More',
+  description: 'Explore the top tourist attractions in Jalgaon, including Ajanta Caves, Gandhi Teerth, Patnadevi, and Mehrun Lake. Plan your perfect Khandesh trip.',
+  alternates: {
+    canonical: 'https://www.jalgaon.com/tourism',
+  },
+  openGraph: {
+    title: 'Jalgaon Tourism & Heritage Places',
+    description: 'Explore the top tourist attractions in Jalgaon, including Ajanta Caves, Gandhi Teerth, Patnadevi, and Mehrun Lake.',
+    url: 'https://www.jalgaon.com/tourism',
+    type: 'website',
+  }
+};
+
 export default function TourismPage() {
+  const touristSchema = {
+    "@context": "https://schema.org",
+    "@type": "TouristDestination",
+    "name": "Jalgaon",
+    "description": "Jalgaon is the cultural soul of North Maharashtra, known as the Banana Capital of India and gateway to the UNESCO World Heritage Ajanta Caves.",
+    "touristType": ["Cultural tourism", "Heritage tourism", "Nature tourism"],
+    "includesAttraction": [
+      {
+        "@type": "TouristAttraction",
+        "name": "Ajanta Caves",
+        "description": "UNESCO World Heritage site featuring 30 rock-cut Buddhist cave monuments."
+      },
+      {
+        "@type": "TouristAttraction",
+        "name": "Gandhi Teerth",
+        "description": "A magnificent museum and research institute dedicated to Mahatma Gandhi."
+      },
+      {
+        "@type": "TouristAttraction",
+        "name": "Patnadevi Temple",
+        "description": "Historic temple surrounded by lush green forests and mountains."
+      }
+    ]
+  };
   return (
     <>
       <style>{`
@@ -11,6 +52,11 @@ export default function TourismPage() {
       `}</style>
       {/* Wrapper for page specific styles to not pollute globals */}
       <div className="bg-background text-on-surface font-body-md">
+        <Script
+          id="tourism-schema"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(touristSchema) }}
+        />
         
 <Header />
 <main>

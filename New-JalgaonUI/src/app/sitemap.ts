@@ -1,5 +1,30 @@
 import type { MetadataRoute } from 'next';
 
+async function fetchAll(url: string): Promise<any[]> {
+  let results: any[] = [];
+  let nextUrl: string | null = url;
+
+  while (nextUrl) {
+    try {
+      const res = await fetch(nextUrl, { next: { revalidate: 3600 } });
+      if (!res.ok) break;
+      const data = await res.json();
+      if (data.results) {
+        results = results.concat(data.results);
+        nextUrl = data.next; // DRF pagination
+      } else if (Array.isArray(data)) {
+        results = results.concat(data);
+        nextUrl = null;
+      } else {
+        break;
+      }
+    } catch (e) {
+      break;
+    }
+  }
+  return results;
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.jalgaon.com';
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
@@ -32,39 +57,57 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         });
     }
 
-    // 2. Fetch Business Listings
-    const listingsRes = await fetch(`${apiUrl}/api/v1/listings/`, { next: { revalidate: 3600 } });
-    if (listingsRes.ok) {
-      const data = await listingsRes.json();
-      const listings = data.results || data.data || data || [];
-      listings.forEach((listing: any) => {
-        if (listing.id || listing.slug) {
-          routes.push({
-            url: `${baseUrl}/directory/${listing.slug || listing.id}`,
-            lastModified: listing.updated_at ? new Date(listing.updated_at) : new Date(),
-            changeFrequency: 'weekly',
-            priority: 0.8,
-          });
-        }
-      });
-    }
-
-    // 3. Fetch Trending News
-    const newsRes = await fetch(`${apiUrl}/api/v1/news/trending/`, { next: { revalidate: 3600 } });
-    if (newsRes.ok) {
-        const data = await newsRes.json();
-        const news = data.results || data.data || data || [];
-        news.forEach((n: any) => {
-            if (n.slug || n.id) {
-                routes.push({
-                    url: `${baseUrl}/news/${n.slug || n.id}`,
-                    lastModified: n.published_at || n.created_at ? new Date(n.published_at || n.created_at) : new Date(),
-                    changeFrequency: 'daily',
-                    priority: 0.7,
-                });
-            }
+    // 2. Fetch All Business Listings
+    const listings = await fetchAll(`${apiUrl}/api/v1/listings/`);
+    listings.forEach((listing: any) => {
+      if (listing.id || listing.slug) {
+        routes.push({
+          url: `${baseUrl}/directory/${listing.slug || listing.id}`,
+          lastModified: listing.updated_at ? new Date(listing.updated_at) : new Date(),
+          changeFrequency: 'weekly',
+          priority: 0.8,
         });
-    }
+      }
+    });
+
+    // 3. Fetch All News
+    const news = await fetchAll(`${apiUrl}/api/v1/news/`);
+    news.forEach((n: any) => {
+        if (n.slug || n.id) {
+            routes.push({
+                url: `${baseUrl}/news/${n.slug || n.id}`,
+                lastModified: n.updated_at || n.published_at || n.created_at ? new Date(n.updated_at || n.published_at || n.created_at) : new Date(),
+                changeFrequency: 'daily',
+                priority: 0.7,
+            });
+        }
+    });
+
+    // 4. Fetch All Events
+    const events = await fetchAll(`${apiUrl}/api/v1/events/`);
+    events.forEach((e: any) => {
+        if (e.slug || e.id) {
+            routes.push({
+                url: `${baseUrl}/events/${e.slug || e.id}`,
+                lastModified: e.updated_at || e.created_at ? new Date(e.updated_at || e.created_at) : new Date(),
+                changeFrequency: 'daily',
+                priority: 0.7,
+            });
+        }
+    });
+
+    // 5. Fetch All Jobs
+    const jobs = await fetchAll(`${apiUrl}/api/v1/jobs/`);
+    jobs.forEach((j: any) => {
+        if (j.slug || j.id) {
+            routes.push({
+                url: `${baseUrl}/jobs/${j.slug || j.id}`,
+                lastModified: j.updated_at || j.created_at ? new Date(j.updated_at || j.created_at) : new Date(),
+                changeFrequency: 'daily',
+                priority: 0.7,
+            });
+        }
+    });
     
   } catch (err) {
     console.warn("Failed to generate dynamic sitemap entries:", err);

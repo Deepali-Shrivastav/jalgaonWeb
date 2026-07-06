@@ -12,11 +12,12 @@ export interface EventItem {
   venue?: string;
 }
 
-export default function UpcomingEvents() {
-  const [events, setEvents] = useState<EventItem[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function UpcomingEvents({ initialData }: { initialData?: EventItem[] }) {
+  const [events, setEvents] = useState<EventItem[]>(initialData || []);
+  const [loading, setLoading] = useState(!initialData);
 
   useEffect(() => {
+    if (initialData) return;
     const fetchEvents = async () => {
       try {
         const url = process.env.NEXT_PUBLIC_API_URL 
@@ -54,7 +55,7 @@ export default function UpcomingEvents() {
       }
     };
     fetchEvents();
-  }, []);
+  }, [initialData]);
 
   return (
     <section id="events" className="bg-surface-container-low py-xxxl sm:py-section" aria-labelledby="events-heading">
