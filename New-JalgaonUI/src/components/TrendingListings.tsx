@@ -15,13 +15,15 @@ export interface TrendingListing {
 
 interface TrendingListingsProps {
   selectedCity?: string;
+  initialData?: TrendingListing[];
 }
 
-export default function TrendingListings({ selectedCity }: TrendingListingsProps) {
-  const [listings, setListings] = useState<TrendingListing[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function TrendingListings({ selectedCity, initialData }: TrendingListingsProps) {
+  const [listings, setListings] = useState<TrendingListing[]>(initialData || []);
+  const [loading, setLoading] = useState(!initialData);
 
   useEffect(() => {
+    if (initialData) return;
     const fetchListings = async () => {
       try {
         const url = process.env.NEXT_PUBLIC_API_URL 
@@ -55,7 +57,7 @@ export default function TrendingListings({ selectedCity }: TrendingListingsProps
       }
     };
     fetchListings();
-  }, []);
+  }, [initialData]);
 
   const filteredListings = selectedCity
     ? listings.filter(item => item.location.toLowerCase() === selectedCity.toLowerCase())

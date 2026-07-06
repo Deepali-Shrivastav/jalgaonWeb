@@ -8,7 +8,7 @@ interface Ad {
   target_page: string;
 }
 
-export default function CarouselAds({ slot = 'hero_banner' }: { slot?: string }) {
+export default function CarouselAds({ slot = 'hero_banner', className = '' }: { slot?: string, className?: string }) {
   const [ads, setAds] = useState<Ad[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -56,11 +56,22 @@ export default function CarouselAds({ slot = 'hero_banner' }: { slot?: string })
     }
   }, [currentIndex, ads]);
 
+  const baseWrapperClass = "relative mx-auto overflow-hidden rounded-xl my-6 group";
+  const emptyWrapperClass = "flex flex-col items-center justify-center bg-surface-container-low border border-hairline-soft text-secondary/40";
+  
+  const finalWrapperClass = className 
+    ? `${baseWrapperClass} ${className}` 
+    : `${baseWrapperClass} w-full max-w-container-max px-base aspect-[4/3]`;
+
+  const finalEmptyClass = className
+    ? `${baseWrapperClass} ${emptyWrapperClass} ${className}`
+    : `${baseWrapperClass} ${emptyWrapperClass} w-full max-w-container-max px-base aspect-[4/3]`;
+
   if (loading) return null;
   
   if (ads.length === 0) {
     return (
-      <div className="relative w-full max-w-container-max mx-auto px-base overflow-hidden rounded-xl my-6 flex flex-col items-center justify-center bg-surface-container-low border border-hairline-soft aspect-[4/3] text-secondary/40">
+      <div className={finalEmptyClass}>
         <span className="material-symbols-outlined text-5xl mb-2 opacity-50">ad</span>
         <span className="text-xs font-bold tracking-widest uppercase opacity-50">Advertisement Space</span>
         <p className="text-[10px] mt-1 text-center px-4">({slot} slot is empty)</p>
@@ -68,17 +79,17 @@ export default function CarouselAds({ slot = 'hero_banner' }: { slot?: string })
     );
   }
   return (
-    <div className="relative w-full max-w-container-max mx-auto px-base overflow-hidden rounded-xl my-6 group">
+    <div className={finalWrapperClass}>
       <div 
-        className="flex transition-transform duration-500 ease-in-out" 
+        className="flex transition-transform duration-500 ease-in-out h-full" 
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
       >
         {ads.map((ad, index) => (
-          <div key={ad.id} className="min-w-full flex-shrink-0 cursor-pointer" onClick={() => handleAdClick(ad.id)}>
+          <div key={ad.id} className="min-w-full h-full flex-shrink-0 cursor-pointer" onClick={() => handleAdClick(ad.id)}>
             <img
               src={ad.ad_image.startsWith('http') ? ad.ad_image : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${ad.ad_image}`}
               alt={ad.name || 'Advertisement'}
-              className="w-full h-auto max-h-[400px] object-cover rounded-xl"
+              className={`object-cover rounded-xl ${className ? 'w-full h-full' : 'w-full h-auto max-h-[400px]'}`}
             />
           </div>
         ))}

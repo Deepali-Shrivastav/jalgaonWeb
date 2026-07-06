@@ -1,51 +1,85 @@
-'use client';
-
-import React, { useState } from 'react';
 import Header from '@/components/Header';
-import Hero from '@/components/Hero';
-import MarketWeatherDashboard from '@/components/MarketWeatherDashboard';
-import LatestNews from '@/components/LatestNews';
-import UpcomingEvents from '@/components/UpcomingEvents';
-import LocalWonders from '@/components/LocalWonders';
-import JobOpenings from '@/components/JobOpenings';
-import NgoSpotlight from '@/components/NgoSpotlight';
-import BlogSection from '@/components/BlogSection';
-import TrendingListings from '@/components/TrendingListings';
-import IndustryGrids from '@/components/IndustryGrids';
-import CallToAction from '@/components/CallToAction';
-import ContactForm from '@/components/ContactForm';
 import Footer from '@/components/Footer';
-import { useRouter } from 'next/navigation';
+import HomeClient from '@/components/HomeClient';
 
-export default function Home() {
-  const router = useRouter();
-  const [selectedCity, setSelectedCity] = useState<string>('Jalgaon');
+async function getHomeData() {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  
+  try {
+    const [trendingRes, newsRes, eventsRes, jobsRes] = await Promise.allSettled([
+      fetch(`${apiUrl}/api/v1/listings/trending/`, { next: { revalidate: 3600 } }),
+      fetch(`${apiUrl}/api/v1/news/trending/`, { next: { revalidate: 1800 } }),
+      fetch(`${apiUrl}/api/v1/events/`, { next: { revalidate: 3600 } }),
+      fetch(`${apiUrl}/api/v1/jobs/`, { next: { revalidate: 3600 } }),
+    ]);
 
-  const handleSelectCategory = (cat: string) => {
-    router.push(`/category/${cat}`);
-  };
+    const getJson = async (res: PromiseSettledResult<Response>) => {
+      if (res.status === 'fulfilled' && res.value.ok) {
+        try {
+          const data = await res.value.json();
+          return data.results || data.data || data || [];
+        } catch {
+          return [];
+        }
+      }
+      return [];
+    };
 
-  const handleSearch = (query: string) => {
-    if (!query.trim()) return;
-    router.push(`/search?q=${encodeURIComponent(query)}`);
-  };
+    const trendingListings = await getJson(trendingRes);
+    const news = await getJson(newsRes);
+    
+    let events = await getJson(eventsRes);
+    events = events.slice(0, 4).map((item: any) => {
+      const startDate = item.start_datetime ? new Date(item.start_datetime) : new Date();
+      return {
+        id: item.id,
+        slug: item.slug,
+        month: startDate.toLocaleString('en-US', { month: 'short' }),
+        day: startDate.getDate().toString().padStart(2, '0'),
+        isoDate: item.start_datetime || '',
+        title: item.title,
+        location: item.venue_name || item.venue_address || 'TBA',
+        venue: item.venue_name || item.venue_address || 'TBA'
+      };
+    });
+
+    const jobs = await getJson(jobsRes);
+    const slicedJobs = jobs.slice(0, 3);
+
+    const mappedListings = trendingListings.map((item: any) => ({
+      id: item.slug || item.id,
+      name: item.business_name,
+      category: item.main_category_name || 'Business',
+      rating: item.avg_rating || 4.0,
+      location: item.city || 'Jalgaon',
+      image: item.business_banner || '',
+      verified: true
+    }));
+
+    return { 
+      trendingListings: mappedListings, 
+      news, 
+      events, 
+      jobs: slicedJobs 
+    };
+  } catch (err) {
+    return { trendingListings: [], news: [], events: [], jobs: [] };
+  }
+}
+
+export default async function Home() {
+  const { trendingListings, news, events, jobs } = await getHomeData();
 
   return (
     <>
       <Header />
       <main>
-          <MarketWeatherDashboard />
-          <Hero selectedCity={selectedCity} onCityChange={setSelectedCity} onSearch={handleSearch} />
-          <TrendingListings selectedCity={selectedCity} />
-          <IndustryGrids onSelectCategory={handleSelectCategory} />
-          <LatestNews />
-          <UpcomingEvents />
-          <LocalWonders />
-          <JobOpenings />
-          <NgoSpotlight />
-          {/* <BlogSection /> */}
-          <CallToAction />
-          <ContactForm />
+        <HomeClient 
+          trendingListings={trendingListings} 
+          news={news} 
+          events={events} 
+          jobs={jobs} 
+        />
       </main>
       <Footer />
     </>
