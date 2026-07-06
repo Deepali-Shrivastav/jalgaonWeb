@@ -190,7 +190,27 @@ class ListingReviewListView(generics.ListAPIView):
 
     def get_queryset(self):
         slug = self.kwargs.get('slug')
+        user = self.request.user
+        if user.is_authenticated:
+            shop = ShopListing.objects.filter(slug=slug).first()
+            if shop and shop.user == user:
+                return ShopReview.objects.filter(shop_listing__slug=slug).order_by('-timestamp')
         return ShopReview.objects.filter(shop_listing__slug=slug, status='approved').order_by('-timestamp')
+
+class ReviewManageView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ShopReviewSerializer
+
+    def get_queryset(self):
+        return ShopReview.objects.filter(shop_listing__user=self.request.user)
+
+    def perform_update(self, serializer):
+        status_val = self.request.data.get('status')
+        instance = serializer.save()
+        if status_val in ['approved', 'pending', 'rejected']:
+            instance.status = status_val
+            instance.save()
+
 
 class ListingReviewCreateView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
@@ -233,6 +253,13 @@ class UserListedShops(generics.ListAPIView):
     
     def get_queryset(self):
         return ShopListing.objects.filter(user=self.request.user).order_by('-created_at')
+
+class UserBusinessReviewsView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ShopReviewSerializer
+
+    def get_queryset(self):
+        return ShopReview.objects.filter(shop_listing__user=self.request.user).order_by('-timestamp')
 
 class BusinessClaimCreateView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]

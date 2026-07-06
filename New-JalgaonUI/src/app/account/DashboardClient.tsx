@@ -60,6 +60,7 @@ export default function DashboardClient({ initialTab = 'overview' }: { initialTa
         else if (activeTab === 'applications') endpoint = '/api/v1/jobs/my-applications/';
         else if (activeTab === 'events') endpoint = '/api/v1/events/my-events/';
         else if (activeTab === 'ngos') endpoint = '/api/v1/ngo/my-ngos/';
+        else if (activeTab === 'reviews') endpoint = '/api/v1/listings/user/business-reviews/';
         else if (activeTab === 'settings') endpoint = '/api/v1/auth/user/';
 
         if (endpoint) {
@@ -154,8 +155,32 @@ export default function DashboardClient({ initialTab = 'overview' }: { initialTa
     { id: 'applications', label: 'My Applications', icon: 'description' },
     { id: 'events', label: 'My Events', icon: 'event' },
     { id: 'ngos', label: 'My NGOs', icon: 'volunteer_activism' },
+    { id: 'reviews', label: 'Manage Reviews', icon: 'reviews' },
     { id: 'settings', label: 'Settings', icon: 'settings' },
   ];
+
+  const handleReviewStatus = async (reviewId: number, status: string) => {
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${baseUrl}/api/v1/listings/reviews/${reviewId}/manage/`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status })
+      });
+      if (res.ok) {
+        toast.success(`Review ${status} successfully!`);
+        setData(data.map((r: any) => r.id === reviewId ? { ...r, status } : r));
+      } else {
+        toast.error("Failed to update review status.");
+      }
+    } catch (err) {
+      toast.error("An error occurred while updating review.");
+    }
+  };
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -378,6 +403,11 @@ export default function DashboardClient({ initialTab = 'overview' }: { initialTa
                   Register NGO
                 </Link>
               )}
+              {activeTab === 'reviews' && (
+                <Link href="/add-listing" className="bg-primary hover:bg-primary-deep text-white font-bold px-6 py-2 rounded-full transition-all text-sm">
+                  Add Your First Listing
+                </Link>
+              )}
             </div>
           )}
 
@@ -445,6 +475,36 @@ export default function DashboardClient({ initialTab = 'overview' }: { initialTa
                       <h4 className="font-bold text-ink-deep mb-2">{item.name}</h4>
                       <p className="text-sm text-secondary mb-4 line-clamp-2">{item.description}</p>
                       <span className="text-xs font-bold px-2 py-1 rounded-md text-emerald-700 bg-emerald-100">Verified: {item.is_verified ? 'Yes' : 'Pending'}</span>
+                    </>
+                  )}
+                  {activeTab === 'reviews' && (
+                    <>
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <h4 className="font-bold text-ink-deep">{item.user_name || 'Anonymous'}</h4>
+                          <Link href={`/directory/${item.business_slug}`} className="text-xs text-primary hover:underline font-bold mb-1 block">
+                            On: {item.business_name}
+                          </Link>
+                          <p className="text-xs text-secondary">{new Date(item.timestamp).toLocaleDateString()}</p>
+                        </div>
+                        <div className="flex text-yellow-500">
+                          {Array(item.rating_star || 0).fill(0).map((_, i) => <span key={i} className="material-symbols-outlined text-[16px]" style={{fontVariationSettings: "'FILL' 1"}}>star</span>)}
+                        </div>
+                      </div>
+                      <p className="text-sm text-secondary mb-4 line-clamp-3">{item.user_review}</p>
+                      
+                      <div className="flex items-center gap-2 border-t border-hairline-soft pt-3 mt-2">
+                        <span className={`text-xs font-bold px-2 py-1 rounded-full ${item.status === 'approved' ? 'bg-green-100 text-green-700' : item.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                          {item.status ? item.status.toUpperCase() : 'UNKNOWN'}
+                        </span>
+                        <div className="flex-1"></div>
+                        {item.status !== 'approved' && (
+                          <button type="button" onClick={() => handleReviewStatus(item.id, 'approved')} className="text-xs bg-green-50 text-green-600 hover:bg-green-100 px-3 py-1.5 rounded-lg font-bold transition-colors border border-green-200">Approve</button>
+                        )}
+                        {item.status !== 'rejected' && (
+                          <button type="button" onClick={() => handleReviewStatus(item.id, 'rejected')} className="text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded-lg font-bold transition-colors border border-red-200">Hide</button>
+                        )}
+                      </div>
                     </>
                   )}
                 </div>

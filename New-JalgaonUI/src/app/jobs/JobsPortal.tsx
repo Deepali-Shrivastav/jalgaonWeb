@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Pagination from "@/components/Pagination";
 import SkeletonCard from "@/components/SkeletonCard";
+import Link from "next/link";
 
 const jobTypes = ["Full-time", "Part-time", "Contract", "Internship"];
 const experienceLevels = [
@@ -283,7 +284,7 @@ export default function JobsPortal() {
                         <div className="flex-1 min-w-0">
                           <Link href={`/jobs/${job.slug}`} className="font-bold text-ink-deep group-hover:text-primary transition-colors truncate block">
                             {job.title}
-                          </h3>
+                          </Link>
                           <p className="text-sm text-secondary truncate">
                             {job.company}
                           </p>
@@ -423,3 +424,4 @@ export default function JobsPortal() {
     </>
   );
 }
+
