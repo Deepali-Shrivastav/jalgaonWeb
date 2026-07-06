@@ -315,6 +315,9 @@ export default function DashboardClient() {
                         </Link>
                         {activeTab === 'listings' && (
                           <div className="flex gap-3">
+                            <Link href={`/add-job?listing_id=${item.id}&company_name=${encodeURIComponent(item.business_name || item.shop_listing?.business_name || '')}`} className="text-blue-600 font-bold text-sm hover:underline flex items-center gap-1">
+                              <span className="material-symbols-outlined text-[16px]">work</span> List Job
+                            </Link>
                             <Link href={`/edit-listing/${item.slug}`} className="text-emerald-600 font-bold text-sm hover:underline flex items-center gap-1">
                               <span className="material-symbols-outlined text-[16px]">edit</span> Edit
                             </Link>

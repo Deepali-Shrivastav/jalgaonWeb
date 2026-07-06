@@ -1,17 +1,20 @@
 "use client";
 
 import React, { useState, useContext, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthContext } from '@/context/AuthContext';
 
 export default function AddJobClient() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const listingId = searchParams.get('listing_id') || '';
+  const companyNameParam = searchParams.get('company_name') || '';
   const { user, isLogin } = useContext(AuthContext);
   
   const [categories, setCategories] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     title: '',
-    company: '',
+    company: companyNameParam,
     location: '',
     job_type: 'full_time',
     category: '',
@@ -20,7 +23,8 @@ export default function AddJobClient() {
     description: '',
     requirements: '',
     apply_url: '',
-    deadline: ''
+    deadline: '',
+    shop_listing: listingId
   });
   
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -85,7 +89,19 @@ export default function AddJobClient() {
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.detail || errorData.non_field_errors?.[0] || 'Failed to submit job.');
+        let errorMessage = 'Failed to submit job.';
+        if (errorData.detail) {
+          errorMessage = errorData.detail;
+        } else if (errorData.non_field_errors) {
+          errorMessage = errorData.non_field_errors[0];
+        } else {
+          // Extract the first field error
+          const firstKey = Object.keys(errorData)[0];
+          if (firstKey) {
+            errorMessage = `${firstKey}: ${errorData[firstKey][0]}`;
+          }
+        }
+        throw new Error(errorMessage);
       }
 
       setSuccess(true);
@@ -287,11 +303,12 @@ export default function AddJobClient() {
             </div>
 
             <div className="mb-6">
-              <label className="block text-sm font-semibold text-ink-deep mb-2">Requirements / Qualifications</label>
+              <label className="block text-sm font-semibold text-ink-deep mb-2">Requirements / Qualifications *</label>
               <textarea 
                 name="requirements" 
                 value={formData.requirements} 
                 onChange={handleChange} 
+                required
                 rows={4}
                 placeholder="List the skills, experience, and education required..."
                 className="w-full p-4 rounded-xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-y"

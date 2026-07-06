@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import Link from 'next/link';
 
 const jobTypes = ['Full-time', 'Part-time', 'Contract', 'Internship'];
 const experienceLevels = [
@@ -13,15 +14,15 @@ const experienceLevels = [
 
 export interface JobListing {
   id: number;
+  slug: string;
   title: string;
   company: string;
   location: string;
-  salary: string;
-  posted: string;
-  type: string;
-  typeBg?: string;
-  logo: string;
-  logoAlt?: string;
+  salary_min?: number;
+  salary_max?: number;
+  created_at: string;
+  job_type: string;
+  company_logo: string;
 }
 
 
@@ -227,20 +228,20 @@ export default function JobsPortal() {
                     >
                       <div className="flex gap-4 items-start">
                         <div className="w-12 h-12 rounded-lg bg-white flex items-center justify-center p-2 border border-amber-100 shrink-0">
-                          {job.logo ? (
-                            <img className="w-full h-full object-contain" src={job.logo} alt={job.logoAlt || job.company} loading="lazy" />
+                          {job.company_logo ? (
+                            <img className="w-full h-full object-contain" src={job.company_logo} alt={job.company} loading="lazy" />
                           ) : (
                             <span className="material-symbols-outlined text-amber-600">business</span>
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-ink-deep group-hover:text-primary transition-colors truncate">
+                          <Link href={`/jobs/${job.slug}`} className="font-bold text-ink-deep group-hover:text-primary transition-colors truncate block">
                             {job.title}
-                          </h3>
+                          </Link>
                           <p className="text-sm text-secondary truncate">{job.company}</p>
                           <div className="flex items-center gap-3 mt-2 text-xs text-secondary">
                             <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">location_on</span>{job.location}</span>
-                            <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">payments</span>{job.salary}</span>
+                            <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">payments</span>{job.salary_min && job.salary_max ? `₹${job.salary_min} - ₹${job.salary_max}` : 'Not specified'}</span>
                           </div>
                         </div>
                       </div>
@@ -281,11 +282,11 @@ export default function JobsPortal() {
                     <div className="flex flex-col md:flex-row gap-5 items-start">
                       {/* Company Logo */}
                       <div className="w-14 h-14 rounded-lg bg-surface-container-low flex items-center justify-center p-2 border border-hairline-soft shrink-0">
-                        {job.logo ? (
+                        {job.company_logo ? (
                           <img
                             className="w-full h-full object-contain"
-                            src={job.logo}
-                            alt={job.logoAlt || job.company}
+                            src={job.company_logo}
+                            alt={job.company}
                             loading="lazy"
                           />
                         ) : (
@@ -296,13 +297,13 @@ export default function JobsPortal() {
                       {/* Job Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap justify-between items-start gap-2 mb-2">
-                          <h3 className="text-lg font-bold group-hover:text-primary transition-colors">
+                          <Link href={`/jobs/${job.slug}`} className="text-lg font-bold hover:text-primary transition-colors">
                             {job.title}
-                          </h3>
+                          </Link>
                           <span
-                            className={`${job.typeBg || 'bg-blue-50 text-primary'} px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap`}
+                            className={`bg-blue-50 text-primary px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap uppercase`}
                           >
-                            {job.type}
+                            {job.job_type?.replace('_', ' ')}
                           </span>
                         </div>
                         <p className="text-secondary mb-3">{job.company}</p>
@@ -317,30 +318,25 @@ export default function JobsPortal() {
                             <span className="material-symbols-outlined text-[18px]">
                               payments
                             </span>
-                            {job.salary}
+                            {job.salary_min && job.salary_max ? `₹${job.salary_min} - ₹${job.salary_max}` : 'Not specified'}
                           </span>
                           <time className="flex items-center gap-1">
                             <span className="material-symbols-outlined text-[18px]">
                               schedule
                             </span>
-                            {job.posted}
+                            {new Date(job.created_at).toLocaleDateString()}
                           </time>
                         </div>
                       </div>
 
                       {/* Actions */}
                       <div className="flex flex-row md:flex-col gap-2 w-full md:w-auto mt-3 md:mt-0 shrink-0">
-                        <button className="flex-1 md:flex-initial bg-primary text-white px-6 py-3 rounded-full font-bold text-sm hover:bg-primary-deep transition-all text-center active:scale-95 shadow-sm">
+                        <Link href={`/jobs/${job.slug}`} className="flex-1 md:flex-initial bg-surface border border-primary text-primary px-6 py-2 rounded-full font-bold text-sm hover:bg-primary hover:text-white transition-all text-center active:scale-95 shadow-sm">
+                          View Details
+                        </Link>
+                        <Link href={`/jobs/${job.slug}?apply=true`} className="flex-1 md:flex-initial bg-primary text-white px-6 py-2 rounded-full font-bold text-sm hover:bg-primary-deep transition-all text-center active:scale-95 shadow-sm">
                           Apply Now
-                        </button>
-                        <button
-                          className="p-3 border border-hairline-soft rounded-full hover:bg-surface-container-low transition-colors"
-                          aria-label={`Bookmark ${job.title}`}
-                        >
-                          <span className="material-symbols-outlined">
-                            bookmark
-                          </span>
-                        </button>
+                        </Link>
                       </div>
                     </div>
                   </article>
