@@ -34,6 +34,7 @@ urlpatterns = [
     path('api/v1/jobs/', include('apps.jobs.urls')),
     path('api/v1/admin-panel/', include('apps.admin_panel.urls')),
     path('api/v1/ngo/', include('apps.ngo.urls')),
+    path('api/v1/notifications/', include('apps.notifications.urls')),
 
     # Swagger / OpenAPI Docs
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

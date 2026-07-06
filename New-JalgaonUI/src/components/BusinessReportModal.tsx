@@ -55,7 +55,7 @@ export default function BusinessReportModal({ isOpen, onClose, business, baseUrl
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
-      <div className="bg-white rounded-2xl p-8 w-[90vw] md:w-[500px] max-w-md relative shadow-2xl animate-fade-in box-border min-w-[320px]">
+      <div className="bg-white rounded-2xl p-8 w-[90vw] md:w-[500px] max-w-[500px] relative shadow-2xl animate-fade-in box-border min-w-[320px]">
         <button 
           onClick={onClose} 
           className="absolute top-4 right-4 text-secondary hover:text-red-500 transition-colors focus:outline-none"

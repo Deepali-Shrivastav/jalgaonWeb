@@ -30,7 +30,40 @@ export default function AdvertiseClient() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setAdImage(e.target.files[0]);
+      const file = e.target.files[0];
+      const img = new Image();
+      img.onload = () => {
+        if (formData.ad_type === 'BA') {
+          if (img.width !== 900 || img.height !== 200) {
+            toast.error("Banner ads must be exactly 900x200px");
+            setAdImage(null);
+            e.target.value = '';
+          } else {
+            setAdImage(file);
+          }
+        } else if (formData.ad_type === 'CA') {
+          if (formData.target_page === 'sidebar') {
+            if (img.width !== 300 || img.height !== 250) {
+              toast.error("Sidebar Carousel ads must be exactly 300x250px");
+              setAdImage(null);
+              e.target.value = '';
+            } else {
+              setAdImage(file);
+            }
+          } else {
+            if (img.width > 800 || img.height > 400) {
+              toast.error("Carousel ads must be max 800x400px");
+              setAdImage(null);
+              e.target.value = '';
+            } else {
+              setAdImage(file);
+            }
+          }
+        } else {
+          setAdImage(file);
+        }
+      };
+      img.src = URL.createObjectURL(file);
     }
   };
 
@@ -52,6 +85,38 @@ export default function AdvertiseClient() {
     });
 
     if (adImage) {
+      const isValid = await new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          if (formData.ad_type === 'BA') {
+            resolve(img.width === 900 && img.height === 200);
+          } else if (formData.ad_type === 'CA') {
+            if (formData.target_page === 'sidebar') {
+              resolve(img.width === 300 && img.height === 250);
+            } else {
+              resolve(img.width <= 800 && img.height <= 400);
+            }
+          } else {
+            resolve(true);
+          }
+        };
+        img.onerror = () => resolve(false);
+        img.src = URL.createObjectURL(adImage);
+      });
+      
+      if (!isValid) {
+        if (formData.ad_type === 'BA') {
+          toast.error("Banner ads must be exactly 900x200px");
+        } else if (formData.ad_type === 'CA') {
+          if (formData.target_page === 'sidebar') {
+            toast.error("Sidebar Carousel ads must be exactly 300x250px");
+          } else {
+            toast.error("Carousel ads must be max 800x400px");
+          }
+        }
+        setSubmitting(false);
+        return;
+      }
       submitData.append('ad_image', adImage);
     } else {
       toast.error("Advertisement image is required");
@@ -183,7 +248,13 @@ export default function AdvertiseClient() {
                             <>
                               <span className="material-symbols-outlined text-outline mb-2 text-3xl">cloud_upload</span>
                               <p className="mb-2 text-sm text-on-surface-variant"><span className="font-semibold text-primary">Click to upload</span> or drag and drop</p>
-                              <p className="text-xs text-secondary">PNG, JPG (MAX. 800x400px)</p>
+                              <p className="text-xs text-secondary">
+                                {formData.ad_type === 'BA' 
+                                  ? 'PNG, JPG (Exactly 900x200px)' 
+                                  : formData.ad_type === 'CA' && formData.target_page === 'sidebar' 
+                                    ? 'PNG, JPG (Exactly 300x250px)' 
+                                    : 'PNG, JPG (MAX. 800x400px)'}
+                              </p>
                             </>
                           )}
                         </div>

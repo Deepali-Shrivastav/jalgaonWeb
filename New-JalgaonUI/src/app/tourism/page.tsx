@@ -111,7 +111,7 @@ export default function TourismPage() {
 <img alt="Ajanta Caves" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDx_4IxcLRPiwbMxgDZhbIyrC-6ueQmxrxuRion8LWNFLTsf1XTSuMpg8Qsjbx3CSImSoJRxhRHMhAw9ZIM2ePSBfpPc93NBPclPyI_xx9qVLdlZLyeOdeUaCuKSEHK0s9WhWStE7BG4P-Tza-BpyclIVjY0GpUFqyDSZU_L1nPR3kMFBftqaeZZZ7eaAUSdLRRkCpojc42c2_MUTeQGGq0K-_Qp8rcUGxgZRqvRVzDT9B87y6G5FZb"/>
 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8">
 <h3 className="text-white font-headline-md text-headline-md mb-2">Ajanta Caves</h3>
-<p className="text-white/90 text-body-sm max-w-md">UNESCO World Heritage site featuring 30 rock-cut Buddhist cave monuments dating from the 2nd century BCE.</p>
+<p className="text-white/90 text-body-sm max-w-[448px]">UNESCO World Heritage site featuring 30 rock-cut Buddhist cave monuments dating from the 2nd century BCE.</p>
 </div>
 </div>
 {/* Right Column Top: Patnadevi Temple */}
