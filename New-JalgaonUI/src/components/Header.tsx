@@ -4,7 +4,6 @@ import React, { useContext, useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AuthContext } from "@/context/AuthContext";
-import SearchBar from "@/components/SearchBar";
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -22,8 +21,6 @@ export default function Header() {
     if (href === "/") return pathname === "/";
     return pathname.startsWith(href);
   };
-
-  const showHeaderSearch = pathname === "/search" || pathname.startsWith("/directory") || pathname.startsWith("/category");
 
   return (
     <>
@@ -57,30 +54,24 @@ export default function Header() {
               ))}
               <Link
                 href="/add-listing"
-                className={`${showHeaderSearch ? "hidden" : ""} text-secondary hover:text-primary transition-colors font-medium`}
+                className="text-secondary hover:text-primary transition-colors font-medium"
               >
                 Add Listing
               </Link>
               <Link
                 href="/add-event"
-                className={`${showHeaderSearch ? "hidden" : ""} text-secondary hover:text-primary transition-colors font-medium`}
+                className="text-secondary hover:text-primary transition-colors font-medium"
               >
                 Add Event
               </Link>
               <Link
                 href="/advertise"
-                className={`${showHeaderSearch ? "hidden" : ""} text-secondary hover:text-primary transition-colors font-medium`}
+                className="text-secondary hover:text-primary transition-colors font-medium"
               >
                 Advertise
               </Link>
             </nav>
           </div>
-
-          {showHeaderSearch && (
-            <div className="hidden xl:block flex-1 min-w-[180px] max-w-[240px] xl:max-w-xs mx-4">
-              <SearchBar compact placeholder="Search Jalgaon.com..." />
-            </div>
-          )}
 
           <div className="flex items-center gap-base">
             <div className="hidden md:flex items-center gap-base">
