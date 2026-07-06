@@ -52,10 +52,6 @@ const getImageUrl = (img: any) => {
   return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
-export default function LatestNews() {
-  const [featuredStory, setFeaturedStory] = useState<NewsStory | null>(null);
-  const [newsList, setNewsList] = useState<NewsStory[]>([]);
-  const [loading, setLoading] = useState(true);
 export default function LatestNews({ initialData }: { initialData?: NewsStory[] }) {
   const [featuredStory, setFeaturedStory] = useState<NewsStory | null>(initialData && initialData.length > 0 ? initialData[0] : null);
   const [newsList, setNewsList] = useState<NewsStory[]>(initialData && initialData.length > 1 ? initialData.slice(1, 5) : []);
