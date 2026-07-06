@@ -7,9 +7,10 @@ import { AuthContext } from "@/context/AuthContext";
 
 interface AdminSidebarProps {
   isCollapsed: boolean;
+  toggleSidebar?: () => void;
 }
 
-const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed }) => {
+const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, toggleSidebar }) => {
   const { user } = useContext(AuthContext);
   const pathname = usePathname();
 
@@ -43,8 +44,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed }) => {
 
   return (
     <aside
-      className={`bg-white border-r border-slate-200 h-screen overflow-y-auto flex-shrink-0 transition-all duration-300 ${
-        isCollapsed ? "w-20" : "w-64"
+      className={`bg-white border-r border-slate-200 h-screen overflow-y-auto flex-shrink-0 transition-all duration-300 absolute md:relative z-50 ${
+        isCollapsed ? "-translate-x-full md:translate-x-0 md:w-20" : "translate-x-0 w-64"
       }`}
       style={{
         scrollbarWidth: 'none',
@@ -57,11 +58,19 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed }) => {
           display: none;
         }
       `}</style>
-      <div className="h-16 flex items-center justify-center border-b border-slate-200 px-4 sticky top-0 bg-white z-10">
-        {isCollapsed ? (
-          <img src="/title-logo.png" alt="Logo" className="h-8 w-auto object-contain" />
-        ) : (
-          <img src="/main-logo.png" alt="Jalgaon Admin" className="h-9 w-auto object-contain" />
+      <div className="h-16 flex items-center justify-between border-b border-slate-200 px-4 sticky top-0 bg-white z-10">
+        <div className="flex justify-center w-full">
+          {isCollapsed ? (
+            <img src="/title-logo.png" alt="Logo" className="h-8 w-auto object-contain hidden md:block" />
+          ) : (
+            <img src="/main-logo.png" alt="Jalgaon Admin" className="h-9 w-auto object-contain" />
+          )}
+        </div>
+        {/* Mobile close button inside sidebar */}
+        {!isCollapsed && (
+          <button onClick={toggleSidebar} className="md:hidden text-slate-500 p-1">
+            <span className="material-symbols-outlined">close</span>
+          </button>
         )}
       </div>
 

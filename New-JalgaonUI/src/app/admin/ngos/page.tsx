@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Pagination from "@/components/Pagination";
 
 interface Ngo {
   id: number;
@@ -17,17 +18,24 @@ export default function AdminNgosPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionMsg, setActionMsg] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchNgos = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
       // Use the standard NGO endpoint for now, can be updated to an admin-specific one if it exists
-      const res = await fetch(`${baseUrl}/api/v1/ngo/`, {
+      const res = await fetch(`${baseUrl}/api/v1/ngo/?page=${page}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
       setNgos(data.results || data || []);
+      if (data.count !== undefined) {
+        setTotalPages(Math.ceil(data.count / 20));
+      } else {
+        setTotalPages(1);
+      }
     } catch {
       setError("Failed to load NGOs.");
     } finally {
@@ -37,7 +45,7 @@ export default function AdminNgosPage() {
 
   useEffect(() => {
     fetchNgos();
-  }, []);
+  }, [page]);
 
   const handleToggleVerify = async (id: number, currentStatus: boolean) => {
     const token = localStorage.getItem("token");
@@ -145,6 +153,12 @@ export default function AdminNgosPage() {
             </table>
           )}
         </div>
+        
+        <Pagination 
+          currentPage={page} 
+          totalPages={totalPages} 
+          onPageChange={setPage} 
+        />
       </div>
     </div>
   );

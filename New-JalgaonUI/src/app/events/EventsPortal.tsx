@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 // import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import Pagination from '@/components/Pagination';
+import SkeletonCard from '@/components/SkeletonCard';
 
 
 
@@ -30,6 +32,8 @@ export default function EventsPortal() {
   const [upcomingEvents, setUpcomingEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   React.useEffect(() => {
     const fetchCategories = async () => {
@@ -56,6 +60,7 @@ export default function EventsPortal() {
         if (activeCategory !== 'all') {
           url.searchParams.append('category', activeCategory);
         }
+        url.searchParams.append('page', page.toString());
         
         const res = await fetch(url.toString());
         if (!res.ok) throw new Error('Failed to fetch events');
@@ -80,11 +85,21 @@ export default function EventsPortal() {
         });
         
         if (mappedResults.length > 0) {
-          setFeaturedEvents(mappedResults.slice(0, 3));
-          setUpcomingEvents(mappedResults.slice(3, 9).length > 0 ? mappedResults.slice(3, 9) : mappedResults);
+          if (page === 1) {
+            setFeaturedEvents(mappedResults.slice(0, 3));
+            setUpcomingEvents(mappedResults.slice(3, 9).length > 0 ? mappedResults.slice(3, 9) : mappedResults);
+          } else {
+            setUpcomingEvents(mappedResults);
+          }
         } else {
-          setFeaturedEvents([]);
+          if (page === 1) setFeaturedEvents([]);
           setUpcomingEvents([]);
+        }
+        
+        if (json.count !== undefined) {
+          setTotalPages(Math.ceil(json.count / 20));
+        } else {
+          setTotalPages(1);
         }
       } catch (err: any) {
         setError(err.message);
@@ -93,7 +108,9 @@ export default function EventsPortal() {
       }
     };
     fetchEvents();
-  }, [activeCategory]);
+  }, [activeCategory, page]);
+
+  React.useEffect(() => { setPage(1); }, [activeCategory]);
 
   return (
     <>
@@ -145,9 +162,10 @@ export default function EventsPortal() {
         </section>
 
         {loading ? (
-          <div className="text-center py-16 bg-white">
-            <span className="material-symbols-outlined animate-spin text-4xl text-primary mb-4">progress_activity</span>
-            <h3 className="text-lg font-bold text-ink-deep">Loading events...</h3>
+          <div className="max-w-container-max mx-auto px-xxl py-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[1, 2, 3, 4, 5, 6].map(i => <SkeletonCard key={i} />)}
+            </div>
           </div>
         ) : error ? (
           <div className="text-center py-16 text-red-500 bg-white">
@@ -157,6 +175,7 @@ export default function EventsPortal() {
         ) : (
           <>
             {/* ─── Featured Events (Carousel) ─── */}
+            {page === 1 && featuredEvents.length > 0 && (
             <section
               id="featured-events"
               className="py-12 bg-white"
@@ -237,6 +256,7 @@ export default function EventsPortal() {
             </div>
           </div>
         </section>
+        )}
 
         {/* ─── Upcoming Events Grid ─── */}
         <section
@@ -333,14 +353,12 @@ export default function EventsPortal() {
               ))}
             </div>
 
-            {/* Load More */}
-            <div className="mt-16 flex justify-center">
-              <button className="group flex items-center gap-3 px-10 py-4 rounded-full border-2 border-primary text-primary font-bold hover:bg-primary hover:text-white transition-all active:scale-95">
-                Load More Events
-                <span className="material-symbols-outlined group-hover:translate-y-1 transition-transform">
-                  expand_more
-                </span>
-              </button>
+            <div className="mt-16 pb-12">
+              <Pagination 
+                currentPage={page} 
+                totalPages={totalPages} 
+                onPageChange={setPage} 
+              />
             </div>
           </div>
         </section>

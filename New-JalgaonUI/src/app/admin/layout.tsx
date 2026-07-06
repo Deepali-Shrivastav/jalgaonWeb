@@ -15,6 +15,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     setIsMounted(true);
+    if (window.innerWidth < 768) {
+      setSidebarCollapsed(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -62,8 +65,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (!isLogin || !user) return null;
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
-      <AdminSidebar isCollapsed={isSidebarCollapsed} />
+    <div className="flex h-screen bg-slate-50 overflow-hidden relative">
+      {/* Mobile overlay for sidebar */}
+      {!isSidebarCollapsed && (
+        <div 
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 md:hidden"
+          onClick={toggleSidebar}
+        />
+      )}
+      
+      <AdminSidebar isCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <AdminTopbar toggleSidebar={toggleSidebar} title={getPageTitle()} />

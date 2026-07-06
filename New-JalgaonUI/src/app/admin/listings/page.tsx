@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Pagination from "@/components/Pagination";
 
 interface Listing { id: number; business_name: string; business_address: string; category_name: string; owner_name: string; owner_phone: string; status: string; business_banner?: string; business_no?: string; business_email?: string; city?: string; business_dob?: string; business_gst?: string; business_description?: string; main_category_name?: string; sub_category_name?: string; is_trending?: boolean; }
 
@@ -11,6 +12,9 @@ export default function AdminListingsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [statusMsg, setStatusMsg] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
@@ -28,15 +32,21 @@ export default function AdminListingsPage() {
     setLoading(true);
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch(`${baseUrl}/api/v1/admin-panel/listings/?search=${searchTerm}&status=${statusFilter}`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`${baseUrl}/api/v1/admin-panel/listings/?search=${searchTerm}&status=${statusFilter}&page=${page}`, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       setListings(data.results || data);
       setSelectedIds([]);
+      if (data.count !== undefined) {
+        setTotalPages(Math.ceil(data.count / 20));
+      } else {
+        setTotalPages(1);
+      }
     } catch (error) { console.error("Failed to fetch listings", error); }
     finally { setLoading(false); }
   };
 
-  useEffect(() => { const d = setTimeout(() => fetchListings(), 300); return () => clearTimeout(d); }, [searchTerm, statusFilter]);
+  useEffect(() => { setPage(1); }, [searchTerm, statusFilter]);
+  useEffect(() => { const d = setTimeout(() => fetchListings(), 300); return () => clearTimeout(d); }, [searchTerm, statusFilter, page]);
 
   const handleAction = async (id: number, action: string, reason = "") => {
     if (action === "delete" && !window.confirm("Are you sure you want to delete this listing?")) return;
@@ -107,6 +117,28 @@ export default function AdminListingsPage() {
     }
   };
 
+  const handleRemoveTrending = async (id: number) => {
+    if (!window.confirm("Remove from trending?")) return;
+    const token = localStorage.getItem("token");
+    try {
+      await fetch(`${baseUrl}/api/v1/admin-panel/listings/${id}/trending/`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          is_trending: false,
+          trending_priority: 0,
+          trending_until: null
+        })
+      });
+      setStatusMsg("Removed from trending.");
+      setTimeout(() => setStatusMsg(""), 3000);
+      fetchListings();
+    } catch {
+      setStatusMsg("Error removing from trending");
+      setTimeout(() => setStatusMsg(""), 3000);
+    }
+  };
+
   const openPreview = async (id: number) => {
     const token = localStorage.getItem("token");
     try {
@@ -120,6 +152,23 @@ export default function AdminListingsPage() {
   const toggleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => { setSelectedIds(e.target.checked ? listings.map(l => l.id) : []); };
 
   const badgeClass = (status: string) => status === "active" ? "bg-green-100 text-green-700" : status === "rejected" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700";
+
+  const handleSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedListings = React.useMemo(() => {
+    if (!sortConfig) return listings;
+    return [...listings].sort((a: any, b: any) => {
+      if (a[sortConfig.key] < b[sortConfig.key]) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (a[sortConfig.key] > b[sortConfig.key]) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [listings, sortConfig]);
 
   return (
     <div className="space-y-4">
@@ -147,14 +196,22 @@ export default function AdminListingsPage() {
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-left"><tr>
                 <th className="px-4 py-3 w-10"><input type="checkbox" onChange={toggleSelectAll} checked={listings.length > 0 && selectedIds.length === listings.length} /></th>
-                <th className="px-4 py-3 font-semibold text-slate-600">Business Name</th>
-                <th className="px-4 py-3 font-semibold text-slate-600">Category</th>
-                <th className="px-4 py-3 font-semibold text-slate-600">Owner</th>
-                <th className="px-4 py-3 font-semibold text-slate-600">Status</th>
+                <th className="px-4 py-3 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('business_name')}>
+                  <div className="flex items-center gap-1">Business Name <span className="material-symbols-outlined text-[16px] text-slate-400">{sortConfig?.key === 'business_name' ? (sortConfig.direction === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more'}</span></div>
+                </th>
+                <th className="px-4 py-3 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('category_name')}>
+                  <div className="flex items-center gap-1">Category <span className="material-symbols-outlined text-[16px] text-slate-400">{sortConfig?.key === 'category_name' ? (sortConfig.direction === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more'}</span></div>
+                </th>
+                <th className="px-4 py-3 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('owner_name')}>
+                  <div className="flex items-center gap-1">Owner <span className="material-symbols-outlined text-[16px] text-slate-400">{sortConfig?.key === 'owner_name' ? (sortConfig.direction === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more'}</span></div>
+                </th>
+                <th className="px-4 py-3 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSort('status')}>
+                  <div className="flex items-center gap-1">Status <span className="material-symbols-outlined text-[16px] text-slate-400">{sortConfig?.key === 'status' ? (sortConfig.direction === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more'}</span></div>
+                </th>
                 <th className="px-4 py-3 font-semibold text-slate-600">Actions</th>
               </tr></thead>
               <tbody className="divide-y divide-slate-100">
-                {listings.length > 0 ? listings.map((l) => (
+                {sortedListings.length > 0 ? sortedListings.map((l) => (
                   <tr key={l.id} className={`hover:bg-slate-50 ${selectedIds.includes(l.id) ? "bg-blue-50" : ""}`}>
                     <td className="px-4 py-3"><input type="checkbox" checked={selectedIds.includes(l.id)} onChange={() => toggleSelection(l.id)} /></td>
                     <td className="px-4 py-3"><strong>{l.business_name}</strong><br /><span className="text-xs text-slate-400">{l.business_address}</span></td>
@@ -165,17 +222,46 @@ export default function AdminListingsPage() {
                       <div className="flex gap-1">
                         <button onClick={() => openPreview(l.id)} className="p-1.5 rounded hover:bg-slate-100" title="Preview"><span className="material-symbols-outlined text-lg text-slate-500">visibility</span></button>
                         {l.status !== "active" && <button onClick={() => handleAction(l.id, "approve")} className="p-1.5 rounded hover:bg-green-50" title="Approve"><span className="material-symbols-outlined text-lg text-green-600">check_circle</span></button>}
-                        {l.status === "active" && !l.is_trending && <button onClick={() => openTrendingModal(l)} className="p-1.5 rounded hover:bg-yellow-50" title="Make Trending"><span className="material-symbols-outlined text-lg text-yellow-500">star</span></button>}
+                        {l.status === "active" && (
+                          <button 
+                            onClick={() => !l.is_trending ? openTrendingModal(l) : handleRemoveTrending(l.id)} 
+                            className={`p-1.5 rounded ${l.is_trending ? 'hover:bg-yellow-50 bg-yellow-50/30' : 'hover:bg-slate-100'}`} 
+                            title={l.is_trending ? "Remove from Trending" : "Make Trending"}
+                          >
+                            <span 
+                              className={`material-symbols-outlined text-lg ${l.is_trending ? 'text-yellow-500' : 'text-slate-300'}`}
+                              style={l.is_trending ? { fontVariationSettings: "'FILL' 1" } : { fontVariationSettings: "'FILL' 0" }}
+                            >
+                              star
+                            </span>
+                          </button>
+                        )}
                         {l.status !== "rejected" && <button onClick={() => openRejectModal(l.id)} className="p-1.5 rounded hover:bg-red-50" title="Reject"><span className="material-symbols-outlined text-lg text-red-500">cancel</span></button>}
                         <button onClick={() => handleAction(l.id, "delete")} className="p-1.5 rounded hover:bg-red-50" title="Delete"><span className="material-symbols-outlined text-lg text-red-400">delete</span></button>
                       </div>
                     </td>
                   </tr>
-                )) : <tr><td colSpan={6} className="px-4 py-8 text-center text-slate-400">No listings found.</td></tr>}
+                )) : (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-16 text-center">
+                      <div className="flex flex-col items-center justify-center text-slate-400">
+                        <span className="material-symbols-outlined text-5xl mb-2 text-slate-300">store_off</span>
+                        <p className="font-medium text-slate-500 text-base">No listings found</p>
+                        <p className="text-sm mt-1">Try adjusting your filters or search query</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           )}
         </div>
+        
+        <Pagination 
+          currentPage={page} 
+          totalPages={totalPages} 
+          onPageChange={setPage} 
+        />
       </div>
 
       {/* Rejection Modal */}

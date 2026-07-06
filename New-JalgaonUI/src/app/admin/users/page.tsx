@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "@/context/AuthContext";
+import Pagination from "@/components/Pagination";
 
 interface UserData {
   id: number;
@@ -27,13 +28,16 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusMsg, setStatusMsg] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
 
   const fetchUsers = async () => {
     setLoading(true);
     const token = localStorage.getItem("token");
     const safeBaseUrl = baseUrl || "http://127.0.0.1:8000";
     try {
-      const res = await fetch(`${safeBaseUrl}/api/v1/admin-panel/users/?search=${searchTerm}`, {
+      const res = await fetch(`${safeBaseUrl}/api/v1/admin-panel/users/?search=${searchTerm}&page=${page}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       
@@ -47,6 +51,11 @@ export default function AdminUsersPage() {
 
       const data = await res.json();
       setUsers(data.results || data);
+      if (data.count !== undefined) {
+        setTotalPages(Math.ceil(data.count / 20));
+      } else {
+        setTotalPages(1);
+      }
     } catch (error) {
       console.error("Failed to fetch users", error);
     } finally {
@@ -55,9 +64,13 @@ export default function AdminUsersPage() {
   };
 
   useEffect(() => {
+    setPage(1);
+  }, [searchTerm]);
+
+  useEffect(() => {
     const delay = setTimeout(() => fetchUsers(), 300);
     return () => clearTimeout(delay);
-  }, [searchTerm]);
+  }, [searchTerm, page]);
 
   const handleRoleChange = async (userId: number, newRole: string) => {
     const token = localStorage.getItem("token");
@@ -83,6 +96,32 @@ export default function AdminUsersPage() {
       setTimeout(() => setStatusMsg(""), 3000);
     }
   };
+
+  const handleSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedUsers = React.useMemo(() => {
+    if (!sortConfig) return users;
+    return [...users].sort((a: any, b: any) => {
+      let aVal = a[sortConfig.key];
+      let bVal = b[sortConfig.key];
+      
+      // Combine first/last name for sorting
+      if (sortConfig.key === 'first_name') {
+        aVal = `${a.first_name || ''} ${a.last_name || ''}`;
+        bVal = `${b.first_name || ''} ${b.last_name || ''}`;
+      }
+      
+      if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [users, sortConfig]);
 
   return (
     <div className="space-y-4">
@@ -113,14 +152,34 @@ export default function AdminUsersPage() {
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-left">
                 <tr>
-                  <th className="px-4 py-3 font-semibold text-slate-600">Phone / ID</th>
-                  <th className="px-4 py-3 font-semibold text-slate-600">Name</th>
-                  <th className="px-4 py-3 font-semibold text-slate-600">Role</th>
-                  <th className="px-4 py-3 font-semibold text-slate-600">Joined Date</th>
+                  <th 
+                    className="px-4 py-3 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                    onClick={() => handleSort('phone_number')}
+                  >
+                    <div className="flex items-center gap-1">Phone / ID <span className="material-symbols-outlined text-[16px] text-slate-400">{sortConfig?.key === 'phone_number' ? (sortConfig.direction === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more'}</span></div>
+                  </th>
+                  <th 
+                    className="px-4 py-3 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                    onClick={() => handleSort('first_name')}
+                  >
+                    <div className="flex items-center gap-1">Name <span className="material-symbols-outlined text-[16px] text-slate-400">{sortConfig?.key === 'first_name' ? (sortConfig.direction === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more'}</span></div>
+                  </th>
+                  <th 
+                    className="px-4 py-3 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                    onClick={() => handleSort('role')}
+                  >
+                    <div className="flex items-center gap-1">Role <span className="material-symbols-outlined text-[16px] text-slate-400">{sortConfig?.key === 'role' ? (sortConfig.direction === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more'}</span></div>
+                  </th>
+                  <th 
+                    className="px-4 py-3 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                    onClick={() => handleSort('date_joined')}
+                  >
+                    <div className="flex items-center gap-1">Joined Date <span className="material-symbols-outlined text-[16px] text-slate-400">{sortConfig?.key === 'date_joined' ? (sortConfig.direction === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more'}</span></div>
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {users.length > 0 ? users.map((u) => (
+                {sortedUsers.length > 0 ? sortedUsers.map((u) => (
                   <tr key={u.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3">{u.phone_number}</td>
                     <td className="px-4 py-3">{u.first_name ? `${u.first_name} ${u.last_name || ""}` : "-"}</td>
@@ -142,12 +201,26 @@ export default function AdminUsersPage() {
                     <td className="px-4 py-3 text-slate-500">{new Date(u.date_joined).toLocaleDateString()}</td>
                   </tr>
                 )) : (
-                  <tr><td colSpan={4} className="px-4 py-8 text-center text-slate-400">No users found.</td></tr>
+                  <tr>
+                    <td colSpan={4} className="px-4 py-16 text-center">
+                      <div className="flex flex-col items-center justify-center text-slate-400">
+                        <span className="material-symbols-outlined text-5xl mb-2 text-slate-300">group_off</span>
+                        <p className="font-medium text-slate-500 text-base">No users found</p>
+                        <p className="text-sm mt-1">Try adjusting your search criteria</p>
+                      </div>
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
           )}
         </div>
+        
+        <Pagination 
+          currentPage={page} 
+          totalPages={totalPages} 
+          onPageChange={setPage} 
+        />
       </div>
     </div>
   );

@@ -79,7 +79,7 @@ class AdminListingSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'business_name', 'business_address', 'business_banner',
             'is_valid', 'status', 'owner_phone', 'owner_name', 'category_name',
-            'main_category', 'sub_category'
+            'main_category', 'sub_category', 'is_trending'
         ]
         read_only_fields = ['id', 'owner_phone', 'owner_name', 'category_name']
 
