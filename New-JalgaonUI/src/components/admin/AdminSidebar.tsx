@@ -15,6 +15,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, toggleSidebar 
   const pathname = usePathname();
 
   const [isNewsExpanded, setIsNewsExpanded] = useState(false);
+  const [isBlogExpanded, setIsBlogExpanded] = useState(false);
   const [isJobsExpanded, setIsJobsExpanded] = useState(false);
   const [isEventsExpanded, setIsEventsExpanded] = useState(false);
 
@@ -150,6 +151,43 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, toggleSidebar 
                 </Link>
                 {canSeeNewsComments && (
                   <Link href="/admin/news/comments" className={navLinkClass("/admin/news/comments")}>
+                    Comments
+                  </Link>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Blog Module (dropdown) */}
+        {canSeeNews && (
+          <div className="space-y-1">
+            <button
+              onClick={() => setIsBlogExpanded(!isBlogExpanded)}
+              className={`w-full flex items-center ${
+                isCollapsed ? "justify-center w-12 h-12 mx-auto" : "justify-between px-4 py-3"
+              } text-sm font-medium rounded-xl text-slate-600 hover:bg-slate-100 transition-all duration-200`}
+            >
+              <div className={`flex items-center ${isCollapsed ? "" : "gap-3"}`}>
+                <span className="material-symbols-outlined">book</span>
+                {!isCollapsed && <span>Blog Module</span>}
+              </div>
+              {!isCollapsed && (
+                <span className="material-symbols-outlined text-sm">
+                  {isBlogExpanded ? "expand_less" : "expand_more"}
+                </span>
+              )}
+            </button>
+            {isBlogExpanded && !isCollapsed && (
+              <div className="pl-11 space-y-1">
+                <Link href="/admin/blog" className={navLinkClass("/admin/blog", true)}>
+                  Articles
+                </Link>
+                <Link href="/admin/blog/categories" className={navLinkClass("/admin/blog/categories")}>
+                  Categories
+                </Link>
+                {canSeeNewsComments && (
+                  <Link href="/admin/blog/comments" className={navLinkClass("/admin/blog/comments")}>
                     Comments
                   </Link>
                 )}
