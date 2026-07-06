@@ -311,13 +311,22 @@ export default function JobsPortal() {
               </div>
             )}
 
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl md:text-3xl font-bold text-ink-deep">
-                Latest Job Openings
-              </h1>
-              <span className="text-secondary text-sm">
-                Showing {jobs.length} Jobs
-              </span>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold text-ink-deep">
+                  Latest Job Openings
+                </h1>
+                <span className="text-secondary text-sm">
+                  Showing {jobs.length} Jobs
+                </span>
+              </div>
+              <Link 
+                href="/add-job"
+                className="bg-primary hover:bg-primary-deep text-white font-bold px-6 py-3 rounded-xl text-sm transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 w-full sm:w-auto shrink-0"
+              >
+                <span className="material-symbols-outlined text-[20px]">add_circle</span>
+                Post a Job
+              </Link>
             </div>
 
             {loading ? (
