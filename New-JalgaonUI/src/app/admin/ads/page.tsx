@@ -124,7 +124,17 @@ export default function AdminAdsPage() {
               <h2 className="text-lg font-semibold">{previewData.name} ({previewData.ad_type === "BA" ? "Banner Ad" : "Carousel Ad"})</h2>
               <button onClick={() => setPreviewModalOpen(false)} className="p-1 hover:bg-slate-100 rounded"><span className="material-symbols-outlined">close</span></button>
             </div>
-            <div className="text-center"><img src={previewData.ad_image.startsWith("http") ? previewData.ad_image : `${baseUrl}${previewData.ad_image}`} alt="Ad Preview" className="max-w-full max-h-[60vh] object-contain rounded-lg border border-slate-200 mx-auto" /></div>
+            <div className="text-center">
+              {previewData?.ad_image ? (
+                <img 
+                  src={previewData.ad_image.startsWith("http") ? previewData.ad_image : `${baseUrl.replace(/\/$/, '')}${previewData.ad_image.startsWith('/') ? '' : '/'}${previewData.ad_image}`} 
+                  alt="Ad Preview" 
+                  className="max-w-full max-h-[60vh] object-contain rounded-lg border border-slate-200 mx-auto" 
+                />
+              ) : (
+                <div className="p-8 text-slate-400 border border-slate-200 rounded-lg">No image available</div>
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -92,11 +92,11 @@ export default function TrendingListings({ selectedCity, initialData }: Trending
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-xl">
             {displayListings.map((listing, idx) => (
               <Link href={`/directory/${listing.id}`} key={listing.id || idx} className="group cursor-pointer block">
-                <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-base shadow-sm group-hover:shadow-xl transition-all duration-500">
+                <div className="relative h-[240px] w-full rounded-xl overflow-hidden mb-base shadow-sm group-hover:shadow-xl transition-all duration-500 bg-surface-container-low">
                   {listing.image ? (
                     <img 
                       alt={listing.name} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                      className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700" 
                       src={listing.image} 
                     />
                   ) : (

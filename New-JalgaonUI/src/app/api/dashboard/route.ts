@@ -27,7 +27,7 @@ type WeatherApiResponse = {
     condition?: { text?: string };
     humidity?: number;
     wind_kph?: number;
-  };
+  };  
   forecast?: {
     forecastday?: Array<{
       date?: string;
