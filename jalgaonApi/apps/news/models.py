@@ -61,7 +61,7 @@ class NewsArticle(models.Model):
 
     # Core fields
     title = models.CharField(max_length=255)
-    slug = models.SlugField(max_length=300, unique=True)
+    slug = models.SlugField(max_length=300, unique=True, allow_unicode=True)
     short_description = models.CharField(max_length=300)
     content = models.TextField()  # Rich text / markdown body
     featured_image = models.ImageField(upload_to='news/featured/')
