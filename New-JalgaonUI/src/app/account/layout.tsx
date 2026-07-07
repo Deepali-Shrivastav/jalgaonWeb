@@ -5,6 +5,7 @@ import { AuthContext } from '@/context/AuthContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import DashboardSidebar from '@/components/account/DashboardSidebar';
+import ProfileCompleteBanner from '@/components/ProfileCompleteBanner';
 
 export default function AccountLayout({ children }: { children: React.ReactNode }) {
   const { isLogin } = useContext(AuthContext);
@@ -71,6 +72,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
               <DashboardSidebar />
             </div>
             <div className="lg:col-span-3">
+              <ProfileCompleteBanner />
               <div className="bg-white rounded-2xl p-8 shadow-sm border border-hairline-soft min-h-[600px]">
                 {children}
               </div>

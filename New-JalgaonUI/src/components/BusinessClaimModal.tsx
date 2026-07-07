@@ -50,7 +50,7 @@ export default function BusinessClaimModal({ isOpen, onClose, business, baseUrl 
 
       setSuccess(true);
     } catch (err: any) {
-      console.error('Claim error:', err);
+      console.warn('Claim error:', err.message || err);
       setError(err.message || 'Failed to submit claim.');
     } finally {
       setSubmitting(false);

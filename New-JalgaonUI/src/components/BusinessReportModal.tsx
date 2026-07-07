@@ -46,7 +46,7 @@ export default function BusinessReportModal({ isOpen, onClose, business, baseUrl
 
       setSuccess(true);
     } catch (err: any) {
-      console.error('Report error:', err);
+      console.warn('Report error:', err.message || err);
       setError(err.message || 'Failed to submit report.');
     } finally {
       setSubmitting(false);

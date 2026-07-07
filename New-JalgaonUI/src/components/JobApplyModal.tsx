@@ -56,7 +56,7 @@ export default function JobApplyModal({ isOpen, onClose, job, baseUrl }: JobAppl
 
       setSuccess(true);
     } catch (err: any) {
-      console.error('Apply error:', err);
+      console.warn('Apply error:', err.message || err);
       setError(err.message || 'Failed to submit application.');
     } finally {
       setSubmitting(false);
