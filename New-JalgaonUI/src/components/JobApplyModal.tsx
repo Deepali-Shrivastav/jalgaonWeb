@@ -65,7 +65,7 @@ export default function JobApplyModal({ isOpen, onClose, job, baseUrl }: JobAppl
 
   return createPortal(
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
-      <div className="bg-white rounded-2xl p-8 w-full max-w-lg relative shadow-2xl animate-fade-in">
+      <div className="bg-white rounded-2xl p-8 w-[95vw] md:w-[500px] relative shadow-2xl animate-fade-in shrink-0">
         <button 
           onClick={onClose} 
           className="absolute top-4 right-4 text-secondary hover:text-primary transition-colors focus:outline-none"
