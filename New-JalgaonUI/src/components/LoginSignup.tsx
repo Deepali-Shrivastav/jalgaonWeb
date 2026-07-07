@@ -105,7 +105,7 @@ export default function LoginSignup() {
       toast.success("Account created successfully!");
       await handleLoginSubmit();
     } catch (error: any) {
-      console.error("Registration failed", error);
+      console.warn("Registration failed:", error.message || error);
       toast.error(error.message || "Registration failed. Please try again.");
       setErrorMessage(error.message);
       setIsLoading(false);
@@ -174,7 +174,7 @@ export default function LoginSignup() {
         setIsLoginFormOpen(false);
       }
     } catch (error: any) {
-      console.error("Login failed", error);
+      console.warn("Login failed:", error.message || error);
       toast.error(error.message || "Login failed. Please try again.");
       setErrorMessage(error.message);
     } finally {
