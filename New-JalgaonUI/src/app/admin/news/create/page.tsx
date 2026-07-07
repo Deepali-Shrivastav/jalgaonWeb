@@ -38,9 +38,13 @@ export default function AdminNewsCreatePage() {
       const data = new FormData();
       Object.entries(formData).forEach(([key, val]) => { if (val !== null && val !== "") data.append(key, String(val)); });
       if (imageFile) data.append("featured_image", imageFile);
-      await fetch(`${baseUrl}/api/v1/news/admin/articles/`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: data });
+      const res = await fetch(`${baseUrl}/api/v1/news/admin/articles/`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: data });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.detail || JSON.stringify(errData));
+      }
       router.push("/admin/news");
-    } catch { alert("Failed to save article."); }
+    } catch (err: any) { alert("Failed to save article: " + (err.message || "Unknown error")); }
     finally { setSaving(false); }
   };
 
