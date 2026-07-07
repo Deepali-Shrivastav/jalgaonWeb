@@ -26,6 +26,13 @@ interface JobDetail {
 }
 
 export default function JobDetailClient({ slug }: { slug: string }) {
+  const safeSlug = (() => {
+    try {
+      return encodeURIComponent(decodeURIComponent(slug));
+    } catch {
+      return encodeURIComponent(slug);
+    }
+  })();
   const [job, setJob] = useState<JobDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -69,7 +76,7 @@ export default function JobDetailClient({ slug }: { slug: string }) {
   useEffect(() => {
     const fetchJob = async () => {
       try {
-        const res = await fetch(`${baseUrl}/api/v1/jobs/${encodeURIComponent(slug)}/`);
+        const res = await fetch(`${baseUrl}/api/v1/jobs/${safeSlug}/`);
         if (!res.ok) {
           if (res.status === 404) throw new Error('Job not found');
           throw new Error('Failed to fetch job details');
@@ -83,7 +90,7 @@ export default function JobDetailClient({ slug }: { slug: string }) {
       }
     };
     fetchJob();
-  }, [slug]);
+  }, [safeSlug]);
 
   if (loading) {
     return (

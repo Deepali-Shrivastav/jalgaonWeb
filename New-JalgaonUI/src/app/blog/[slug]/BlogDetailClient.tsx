@@ -39,6 +39,13 @@ const getImageUrl = (img: any) => {
 
 export default function BlogDetailClient({ slug }: { slug: string }) {
   const { isLogin, setIsLoginFormOpen } = useContext(AuthContext);
+  const safeSlug = (() => {
+    try {
+      return encodeURIComponent(decodeURIComponent(slug));
+    } catch {
+      return encodeURIComponent(slug);
+    }
+  })();
   const [post, setPost] = useState<BlogDetail | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +68,7 @@ export default function BlogDetailClient({ slug }: { slug: string }) {
       const token = localStorage.getItem("token");
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       
-      const res = await fetch(`${baseUrl}/api/v1/blog/${encodeURIComponent(slug)}/comments/`, {
+      const res = await fetch(`${baseUrl}/api/v1/blog/${safeSlug}/comments/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -74,7 +81,7 @@ export default function BlogDetailClient({ slug }: { slug: string }) {
         setCommentMsg("Comment submitted successfully!");
         setCommentText("");
         // Reload comments
-        const freshRes = await fetch(`${baseUrl}/api/v1/blog/${encodeURIComponent(slug)}/`);
+        const freshRes = await fetch(`${baseUrl}/api/v1/blog/${safeSlug}/`);
         if (freshRes.ok) {
           const freshData = await freshRes.json();
           setPost(freshData);
@@ -95,7 +102,7 @@ export default function BlogDetailClient({ slug }: { slug: string }) {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
         
-        const res = await fetch(`${baseUrl}/api/v1/blog/${encodeURIComponent(slug)}/`);
+        const res = await fetch(`${baseUrl}/api/v1/blog/${safeSlug}/`);
         if (!res.ok) {
           if (res.status === 404) throw new Error('Blog post not found');
           throw new Error('Failed to fetch blog post');
@@ -145,7 +152,7 @@ export default function BlogDetailClient({ slug }: { slug: string }) {
       }
     };
     fetchData();
-  }, [slug]);
+  }, [safeSlug]);
 
   // Set up intersection observer for dynamic active TOC highlight
   useEffect(() => {

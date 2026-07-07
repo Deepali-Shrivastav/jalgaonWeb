@@ -34,6 +34,13 @@ const getImageUrl = (img: any) => {
 
 export default function NewsDetailClient({ slug }: { slug: string }) {
   const { isLogin, setIsLoginFormOpen } = useContext(AuthContext);
+  const safeSlug = (() => {
+    try {
+      return encodeURIComponent(decodeURIComponent(slug));
+    } catch {
+      return encodeURIComponent(slug);
+    }
+  })();
   const [article, setArticle] = useState<NewsDetail | null>(null);
   const [trendingNews, setTrendingNews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,7 +60,7 @@ export default function NewsDetailClient({ slug }: { slug: string }) {
       const token = localStorage.getItem("token");
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       
-      const res = await fetch(`${baseUrl}/api/v1/news/${encodeURIComponent(slug)}/comments/`, {
+      const res = await fetch(`${baseUrl}/api/v1/news/${safeSlug}/comments/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -81,7 +88,7 @@ export default function NewsDetailClient({ slug }: { slug: string }) {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
         
-        const res = await fetch(`${baseUrl}/api/v1/news/${encodeURIComponent(slug)}/`);
+        const res = await fetch(`${baseUrl}/api/v1/news/${safeSlug}/`);
         if (!res.ok) {
           if (res.status === 404) throw new Error('Article not found');
           throw new Error('Failed to fetch article');
@@ -107,7 +114,7 @@ export default function NewsDetailClient({ slug }: { slug: string }) {
       }
     };
     fetchData();
-  }, [slug]);
+  }, [safeSlug]);
 
   if (loading) {
     return (
