@@ -29,7 +29,7 @@ export default function JobDetailClient({ slug }: { slug: string }) {
   const [job, setJob] = useState<JobDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const { isLogin } = useContext(AuthContext);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -41,7 +41,7 @@ export default function JobDetailClient({ slug }: { slug: string }) {
       setSaveActionMsg("Please login to save this job.");
       return;
     }
-    
+
     setIsSaving(true);
     setSaveActionMsg("");
     try {
@@ -143,7 +143,7 @@ export default function JobDetailClient({ slug }: { slug: string }) {
           <p className="text-lg text-secondary font-medium">{job.company}</p>
         </div>
       </div>
-      
+
       {saveActionMsg && (
         <div className={`p-4 rounded-xl mb-6 shadow-sm font-medium ${saveActionMsg.includes('success') ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-600 border border-red-200'}`}>
           {saveActionMsg}
@@ -178,7 +178,7 @@ export default function JobDetailClient({ slug }: { slug: string }) {
 
       <div className="mb-10">
         <h3 className="text-xl font-bold text-ink-deep mb-4">Job Description</h3>
-        <div 
+        <div
           className="prose prose-lg max-w-none text-secondary leading-relaxed"
           dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(job.description || '') }}
         />
@@ -187,7 +187,7 @@ export default function JobDetailClient({ slug }: { slug: string }) {
       {job.requirements && (
         <div className="mb-10">
           <h3 className="text-xl font-bold text-ink-deep mb-4">Requirements</h3>
-          <div 
+          <div
             className="prose prose-lg max-w-none text-secondary leading-relaxed"
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(job.requirements || '') }}
           />
@@ -197,7 +197,7 @@ export default function JobDetailClient({ slug }: { slug: string }) {
       {!isExpired && (
         <div className="flex justify-center items-center gap-4 pt-8 border-t border-hairline-soft">
           {job.apply_url ? (
-            <a 
+            <a
               href={job.apply_url}
               target="_blank"
               rel="noopener noreferrer"
@@ -206,29 +206,29 @@ export default function JobDetailClient({ slug }: { slug: string }) {
               Apply Externally <span className="material-symbols-outlined">open_in_new</span>
             </a>
           ) : (
-            <button 
+            <button
               onClick={() => setIsApplyModalOpen(true)}
               className="bg-primary hover:bg-primary-deep text-white px-10 py-4 rounded-full font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1"
             >
               Apply Now
             </button>
           )}
-          <button 
+          <button
             onClick={handleSaveJob}
             disabled={isSaving}
             className="bg-surface text-primary border-2 border-primary hover:bg-primary/5 px-6 py-4 rounded-full font-bold text-lg shadow-sm transition-all flex items-center gap-2 disabled:opacity-50"
           >
-            <span className="material-symbols-outlined text-[20px]">{isSaving ? 'progress_activity' : 'bookmark'}</span> 
+            <span className="material-symbols-outlined text-[20px]">{isSaving ? 'progress_activity' : 'bookmark'}</span>
             {isSaving ? 'Saving...' : 'Save Job'}
           </button>
         </div>
       )}
 
-      <JobApplyModal 
-        isOpen={isApplyModalOpen} 
-        onClose={() => setIsApplyModalOpen(false)} 
-        job={job} 
-        baseUrl={baseUrl} 
+      <JobApplyModal
+        isOpen={isApplyModalOpen}
+        onClose={() => setIsApplyModalOpen(false)}
+        job={job}
+        baseUrl={baseUrl}
       />
     </article>
   );
