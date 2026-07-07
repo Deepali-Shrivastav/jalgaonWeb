@@ -50,6 +50,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (pathname.includes("news/comments")) return "News Comment Moderation";
     if (pathname.includes("news/create") || pathname.includes("news/edit")) return "Edit News Article";
     if (pathname.includes("news")) return "News Management";
+    if (pathname.includes("blog/categories")) return "Blog Categories";
+    if (pathname.includes("blog/create") || pathname.includes("blog/edit")) return "Edit Blog Post";
+    if (pathname.includes("blog")) return "Blog Management";
     if (pathname.includes("events")) return "Event Management";
     if (pathname.includes("jobs/applications")) return "Job Applications";
     if (pathname.includes("jobs/categories")) return "Job Categories";

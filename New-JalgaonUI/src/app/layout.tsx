@@ -7,6 +7,7 @@ import { Toaster } from "react-hot-toast";
 import { InteractiveMenu } from "@/components/ui/modern-mobile-menu";
 import EngagementTrigger from "@/components/EngagementTrigger";
 import ProfileCompleteModal from "@/components/ProfileCompleteModal";
+import FloatingSideButtons from "@/components/FloatingSideButtons";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-sans",
@@ -71,6 +72,7 @@ export default function RootLayout({
           <ProfileCompleteModal />
           <Toaster position="bottom-right" toastOptions={{ className: 'font-sans' }} />
           <InteractiveMenu />
+          <FloatingSideButtons />
         </AuthProvider>
       </body>
     </html>

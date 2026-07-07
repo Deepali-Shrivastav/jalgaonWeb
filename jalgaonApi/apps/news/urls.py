@@ -28,6 +28,6 @@ urlpatterns = [
     
     # Note: placing these lower so they don't match 'categories' or 'admin' 
     path('latest/', PublicNewsListView.as_view(), name='public-news-list'),
-    path('<slug:slug>/', PublicNewsDetailView.as_view(), name='public-news-detail'),
-    path('<slug:slug>/comments/', NewsArticleCommentsView.as_view(), name='public-news-comments'),
+    path('<str:slug>/', PublicNewsDetailView.as_view(), name='public-news-detail'),
+    path('<str:slug>/comments/', NewsArticleCommentsView.as_view(), name='public-news-comments'),
 ]

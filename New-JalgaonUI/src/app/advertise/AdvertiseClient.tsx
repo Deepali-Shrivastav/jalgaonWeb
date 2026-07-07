@@ -17,7 +17,7 @@ export default function AdvertiseClient() {
     contact_email: '',
     contact_number: '',
     ad_type: 'BA',
-    target_page: 'hero_banner',
+    target_page: 'category_banner',
     package: 'basic'
   });
   
@@ -25,45 +25,20 @@ export default function AdvertiseClient() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => {
+      const newData = { ...prev, [name]: value };
+      if (name === 'ad_type') {
+        if (value === 'BA') newData.target_page = 'category_banner';
+        if (value === 'CA') newData.target_page = 'sidebar';
+      }
+      return newData;
+    });
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      const img = new Image();
-      img.onload = () => {
-        if (formData.ad_type === 'BA') {
-          if (img.width !== 900 || img.height !== 200) {
-            toast.error("Banner ads must be exactly 900x200px");
-            setAdImage(null);
-            e.target.value = '';
-          } else {
-            setAdImage(file);
-          }
-        } else if (formData.ad_type === 'CA') {
-          if (formData.target_page === 'sidebar') {
-            if (img.width !== 300 || img.height !== 250) {
-              toast.error("Sidebar Carousel ads must be exactly 300x250px");
-              setAdImage(null);
-              e.target.value = '';
-            } else {
-              setAdImage(file);
-            }
-          } else {
-            if (img.width > 800 || img.height > 400) {
-              toast.error("Carousel ads must be max 800x400px");
-              setAdImage(null);
-              e.target.value = '';
-            } else {
-              setAdImage(file);
-            }
-          }
-        } else {
-          setAdImage(file);
-        }
-      };
-      img.src = URL.createObjectURL(file);
+      setAdImage(file);
     }
   };
 
@@ -85,38 +60,6 @@ export default function AdvertiseClient() {
     });
 
     if (adImage) {
-      const isValid = await new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-          if (formData.ad_type === 'BA') {
-            resolve(img.width === 900 && img.height === 200);
-          } else if (formData.ad_type === 'CA') {
-            if (formData.target_page === 'sidebar') {
-              resolve(img.width === 300 && img.height === 250);
-            } else {
-              resolve(img.width <= 800 && img.height <= 400);
-            }
-          } else {
-            resolve(true);
-          }
-        };
-        img.onerror = () => resolve(false);
-        img.src = URL.createObjectURL(adImage);
-      });
-      
-      if (!isValid) {
-        if (formData.ad_type === 'BA') {
-          toast.error("Banner ads must be exactly 900x200px");
-        } else if (formData.ad_type === 'CA') {
-          if (formData.target_page === 'sidebar') {
-            toast.error("Sidebar Carousel ads must be exactly 300x250px");
-          } else {
-            toast.error("Carousel ads must be max 800x400px");
-          }
-        }
-        setSubmitting(false);
-        return;
-      }
       submitData.append('ad_image', adImage);
     } else {
       toast.error("Advertisement image is required");
@@ -207,16 +150,21 @@ export default function AdvertiseClient() {
                     <label className="block text-sm font-semibold text-on-surface-variant" htmlFor="ad_type">Ad Type *</label>
                     <select required disabled={!isLogin} className="w-full border border-hairline-soft bg-white rounded-lg focus:ring-primary focus:border-primary p-3 outline-none transition-all text-on-surface-variant disabled:opacity-50" id="ad_type" name="ad_type" value={formData.ad_type} onChange={handleInputChange}>
                       <option value="BA">Banner Ad</option>
-                      <option value="CA">Carousel Ad</option>
+                      <option value="CA">Card Ad</option>
                     </select>
                   </div>
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-on-surface-variant" htmlFor="target_page">Target Page *</label>
                     <select required disabled={!isLogin} className="w-full border border-hairline-soft bg-white rounded-lg focus:ring-primary focus:border-primary p-3 outline-none transition-all text-on-surface-variant disabled:opacity-50" id="target_page" name="target_page" value={formData.target_page} onChange={handleInputChange}>
-                      <option value="hero_banner">Homepage Hero Banner</option>
-                      <option value="category_banner">Category Page Banner</option>
-                      <option value="sidebar">Sidebar</option>
-                      <option value="listing_interstitial">Between Listings</option>
+                      {formData.ad_type === 'BA' && (
+                        <>
+                          <option value="category_banner">Category Page Banner</option>
+                          <option value="listing_interstitial">Between Listings</option>
+                        </>
+                      )}
+                      {formData.ad_type === 'CA' && (
+                        <option value="sidebar">Sidebar</option>
+                      )}
                     </select>
                   </div>
                   <div className="space-y-2">
@@ -250,10 +198,8 @@ export default function AdvertiseClient() {
                               <p className="mb-2 text-sm text-on-surface-variant"><span className="font-semibold text-primary">Click to upload</span> or drag and drop</p>
                               <p className="text-xs text-secondary">
                                 {formData.ad_type === 'BA' 
-                                  ? 'PNG, JPG (Exactly 900x200px)' 
-                                  : formData.ad_type === 'CA' && formData.target_page === 'sidebar' 
-                                    ? 'PNG, JPG (Exactly 300x250px)' 
-                                    : 'PNG, JPG (MAX. 800x400px)'}
+                                  ? 'PNG, JPG (Recommended: 900x200px)' 
+                                  : 'PNG, JPG (Recommended: 250x250px)'}
                               </p>
                             </>
                           )}

@@ -13,6 +13,7 @@ import TrendingListings from '@/components/TrendingListings';
 import IndustryGrids from '@/components/IndustryGrids';
 import CallToAction from '@/components/CallToAction';
 import ContactForm from '@/components/ContactForm';
+import BlogSection from '@/components/BlogSection';
 
 export default function HomeClient({ 
   trendingListings, 
@@ -48,7 +49,7 @@ export default function HomeClient({
       <LocalWonders />
       <JobOpenings initialData={jobs} />
       <NgoSpotlight />
-      {/* <BlogSection /> */}
+      <BlogSection />
       <CallToAction />
       <ContactForm />
     </>

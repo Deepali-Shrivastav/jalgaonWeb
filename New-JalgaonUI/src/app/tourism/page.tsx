@@ -237,36 +237,36 @@ export default function TourismPage() {
 </section>
 {/* CTA Banner */}
 <section className="max-w-container-max mx-auto px-4 md:px-8 mb-20">
-<div className="bg-primary text-on-primary p-12 rounded-[32px] relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
-<div className="relative z-10 max-w-xl">
-<h2 className="font-headline-lg text-headline-lg mb-4">Ready to Explore Jalgaon?</h2>
-<p className="text-on-primary-container text-body-md mb-8">Download our official travel guide or book a verified local heritage walk today.</p>
+<div className="bg-primary text-on-primary p-10 md:p-12 rounded-[20px] relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
+<div className="relative z-10 flex-1 w-full">
+<h2 className="text-3xl md:text-[34px] font-bold mb-3">Ready to Explore Jalgaon?</h2>
+<p className="text-white/90 text-[15px] mb-8">Download our official travel guide or book a verified local heritage walk today.</p>
 <div className="flex flex-wrap gap-4">
-<button className="bg-white text-primary px-8 py-3 rounded-lg font-bold hover:bg-surface-container-low transition-colors">Download PDF Guide</button>
-<button className="bg-transparent border-2 border-white px-8 py-3 rounded-lg font-bold hover:bg-white/10 transition-colors">Contact Tourist Office</button>
+<button className="bg-white text-primary px-6 py-[10px] rounded-[6px] font-bold hover:bg-gray-100 transition-colors text-[14px]">Download PDF Guide</button>
+<button className="bg-transparent border border-white px-6 py-[10px] rounded-[6px] font-bold hover:bg-white/10 transition-colors text-[14px]">Contact Tourist Office</button>
 </div>
 </div>
-<div className="relative z-10 w-full md:w-1/3 bg-white/10 p-6 rounded-xl backdrop-blur-sm border border-white/20">
-<div className="flex items-center gap-4 mb-4">
-<div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
-<span className="material-symbols-outlined text-primary">location_on</span>
+<div className="relative z-10 w-full md:w-[400px] bg-white/10 backdrop-blur-md p-6 rounded-[8px] border border-white/20">
+<div className="flex items-center gap-4 mb-6">
+<div className="w-[42px] h-[42px] bg-white rounded-[10px] flex items-center justify-center shrink-0">
+<span className="material-symbols-outlined text-primary text-[22px]">location_on</span>
 </div>
 <div>
-<div className="text-xs uppercase opacity-70">Current Location</div>
-<div className="font-bold">Jalgaon, Maharashtra</div>
+<div className="text-[10px] uppercase text-white/70 tracking-wider font-semibold mb-0.5">Current Location</div>
+<div className="font-bold text-[15px]">Jalgaon, Maharashtra</div>
 </div>
 </div>
 <div className="space-y-3">
-<div className="flex justify-between items-center text-sm">
-<span>Ajanta Caves</span>
+<div className="flex justify-between items-center text-[13px]">
+<span className="text-white/90">Ajanta Caves</span>
 <span className="font-bold">59 km</span>
 </div>
-<div className="flex justify-between items-center text-sm">
-<span>Gandhi Teerth</span>
+<div className="flex justify-between items-center text-[13px]">
+<span className="text-white/90">Gandhi Teerth</span>
 <span className="font-bold">7 km</span>
 </div>
-<div className="h-[2px] bg-white/20 w-full"></div>
-<button className="w-full text-center text-sm font-bold pt-2">View Interactive Map</button>
+<div className="h-[1px] bg-white/10 w-full my-4"></div>
+<button className="w-full text-center text-[13px] font-bold mt-1 hover:text-white/80 transition-colors">View Interactive Map</button>
 </div>
 </div>
 {/* Background Pattern */}

@@ -61,7 +61,7 @@ class NewsArticle(models.Model):
 
     # Core fields
     title = models.CharField(max_length=255)
-    slug = models.SlugField(max_length=300, unique=True)
+    slug = models.SlugField(max_length=300, unique=True, allow_unicode=True)
     short_description = models.CharField(max_length=300)
     content = models.TextField()  # Rich text / markdown body
     featured_image = models.ImageField(upload_to='news/featured/')
@@ -98,6 +98,12 @@ class NewsArticle(models.Model):
             models.Index(fields=['category']),
         ]
         
+    def save(self, *args, **kwargs):
+        if self.status == 'published' and not self.published_at:
+            from django.utils import timezone
+            self.published_at = timezone.now()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.title
 

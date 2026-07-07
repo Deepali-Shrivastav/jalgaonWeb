@@ -133,7 +133,9 @@ class AdminNewsArticleViewSet(viewsets.ModelViewSet):
         import uuid
         
         title = serializer.validated_data.get('title', 'article')
-        base_slug = slugify(title)
+        base_slug = slugify(title, allow_unicode=True)
+        if not base_slug:
+            base_slug = "article"
         slug = base_slug
         
         # Ensure unique slug
