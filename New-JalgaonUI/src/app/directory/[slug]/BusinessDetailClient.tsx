@@ -12,6 +12,13 @@ interface BusinessDetailClientProps {
 
 export default function BusinessDetailClient({ slug }: BusinessDetailClientProps) {
   const { user, isLogin } = useContext(AuthContext);
+  const safeSlug = (() => {
+    try {
+      return encodeURIComponent(decodeURIComponent(slug));
+    } catch {
+      return encodeURIComponent(slug);
+    }
+  })();
   const [businessData, setBusinessData] = useState<any>(null);
   const [relatedListings, setRelatedListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,7 +35,7 @@ export default function BusinessDetailClient({ slug }: BusinessDetailClientProps
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`${baseUrl}/api/v1/listings/${slug}/`);
+        const response = await fetch(`${baseUrl}/api/v1/listings/${safeSlug}/`);
         if (!response.ok) throw new Error('Listing not found');
         const data = await response.json();
         setBusinessData(data);
@@ -46,7 +53,7 @@ export default function BusinessDetailClient({ slug }: BusinessDetailClientProps
       }
     };
     fetchData();
-  }, [slug, baseUrl]);
+  }, [safeSlug, baseUrl]);
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +64,7 @@ export default function BusinessDetailClient({ slug }: BusinessDetailClientProps
     const token = localStorage.getItem('token');
     setIsSubmitting(true);
     try {
-      const res = await fetch(`${baseUrl}/api/v1/listings/${slug}/reviews/create/`, {
+      const res = await fetch(`${baseUrl}/api/v1/listings/${safeSlug}/reviews/create/`, {
         method: "POST",
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -8,8 +8,15 @@ import BusinessDetailClient from './BusinessDetailClient';
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   try {
     const { slug } = await params;
+    const safeSlug = (() => {
+      try {
+        return encodeURIComponent(decodeURIComponent(slug));
+      } catch {
+        return encodeURIComponent(slug);
+      }
+    })();
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-    const res = await fetch(`${baseUrl}/api/v1/listings/${slug}/`);
+    const res = await fetch(`${baseUrl}/api/v1/listings/${safeSlug}/`);
     
     if (res.ok) {
       const data = await res.json();
@@ -31,11 +38,18 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BusinessDirectoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  const safeSlug = (() => {
+    try {
+      return encodeURIComponent(decodeURIComponent(slug));
+    } catch {
+      return encodeURIComponent(slug);
+    }
+  })();
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   let schemas: any[] = [];
 
   try {
-    const res = await fetch(`${baseUrl}/api/v1/listings/${slug}/`);
+    const res = await fetch(`${baseUrl}/api/v1/listings/${safeSlug}/`);
     if (res.ok) {
       const data = await res.json();
       schemas.push({
