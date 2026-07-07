@@ -81,27 +81,36 @@ export default function CarouselAds({ slot = 'hero_banner', className = '' }: { 
   return (
     <div className={finalWrapperClass}>
       <div 
-        className="flex transition-transform duration-500 ease-in-out h-full" 
-        style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+        className="flex transition-transform duration-500 ease-in-out h-full w-full" 
+        style={{ width: `${ads.length * 100}%`, transform: `translateX(-${(currentIndex * 100) / ads.length}%)` }}
       >
         {ads.map((ad, index) => (
-          <div key={ad.id} className="min-w-full h-full flex-shrink-0 cursor-pointer" onClick={() => handleAdClick(ad.id)}>
+          <div key={ad.id} className="relative h-full flex-shrink-0 cursor-pointer" style={{ width: `${100 / ads.length}%` }} onClick={() => handleAdClick(ad.id)}>
             <img
-              src={ad.ad_image.startsWith('http') ? ad.ad_image : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${ad.ad_image}`}
+              src={ad.ad_image.startsWith('http') ? ad.ad_image : `${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/$/, '')}${ad.ad_image.startsWith('/') ? '' : '/'}${ad.ad_image}`}
               alt={ad.name || 'Advertisement'}
               className={`object-cover rounded-xl ${className ? 'w-full h-full' : 'w-full h-auto max-h-[400px]'}`}
+              onError={(e) => {
+                // Fallback for broken images
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.parentElement?.classList.add('bg-surface-container-low', 'flex', 'items-center', 'justify-center');
+                const span = document.createElement('span');
+                span.className = 'text-xs text-secondary/50 font-bold uppercase tracking-widest';
+                span.innerText = 'Ad Space';
+                e.currentTarget.parentElement?.appendChild(span);
+              }}
             />
           </div>
         ))}
       </div>
       
       {ads.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
           {ads.map((_, idx) => (
             <button
               key={idx}
               onClick={() => setCurrentIndex(idx)}
-              className={`w-3 h-3 rounded-full transition-colors ${idx === currentIndex ? 'bg-primary' : 'bg-white/50'}`}
+              className={`w-3 h-3 rounded-full transition-colors ${idx === currentIndex ? 'bg-primary' : 'bg-white/50 border border-black/10'}`}
               aria-label={`Go to slide ${idx + 1}`}
             />
           ))}

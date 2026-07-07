@@ -134,21 +134,7 @@ export default function EditListingClient({ slug }: { slug: string }) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const img = new Image();
-      img.onload = () => {
-        if (img.width > 290 || img.height > 240) {
-          toast.error("Image dimensions must not exceed 290x240 pixels.");
-          setBannerFile(null);
-        } else {
-          setBannerFile(file);
-        }
-        URL.revokeObjectURL(img.src);
-      };
-      img.onerror = () => {
-        toast.error("Invalid image file.");
-        URL.revokeObjectURL(img.src);
-      };
-      img.src = URL.createObjectURL(file);
+      setBannerFile(file);
     }
   };
 
@@ -359,7 +345,7 @@ export default function EditListingClient({ slug }: { slug: string }) {
                     <>
                       <span className="material-symbols-outlined text-4xl text-outline mb-2">upload_file</span>
                       <p className="text-sm font-bold text-on-surface-variant mb-2">Upload New Business Banner</p>
-                      <p className="text-xs text-secondary mb-4">PNG, JPG (Max dimensions: 290x240 px)</p>
+                      <p className="text-xs text-secondary mb-4">PNG, JPG</p>
                     </>
                   )}
                   <input className="hidden" id="bannerUpload" type="file" accept="image/*" onChange={handleFileChange} />
