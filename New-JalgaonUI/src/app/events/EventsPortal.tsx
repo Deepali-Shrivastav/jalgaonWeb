@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-// import Link from 'next/link';
+import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Pagination from '@/components/Pagination';
@@ -11,6 +11,7 @@ import SkeletonCard from '@/components/SkeletonCard';
 
 export interface EventItem {
   id: number;
+  slug?: string;
   category: any;
   month: string;
   day: string;
@@ -70,6 +71,7 @@ export default function EventsPortal() {
           const startDate = item.start_datetime ? new Date(item.start_datetime) : new Date();
           return {
             id: item.id,
+            slug: item.slug || item.id.toString(),
             category: item.category,
             month: startDate.toLocaleString('default', { month: 'short' }),
             day: startDate.getDate().toString(),
@@ -79,20 +81,23 @@ export default function EventsPortal() {
             excerpt: item.short_description,
             price: 'Free',
             cta: 'View Details',
-            image: item.featured_image || '/placeholder-event.jpg',
+            image: item.featured_image 
+              ? (item.featured_image.startsWith('http') ? item.featured_image : `${baseUrl}${item.featured_image}`)
+              : '/logo.png',
             alt: item.title
           };
         });
         
         if (mappedResults.length > 0) {
-          if (page === 1) {
+          if (page === 1 && activeCategory === 'all') {
             setFeaturedEvents(mappedResults.slice(0, 3));
-            setUpcomingEvents(mappedResults.slice(3, 9).length > 0 ? mappedResults.slice(3, 9) : mappedResults);
+            setUpcomingEvents(mappedResults.slice(3));
           } else {
+            setFeaturedEvents([]);
             setUpcomingEvents(mappedResults);
           }
         } else {
-          if (page === 1) setFeaturedEvents([]);
+          setFeaturedEvents([]);
           setUpcomingEvents([]);
         }
         
@@ -221,6 +226,7 @@ export default function EventsPortal() {
                       loading="lazy"
                       width={420}
                       height={260}
+                      onError={(e) => { e.currentTarget.src = '/logo.png'; }}
                     />
                     <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-extrabold text-primary shadow-sm">
                       {event.category?.name || 'Uncategorized'}
@@ -246,14 +252,12 @@ export default function EventsPortal() {
                       <span className="text-primary font-bold text-lg">
                         {event.price}
                       </span>
-                      <a 
-                        href={event.venue && event.venue !== 'Online' ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}` : '#'}
-                        target={event.venue && event.venue !== 'Online' ? "_blank" : undefined}
-                        rel={event.venue && event.venue !== 'Online' ? "noopener noreferrer" : undefined}
+                      <Link 
+                        href={`/events/${event.slug || event.id}`}
                         className="bg-primary text-white px-6 py-2 rounded-full text-sm font-bold hover:bg-primary-deep hover:shadow-lg transition-all active:scale-95 inline-block text-center"
                       >
                         {event.cta}
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </article>
@@ -300,68 +304,75 @@ export default function EventsPortal() {
               </nav>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {upcomingEvents.map((event) => (
-                <article
-                  key={event.id}
-                  className="bg-white rounded-xl overflow-hidden event-card-shadow flex flex-col"
-                >
-                  <div className="h-52 md:h-56 relative group overflow-hidden">
-                    <img
-                      className="absolute inset-0 w-full h-full object-cover"
-                      src={event.image}
-                      alt={event.alt}
-                      loading="lazy"
-                      width={420}
-                      height={230}
-                    />
-                    <div className="absolute bottom-4 left-4">
-                      <span className="bg-white text-ink-deep px-4 py-1 rounded-full text-[10px] font-black shadow-md tracking-wider">
-                        {event.category?.name || 'Uncategorized'}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-6 md:p-8 flex flex-col flex-1">
-                    <div className="flex gap-4 items-start mb-4">
-                      <div className="bg-surface-container-low rounded-2xl p-2 flex flex-col items-center min-w-[56px]">
-                        <span className="text-[10px] text-secondary font-bold uppercase">
-                          {event.month}
-                        </span>
-                        <span className="text-2xl font-black text-primary">
-                          {event.day}
+            {upcomingEvents.length === 0 ? (
+              <div className="text-center py-16 bg-white rounded-xl border border-hairline-soft">
+                <span className="material-symbols-outlined text-4xl text-secondary mb-3">event_busy</span>
+                <h3 className="text-xl font-bold text-ink-deep">No Events Found</h3>
+                <p className="text-secondary mt-2">There are currently no upcoming events in this category.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {upcomingEvents.map((event) => (
+                  <article
+                    key={event.id}
+                    className="bg-white rounded-xl overflow-hidden event-card-shadow flex flex-col"
+                  >
+                    <div className="h-52 md:h-56 relative group overflow-hidden bg-surface-container-low">
+                      <img
+                        className="absolute inset-0 w-full h-full object-cover"
+                        src={event.image}
+                        alt={event.alt}
+                        loading="lazy"
+                        width={420}
+                        height={230}
+                        onError={(e) => { e.currentTarget.src = '/logo.png'; }}
+                      />
+                      <div className="absolute bottom-4 left-4">
+                        <span className="bg-white text-ink-deep px-4 py-1 rounded-full text-[10px] font-black shadow-md tracking-wider">
+                          {event.category?.name || 'Uncategorized'}
                         </span>
                       </div>
-                      <div>
-                        <h3 className="text-base md:text-lg font-bold text-ink-deep leading-snug">
-                          {event.title}
-                        </h3>
-                        <p className="text-sm text-secondary mt-1">
-                          {event.time}
+                    </div>
+                    <div className="p-6 md:p-8 flex flex-col flex-1">
+                      <div className="flex gap-4 items-start mb-4">
+                        <div className="bg-surface-container-low rounded-2xl p-2 flex flex-col items-center min-w-[56px]">
+                          <span className="text-[10px] text-secondary font-bold uppercase">
+                            {event.month}
+                          </span>
+                          <span className="text-2xl font-black text-primary">
+                            {event.day}
+                          </span>
+                        </div>
+                        <div>
+                          <h3 className="text-base md:text-lg font-bold text-ink-deep leading-snug">
+                            {event.title}
+                          </h3>
+                          <p className="text-sm text-secondary mt-1">
+                            {event.time}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="mt-auto space-y-4">
+                        <p className="text-sm text-secondary line-clamp-2 leading-relaxed">
+                          {event.excerpt}
                         </p>
+                        <div className="flex items-center justify-between pt-4 border-t border-hairline-soft">
+                          <span className="text-ink-deep font-bold">
+                            {event.price}
+                          </span>
+                          <Link 
+                            href={`/events/${event.slug || event.id}`}
+                            className="bg-primary text-white px-8 py-3 rounded-full text-sm font-bold hover:bg-primary-deep transition-colors active:scale-95 inline-block text-center"
+                          >
+                            {event.cta}
+                          </Link>
+                        </div>
                       </div>
                     </div>
-                    <div className="mt-auto space-y-4">
-                      <p className="text-sm text-secondary line-clamp-2 leading-relaxed">
-                        {event.excerpt}
-                      </p>
-                      <div className="flex items-center justify-between pt-4 border-t border-hairline-soft">
-                        <span className="text-ink-deep font-bold">
-                          {event.price}
-                        </span>
-                        <a 
-                          href={event.venue && event.venue !== 'Online' ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}` : '#'}
-                          target={event.venue && event.venue !== 'Online' ? "_blank" : undefined}
-                          rel={event.venue && event.venue !== 'Online' ? "noopener noreferrer" : undefined}
-                          className="bg-primary text-white px-8 py-3 rounded-full text-sm font-bold hover:bg-primary-deep transition-colors active:scale-95 inline-block text-center"
-                        >
-                          {event.cta}
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
+                  </article>
+                ))}
+              </div>
+            )}
 
             <div className="mt-16 pb-12">
               <Pagination 

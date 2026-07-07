@@ -166,12 +166,6 @@ const touristPlaces = [
     image: 'https://lh3.googleusercontent.com/gps-cs-s/APNQkAFs6CpB4B6RszQxyoydfFbE_V7tS3OZYdFl6MAVc043QMxuAgOTCH56RkLWOcbEo2vtR13WD51dlOXvEblUvvgwmZUPmyJcPNh1YmZAcDlevYq-099UEkNFUl1wbKBvAUt6vdF9=w80-h141-k-no'
   },
   {
-    name: 'Kamesh Nala',
-    type: 'Historical landmark',
-    address: 'Open 24 hours',
-    image: 'https://lh3.googleusercontent.com/gps-cs-s/APNQkAHyGl1DwjxlYYSrjiSoGocrhGrxBnK5PxevjXv2L6WmgKCkYnX_b-4ZDcDJT0rq6h-Xd2O70N9euTYAr9EJPQLYjrWnTTGwJxn5xSGUjaL7BUOopDi3eEjaAAGeIoBWU2IQNZTPug=w80-h106-k-no'
-  },
-  {
     name: 'Gandhi Tirtha Jain hills Jalgaon',
     type: 'Museum',
     address: '',
@@ -188,12 +182,6 @@ const touristPlaces = [
     type: 'Place of worship',
     address: '',
     image: 'https://lh3.googleusercontent.com/gps-cs-s/APNQkAFpZATZNJmehNKOo2w1VuCyJU2_LSkSTHcofUS2wDX7foPWUYmSBLZIC8v-hKPpYtbFnXN28mzblhZ8K3Jlp929e2ev5kdXHrfLJ_QYx-DIxwA1sk3p0BrKkhrNMhTLUBN2O953Ow=w122-h92-k-no'
-  },
-  {
-    name: 'Hotel Tourist Resort · Visited link',
-    type: 'Hotel',
-    address: '',
-    image: 'https://lh3.googleusercontent.com/gps-cs-s/APNQkAFkTsk2heg4nOYD8WlzwdzfIIeAmWbLfQQxmFzFOI7INkZfWwFR3uuD1uzRq0E4CI3G-CPKFUZVMarRFB01t76jc7e3r9Eh2OdYUAfL56JVRuicggGAFf0KmexCl8ESqLmI37Q=w80-h106-k-no'
   },
   {
     name: 'Sant Gadage Baba Udyan',
