@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 interface JobApplyModalProps {
   isOpen: boolean;
@@ -14,8 +15,13 @@ export default function JobApplyModal({ isOpen, onClose, job, baseUrl }: JobAppl
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [mounted, setMounted] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,8 +63,8 @@ export default function JobApplyModal({ isOpen, onClose, job, baseUrl }: JobAppl
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+  return createPortal(
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
       <div className="bg-white rounded-2xl p-8 w-full max-w-lg relative shadow-2xl animate-fade-in">
         <button 
           onClick={onClose} 
@@ -132,6 +138,7 @@ export default function JobApplyModal({ isOpen, onClose, job, baseUrl }: JobAppl
           </>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
