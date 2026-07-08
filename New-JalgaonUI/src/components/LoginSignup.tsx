@@ -32,7 +32,9 @@ export default function LoginSignup() {
     if (!phoneNumber || !/^\d{10}$/.test(phoneNumber)) {
       newErrors.phone = "Please enter a valid 10-digit mobile number.";
     }
-    if (!userPassword || userPassword.length < 6) {
+    if (!userPassword) {
+      newErrors.password = "Password is required.";
+    } else if (isSignUp && userPassword.length < 6) {
       newErrors.password = "Password must be at least 6 characters.";
     }
     return newErrors;
@@ -67,6 +69,8 @@ export default function LoginSignup() {
     const clientErrors = validateForm();
     if (Object.keys(clientErrors).length > 0) {
       setErrors(clientErrors);
+      if (clientErrors.phone) toast.error(clientErrors.phone, { id: 'val-phone' });
+      else if (clientErrors.password) toast.error(clientErrors.password, { id: 'val-pass' });
       return;
     }
 
@@ -133,6 +137,8 @@ export default function LoginSignup() {
     const clientErrors = validateForm();
     if (Object.keys(clientErrors).length > 0) {
       setErrors(clientErrors);
+      if (clientErrors.phone) toast.error(clientErrors.phone, { id: 'val-phone' });
+      else if (clientErrors.password) toast.error(clientErrors.password, { id: 'val-pass' });
       return;
     }
 
@@ -191,6 +197,7 @@ export default function LoginSignup() {
       }
     } catch (error: any) {
       console.error("Login failed", error);
+      toast.error(error.message || "Login failed. Please try again.", { id: 'login-fail' });
       setErrorMessage(error.message || "Login failed. Please try again.");
     } finally {
       setIsLoading(false);
