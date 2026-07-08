@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { AuthContext } from '@/context/AuthContext';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 export default function AddListingClient() {
   const { isLogin, user } = useContext(AuthContext);
@@ -38,6 +38,7 @@ export default function AddListingClient() {
   });
   
   const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     // Fetch categories
@@ -65,28 +66,95 @@ export default function AddListingClient() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors(prev => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setBannerFile(file);
+      if (errors.business_banner) {
+        setErrors(prev => {
+          const next = { ...prev };
+          delete next.business_banner;
+          return next;
+        });
+      }
     }
   };
 
   const selectedMainCategory = categories.find(c => c.id.toString() === formData.main_category);
   const subCategories = selectedMainCategory ? selectedMainCategory.subcategories : [];
 
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    if (!formData.business_name || formData.business_name.trim().length < 3) {
+      newErrors.business_name = "Business name must be at least 3 characters.";
+    }
+    if (!formData.business_email) {
+      newErrors.business_email = "Contact email is required.";
+    } else if (!/\S+@\S+\.\S+/.test(formData.business_email)) {
+      newErrors.business_email = "Please enter a valid email address.";
+    }
+    if (!formData.business_no) {
+      newErrors.business_no = "Phone number is required.";
+    } else if (!/^[0-9]{10}$/.test(formData.business_no)) {
+      newErrors.business_no = "Please enter a valid 10-digit phone number.";
+    }
+    if (!formData.main_category) {
+      newErrors.main_category = "Please select a main category.";
+    }
+    if (!formData.sub_category) {
+      newErrors.sub_category = "Please select a sub-category.";
+    }
+    if (!formData.business_description || formData.business_description.trim().length < 10) {
+      newErrors.business_description = "Description must be at least 10 characters.";
+    }
+    if (!formData.business_address || formData.business_address.trim().length === 0) {
+      newErrors.business_address = "Detailed address is required.";
+    }
+    // Optional fields format checks
+    if (formData.business_gst && !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(formData.business_gst)) {
+      newErrors.business_gst = "Please enter a valid 15-character GSTIN.";
+    }
+    if (formData.insta_link && !/^https?:\/\/.+/.test(formData.insta_link)) {
+      newErrors.insta_link = "Please enter a valid URL starting with http:// or https://";
+    }
+    if (formData.facebook_link && !/^https?:\/\/.+/.test(formData.facebook_link)) {
+      newErrors.facebook_link = "Please enter a valid URL starting with http:// or https://";
+    }
+    return newErrors;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    toast.dismiss();
     
     if (!isLogin) {
-      toast.error("Please login to submit a business listing.");
+      toast.error("Please login to submit a business listing.", { id: 'auth-error' });
       return;
     }
 
-    if (!formData.main_category || !formData.sub_category) {
-      toast.error("Please select a main category and sub-category.");
+    const clientErrors = validateForm();
+    if (Object.keys(clientErrors).length > 0) {
+      setErrors(clientErrors);
+      toast.error("Please fill all required fields correctly.", { id: 'validation-error' });
+      
+      // Scroll to first error field
+      setTimeout(() => {
+        const firstErrorKey = Object.keys(clientErrors)[0];
+        const element = document.getElementsByName(firstErrorKey)[0];
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.focus();
+        }
+      }, 100);
       return;
     }
 
@@ -116,18 +184,43 @@ export default function AddListingClient() {
       });
 
       if (res.ok) {
-        toast.success("Listing submitted successfully! Awaiting admin approval.");
+        toast.success("Listing submitted successfully! Awaiting admin approval.", { id: 'submit-success' });
         setTimeout(() => {
           router.push('/');
         }, 2000);
       } else {
         const errorData = await res.json();
-        console.error("Submission error:", errorData);
-        toast.error("Failed to submit listing. Please check required fields.");
+        console.log("Submission error:", errorData);
+        const backendErrors: Record<string, string> = {};
+        if (typeof errorData === 'object' && errorData !== null) {
+          Object.entries(errorData).forEach(([key, val]) => {
+            if (Array.isArray(val)) {
+              backendErrors[key] = val.join(' ');
+            } else if (typeof val === 'string') {
+              backendErrors[key] = val;
+            }
+          });
+        }
+        setErrors(backendErrors);
+        
+        const errorFields = Object.keys(backendErrors).map(key => key.replace('_', ' ')).join(', ');
+        if (errorFields) {
+          toast.error(`Failed to submit listing. Errors in: ${errorFields}`, { id: 'backend-error' });
+          setTimeout(() => {
+            const firstErrorKey = Object.keys(backendErrors)[0];
+            const element = document.getElementsByName(firstErrorKey)[0];
+            if (element) {
+              element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              element.focus();
+            }
+          }, 100);
+        } else {
+          toast.error("Failed to submit listing. Please check required fields.", { id: 'backend-error' });
+        }
       }
     } catch (err) {
-      console.error(err);
-      toast.error("An error occurred during submission.");
+      console.warn("Exception during submission:", err);
+      toast.error("An error occurred during submission.", { id: 'submit-exception' });
     } finally {
       setSubmitting(false);
     }
@@ -136,7 +229,6 @@ export default function AddListingClient() {
   return (
     <>
       <Header />
-      <Toaster position="top-center" />
       <main className="py-xxxl mb-12 px-base md:px-xxl max-w-container-max mx-auto bg-surface">
         {/* Hero Section */}
         <section className="text-center mb-xxl mt-xl">
@@ -148,7 +240,7 @@ export default function AddListingClient() {
 
         {/* Form Container */}
         <div className="bg-surface-container-lowest rounded-[32px] p-base md:p-xxxl shadow-lg border border-hairline-soft">
-          <form className="space-y-xxl" id="businessForm" onSubmit={handleSubmit}>
+          <form className="space-y-xxl" id="businessForm" onSubmit={handleSubmit} noValidate>
             
             {/* Business Details */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-xl">
@@ -161,12 +253,44 @@ export default function AddListingClient() {
               </div>
               <div className="md:col-span-8 grid grid-cols-1 gap-md">
                 <div className="group">
-                  <label className="block text-sm font-semibold text-on-surface-variant mb-xs transition-colors group-focus-within:text-primary">Business Name *</label>
-                  <input required minLength={3} maxLength={100} name="business_name" value={formData.business_name} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="e.g. Jalgaon Tech Solutions" type="text"/>
+                  <label className="block text-sm font-semibold text-on-surface-variant mb-xs transition-colors group-focus-within:text-primary">
+                    Business Name *
+                  </label>
+                  <input
+                    name="business_name"
+                    value={formData.business_name}
+                    onChange={handleInputChange}
+                    className={`w-full bg-white border rounded-lg p-3 focus:ring-2 outline-none transition-all ${
+                      errors.business_name
+                        ? 'border-red-500 focus:ring-red-200 focus:border-red-500'
+                        : 'border-outline-variant focus:ring-primary/20 focus:border-primary'
+                    }`}
+                    placeholder="e.g. Jalgaon Tech Solutions"
+                    type="text"
+                  />
+                  {errors.business_name && (
+                    <p className="text-red-500 text-xs mt-1 font-medium">{errors.business_name}</p>
+                  )}
                 </div>
                 <div className="group">
-                  <label className="block text-sm font-semibold text-on-surface-variant mb-xs transition-colors group-focus-within:text-primary">Legal Business Name</label>
-                  <input name="legal_name" value={formData.legal_name} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="Registered Enterprise Name" type="text"/>
+                  <label className="block text-sm font-semibold text-on-surface-variant mb-xs transition-colors group-focus-within:text-primary">
+                    Legal Business Name
+                  </label>
+                  <input
+                    name="legal_name"
+                    value={formData.legal_name}
+                    onChange={handleInputChange}
+                    className={`w-full bg-white border rounded-lg p-3 focus:ring-2 outline-none transition-all ${
+                      errors.legal_name
+                        ? 'border-red-500 focus:ring-red-200 focus:border-red-500'
+                        : 'border-outline-variant focus:ring-primary/20 focus:border-primary'
+                    }`}
+                    placeholder="Registered Enterprise Name"
+                    type="text"
+                  />
+                  {errors.legal_name && (
+                    <p className="text-red-500 text-xs mt-1 font-medium">{errors.legal_name}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -185,11 +309,39 @@ export default function AddListingClient() {
               <div className="md:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-md">
                 <div className="group">
                   <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Contact Email *</label>
-                  <input required name="business_email" value={formData.business_email} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="contact@business.com" type="email"/>
+                  <input
+                    name="business_email"
+                    value={formData.business_email}
+                    onChange={handleInputChange}
+                    className={`w-full bg-white border rounded-lg p-3 focus:ring-2 outline-none transition-all ${
+                      errors.business_email
+                        ? 'border-red-500 focus:ring-red-200 focus:border-red-500'
+                        : 'border-outline-variant focus:ring-primary/20 focus:border-primary'
+                    }`}
+                    placeholder="contact@business.com"
+                    type="email"
+                  />
+                  {errors.business_email && (
+                    <p className="text-red-500 text-xs mt-1 font-medium">{errors.business_email}</p>
+                  )}
                 </div>
                 <div className="group">
                   <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Phone Number *</label>
-                  <input required pattern="[0-9]{10}" title="Please enter a valid 10-digit phone number without country code or spaces" name="business_no" value={formData.business_no} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="9876543210" type="tel"/>
+                  <input
+                    name="business_no"
+                    value={formData.business_no}
+                    onChange={handleInputChange}
+                    className={`w-full bg-white border rounded-lg p-3 focus:ring-2 outline-none transition-all ${
+                      errors.business_no
+                        ? 'border-red-500 focus:ring-red-200 focus:border-red-500'
+                        : 'border-outline-variant focus:ring-primary/20 focus:border-primary'
+                    }`}
+                    placeholder="9876543210"
+                    type="tel"
+                  />
+                  {errors.business_no && (
+                    <p className="text-red-500 text-xs mt-1 font-medium">{errors.business_no}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -209,26 +361,65 @@ export default function AddListingClient() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
                   <div className="group">
                     <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Main Category *</label>
-                    <select required name="main_category" value={formData.main_category} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-on-surface-variant">
+                    <select
+                      name="main_category"
+                      value={formData.main_category}
+                      onChange={handleInputChange}
+                      className={`w-full bg-white border rounded-lg p-3 focus:ring-2 outline-none transition-all text-on-surface-variant ${
+                        errors.main_category
+                          ? 'border-red-500 focus:ring-red-200 focus:border-red-500'
+                          : 'border-outline-variant focus:ring-primary/20 focus:border-primary'
+                      }`}
+                    >
                       <option disabled value="">Select a main category...</option>
                       {categories.map(cat => (
                         <option key={cat.id} value={cat.id}>{cat.main_category}</option>
                       ))}
                     </select>
+                    {errors.main_category && (
+                      <p className="text-red-500 text-xs mt-1 font-medium">{errors.main_category}</p>
+                    )}
                   </div>
                   <div className="group">
                     <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Sub-category *</label>
-                    <select required name="sub_category" value={formData.sub_category} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-on-surface-variant" disabled={!formData.main_category}>
+                    <select
+                      name="sub_category"
+                      value={formData.sub_category}
+                      onChange={handleInputChange}
+                      className={`w-full bg-white border rounded-lg p-3 focus:ring-2 outline-none transition-all text-on-surface-variant ${
+                        errors.sub_category
+                          ? 'border-red-500 focus:ring-red-200 focus:border-red-500'
+                          : 'border-outline-variant focus:ring-primary/20 focus:border-primary'
+                      }`}
+                      disabled={!formData.main_category}
+                    >
                       <option disabled value="">Select a sub category...</option>
                       {subCategories.map((sub: any) => (
                         <option key={sub.id} value={sub.id}>{sub.sub_category}</option>
                       ))}
                     </select>
+                    {errors.sub_category && (
+                      <p className="text-red-500 text-xs mt-1 font-medium">{errors.sub_category}</p>
+                    )}
                   </div>
                 </div>
                 <div className="group">
                   <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Description *</label>
-                  <textarea required minLength={10} name="business_description" value={formData.business_description} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="Tell us about your business, your mission, and what sets you apart..." rows={4}></textarea>
+                  <textarea
+                    name="business_description"
+                    value={formData.business_description}
+                    onChange={handleInputChange}
+                    className={`w-full bg-white border rounded-lg p-3 focus:ring-2 outline-none transition-all ${
+                      errors.business_description
+                        ? 'border-red-500 focus:ring-red-200 focus:border-red-500'
+                        : 'border-outline-variant focus:ring-primary/20 focus:border-primary'
+                    }`}
+                    placeholder="Tell us about your business, your mission, and what sets you apart..."
+                    rows={4}
+                  ></textarea>
+                  {errors.business_description && (
+                    <p className="text-red-500 text-xs mt-1 font-medium">{errors.business_description}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -274,7 +465,21 @@ export default function AddListingClient() {
                 </div>
                 <div className="group">
                   <label className="block text-sm font-semibold text-on-surface-variant mb-xs">GST Number</label>
-                  <input name="business_gst" pattern="^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$" title="Please enter a valid 15-character GSTIN" value={formData.business_gst} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="27XXXXX..." type="text"/>
+                  <input
+                    name="business_gst"
+                    value={formData.business_gst}
+                    onChange={handleInputChange}
+                    className={`w-full bg-white border rounded-lg p-3 focus:ring-2 outline-none transition-all ${
+                      errors.business_gst
+                        ? 'border-red-500 focus:ring-red-200 focus:border-red-500'
+                        : 'border-outline-variant focus:ring-primary/20 focus:border-primary'
+                    }`}
+                    placeholder="27XXXXX..."
+                    type="text"
+                  />
+                  {errors.business_gst && (
+                    <p className="text-red-500 text-xs mt-1 font-medium">{errors.business_gst}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -294,14 +499,44 @@ export default function AddListingClient() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
                   <div className="group">
                     <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Instagram</label>
-                    <input name="insta_link" pattern="https?://.*" title="Please enter a valid URL starting with http:// or https://" value={formData.insta_link} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="https://instagram.com/yourbusiness" type="url"/>
+                    <input
+                      name="insta_link"
+                      value={formData.insta_link}
+                      onChange={handleInputChange}
+                      className={`w-full bg-white border rounded-lg p-3 focus:ring-2 outline-none transition-all ${
+                        errors.insta_link
+                          ? 'border-red-500 focus:ring-red-200 focus:border-red-500'
+                          : 'border-outline-variant focus:ring-primary/20 focus:border-primary'
+                      }`}
+                      placeholder="https://instagram.com/yourbusiness"
+                      type="url"
+                    />
+                    {errors.insta_link && (
+                      <p className="text-red-500 text-xs mt-1 font-medium">{errors.insta_link}</p>
+                    )}
                   </div>
                   <div className="group">
                     <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Facebook</label>
-                    <input name="facebook_link" pattern="https?://.*" title="Please enter a valid URL starting with http:// or https://" value={formData.facebook_link} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="https://fb.com/yourbusiness" type="url"/>
+                    <input
+                      name="facebook_link"
+                      value={formData.facebook_link}
+                      onChange={handleInputChange}
+                      className={`w-full bg-white border rounded-lg p-3 focus:ring-2 outline-none transition-all ${
+                        errors.facebook_link
+                          ? 'border-red-500 focus:ring-red-200 focus:border-red-500'
+                          : 'border-outline-variant focus:ring-primary/20 focus:border-primary'
+                      }`}
+                      placeholder="https://fb.com/yourbusiness"
+                      type="url"
+                    />
+                    {errors.facebook_link && (
+                      <p className="text-red-500 text-xs mt-1 font-medium">{errors.facebook_link}</p>
+                    )}
                   </div>
                 </div>
-                <div className="border-2 border-dashed border-outline-variant p-8 rounded-xl text-center transition-colors hover:border-primary group bg-surface relative">
+                <div className={`border-2 border-dashed p-8 rounded-xl text-center transition-colors hover:border-primary group bg-surface relative ${
+                  errors.business_banner ? 'border-red-500 bg-red-50/10' : 'border-outline-variant'
+                }`}>
                   {bannerFile ? (
                     <div className="mb-2">
                       <p className="text-sm font-bold text-primary">{bannerFile.name}</p>
@@ -318,6 +553,9 @@ export default function AddListingClient() {
                   <label className="inline-block bg-surface-container-high px-6 py-2 rounded-full text-sm font-bold cursor-pointer hover:bg-primary hover:text-white transition-all text-on-surface" htmlFor="bannerUpload">
                     {bannerFile ? 'Change File' : 'Choose File'}
                   </label>
+                  {errors.business_banner && (
+                    <p className="text-red-500 text-xs mt-2 font-medium">{errors.business_banner}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -346,7 +584,21 @@ export default function AddListingClient() {
                 </div>
                 <div className="group">
                   <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Detailed Address *</label>
-                  <textarea required name="business_address" value={formData.business_address} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="Plot No, Building, Street, Area, Jalgaon" rows={3}></textarea>
+                  <textarea
+                    name="business_address"
+                    value={formData.business_address}
+                    onChange={handleInputChange}
+                    className={`w-full bg-white border rounded-lg p-3 focus:ring-2 outline-none transition-all ${
+                      errors.business_address
+                        ? 'border-red-500 focus:ring-red-200 focus:border-red-500'
+                        : 'border-outline-variant focus:ring-primary/20 focus:border-primary'
+                    }`}
+                    placeholder="Plot No, Building, Street, Area, Jalgaon"
+                    rows={3}
+                  ></textarea>
+                  {errors.business_address && (
+                    <p className="text-red-500 text-xs mt-1 font-medium">{errors.business_address}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -375,3 +627,4 @@ export default function AddListingClient() {
     </>
   );
 }
+

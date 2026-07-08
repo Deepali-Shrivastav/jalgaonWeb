@@ -40,6 +40,7 @@ export default function JobDetailClient({ slug }: { slug: string }) {
   const { isLogin } = useContext(AuthContext);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const [saveActionMsg, setSaveActionMsg] = useState("");
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -60,6 +61,7 @@ export default function JobDetailClient({ slug }: { slug: string }) {
         }
       });
       if (res.ok) {
+        setIsSaved(true);
         setSaveActionMsg("Job saved successfully!");
       } else {
         const errorData = await res.json();
@@ -212,11 +214,17 @@ export default function JobDetailClient({ slug }: { slug: string }) {
           </button>
           <button
             onClick={handleSaveJob}
-            disabled={isSaving}
-            className="bg-transparent text-primary border-2 border-primary hover:bg-primary/5 px-8 py-3 rounded-full font-semibold text-base transition-all flex items-center gap-2 disabled:opacity-50 transform hover:-translate-y-0.5"
+            disabled={isSaving || isSaved}
+            className={`px-8 py-3 rounded-full font-semibold text-base transition-all flex items-center gap-2 disabled:opacity-50 transform hover:-translate-y-0.5 ${
+              isSaved
+                ? 'bg-green-100 text-green-700 border-2 border-green-200 cursor-not-allowed hover:translate-y-0'
+                : 'bg-transparent text-primary border-2 border-primary hover:bg-primary/5'
+            }`}
           >
-            <span className="material-symbols-outlined text-[20px]">{isSaving ? 'progress_activity' : 'bookmark_border'}</span>
-            {isSaving ? 'Saving...' : 'Save Job'}
+            <span className="material-symbols-outlined text-[20px]">
+              {isSaving ? 'progress_activity' : (isSaved ? 'bookmark_added' : 'bookmark_border')}
+            </span>
+            {isSaving ? 'Saving...' : (isSaved ? 'Saved' : 'Save Job')}
           </button>
         </div>
       )}
