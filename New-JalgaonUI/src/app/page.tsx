@@ -6,11 +6,12 @@ async function getHomeData() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   
   try {
-    const [trendingRes, newsRes, eventsRes, jobsRes] = await Promise.allSettled([
+    const [trendingRes, newsRes, eventsRes, jobsRes, startupsRes] = await Promise.allSettled([
       fetch(`${apiUrl}/api/v1/listings/trending/`, { next: { revalidate: 3600 } }),
       fetch(`${apiUrl}/api/v1/news/trending/`, { next: { revalidate: 1800 } }),
       fetch(`${apiUrl}/api/v1/events/`, { next: { revalidate: 3600 } }),
       fetch(`${apiUrl}/api/v1/jobs/`, { next: { revalidate: 3600 } }),
+      fetch(`${apiUrl}/api/v1/startups/featured/`, { next: { revalidate: 3600 } }),
     ]);
 
     const getJson = async (res: PromiseSettledResult<Response>) => {
@@ -45,6 +46,8 @@ async function getHomeData() {
 
     const jobs = await getJson(jobsRes);
     const slicedJobs = jobs.slice(0, 3);
+    const startups = await getJson(startupsRes);
+    const slicedStartups = startups.slice(0, 4);
 
     const mappedListings = trendingListings.map((item: any) => ({
       id: item.slug || item.id,
@@ -64,15 +67,16 @@ async function getHomeData() {
       trendingListings: mappedListings, 
       news, 
       events, 
-      jobs: slicedJobs 
+      jobs: slicedJobs,
+      startups: slicedStartups
     };
   } catch (err) {
-    return { trendingListings: [], news: [], events: [], jobs: [] };
+    return { trendingListings: [], news: [], events: [], jobs: [], startups: [] };
   }
 }
 
 export default async function Home() {
-  const { trendingListings, news, events, jobs } = await getHomeData();
+  const { trendingListings, news, events, jobs, startups } = await getHomeData();
 
   return (
     <>
@@ -83,6 +87,7 @@ export default async function Home() {
           news={news} 
           events={events} 
           jobs={jobs} 
+          startups={startups}
         />
       </main>
       <Footer />

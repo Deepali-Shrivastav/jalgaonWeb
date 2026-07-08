@@ -18,6 +18,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, toggleSidebar 
   const [isBlogExpanded, setIsBlogExpanded] = useState(false);
   const [isJobsExpanded, setIsJobsExpanded] = useState(false);
   const [isEventsExpanded, setIsEventsExpanded] = useState(false);
+  const [isStartupsExpanded, setIsStartupsExpanded] = useState(false);
 
   const userRole = user?.role || "";
   const isAdmin = ["super_admin", "admin"].includes(userRole);
@@ -31,6 +32,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, toggleSidebar 
   const canSeeNewsComments = isAdmin || ["content_manager", "moderator", "news_editor"].includes(userRole);
   const canSeeEvents = isAdmin || ["content_manager", "moderator"].includes(userRole);
   const canSeeJobs = isAdmin || ["content_manager", "moderator"].includes(userRole);
+  const canSeeStartups = isAdmin || ["content_manager", "moderator"].includes(userRole);
 
   const navLinkClass = (path: string, exact = false) => {
     const isActive = exact ? pathname === path : pathname?.startsWith(path);
@@ -270,6 +272,38 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, toggleSidebar 
               <span className="material-symbols-outlined">volunteer_activism</span>
               {!isCollapsed && <span>NGOs</span>}
             </Link>
+          </div>
+        )}
+
+        {/* Startups */}
+        {canSeeStartups && (
+          <div className="space-y-1">
+            <button
+              onClick={() => setIsStartupsExpanded(!isStartupsExpanded)}
+              className={`w-full flex items-center ${
+                isCollapsed ? "justify-center w-12 h-12 mx-auto" : "justify-between px-4 py-3"
+              } text-sm font-medium rounded-xl text-slate-600 hover:bg-slate-100 transition-all duration-200`}
+            >
+              <div className={`flex items-center ${isCollapsed ? "" : "gap-3"}`}>
+                <span className="material-symbols-outlined">rocket_launch</span>
+                {!isCollapsed && <span>Startups</span>}
+              </div>
+              {!isCollapsed && (
+                <span className="material-symbols-outlined text-sm">
+                  {isStartupsExpanded ? "expand_less" : "expand_more"}
+                </span>
+              )}
+            </button>
+            {isStartupsExpanded && !isCollapsed && (
+              <div className="pl-11 space-y-1">
+                <Link href="/admin/startups" className={navLinkClass("/admin/startups", true)}>
+                  Startups List
+                </Link>
+                <Link href="/admin/startups/industries" className={navLinkClass("/admin/startups/industries")}>
+                  Industries
+                </Link>
+              </div>
+            )}
           </div>
         )}
 

@@ -61,6 +61,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (pathname.includes("moderation")) return "Moderation Queue";
     if (pathname.includes("claims")) return "Business Claims";
     if (pathname.includes("reports")) return "Business Reports";
+    if (pathname.includes("startups")) return "Startup Management";
     return "Dashboard Overview";
   };
 
