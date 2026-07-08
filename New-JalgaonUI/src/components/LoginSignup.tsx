@@ -160,6 +160,7 @@ export default function LoginSignup() {
       localStorage.setItem("token", access);
       localStorage.setItem("refresh_token", refresh);
       localStorage.setItem("user", JSON.stringify(user));
+      sessionStorage.setItem("just_logged_in", "true");
 
       if (
         ["super_admin", "admin", "moderator", "content_manager", "news_editor"].includes(
