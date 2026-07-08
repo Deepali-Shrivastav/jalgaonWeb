@@ -64,7 +64,13 @@ class UserLoginSerializer(serializers.Serializer):
         return validate_phone_number(value)
 
     def validate(self, data):
-        user = authenticate(phone_number=data['phone_number'], password=data['password'])
+        phone_number = data.get('phone_number')
+        password = data.get('password')
+        
+        if not User.objects.filter(phone_number=phone_number).exists():
+            raise serializers.ValidationError("Account with this mobile number not found.")
+            
+        user = authenticate(phone_number=phone_number, password=password)
         if not user:
             raise serializers.ValidationError("Invalid credentials.")
         if not user.is_active:

@@ -41,7 +41,13 @@ csrf_trusted_origins_env = os.getenv('CSRF_TRUSTED_ORIGINS')
 if csrf_trusted_origins_env:
     CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_trusted_origins_env.split(',') if origin.strip()]
 else:
-    CSRF_TRUSTED_ORIGINS = ['https://api.jalgaon.com', 'https://www.jalgaon.com']
+    CSRF_TRUSTED_ORIGINS = [
+        'https://api.jalgaon.com',
+        'https://www.jalgaon.com',
+        'https://jalgaon.com',
+        'http://localhost:3000',
+        'http://127.0.0.1:3000'
+    ]
 
 # ─────────────────────────────────────────────────────────────────────────────
 # HTTPS / PROXY TRUST
@@ -249,18 +255,23 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # CORS settings
 CORS_ALLOW_CREDENTIALS = True
 
-cors_allowed_origins_env = os.getenv('CORS_ALLOWED_ORIGINS')
-if cors_allowed_origins_env:
-    CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_allowed_origins_env.split(',') if origin.strip()]
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
 else:
-    CORS_ALLOWED_ORIGINS = [
-        'https://api.jalgaon.com',
-        'https://www.jalgaon.com',
-        'capacitor://localhost',
-        'http://localhost:5173',
-        'http://127.0.0.1:5173',
-        'http://localhost:3000'
-    ]
+    cors_allowed_origins_env = os.getenv('CORS_ALLOWED_ORIGINS')
+    if cors_allowed_origins_env:
+        CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_allowed_origins_env.split(',') if origin.strip()]
+    else:
+        CORS_ALLOWED_ORIGINS = [
+            'https://api.jalgaon.com',
+            'https://www.jalgaon.com',
+            'https://jalgaon.com',
+            'capacitor://localhost',
+            'http://localhost:5173',
+            'http://127.0.0.1:5173',
+            'http://localhost:3000',
+            'http://127.0.0.1:3000'
+        ]
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SWAGGER / OPENAPI DOCUMENTATION (PRD §15.1)

@@ -10,7 +10,7 @@ export default function ProfileCompleteBanner() {
   const [isDismissed, setIsDismissed] = useState(true); // default to true, show on condition
 
   useEffect(() => {
-    if (isLoading || isComplete || score === 0 || score === 100) return;
+    if (isLoading || isComplete) return;
     setIsDismissed(isProfileNudgeDismissed());
   }, [isLoading, isComplete, score]);
 

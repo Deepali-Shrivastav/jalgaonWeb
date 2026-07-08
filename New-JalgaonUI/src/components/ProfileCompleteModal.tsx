@@ -16,13 +16,19 @@ export default function ProfileCompleteModal() {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    // Conditions check:
-    if (isLoading || isComplete || score === 0 || score === 100) return;
+    if (isLoading || isComplete) return;
     if (isProfileNudgeSnoozed() || isProfileNudgeDismissed()) return;
+
+    // Only trigger if user just logged in this session
+    const justLoggedIn = typeof window !== 'undefined' && sessionStorage.getItem("just_logged_in") === "true";
+    if (!justLoggedIn) return;
 
     // Show modal with a 3-second delay after mount
     const timer = setTimeout(() => {
       setIsOpen(true);
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem("just_logged_in");
+      }
     }, 3000);
 
     return () => clearTimeout(timer);
@@ -47,13 +53,13 @@ export default function ProfileCompleteModal() {
   const strokeDashoffset = circumference - (score / 100) * circumference;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-hairline-soft/80 relative transform scale-100 transition-all duration-300">
+    <div className="fixed top-0 left-0 w-full h-full z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+      <div className="bg-white rounded-3xl p-8 w-[95vw] sm:w-[450px] max-w-[450px] shrink-0 shadow-2xl border border-hairline-soft/80 relative transform scale-100 transition-all duration-300">
         
         {/* Close button */}
         <button
           onClick={handleSnooze}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-100 rounded-full transition-all"
+          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-100 rounded-full transition-all cursor-pointer"
           aria-label="Close modal"
         >
           <span className="material-symbols-outlined text-xl">close</span>
@@ -62,7 +68,12 @@ export default function ProfileCompleteModal() {
         {/* Circular Progress Section */}
         <div className="flex flex-col items-center text-center mt-2 mb-6">
           <div className="relative flex items-center justify-center w-24 h-24 mb-4">
-            <svg className="w-full h-full transform -rotate-90">
+            <svg 
+              viewBox="0 0 96 96"
+              width="96"
+              height="96"
+              className="w-full h-full transform -rotate-90"
+            >
               {/* Background circle */}
               <circle
                 cx="48"
