@@ -129,7 +129,7 @@ export default function MarketWeatherDashboard() {
   }, []);
 
   return (
-    <section className="border-b border-hairline-soft bg-white" aria-label="Live market and Jalgaon weather">
+    <section className="border-b border-hairline-soft bg-white" aria-label="Live commodity market and Jalgaon weather">
       <div className="market-ticker mx-auto flex h-12 max-w-[100vw] items-center overflow-hidden text-xs sm:text-sm">
         <div className="market-ticker-track flex w-max items-center">
           <TickerItems dashboard={dashboard} loading={loading} />

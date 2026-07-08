@@ -69,8 +69,6 @@ export default function LoginSignup() {
     const clientErrors = validateForm();
     if (Object.keys(clientErrors).length > 0) {
       setErrors(clientErrors);
-      if (clientErrors.phone) toast.error(clientErrors.phone, { id: 'val-phone' });
-      else if (clientErrors.password) toast.error(clientErrors.password, { id: 'val-pass' });
       return;
     }
 
@@ -122,8 +120,7 @@ export default function LoginSignup() {
       await handleLoginSubmit();
     } catch (error: any) {
       console.error("Registration failed", error);
-      toast.error(error.message || "Registration failed. Please try again.");
-      setErrorMessage(error.message);
+      setErrorMessage(error.message || "Registration failed. Please try again.");
       setIsLoading(false);
     }
   };
@@ -137,8 +134,6 @@ export default function LoginSignup() {
     const clientErrors = validateForm();
     if (Object.keys(clientErrors).length > 0) {
       setErrors(clientErrors);
-      if (clientErrors.phone) toast.error(clientErrors.phone, { id: 'val-phone' });
-      else if (clientErrors.password) toast.error(clientErrors.password, { id: 'val-pass' });
       return;
     }
 
@@ -197,7 +192,6 @@ export default function LoginSignup() {
       }
     } catch (error: any) {
       console.error("Login failed", error);
-      toast.error(error.message || "Login failed. Please try again.", { id: 'login-fail' });
       setErrorMessage(error.message || "Login failed. Please try again.");
     } finally {
       setIsLoading(false);
