@@ -73,7 +73,24 @@ export default function AdminNewsCreatePage() {
         throw new Error(errData.detail || JSON.stringify(errData));
       }
       router.push("/admin/news");
-    } catch (err: any) { alert("Failed to save article: " + (err.message || "Unknown error")); }
+    } catch (err: any) {
+      let msg = err.message || "Unknown error";
+      try {
+        const parsed = JSON.parse(err.message);
+        if (typeof parsed === "object" && parsed !== null) {
+          msg = Object.entries(parsed)
+            .map(([field, errors]) => {
+              const fieldLabel = field.split("_").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+              const detail = Array.isArray(errors) ? errors.join(", ") : String(errors);
+              return `${fieldLabel}: ${detail}`;
+            })
+            .join("\n");
+        }
+      } catch {
+        // Not a JSON string
+      }
+      alert("Failed to save article:\n" + msg);
+    }
     finally { setSaving(false); }
   };
 
