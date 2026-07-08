@@ -83,7 +83,7 @@ class NewsArticleDetailSerializer(NewsArticleListSerializer):
         return NewsCommentSerializer(comments, many=True).data
 
 class NewsArticleAdminSerializer(serializers.ModelSerializer):
-    slug = serializers.SlugField(required=False, read_only=True)
+    slug = serializers.SlugField(required=True)
     category = serializers.PrimaryKeyRelatedField(queryset=NewsCategory.objects.all(), required=False, allow_null=True)
     author = serializers.PrimaryKeyRelatedField(read_only=True)
 
