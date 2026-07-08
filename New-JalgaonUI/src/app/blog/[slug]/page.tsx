@@ -7,9 +7,16 @@ import BlogDetailClient from './BlogDetailClient';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
+  const safeSlug = (() => {
+    try {
+      return encodeURIComponent(decodeURIComponent(slug));
+    } catch {
+      return encodeURIComponent(slug);
+    }
+  })();
   try {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-    const res = await fetch(`${baseUrl}/api/v1/blog/${slug}/`);
+    const res = await fetch(`${baseUrl}/api/v1/blog/${safeSlug}/`);
     if (res.ok) {
       const data = await res.json();
       return {
@@ -25,11 +32,18 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  const safeSlug = (() => {
+    try {
+      return encodeURIComponent(decodeURIComponent(slug));
+    } catch {
+      return encodeURIComponent(slug);
+    }
+  })();
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   let schemas: any[] = [];
 
   try {
-    const res = await fetch(`${baseUrl}/api/v1/blog/${slug}/`);
+    const res = await fetch(`${baseUrl}/api/v1/blog/${safeSlug}/`);
     if (res.ok) {
       const data = await res.json();
       const featuredImageUrl = data.featured_image

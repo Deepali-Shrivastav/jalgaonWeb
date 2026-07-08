@@ -22,6 +22,13 @@ interface EventDetail {
 }
 
 export default function EventDetailClient({ slug }: { slug: string }) {
+  const safeSlug = (() => {
+    try {
+      return encodeURIComponent(decodeURIComponent(slug));
+    } catch {
+      return encodeURIComponent(slug);
+    }
+  })();
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +37,7 @@ export default function EventDetailClient({ slug }: { slug: string }) {
     const fetchEvent = async () => {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        const res = await fetch(`${baseUrl}/api/v1/events/${encodeURIComponent(slug)}/`);
+        const res = await fetch(`${baseUrl}/api/v1/events/${safeSlug}/`);
         if (!res.ok) {
           if (res.status === 404) throw new Error('Event not found');
           throw new Error('Failed to fetch event details');

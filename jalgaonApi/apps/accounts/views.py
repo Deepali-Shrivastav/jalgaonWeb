@@ -129,8 +129,15 @@ class UserLogin(APIView):
                 f"Failed login for {phone_number} from {ip_address}. "
                 f"{remaining} attempts remaining."
             )
+            
+            error_msg = f'Invalid credentials. {max(0, remaining)} attempts remaining before lockout.'
+            if serializer.errors and 'non_field_errors' in serializer.errors:
+                err_text = str(serializer.errors['non_field_errors'][0])
+                if "not found" in err_text.lower():
+                    error_msg = err_text
+                    
             return Response(
-                {'error': f'Invalid credentials. {max(0, remaining)} attempts remaining before lockout.'},
+                {'error': error_msg},
                 status=status.HTTP_401_UNAUTHORIZED
             )
 

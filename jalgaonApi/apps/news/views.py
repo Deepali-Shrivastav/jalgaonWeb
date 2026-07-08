@@ -129,20 +129,7 @@ class AdminNewsArticleViewSet(viewsets.ModelViewSet):
     permission_classes = [IsNewsEditor]
 
     def perform_create(self, serializer):
-        from django.utils.text import slugify
-        import uuid
-        
-        title = serializer.validated_data.get('title', 'article')
-        base_slug = slugify(title, allow_unicode=True)
-        if not base_slug:
-            base_slug = "article"
-        slug = base_slug
-        
-        # Ensure unique slug
-        if NewsArticle.objects.filter(slug=slug).exists():
-            slug = f"{base_slug}-{str(uuid.uuid4())[:8]}"
-            
-        serializer.save(author=self.request.user, slug=slug)
+        serializer.save(author=self.request.user)
         
     def perform_destroy(self, instance):
         if not self.request.user.role in ('super_admin', 'admin'):

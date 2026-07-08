@@ -5,6 +5,18 @@ import { useRouter, useParams } from "next/navigation";
 
 interface NewsCategory { id: number; name: string; }
 
+const slugify = (text: string) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w\u0900-\u097F-]+/g, "")
+    .replace(/--+/g, "-")
+    .replace(/^-+/, "")
+    .replace(/-+$/, "");
+};
+
 export default function AdminNewsEditPage() {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
   const router = useRouter();
@@ -13,7 +25,8 @@ export default function AdminNewsEditPage() {
   const [categories, setCategories] = useState<NewsCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [formData, setFormData] = useState({ title: "", short_description: "", content: "", category: "", status: "draft", is_breaking: false, meta_title: "", meta_description: "" });
+  const [isSlugManual, setIsSlugManual] = useState(true); // Default to manual for existing articles to prevent accidental URL changes
+  const [formData, setFormData] = useState({ title: "", slug: "", short_description: "", content: "", category: "", status: "draft", is_breaking: false, meta_title: "", meta_description: "" });
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   useEffect(() => {
@@ -27,7 +40,7 @@ export default function AdminNewsEditPage() {
         const catData = await catRes.json();
         setCategories(catData.results || catData);
         const data = await artRes.json();
-        setFormData({ title: data.title || "", short_description: data.short_description || "", content: data.content || "", category: data.category?.id || data.category || "", status: data.status || "draft", is_breaking: data.is_breaking || false, meta_title: data.meta_title || "", meta_description: data.meta_description || "" });
+        setFormData({ title: data.title || "", slug: data.slug || "", short_description: data.short_description || "", content: data.content || "", category: data.category?.id || data.category || "", status: data.status || "draft", is_breaking: data.is_breaking || false, meta_title: data.meta_title || "", meta_description: data.meta_description || "" });
       } catch { alert("Failed to load article."); router.push("/admin/news"); }
       finally { setLoading(false); }
     };
@@ -37,7 +50,23 @@ export default function AdminNewsEditPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const target = e.target as HTMLInputElement;
     const { name, value, type } = target;
-    setFormData(prev => ({ ...prev, [name]: type === "checkbox" ? target.checked : value }));
+    const isCheckbox = type === "checkbox";
+    const val = isCheckbox ? target.checked : value;
+
+    setFormData(prev => {
+      const nextData = { ...prev, [name]: val };
+      if (name === "title" && !isSlugManual) {
+        nextData.slug = slugify(String(val));
+      }
+      return nextData;
+    });
+
+    if (name === "slug") {
+      setIsSlugManual(true);
+      if (!val) {
+        setIsSlugManual(false);
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,13 +77,30 @@ export default function AdminNewsEditPage() {
       const data = new FormData();
       Object.entries(formData).forEach(([key, val]) => { if (val !== null && val !== "") data.append(key, String(typeof val === "object" ? (val as any).id : val)); });
       if (imageFile) data.append("featured_image", imageFile);
-      const res = await fetch(`${baseUrl}/api/v1/news/admin/articles/${id}/`, { method: "PUT", headers: { Authorization: `Bearer ${token}` }, body: data });
+      const res = await fetch(`${baseUrl}/api/v1/news/admin/articles/${id}/`, { method: "PATCH", headers: { Authorization: `Bearer ${token}` }, body: data });
       if (!res.ok) {
         const errData = await res.json();
         throw new Error(errData.detail || JSON.stringify(errData));
       }
       router.push("/admin/news");
-    } catch (err: any) { alert("Failed to save article: " + (err.message || "Unknown error")); }
+    } catch (err: any) {
+      let msg = err.message || "Unknown error";
+      try {
+        const parsed = JSON.parse(err.message);
+        if (typeof parsed === "object" && parsed !== null) {
+          msg = Object.entries(parsed)
+            .map(([field, errors]) => {
+              const fieldLabel = field.split("_").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+              const detail = Array.isArray(errors) ? errors.join(", ") : String(errors);
+              return `${fieldLabel}: ${detail}`;
+            })
+            .join("\n");
+        }
+      } catch {
+        // Not a JSON string
+      }
+      alert("Failed to save article:\n" + msg);
+    }
     finally { setSaving(false); }
   };
 
@@ -68,6 +114,19 @@ export default function AdminNewsEditPage() {
       </div>
       <form onSubmit={handleSubmit} className="space-y-5">
         <div><label className="block text-sm font-medium text-slate-600 mb-1">Title *</label><input type="text" name="title" value={formData.title} onChange={handleChange} required className="w-full p-2.5 border border-slate-200 rounded-lg text-sm" /></div>
+        <div>
+          <label className="block text-sm font-medium text-slate-600 mb-1">Slug *</label>
+          <input
+            type="text"
+            name="slug"
+            value={formData.slug}
+            onChange={handleChange}
+            required
+            className="w-full p-2.5 border border-slate-200 rounded-lg text-sm bg-slate-50 font-mono"
+            placeholder="e.g. local-news-article-slug"
+          />
+          <small className="text-slate-400">Unique identifier for the URL (changing this will change the article's link).</small>
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <div><label className="block text-sm font-medium text-slate-600 mb-1">Category</label><select name="category" value={formData.category} onChange={handleChange} className="w-full p-2.5 border border-slate-200 rounded-lg text-sm"><option value="">Select Category</option>{categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
           <div><label className="block text-sm font-medium text-slate-600 mb-1">Status</label><select name="status" value={formData.status} onChange={handleChange} className="w-full p-2.5 border border-slate-200 rounded-lg text-sm"><option value="draft">Draft</option><option value="review">Review</option><option value="published">Published</option></select></div>

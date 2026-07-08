@@ -5,7 +5,7 @@ This audit details all hardcoded/mock data currently stored in the frontend comp
 ---
 
 ## 1. Modern Frontend: `New-JalgaonUI`
-This project contains the majority of the active pages and components. Almost all sections (aside from live weather and metal rates in the weather ticker) currently render hardcoded mock data.
+This project contains the majority of the active pages and components. Almost all sections (aside from live weather and commodity rates in the weather ticker) currently render hardcoded mock data.
 
 ### Components Directory (`New-JalgaonUI/src/components/`)
 
@@ -32,7 +32,7 @@ This project contains the majority of the active pages and components. Almost al
 | [`events/EventsPortal.tsx`](file:///d:/jalgaonWeb/New-JalgaonUI/src/app/events/EventsPortal.tsx#L9-L51) | `featuredEvents` & `upcomingEvents` | 6 items total | Detailed event listings (Tapovan Heritage Fest, Tech Summit Jain Hills, Cricket League, classical music, farmers market). |
 
 ### API Routes Configuration (`New-JalgaonUI/src/app/api/`)
-- **[`dashboard/route.ts`](file:///d:/jalgaonWeb/New-JalgaonUI/src/app/api/dashboard/route.ts#L40)**: Uses a hardcoded `marketInstruments` array to determine which commodity API symbols to query (`XAU` for Gold, `XAG` for Silver, and `WTIOIL-SPOT` for Crude Oil).
+- **[`dashboard/route.ts`](file:///d:/jalgaonWeb/New-JalgaonUI/src/app/api/dashboard/route.ts#L40)**: Uses a hardcoded commodity array to determine which market symbols to query (`GOLD`, `SILVER`, and `WTI`), with Yahoo Finance futures fallbacks for gold and silver.
 
 ---
 
@@ -51,4 +51,4 @@ The legacy Vite + React project has a similar layout and structure but features 
 2. **Mocking Level**: Over **95%** of the visible user directory content (individual businesses, specific job postings, news stories, and event items) is stored in inline JavaScript arrays rather than being queried from a backend database or CMS.
 3. **Dynamic Integrations**: The only page sections that are connected to dynamic APIs are:
    - Weather API (Jalgaon & Bhusawal forecast).
-   - Commodity price feeds (Gold, Silver, Crude Oil via Frankfurter and CommodityPriceAPI).
+   - Commodity price feeds (Gold, Silver, WTI crude oil via Alpha Vantage, with Yahoo Finance fallbacks for metals).

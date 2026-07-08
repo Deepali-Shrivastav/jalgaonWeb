@@ -34,6 +34,13 @@ const getImageUrl = (img: any) => {
 
 export default function NewsDetailClient({ slug }: { slug: string }) {
   const { isLogin, setIsLoginFormOpen } = useContext(AuthContext);
+  const safeSlug = (() => {
+    try {
+      return encodeURIComponent(decodeURIComponent(slug));
+    } catch {
+      return encodeURIComponent(slug);
+    }
+  })();
   const [article, setArticle] = useState<NewsDetail | null>(null);
   const [trendingNews, setTrendingNews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,6 +48,7 @@ export default function NewsDetailClient({ slug }: { slug: string }) {
   const [commentText, setCommentText] = useState("");
   const [submittingComment, setSubmittingComment] = useState(false);
   const [commentMsg, setCommentMsg] = useState("");
+  const [isSaved, setIsSaved] = useState(false);
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +61,7 @@ export default function NewsDetailClient({ slug }: { slug: string }) {
       const token = localStorage.getItem("token");
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       
-      const res = await fetch(`${baseUrl}/api/v1/news/${encodeURIComponent(slug)}/comments/`, {
+      const res = await fetch(`${baseUrl}/api/v1/news/${safeSlug}/comments/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -81,7 +89,7 @@ export default function NewsDetailClient({ slug }: { slug: string }) {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
         
-        const res = await fetch(`${baseUrl}/api/v1/news/${encodeURIComponent(slug)}/`);
+        const res = await fetch(`${baseUrl}/api/v1/news/${safeSlug}/`);
         if (!res.ok) {
           if (res.status === 404) throw new Error('Article not found');
           throw new Error('Failed to fetch article');
@@ -107,7 +115,7 @@ export default function NewsDetailClient({ slug }: { slug: string }) {
       }
     };
     fetchData();
-  }, [slug]);
+  }, [safeSlug]);
 
   if (loading) {
     return (
@@ -201,11 +209,18 @@ export default function NewsDetailClient({ slug }: { slug: string }) {
                 </button>
                 <div className="w-[1px] h-6 bg-outline-variant mx-2"></div>
                 <button 
-                  onClick={() => alert('Article saved!')}
-                  className="text-xs font-bold bg-surface-container-low px-3 py-1.5 rounded-full text-ink-deep border border-outline-variant/50 hover:bg-surface-container-high transition-colors flex items-center gap-1.5"
+                  onClick={() => setIsSaved(true)}
+                  disabled={isSaved}
+                  className={`text-xs font-bold px-3 py-1.5 rounded-full transition-colors flex items-center gap-1.5 border disabled:opacity-80 disabled:cursor-not-allowed ${
+                    isSaved
+                      ? 'bg-green-100 text-green-700 border-green-200'
+                      : 'bg-surface-container-low text-ink-deep border-outline-variant/50 hover:bg-surface-container-high'
+                  }`}
                 >
-                  <span className="material-symbols-outlined text-[14px]">bookmark_add</span>
-                  Save
+                  <span className="material-symbols-outlined text-[14px]">
+                    {isSaved ? 'bookmark_added' : 'bookmark_add'}
+                  </span>
+                  {isSaved ? 'Saved' : 'Save'}
                 </button>
               </div>
             </div>

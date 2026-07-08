@@ -95,10 +95,18 @@ export default function BusinessListings({
           ? `&lat=${lat}&lng=${lng}&radius=${radius}`
           : "";
 
+        const safeCategory = category ? (() => {
+          try {
+            return encodeURIComponent(decodeURIComponent(category));
+          } catch {
+            return encodeURIComponent(category);
+          }
+        })() : "";
+
         if (searchQuery) {
           endpoint = `/api/v1/search/?q=${encodeURIComponent(searchQuery)}&page=${page}&sort=${sortBy}${categoryParam}${subcategoryParam}${locationParam}`;
         } else if (category) {
-          endpoint = `/api/v1/listings/?category=${encodeURIComponent(category)}&page=${page}&sort=${sortBy}${subcategoryParam}${locationParam}`;
+          endpoint = `/api/v1/listings/?category=${safeCategory}&page=${page}&sort=${sortBy}${subcategoryParam}${locationParam}`;
         } else {
           endpoint = `/api/v1/listings/?page=${page}&sort=${sortBy}${categoryParam}${subcategoryParam}${locationParam}`;
         }

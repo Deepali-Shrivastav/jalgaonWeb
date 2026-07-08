@@ -23,6 +23,22 @@ export default function LoginSignup() {
   const [errorMessage, setErrorMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Validation State
+  const [errors, setErrors] = useState<{ phone?: string; password?: string }>({});
+
+  const validateForm = () => {
+    const newErrors: { phone?: string; password?: string } = {};
+    if (!phoneNumber || !/^\d{10}$/.test(phoneNumber)) {
+      newErrors.phone = "Please enter a valid 10-digit mobile number.";
+    }
+    if (!userPassword) {
+      newErrors.password = "Password is required.";
+    } else if (isSignUp && userPassword.length < 6) {
+      newErrors.password = "Password must be at least 6 characters.";
+    }
+    return newErrors;
+  };
 
   const getCsrfToken = async () => {
     try {
@@ -48,13 +64,11 @@ export default function LoginSignup() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    toast.dismiss();
     
-    if (phoneNumber.length !== 10) {
-      toast.error("Please enter a valid 10-digit mobile number.");
-      return;
-    }
-    if (userPassword.length < 6) {
-      toast.error("Password must be at least 6 characters long.");
+    const clientErrors = validateForm();
+    if (Object.keys(clientErrors).length > 0) {
+      setErrors(clientErrors);
       return;
     }
 
@@ -105,18 +119,21 @@ export default function LoginSignup() {
       toast.success("Account created successfully!");
       await handleLoginSubmit();
     } catch (error: any) {
-      console.warn("Registration failed:", error.message || error);
-      toast.error(error.message || "Registration failed. Please try again.");
-      setErrorMessage(error.message);
+      console.error("Registration failed", error);
+      setErrorMessage(error.message || "Registration failed. Please try again.");
       setIsLoading(false);
     }
   };
 
   const handleLoginSubmit = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
+    if (e) {
+      e.preventDefault();
+      toast.dismiss();
+    }
 
-    if (phoneNumber.length !== 10) {
-      toast.error("Please enter a valid 10-digit mobile number.");
+    const clientErrors = validateForm();
+    if (Object.keys(clientErrors).length > 0) {
+      setErrors(clientErrors);
       return;
     }
 
@@ -175,9 +192,8 @@ export default function LoginSignup() {
         setIsLoginFormOpen(false);
       }
     } catch (error: any) {
-      console.warn("Login failed:", error.message || error);
-      toast.error(error.message || "Login failed. Please try again.");
-      setErrorMessage(error.message);
+      console.error("Login failed", error);
+      setErrorMessage(error.message || "Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -209,7 +225,7 @@ export default function LoginSignup() {
 
         {/* --- Registration Form --- */}
         {isSignUp && (
-          <form onSubmit={handleSubmit} className="animate-in fade-in zoom-in-95 duration-300">
+          <form onSubmit={handleSubmit} className="animate-in fade-in zoom-in-95 duration-300" noValidate>
             <div className="text-center mb-8">
               <div className="flex items-center justify-center mx-auto mb-6">
                 <img
@@ -235,7 +251,11 @@ export default function LoginSignup() {
               >
                 Mobile Number
               </label>
-              <div className="relative flex items-center bg-slate-50 border-2 border-slate-200 rounded-xl focus-within:border-primary focus-within:bg-white focus-within:ring-4 focus-within:ring-primary/10 transition-all">
+              <div className={`relative flex items-center bg-slate-50 border-2 rounded-xl focus-within:bg-white focus-within:ring-4 transition-all ${
+                errors.phone 
+                  ? 'border-red-500 focus-within:border-red-500 focus-within:ring-red-100' 
+                  : 'border-slate-200 focus-within:border-primary focus-within:ring-primary/10'
+              }`}>
                 <span className="material-symbols-outlined text-slate-400 ml-4 text-xl">
                   phone_iphone
                 </span>
@@ -244,13 +264,17 @@ export default function LoginSignup() {
                   id="reg-mobile"
                   placeholder="Enter 10-digit number"
                   value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  onChange={(e) => {
+                    setPhoneNumber(e.target.value);
+                    if (errors.phone) setErrors(prev => ({ ...prev, phone: undefined }));
+                  }}
                   required
-                  pattern="[0-9]{10}"
-                  title="Please enter a valid 10-digit phone number without spaces or country code"
                   className="flex-1 bg-transparent border-none py-3.5 px-3 text-base text-slate-900 outline-none placeholder-slate-400"
                 />
               </div>
+              {errors.phone && (
+                <p className="text-red-500 text-xs mt-1.5 font-medium">{errors.phone}</p>
+              )}
             </div>
 
             <div className="mb-5">
@@ -260,7 +284,11 @@ export default function LoginSignup() {
               >
                 Password
               </label>
-              <div className="relative flex items-center bg-slate-50 border-2 border-slate-200 rounded-xl focus-within:border-primary focus-within:bg-white focus-within:ring-4 focus-within:ring-primary/10 transition-all">
+              <div className={`relative flex items-center bg-slate-50 border-2 rounded-xl focus-within:bg-white focus-within:ring-4 transition-all ${
+                errors.password 
+                  ? 'border-red-500 focus-within:border-red-500 focus-within:ring-red-100' 
+                  : 'border-slate-200 focus-within:border-primary focus-within:ring-primary/10'
+              }`}>
                 <span className="material-symbols-outlined text-slate-400 ml-4 text-xl">
                   lock
                 </span>
@@ -269,7 +297,10 @@ export default function LoginSignup() {
                   id="reg-password"
                   placeholder="Create a strong password"
                   value={userPassword}
-                  onChange={(e) => setUserPassword(e.target.value)}
+                  onChange={(e) => {
+                    setUserPassword(e.target.value);
+                    if (errors.password) setErrors(prev => ({ ...prev, password: undefined }));
+                  }}
                   required
                   className="flex-1 bg-transparent border-none py-3.5 px-3 text-base text-slate-900 outline-none placeholder-slate-400"
                 />
@@ -283,6 +314,9 @@ export default function LoginSignup() {
                   </span>
                 </button>
               </div>
+              {errors.password && (
+                <p className="text-red-500 text-xs mt-1.5 font-medium">{errors.password}</p>
+              )}
             </div>
 
             <p className="text-[13px] text-slate-500 mb-5">
@@ -311,6 +345,7 @@ export default function LoginSignup() {
                   onClick={() => {
                     setIsSignUp(false);
                     setErrorMessage("");
+                    setErrors({});
                   }}
                   className="text-primary font-semibold ml-1 hover:text-blue-700 hover:underline transition-colors"
                 >
@@ -350,7 +385,7 @@ export default function LoginSignup() {
 
         {/* --- Login Form --- */}
         {!isSignUp && (
-          <form onSubmit={handleLoginSubmit} className="animate-in fade-in zoom-in-95 duration-300">
+          <form onSubmit={handleLoginSubmit} className="animate-in fade-in zoom-in-95 duration-300" noValidate>
             <div className="text-center mb-8">
               <div className="flex items-center justify-center mx-auto mb-6">
                 <img
@@ -376,7 +411,11 @@ export default function LoginSignup() {
               >
                 Mobile Number
               </label>
-              <div className="relative flex items-center bg-slate-50 border-2 border-slate-200 rounded-xl focus-within:border-primary focus-within:bg-white focus-within:ring-4 focus-within:ring-primary/10 transition-all">
+              <div className={`relative flex items-center bg-slate-50 border-2 rounded-xl focus-within:bg-white focus-within:ring-4 transition-all ${
+                errors.phone 
+                  ? 'border-red-500 focus-within:border-red-500 focus-within:ring-red-100' 
+                  : 'border-slate-200 focus-within:border-primary focus-within:ring-primary/10'
+              }`}>
                 <span className="material-symbols-outlined text-slate-400 ml-4 text-xl">
                   phone_iphone
                 </span>
@@ -385,13 +424,17 @@ export default function LoginSignup() {
                   id="login-mobile"
                   placeholder="Enter your registered number"
                   value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  onChange={(e) => {
+                    setPhoneNumber(e.target.value);
+                    if (errors.phone) setErrors(prev => ({ ...prev, phone: undefined }));
+                  }}
                   required
-                  pattern="[0-9]{10}"
-                  title="Please enter a valid 10-digit phone number without spaces or country code"
                   className="flex-1 bg-transparent border-none py-3.5 px-3 text-base text-slate-900 outline-none placeholder-slate-400"
                 />
               </div>
+              {errors.phone && (
+                <p className="text-red-500 text-xs mt-1.5 font-medium">{errors.phone}</p>
+              )}
             </div>
 
             <div className="mb-5">
@@ -401,7 +444,11 @@ export default function LoginSignup() {
               >
                 Password
               </label>
-              <div className="relative flex items-center bg-slate-50 border-2 border-slate-200 rounded-xl focus-within:border-primary focus-within:bg-white focus-within:ring-4 focus-within:ring-primary/10 transition-all">
+              <div className={`relative flex items-center bg-slate-50 border-2 rounded-xl focus-within:bg-white focus-within:ring-4 transition-all ${
+                errors.password 
+                  ? 'border-red-500 focus-within:border-red-500 focus-within:ring-red-100' 
+                  : 'border-slate-200 focus-within:border-primary focus-within:ring-primary/10'
+              }`}>
                 <span className="material-symbols-outlined text-slate-400 ml-4 text-xl">
                   lock
                 </span>
@@ -410,7 +457,10 @@ export default function LoginSignup() {
                   id="login-password"
                   placeholder="Enter your password"
                   value={userPassword}
-                  onChange={(e) => setUserPassword(e.target.value)}
+                  onChange={(e) => {
+                    setUserPassword(e.target.value);
+                    if (errors.password) setErrors(prev => ({ ...prev, password: undefined }));
+                  }}
                   required
                   className="flex-1 bg-transparent border-none py-3.5 px-3 text-base text-slate-900 outline-none placeholder-slate-400"
                 />
@@ -424,6 +474,9 @@ export default function LoginSignup() {
                   </span>
                 </button>
               </div>
+              {errors.password && (
+                <p className="text-red-500 text-xs mt-1.5 font-medium">{errors.password}</p>
+              )}
             </div>
 
             <div className="flex justify-between items-center mb-5">
@@ -441,6 +494,13 @@ export default function LoginSignup() {
                 Forgot Password?
               </button>
             </div>
+
+            {errorMessage && (
+              <div className="mb-5 p-3 rounded-xl bg-red-50 border border-red-100 flex items-start gap-2 animate-in fade-in">
+                <span className="material-symbols-outlined text-red-500 text-xl mt-0.5">error</span>
+                <p className="text-sm font-medium text-red-600 flex-1">{errorMessage}</p>
+              </div>
+            )}
 
             <button
               type="submit"
@@ -464,6 +524,7 @@ export default function LoginSignup() {
                   onClick={() => {
                     setIsSignUp(true);
                     setErrorMessage("");
+                    setErrors({});
                   }}
                   className="text-primary font-semibold ml-1 hover:text-blue-700 hover:underline transition-colors"
                 >
