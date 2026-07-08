@@ -121,17 +121,32 @@ export default function BlogPortal() {
           </p>
 
           {/* Search Input */}
-          <div className="mt-xl relative max-w-md mx-auto">
-            <span className="material-symbols-outlined absolute left-base top-1/2 -translate-y-1/2 text-secondary text-xl">
-              search
-            </span>
-            <input
-              type="text"
-              placeholder="Search articles, tags or topics..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-xxxl pr-xl py-md rounded-full border border-hairline bg-white text-sm text-ink-deep outline-none shadow-sm focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-            />
+          <div className="mt-xl mx-auto" style={{ width: '100%', maxWidth: '448px' }}>
+            <div 
+              className="flex items-center gap-2 bg-white border border-slate-200 rounded-full px-4 shadow-sm h-12 transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20"
+              style={{ width: '100%' }}
+            >
+              <span className="material-symbols-outlined text-slate-400 text-xl shrink-0">
+                search
+              </span>
+              <input
+                type="text"
+                placeholder="Search articles, tags or topics..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-transparent border-none outline-none text-sm text-ink-deep placeholder:text-slate-400 font-medium"
+                style={{ flex: 1, minWidth: 0, width: '100%' }}
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="p-1 rounded-full hover:bg-slate-100 transition-colors shrink-0"
+                  aria-label="Clear search"
+                >
+                  <span className="material-symbols-outlined text-slate-400 text-lg">close</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
