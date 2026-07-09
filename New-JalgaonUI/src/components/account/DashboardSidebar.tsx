@@ -20,6 +20,7 @@ export default function DashboardSidebar() {
     { href: '/account/applications', label: 'My Applications', icon: 'description' },
     { href: '/account/my-events', label: 'My Events', icon: 'event' },
     { href: '/account/my-ngos', label: 'My NGOs', icon: 'volunteer_activism' },
+    { href: '/account/my-clubs', label: 'My Clubs', icon: 'groups' },
     { href: '/account/reviews', label: 'Manage Reviews', icon: 'reviews' },
     { href: '/account/ads', label: 'My Ads', icon: 'campaign' },
     { href: '/account/notifications', label: 'Notifications', icon: 'notifications' },

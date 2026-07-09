@@ -62,6 +62,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (pathname.includes("claims")) return "Business Claims";
     if (pathname.includes("reports")) return "Business Reports";
     if (pathname.includes("startups")) return "Startup Management";
+    if (pathname.includes("clubs/categories")) return "Club Categories";
+    if (pathname.includes("clubs")) return "Club Management";
     return "Dashboard Overview";
   };
 
