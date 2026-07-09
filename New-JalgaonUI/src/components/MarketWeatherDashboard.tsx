@@ -32,7 +32,7 @@ function TickerItems({ dashboard, loading }: { dashboard: DashboardResponse; loa
 
   return (
     <div className="flex shrink-0 items-center gap-xxl pr-xxl">
-      <div className="flex items-center gap-xs font-extrabold text-ink-deep">
+      <div className="flex items-center gap-xs whitespace-nowrap font-extrabold text-ink-deep">
         <span className="material-symbols-outlined text-lg text-primary" aria-hidden="true">trending_up</span>
         <span>Market Watch</span>
         <span className={`h-1.5 w-1.5 rounded-full ${dashboard.market.length ? "bg-emerald-500" : "bg-outline-variant"}`} />
