@@ -68,12 +68,14 @@ export function useProfileCompletion(): ProfileCompletion {
 
       setScore(currentScore);
       setMissingFields(missing);
-      setCachedScore(currentScore);
+      if (userData?.id) {
+        setCachedScore(userData.id, currentScore);
+      }
       setIsLoading(false);
     };
 
     // If cache has score and it is 100%, we don't need to load or check anything
-    const cached = getCachedScore();
+    const cached = getCachedScore(user?.id);
     if (cached === 100) {
       setScore(100);
       setMissingFields([]);

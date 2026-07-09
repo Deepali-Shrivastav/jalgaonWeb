@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { useProfileCompletion } from '@/hooks/useProfileCompletion';
+import { AuthContext } from '@/context/AuthContext';
 import {
   isProfileNudgeSnoozed,
   isProfileNudgeDismissed,
@@ -12,12 +13,13 @@ import {
 
 export default function ProfileCompleteModal() {
   const router = useRouter();
+  const { user } = useContext(AuthContext);
   const { score, isComplete, missingFields, isLoading } = useProfileCompletion();
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    if (isLoading || isComplete) return;
-    if (isProfileNudgeSnoozed() || isProfileNudgeDismissed()) return;
+    if (isLoading || isComplete || !user?.id) return;
+    if (isProfileNudgeSnoozed(user.id) || isProfileNudgeDismissed(user.id)) return;
 
     // Only trigger if user just logged in this session
     const justLoggedIn = typeof window !== 'undefined' && sessionStorage.getItem("just_logged_in") === "true";
@@ -32,17 +34,21 @@ export default function ProfileCompleteModal() {
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [isLoading, isComplete, score]);
+  }, [isLoading, isComplete, score, user]);
 
   if (!isOpen) return null;
 
   const handleSnooze = () => {
-    snoozeProfileNudge(7); // Snooze for 7 days
+    if (user?.id) {
+      snoozeProfileNudge(user.id, 7); // Snooze for 7 days
+    }
     setIsOpen(false);
   };
 
   const handleCTA = () => {
-    dismissProfileNudge(); // Dismiss for current session
+    if (user?.id) {
+      dismissProfileNudge(user.id); // Dismiss for current session
+    }
     setIsOpen(false);
     router.push('/account/settings');
   };

@@ -1,23 +1,27 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Link from 'next/link';
 import { useProfileCompletion } from '@/hooks/useProfileCompletion';
+import { AuthContext } from '@/context/AuthContext';
 import { isProfileNudgeDismissed, dismissProfileNudge } from '@/lib/profileCompletionStorage';
 
 export default function ProfileCompleteBanner() {
+  const { user } = useContext(AuthContext);
   const { score, isComplete, isLoading } = useProfileCompletion();
   const [isDismissed, setIsDismissed] = useState(true); // default to true, show on condition
 
   useEffect(() => {
-    if (isLoading || isComplete) return;
-    setIsDismissed(isProfileNudgeDismissed());
-  }, [isLoading, isComplete, score]);
+    if (isLoading || isComplete || !user?.id) return;
+    setIsDismissed(isProfileNudgeDismissed(user.id));
+  }, [isLoading, isComplete, score, user]);
 
   if (isDismissed) return null;
 
   const handleDismiss = () => {
-    dismissProfileNudge();
+    if (user?.id) {
+      dismissProfileNudge(user.id);
+    }
     setIsDismissed(true);
   };
 
