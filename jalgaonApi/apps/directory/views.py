@@ -68,12 +68,12 @@ class ListingListView(generics.ListAPIView):
                 pass
 
         if sort_by == 'rating':
-            queryset = queryset.order_by('-avg_rating', '-review_count')
+            queryset = queryset.order_by('-is_featured', '-avg_rating', '-review_count')
         elif sort_by == 'trending':
-            queryset = queryset.order_by('-trending_priority', '-created_at')
+            queryset = queryset.order_by('-is_featured', '-trending_priority', '-created_at')
         elif sort_by != 'distance':
             # default to newest
-            queryset = queryset.order_by('-created_at')
+            queryset = queryset.order_by('-is_featured', '-created_at')
             
         return queryset
 
@@ -204,20 +204,20 @@ class ListingSearchView(generics.ListAPIView):
             
         if lat and lng:
             if sort_by == 'distance':
-                return queryset.order_by('distance', '-avg_rating')
+                return queryset.order_by('-is_featured', 'distance', '-avg_rating')
             elif sort_by == 'rating':
-                return queryset.order_by('-avg_rating', '-review_count', 'distance')
+                return queryset.order_by('-is_featured', '-avg_rating', '-review_count', 'distance')
             elif sort_by == 'newest':
-                return queryset.order_by('-created_at', 'distance')
+                return queryset.order_by('-is_featured', '-created_at', 'distance')
             else: # relevance
-                return queryset.order_by('-is_trending', 'distance', '-avg_rating')
+                return queryset.order_by('-is_featured', '-is_trending', 'distance', '-avg_rating')
         else:
             if sort_by == 'rating':
-                return queryset.order_by('-avg_rating', '-review_count')
+                return queryset.order_by('-is_featured', '-avg_rating', '-review_count')
             elif sort_by == 'newest':
-                return queryset.order_by('-created_at')
+                return queryset.order_by('-is_featured', '-created_at')
             else: # relevance (default)
-                return queryset.order_by('-is_trending', '-avg_rating', '-created_at')
+                return queryset.order_by('-is_featured', '-is_trending', '-avg_rating', '-created_at')
 
 
 class TrendingListingsView(generics.ListAPIView):

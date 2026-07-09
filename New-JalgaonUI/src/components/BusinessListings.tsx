@@ -129,7 +129,7 @@ export default function BusinessListings({
           displayCategory: item.main_category_name || "",
           rating: parseFloat(item.avg_rating) || 0,
           ratingCount: item.review_count || 0,
-          featured: item.is_trending || false,
+          featured: item.is_featured || false,
           verified: item.is_verified || false,
           address: item.business_address || "",
           image: item.business_banner
@@ -654,11 +654,11 @@ export default function BusinessListings({
                     )}
 
                     {/* Image Container */}
-                    <div className="w-[290px] h-[240px] overflow-hidden rounded-lg m-1 relative shrink-0 bg-surface-container-low">
+                    <div className="w-full md:w-[290px] h-[200px] md:h-[240px] overflow-hidden rounded-lg relative shrink-0 bg-surface-container-low">
                       <img
                         src={listing.image}
                         alt={listing.name}
-                        className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     </div>
 
@@ -713,7 +713,7 @@ export default function BusinessListings({
                         <a
                           href={`tel:${listing.phone}`}
                           onClick={(e) => e.stopPropagation()}
-                          className="flex-1 md:flex-none bg-primary hover:bg-primary-deep text-white px-6 py-2.5 rounded-full font-bold flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer shadow-sm text-sm"
+                          className="flex-1 md:flex-none bg-primary hover:bg-primary-deep text-white px-3 md:px-6 py-2.5 rounded-full font-bold flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer shadow-sm text-sm whitespace-nowrap"
                         >
                           <span className="material-symbols-outlined text-lg">
                             call
@@ -725,7 +725,7 @@ export default function BusinessListings({
                           target="_blank"
                           rel="noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="flex-1 md:flex-none border-2 border-primary text-primary hover:bg-primary/5 px-6 py-2.5 rounded-full font-bold flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer text-sm"
+                          className="flex-1 md:flex-none border-2 border-primary text-primary hover:bg-primary/5 px-3 md:px-6 py-2.5 rounded-full font-bold flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer text-sm whitespace-nowrap"
                         >
                           <span className="material-symbols-outlined text-lg">
                             chat
@@ -737,7 +737,7 @@ export default function BusinessListings({
                             e.stopPropagation();
                             handleSelect(listing.id, listing.name);
                           }}
-                          className="ml-auto flex items-center gap-1 text-primary text-sm font-bold hover:underline cursor-pointer"
+                          className="w-full md:w-auto mt-2 md:mt-0 flex justify-end items-center gap-1 text-primary text-sm font-bold hover:underline cursor-pointer"
                         >
                           View Profile
                           <span className="material-symbols-outlined text-base">

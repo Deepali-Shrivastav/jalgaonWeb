@@ -3,9 +3,9 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="bg-white border-t border-hairline-soft pt-section pb-24 md:pb-xl">
+    <footer className="bg-white border-t border-hairline-soft pt-8 sm:pt-section pb-24 md:pb-xl">
       <div className="max-w-container-max mx-auto px-6 md:px-xxl">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-12 md:gap-section mb-section">
+        <div className="hidden sm:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-12 md:gap-section mb-section">
           <div className="space-y-xl">
             <img 
               alt="Jalgaon.com Logo" 
@@ -60,7 +60,12 @@ export default function Footer() {
           </div>
         </div>
         
-        <div className="pt-xl border-t border-hairline-soft flex flex-col md:flex-row justify-between items-center gap-base">
+        <div className="pt-4 sm:pt-xl sm:border-t sm:border-hairline-soft flex flex-col md:flex-row justify-between items-center gap-base">
+          <img 
+            alt="Jalgaon.com Logo" 
+            className="h-8 w-auto sm:hidden mb-2" 
+            src="/main-logo.png" 
+          />
           <p className="text-secondary text-sm">© 1995-2026 Jalgaon.com. All Rights Reserved.</p>
           <div className="flex items-center gap-xl text-xs font-bold text-secondary uppercase tracking-widest">
             <Link className="hover:text-primary" href="/terms">Terms</Link>

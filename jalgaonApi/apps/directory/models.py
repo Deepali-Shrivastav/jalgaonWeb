@@ -107,8 +107,9 @@ class ShopListing(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     is_claimed = models.BooleanField(default=False)
     
-    # Monetization
+    # Monetization & Featured
     is_trending = models.BooleanField(default=False)
+    is_featured = models.BooleanField(default=False)
     trending_until = models.DateTimeField(null=True, blank=True)
     trending_priority = models.IntegerField(default=0)
     

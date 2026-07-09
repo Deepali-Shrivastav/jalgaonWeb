@@ -6,6 +6,11 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { AuthContext } from '@/context/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
+import dynamic from 'next/dynamic';
+import { getCurrentLocation, reverseGeocode, LocationDetails } from '@/utils/locationService';
+
+// Dynamically import LocationMapPicker with SSR disabled to prevent window is not defined error for leaflet
+const LocationMapPicker = dynamic(() => import('@/components/LocationMapPicker'), { ssr: false });
 
 export default function EditListingClient({ slug }: { slug: string }) {
   const { isLogin } = useContext(AuthContext);
@@ -37,11 +42,17 @@ export default function EditListingClient({ slug }: { slug: string }) {
     insta_link: '',
     facebook_link: '',
     business_address: '',
-    city: 'Jalgaon'
+    city: 'Jalgaon',
+    lat: '',
+    lng: ''
   });
   
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [existingBannerUrl, setExistingBannerUrl] = useState<string | null>(null);
+
+  // Location Picker State
+  const [isMapOpen, setIsMapOpen] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
 
   useEffect(() => {
     const initData = async () => {
@@ -78,7 +89,9 @@ export default function EditListingClient({ slug }: { slug: string }) {
             insta_link: listData.insta_link || '',
             facebook_link: listData.facebook_link || '',
             business_address: listData.business_address || '',
-            city: listData.city || 'Jalgaon'
+            city: listData.city || 'Jalgaon',
+            lat: listData.lat?.toString() || '',
+            lng: listData.lng?.toString() || ''
           });
 
           if (listData.business_banner) {
@@ -134,8 +147,50 @@ export default function EditListingClient({ slug }: { slug: string }) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error("Image size must be less than 2MB.");
+        e.target.value = '';
+        setBannerFile(null);
+        return;
+      }
       setBannerFile(file);
     }
+  };
+
+  const handleGetCurrentLocation = async () => {
+    setIsLocating(true);
+    const toastId = toast.loading("Detecting your location...", { id: 'location-toast' });
+    try {
+      const coords = await getCurrentLocation();
+      const addressDetails = await reverseGeocode(coords.lat, coords.lng);
+      
+      setFormData(prev => ({
+        ...prev,
+        lat: coords.lat.toFixed(8),
+        lng: coords.lng.toFixed(8),
+        business_address: addressDetails.detailedAddress,
+        city: addressDetails.city || prev.city
+      }));
+      
+      toast.success("Location detected successfully!", { id: toastId });
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Failed to get current location. Please check permissions.", { id: toastId });
+    } finally {
+      setIsLocating(false);
+    }
+  };
+
+  const handleLocationConfirmed = (lat: number, lng: number, address: LocationDetails) => {
+    setFormData(prev => ({
+      ...prev,
+      lat: lat.toFixed(8),
+      lng: lng.toFixed(8),
+      business_address: address.detailedAddress,
+      city: address.city || prev.city
+    }));
+    
+    setIsMapOpen(false);
   };
 
   const handleReviewStatus = async (reviewId: number, status: string) => {
@@ -174,6 +229,11 @@ export default function EditListingClient({ slug }: { slug: string }) {
 
     if (!formData.main_category || !formData.sub_category) {
       toast.error("Please select a main category and sub-category.");
+      return;
+    }
+    
+    if (!formData.lat || !formData.lng) {
+      toast.error("Please pick a location on the map or use your current location.");
       return;
     }
 
@@ -345,7 +405,7 @@ export default function EditListingClient({ slug }: { slug: string }) {
                     <>
                       <span className="material-symbols-outlined text-4xl text-outline mb-2">upload_file</span>
                       <p className="text-sm font-bold text-on-surface-variant mb-2">Upload New Business Banner</p>
-                      <p className="text-xs text-secondary mb-4">PNG, JPG</p>
+                      <p className="text-xs text-secondary mb-4">PNG, JPG (Max 2MB)</p>
                     </>
                   )}
                   <input className="hidden" id="bannerUpload" type="file" accept="image/*" onChange={handleFileChange} />
@@ -354,6 +414,28 @@ export default function EditListingClient({ slug }: { slug: string }) {
                   </label>
                 </div>
                 
+                <div className="flex flex-col md:flex-row gap-4">
+                  <button 
+                    onClick={handleGetCurrentLocation}
+                    disabled={isLocating}
+                    className="flex items-center gap-2 text-primary font-bold hover:underline bg-primary/10 p-3 rounded-lg w-full md:w-auto justify-center transition-colors hover:bg-primary/20 disabled:opacity-50 disabled:cursor-not-allowed" 
+                    type="button"
+                  >
+                    <span className="material-symbols-outlined">
+                      {isLocating ? 'progress_activity' : 'my_location'}
+                    </span>
+                    {isLocating ? 'Detecting...' : 'Get Current Location'}
+                  </button>
+                  <button 
+                    onClick={() => setIsMapOpen(true)}
+                    className="flex items-center gap-2 text-primary font-bold hover:underline bg-primary/10 p-3 rounded-lg w-full md:w-auto justify-center transition-colors hover:bg-primary/20" 
+                    type="button"
+                  >
+                    <span className="material-symbols-outlined">map</span>
+                    Set Location
+                  </button>
+                </div>
+
                 <div className="group">
                   <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Detailed Address *</label>
                   <textarea required name="business_address" value={formData.business_address} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" rows={3}></textarea>
@@ -422,6 +504,17 @@ export default function EditListingClient({ slug }: { slug: string }) {
           </form>
         </div>
       </main>
+      
+      {isMapOpen && (
+        <LocationMapPicker
+          isOpen={isMapOpen}
+          onClose={() => setIsMapOpen(false)}
+          onConfirm={handleLocationConfirmed}
+          initialLat={formData.lat ? parseFloat(formData.lat) : undefined}
+          initialLng={formData.lng ? parseFloat(formData.lng) : undefined}
+        />
+      )}
+      
       <Footer />
     </>
   );

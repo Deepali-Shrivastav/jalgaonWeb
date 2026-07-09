@@ -6,6 +6,11 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { AuthContext } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
+import dynamic from 'next/dynamic';
+import { getCurrentLocation, reverseGeocode, LocationDetails } from '@/utils/locationService';
+
+// Dynamically import LocationMapPicker with SSR disabled to prevent window is not defined error for leaflet
+const LocationMapPicker = dynamic(() => import('@/components/LocationMapPicker'), { ssr: false });
 
 export default function AddListingClient() {
   const { isLogin, user } = useContext(AuthContext);
@@ -34,11 +39,17 @@ export default function AddListingClient() {
     insta_link: '',
     facebook_link: '',
     business_address: '',
-    city: 'Jalgaon'
+    city: 'Jalgaon',
+    lat: '',
+    lng: ''
   });
   
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  // Location Picker State
+  const [isMapOpen, setIsMapOpen] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
 
   useEffect(() => {
     // Fetch categories
@@ -78,6 +89,13 @@ export default function AddListingClient() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error("Image size must be less than 2MB.", { id: 'file-size-error' });
+        e.target.value = '';
+        setBannerFile(null);
+        setErrors(prev => ({ ...prev, business_banner: 'Image size must be less than 2MB' }));
+        return;
+      }
       setBannerFile(file);
       if (errors.business_banner) {
         setErrors(prev => {
@@ -87,6 +105,58 @@ export default function AddListingClient() {
         });
       }
     }
+  };
+
+  const handleGetCurrentLocation = async () => {
+    setIsLocating(true);
+    const toastId = toast.loading("Detecting your location...", { id: 'location-toast' });
+    try {
+      const coords = await getCurrentLocation();
+      const addressDetails = await reverseGeocode(coords.lat, coords.lng);
+      
+      setFormData(prev => ({
+        ...prev,
+        lat: coords.lat.toFixed(8),
+        lng: coords.lng.toFixed(8),
+        business_address: addressDetails.detailedAddress,
+        city: addressDetails.city || prev.city
+      }));
+      
+      if (errors.business_address) {
+        setErrors(prev => {
+          const next = { ...prev };
+          delete next.business_address;
+          return next;
+        });
+      }
+      
+      toast.success("Location detected successfully!", { id: toastId });
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Failed to get current location. Please check permissions.", { id: toastId });
+    } finally {
+      setIsLocating(false);
+    }
+  };
+
+  const handleLocationConfirmed = (lat: number, lng: number, address: LocationDetails) => {
+    setFormData(prev => ({
+      ...prev,
+      lat: lat.toFixed(8),
+      lng: lng.toFixed(8),
+      business_address: address.detailedAddress,
+      city: address.city || prev.city
+    }));
+    
+    if (errors.business_address) {
+      setErrors(prev => {
+        const next = { ...prev };
+        delete next.business_address;
+        return next;
+      });
+    }
+    
+    setIsMapOpen(false);
   };
 
   const selectedMainCategory = categories.find(c => c.id.toString() === formData.main_category);
@@ -118,6 +188,9 @@ export default function AddListingClient() {
     }
     if (!formData.business_address || formData.business_address.trim().length === 0) {
       newErrors.business_address = "Detailed address is required.";
+    }
+    if (!formData.lat || !formData.lng) {
+      newErrors.business_address = "Please pick a location on the map or use your current location.";
     }
     // Optional fields format checks
     if (formData.business_gst && !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(formData.business_gst)) {
@@ -546,7 +619,7 @@ export default function AddListingClient() {
                     <>
                       <span className="material-symbols-outlined text-4xl text-outline mb-2 group-hover:text-primary transition-colors">upload_file</span>
                       <p className="text-sm font-bold text-on-surface-variant mb-2">Upload Business Banner</p>
-                      <p className="text-xs text-secondary mb-4">PNG, JPG</p>
+                      <p className="text-xs text-secondary mb-4">PNG, JPG (Max 2MB)</p>
                     </>
                   )}
                   <input className="hidden" id="bannerUpload" type="file" accept="image/*" onChange={handleFileChange} />
@@ -573,11 +646,22 @@ export default function AddListingClient() {
               </div>
               <div className="md:col-span-8 space-y-md">
                 <div className="flex flex-col md:flex-row gap-4">
-                  <button className="flex items-center gap-2 text-primary font-bold hover:underline bg-primary/10 p-3 rounded-lg w-full md:w-auto justify-center transition-colors hover:bg-primary/20" type="button">
-                    <span className="material-symbols-outlined">my_location</span>
-                    Get Current Location
+                  <button 
+                    onClick={handleGetCurrentLocation}
+                    disabled={isLocating}
+                    className="flex items-center gap-2 text-primary font-bold hover:underline bg-primary/10 p-3 rounded-lg w-full md:w-auto justify-center transition-colors hover:bg-primary/20 disabled:opacity-50 disabled:cursor-not-allowed" 
+                    type="button"
+                  >
+                    <span className="material-symbols-outlined">
+                      {isLocating ? 'progress_activity' : 'my_location'}
+                    </span>
+                    {isLocating ? 'Detecting...' : 'Get Current Location'}
                   </button>
-                  <button className="flex items-center gap-2 text-primary font-bold hover:underline bg-primary/10 p-3 rounded-lg w-full md:w-auto justify-center transition-colors hover:bg-primary/20" type="button">
+                  <button 
+                    onClick={() => setIsMapOpen(true)}
+                    className="flex items-center gap-2 text-primary font-bold hover:underline bg-primary/10 p-3 rounded-lg w-full md:w-auto justify-center transition-colors hover:bg-primary/20" 
+                    type="button"
+                  >
                     <span className="material-symbols-outlined">map</span>
                     Set Location
                   </button>
@@ -623,6 +707,17 @@ export default function AddListingClient() {
           </form>
         </div>
       </main>
+      
+      {isMapOpen && (
+        <LocationMapPicker
+          isOpen={isMapOpen}
+          onClose={() => setIsMapOpen(false)}
+          onConfirm={handleLocationConfirmed}
+          initialLat={formData.lat ? parseFloat(formData.lat) : undefined}
+          initialLng={formData.lng ? parseFloat(formData.lng) : undefined}
+        />
+      )}
+      
       <Footer />
     </>
   );
