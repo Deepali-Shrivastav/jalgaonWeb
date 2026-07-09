@@ -31,6 +31,7 @@ type YahooChartResponse = {
       meta?: {
         regularMarketPrice?: number;
         currency?: string;
+        chartPreviousClose?: number;
       };
     }>;
   };
@@ -180,9 +181,19 @@ async function fetchMetalQuote(
   const payload = (await response.json()) as AlphaVantageCommodityResponse;
   const providerMessage = payload["Error Message"] || payload.Note || payload.Information;
   let usdValue = extractLatestCommodityValue(payload, ["price", "value", "spot"]);
+  let previousValue: number | undefined;
 
   if (providerMessage || !Number.isFinite(usdValue)) {
-    usdValue = await fetchYahooCommodityPrice(instrument.fallbackSymbol);
+    const yahoo = await fetchYahooCommodityPrice(instrument.fallbackSymbol);
+    usdValue = yahoo.price;
+    previousValue = yahoo.previous;
+  } else {
+    try {
+      const yahoo = await fetchYahooCommodityPrice(instrument.fallbackSymbol);
+      previousValue = yahoo.previous;
+    } catch (e) {
+      // ignore
+    }
   }
 
   if (!response.ok && !Number.isFinite(usdValue)) {
@@ -195,26 +206,28 @@ async function fetchMetalQuote(
     value: usdValue * usdToInr * instrument.unitMultiplier,
     currency: "INR",
     unit: instrument.unit,
+    percentChange: previousValue !== undefined ? calculatePercentChange(usdValue, previousValue) : undefined,
     note: Number.isFinite(extractLatestCommodityValue(payload, ["price", "value", "spot"]))
       ? instrument.symbol
       : instrument.fallbackSymbol,
   };
 }
 
-async function fetchYahooCommodityPrice(symbol: string): Promise<number> {
+async function fetchYahooCommodityPrice(symbol: string): Promise<{ price: number; previous: number | undefined }> {
   const url = new URL(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}`);
   url.searchParams.set("range", "1d");
   url.searchParams.set("interval", "1d");
 
   const response = await fetch(url, { next: { revalidate: 300 } });
   const payload = (await response.json()) as YahooChartResponse;
-  const value = Number(payload.chart?.result?.[0]?.meta?.regularMarketPrice);
+  const price = Number(payload.chart?.result?.[0]?.meta?.regularMarketPrice);
+  const previous = Number(payload.chart?.result?.[0]?.meta?.chartPreviousClose);
 
-  if (!response.ok || !Number.isFinite(value)) {
+  if (!response.ok || !Number.isFinite(price)) {
     throw new Error("Fallback metal prices are unavailable");
   }
 
-  return value;
+  return { price, previous: Number.isFinite(previous) ? previous : undefined };
 }
 
 async function fetchWtiQuote(key: string, usdToInr: number): Promise<MarketQuote | null> {
@@ -232,11 +245,14 @@ async function fetchWtiQuote(key: string, usdToInr: number): Promise<MarketQuote
     return latest && point.date !== latest.date && Number.isFinite(value);
   });
   let usdValue = Number(latest?.value);
+  let previousValue = Number(previous?.value);
   let note = "WTI";
 
   if (providerMessage || !Number.isFinite(usdValue)) {
     try {
-      usdValue = await fetchYahooCommodityPrice("CL=F");
+      const yahoo = await fetchYahooCommodityPrice("CL=F");
+      usdValue = yahoo.price;
+      previousValue = yahoo.previous ?? previousValue;
       note = "CL=F";
     } catch (e) {
       // ignore fallback error
@@ -253,7 +269,7 @@ async function fetchWtiQuote(key: string, usdToInr: number): Promise<MarketQuote
     value: usdValue * usdToInr,
     currency: "INR",
     unit: "per barrel",
-    percentChange: calculatePercentChange(usdValue, Number(previous?.value)),
+    percentChange: calculatePercentChange(usdValue, previousValue),
     note,
   };
 }

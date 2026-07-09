@@ -35,8 +35,9 @@ function TickerItems({ dashboard, loading }: { dashboard: DashboardResponse; loa
       <div className="flex items-center gap-xs whitespace-nowrap font-extrabold text-ink-deep">
         <span className="material-symbols-outlined text-lg text-primary" aria-hidden="true">trending_up</span>
         <span>Market Watch</span>
-        <span className={`h-1.5 w-1.5 rounded-full ${dashboard.market.length ? "bg-emerald-500" : "bg-outline-variant"}`} />
       </div>
+
+      <span className="h-5 w-px bg-hairline-soft" aria-hidden="true" />
 
       {marketPlaceholders.map((item) => {
         const quote = marketById.get(item.id);
@@ -46,11 +47,13 @@ function TickerItems({ dashboard, loading }: { dashboard: DashboardResponse; loa
         return (
           <div key={item.id} className="flex items-center gap-xs whitespace-nowrap">
             <span className="text-secondary">{item.label}</span>
-            <strong className="text-ink-deep">{formatMarketValue(quote)}</strong>
+            <strong className={change !== undefined ? (isDown ? "text-rose-600" : "text-emerald-600") : "text-ink-deep"}>
+              {formatMarketValue(quote)}
+            </strong>
             <span className="text-[10px] font-bold uppercase text-primary">{quote?.unit || ""}</span>
             {change !== undefined && (
               <span className={`flex items-center text-xs font-extrabold ${isDown ? "text-rose-600" : "text-emerald-600"}`}>
-                <span className="material-symbols-outlined text-sm" aria-hidden="true">{isDown ? "south_east" : "north_east"}</span>
+                <span className="material-symbols-outlined text-sm font-bold" aria-hidden="true">{isDown ? "south_east" : "north_east"}</span>
                 {change >= 0 ? "+" : ""}{change.toFixed(2)}%
               </span>
             )}
