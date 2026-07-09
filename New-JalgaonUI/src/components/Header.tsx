@@ -11,7 +11,7 @@ const navLinks = [
   { href: '/events', label: 'Events' },
   { href: '/blog', label: 'Blog' },
   { href: '/jobs', label: 'Jobs' },
-  { href: '/ngo', label: 'NGOs' },
+  { href: '/startups', label: 'Startups' },
 ];
 
 export default function Header() {

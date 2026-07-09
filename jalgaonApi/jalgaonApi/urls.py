@@ -36,6 +36,7 @@ urlpatterns = [
     path('api/v1/ngo/', include('apps.ngo.urls')),
     path('api/v1/notifications/', include('apps.notifications.urls')),
     path('api/v1/blog/', include('apps.blog.urls')),
+    path('api/v1/startups/', include('apps.startups.urls')),
 
     # Swagger / OpenAPI Docs
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

@@ -8,6 +8,7 @@ import LatestNews from '@/components/LatestNews';
 import UpcomingEvents from '@/components/UpcomingEvents';
 import LocalWonders from '@/components/LocalWonders';
 import JobOpenings from '@/components/JobOpenings';
+import FeaturedStartups from '@/components/FeaturedStartups';
 import NgoSpotlight from '@/components/NgoSpotlight';
 import TrendingListings from '@/components/TrendingListings';
 import IndustryGrids from '@/components/IndustryGrids';
@@ -19,12 +20,14 @@ export default function HomeClient({
   trendingListings, 
   news, 
   events, 
-  jobs 
+  jobs,
+  startups
 }: { 
   trendingListings?: any[], 
   news?: any[], 
   events?: any[], 
-  jobs?: any[] 
+  jobs?: any[],
+  startups?: any[]
 }) {
   const router = useRouter();
   const [selectedCity, setSelectedCity] = useState<string>('Jalgaon');
@@ -48,6 +51,7 @@ export default function HomeClient({
       <UpcomingEvents initialData={events} />
       <LocalWonders />
       <JobOpenings initialData={jobs} />
+      <FeaturedStartups initialData={startups} />
       <NgoSpotlight />
       <BlogSection />
       <CallToAction />

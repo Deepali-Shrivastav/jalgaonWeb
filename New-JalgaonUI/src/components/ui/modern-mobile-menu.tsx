@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Home, Newspaper, CalendarDays, Briefcase, HeartHandshake } from 'lucide-react';
+import { Home, Newspaper, CalendarDays, Briefcase, HeartHandshake, BookOpen } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 
 type IconComponentType = React.ElementType<{ className?: string }>;
@@ -21,7 +21,7 @@ const defaultItems: InteractiveMenuItem[] = [
     { label: 'events', icon: CalendarDays, href: '/events' },
     { label: 'home', icon: Home, href: '/' },
     { label: 'jobs', icon: Briefcase, href: '/jobs' },
-    { label: 'ngos', icon: HeartHandshake, href: '/ngo' },
+    { label: 'blog', icon: BookOpen, href: '/blog' },
 ];
 
 const defaultAccentColor = 'var(--component-active-color-default)';
