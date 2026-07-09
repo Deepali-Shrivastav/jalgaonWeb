@@ -4,26 +4,21 @@ import React, { useState, useEffect, useContext } from 'react';
 import Link from 'next/link';
 import { useProfileCompletion } from '@/hooks/useProfileCompletion';
 import { AuthContext } from '@/context/AuthContext';
-import { isProfileBannerDismissed, dismissProfileBanner } from '@/lib/profileCompletionStorage';
 
 export default function ProfileCompleteBanner() {
   const { user } = useContext(AuthContext);
   const { score, isComplete, isLoading } = useProfileCompletion();
-  const [isDismissed, setIsDismissed] = useState(true); // default to true, show on condition
+  const [shouldShow, setShouldShow] = useState(false);
 
   useEffect(() => {
-    if (isLoading || isComplete || !user?.id) return;
-    setIsDismissed(isProfileBannerDismissed(user.id));
+    if (isLoading || isComplete || !user?.id) {
+      setShouldShow(false);
+      return;
+    }
+    setShouldShow(true);
   }, [isLoading, isComplete, score, user]);
 
-  if (isDismissed) return null;
-
-  const handleDismiss = () => {
-    if (user?.id) {
-      dismissProfileBanner(user.id);
-    }
-    setIsDismissed(true);
-  };
+  if (!shouldShow) return null;
 
   return (
     <div className="mb-6 bg-gradient-to-r from-amber-50 to-amber-100/50 border border-amber-200/80 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm animate-fade-in">
@@ -45,13 +40,6 @@ export default function ProfileCompleteBanner() {
         >
           Update Profile
         </Link>
-        <button
-          onClick={handleDismiss}
-          className="p-2 text-amber-700 hover:bg-amber-200/40 rounded-xl transition-all cursor-pointer flex items-center justify-center"
-          aria-label="Dismiss banner"
-        >
-          <span className="material-symbols-outlined text-base">close</span>
-        </button>
       </div>
     </div>
   );
