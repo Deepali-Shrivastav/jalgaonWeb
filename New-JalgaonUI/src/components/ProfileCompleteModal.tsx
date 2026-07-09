@@ -6,9 +6,9 @@ import { useProfileCompletion } from '@/hooks/useProfileCompletion';
 import { AuthContext } from '@/context/AuthContext';
 import {
   isProfileNudgeSnoozed,
-  isProfileNudgeDismissed,
+  isProfileModalDismissed,
   snoozeProfileNudge,
-  dismissProfileNudge,
+  dismissProfileModal,
 } from '@/lib/profileCompletionStorage';
 
 export default function ProfileCompleteModal() {
@@ -19,7 +19,7 @@ export default function ProfileCompleteModal() {
 
   useEffect(() => {
     if (isLoading || isComplete || !user?.id) return;
-    if (isProfileNudgeSnoozed(user.id) || isProfileNudgeDismissed(user.id)) return;
+    if (isProfileNudgeSnoozed(user.id) || isProfileModalDismissed(user.id)) return;
 
     // Only trigger if user just logged in this session
     const justLoggedIn = typeof window !== 'undefined' && sessionStorage.getItem("just_logged_in") === "true";
@@ -47,7 +47,7 @@ export default function ProfileCompleteModal() {
 
   const handleCTA = () => {
     if (user?.id) {
-      dismissProfileNudge(user.id); // Dismiss for current session
+      dismissProfileModal(user.id); // Dismiss for current session
     }
     setIsOpen(false);
     router.push('/account/settings');

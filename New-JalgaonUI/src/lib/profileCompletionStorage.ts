@@ -10,20 +10,30 @@ export function snoozeProfileNudge(userId: string | number | undefined, days = 7
   localStorage.setItem(`jalgaon_pc_snooze_until_${userId}`, String(Date.now() + days * 86400000));
 }
 
-export function dismissProfileNudge(userId: string | number | undefined): void {
-  if (typeof window === 'undefined' || !userId) return;
-  sessionStorage.setItem(`jalgaon_pc_dismissed_${userId}`, 'true');
-}
-
 export function isProfileNudgeSnoozed(userId: string | number | undefined): boolean {
   if (typeof window === 'undefined' || !userId) return false;
   const until = localStorage.getItem(`jalgaon_pc_snooze_until_${userId}`);
   return !!until && Date.now() < parseInt(until, 10);
 }
 
-export function isProfileNudgeDismissed(userId: string | number | undefined): boolean {
+export function dismissProfileModal(userId: string | number | undefined): void {
+  if (typeof window === 'undefined' || !userId) return;
+  sessionStorage.setItem(`jalgaon_pc_modal_dismissed_${userId}`, 'true');
+}
+
+export function isProfileModalDismissed(userId: string | number | undefined): boolean {
   if (typeof window === 'undefined' || !userId) return false;
-  return sessionStorage.getItem(`jalgaon_pc_dismissed_${userId}`) === 'true';
+  return sessionStorage.getItem(`jalgaon_pc_modal_dismissed_${userId}`) === 'true';
+}
+
+export function dismissProfileBanner(userId: string | number | undefined): void {
+  if (typeof window === 'undefined' || !userId) return;
+  sessionStorage.setItem(`jalgaon_pc_banner_dismissed_${userId}`, 'true');
+}
+
+export function isProfileBannerDismissed(userId: string | number | undefined): boolean {
+  if (typeof window === 'undefined' || !userId) return false;
+  return sessionStorage.getItem(`jalgaon_pc_banner_dismissed_${userId}`) === 'true';
 }
 
 export function getCachedScore(userId: string | number | undefined): number | null {

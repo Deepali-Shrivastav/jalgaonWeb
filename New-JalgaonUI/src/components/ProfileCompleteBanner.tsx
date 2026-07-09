@@ -4,7 +4,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import Link from 'next/link';
 import { useProfileCompletion } from '@/hooks/useProfileCompletion';
 import { AuthContext } from '@/context/AuthContext';
-import { isProfileNudgeDismissed, dismissProfileNudge } from '@/lib/profileCompletionStorage';
+import { isProfileBannerDismissed, dismissProfileBanner } from '@/lib/profileCompletionStorage';
 
 export default function ProfileCompleteBanner() {
   const { user } = useContext(AuthContext);
@@ -13,14 +13,14 @@ export default function ProfileCompleteBanner() {
 
   useEffect(() => {
     if (isLoading || isComplete || !user?.id) return;
-    setIsDismissed(isProfileNudgeDismissed(user.id));
+    setIsDismissed(isProfileBannerDismissed(user.id));
   }, [isLoading, isComplete, score, user]);
 
   if (isDismissed) return null;
 
   const handleDismiss = () => {
     if (user?.id) {
-      dismissProfileNudge(user.id);
+      dismissProfileBanner(user.id);
     }
     setIsDismissed(true);
   };
