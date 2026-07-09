@@ -44,8 +44,7 @@ class ListingListSerializer(serializers.ModelSerializer):
             'id', 'slug', 'business_name', 'main_category_name', 'main_category_slug', 
             'sub_category_name', 'sub_category_slug', 'business_banner', 
             'city', 'business_address', 'business_no', 'whatsapp', 
-            'is_trending', 'avg_rating', 'review_count', 'business_description', 'status'
-            'is_trending', 'is_featured', 'avg_rating', '`review_count`'
+            'is_trending', 'is_featured', 'avg_rating', 'review_count', 'business_description', 'status'
         ]
 
 class ListingDetailSerializer(serializers.ModelSerializer):
