@@ -92,6 +92,21 @@ class ListingSearchView(generics.ListAPIView):
         if q:
             from apps.search.models import SearchQuery
             SearchQuery.record(q)
+            
+            # Passive analytics event tracking
+            try:
+                from apps.analytics.models import AnalyticsEvent
+                from apps.analytics.utils import get_client_ip
+                AnalyticsEvent.objects.create(
+                    event_type='listing_search',
+                    search_query=q,
+                    user=self.request.user if self.request.user.is_authenticated else None,
+                    ip_address=get_client_ip(self.request),
+                    user_agent=self.request.META.get('HTTP_USER_AGENT', ''),
+                    session_id=self.request.session.session_key or ''
+                )
+            except Exception:
+                pass
 
         queryset = ShopListing.objects.filter(status='active')
         
@@ -232,6 +247,21 @@ class ListingDetailView(generics.RetrieveAPIView):
         if obj.status == 'active':
             obj.views += 1
             obj.save(update_fields=['views'])
+            
+            # Passive analytics event tracking
+            try:
+                from apps.analytics.models import AnalyticsEvent
+                from apps.analytics.utils import get_client_ip
+                AnalyticsEvent.objects.create(
+                    event_type='listing_view',
+                    listing=obj,
+                    user=self.request.user if self.request.user.is_authenticated else None,
+                    ip_address=get_client_ip(self.request),
+                    user_agent=self.request.META.get('HTTP_USER_AGENT', ''),
+                    session_id=self.request.session.session_key or ''
+                )
+            except Exception:
+                pass
         return obj
 
 class ListingCreateView(generics.CreateAPIView):

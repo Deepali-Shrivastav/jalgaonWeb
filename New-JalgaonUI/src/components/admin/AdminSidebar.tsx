@@ -33,6 +33,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, toggleSidebar 
   const canSeeEvents = isAdmin || ["content_manager", "moderator"].includes(userRole);
   const canSeeJobs = isAdmin || ["content_manager", "moderator"].includes(userRole);
   const canSeeStartups = isAdmin || ["content_manager", "moderator"].includes(userRole);
+  const canSeeAnalytics = isAdmin || ["content_manager", "moderator", "seo_manager", "support"].includes(userRole);
 
   const navLinkClass = (path: string, exact = false) => {
     const isActive = exact ? pathname === path : pathname?.startsWith(path);
@@ -83,6 +84,14 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, toggleSidebar 
           <span className="material-symbols-outlined">dashboard</span>
           {!isCollapsed && <span>Dashboard</span>}
         </Link>
+
+        {/* Analytics */}
+        {canSeeAnalytics && (
+          <Link href="/admin/analytics" className={navLinkClass("/admin/analytics")}>
+            <span className="material-symbols-outlined">monitoring</span>
+            {!isCollapsed && <span>Analytics</span>}
+          </Link>
+        )}
 
         {/* Users */}
         {canSeeUsers && (

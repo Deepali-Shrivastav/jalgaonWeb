@@ -122,7 +122,8 @@ export default function AdsPage() {
                       <th className="p-4">Status</th>
                       <th className="p-4 text-right">Impressions</th>
                       <th className="p-4 text-right">Clicks</th>
-                      <th className="p-4 text-right pr-6">CTR</th>
+                      <th className="p-4 text-right">CTR</th>
+                      <th className="p-4 text-center pr-6">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-hairline-soft text-sm">
@@ -172,8 +173,13 @@ export default function AdsPage() {
                         <td className="p-4 text-right font-semibold text-ink-deep">
                           {ad.clicks.toLocaleString()}
                         </td>
-                        <td className="p-4 text-right pr-6 font-semibold text-primary">
+                        <td className="p-4 text-right font-semibold text-primary">
                           {ad.ctr}%
+                        </td>
+                        <td className="p-4 text-center pr-6">
+                          <Link href={`/account/ads/${ad.id}/analytics`} className="text-purple-600 font-bold text-xs hover:underline flex items-center justify-center gap-1">
+                            <span className="material-symbols-outlined text-[14px]">analytics</span> Trends
+                          </Link>
                         </td>
                       </tr>
                     ))}

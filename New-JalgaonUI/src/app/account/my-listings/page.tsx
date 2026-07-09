@@ -10,6 +10,7 @@ export default function MyListingsPage() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
   const fetchListings = async () => {
     setLoading(true);
@@ -36,6 +37,14 @@ export default function MyListingsPage() {
     }
   }, [isLogin]);
 
+  useEffect(() => {
+    const handleOutsideClick = () => {
+      setActiveDropdown(null);
+    };
+    window.addEventListener('click', handleOutsideClick);
+    return () => window.removeEventListener('click', handleOutsideClick);
+  }, []);
+
   const handleDeleteListing = async (slug: string) => {
     if (!confirm('Are you sure you want to delete this listing? This action cannot be undone.')) return;
     
@@ -61,9 +70,12 @@ export default function MyListingsPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6 pb-4 border-b border-hairline-soft">
-        <h2 className="text-2xl font-extrabold text-ink-deep">My Listings</h2>
-        <Link href="/add-listing" className="bg-primary hover:bg-primary-deep text-white font-bold px-4 py-2 rounded-xl text-sm transition-all shadow-sm">
-          Add Listing
+        <div>
+          <h2 className="text-2xl font-extrabold text-ink-deep">My Listings</h2>
+          <p className="text-xs text-secondary mt-1">Manage, edit, view, and trace analytics for your business listings.</p>
+        </div>
+        <Link href="/add-listing" className="bg-primary hover:bg-primary-deep text-white font-bold px-4 py-2 rounded-xl text-sm transition-all shadow-sm flex items-center gap-1">
+          <span className="material-symbols-outlined text-[18px]">add_business</span> Add Listing
         </Link>
       </div>
 
@@ -91,38 +103,140 @@ export default function MyListingsPage() {
       )}
 
       {!loading && !error && data.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {data.map((item: any, i) => (
-            <div key={i} className="bg-white p-5 rounded-xl border border-hairline-soft shadow-sm hover:border-primary transition-all flex flex-col justify-between">
-              <div>
-                <div className="flex justify-between items-start gap-2 mb-2">
-                  <h4 className="font-bold text-ink-deep text-lg line-clamp-1">{item.business_name}</h4>
-                  {item.category?.name && (
-                    <span className="text-[10px] bg-secondary/10 text-secondary font-bold px-2 py-0.5 rounded-full uppercase shrink-0">
-                      {item.category.name}
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm text-secondary mb-4 line-clamp-2">{item.business_description}</p>
-              </div>
-              <div className="flex justify-between items-center mt-4 pt-4 border-t border-hairline-soft">
-                <Link href={`/directory/${item.slug}`} className="text-primary font-bold text-sm hover:underline flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[16px]">visibility</span> View
-                </Link>
-                <div className="flex gap-3">
-                  <Link href={`/add-job?listing_id=${item.id}&company_name=${encodeURIComponent(item.business_name || '')}`} className="text-blue-600 font-bold text-sm hover:underline flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[16px]">work</span> List Job
-                  </Link>
-                  <Link href={`/edit-listing/${item.slug}`} className="text-emerald-600 font-bold text-sm hover:underline flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[16px]">edit</span> Edit
-                  </Link>
-                  <button onClick={() => handleDeleteListing(item.slug)} className="text-red-500 font-bold text-sm hover:underline flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[16px]">delete</span> Delete
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="bg-white rounded-xl border border-hairline-soft shadow-sm overflow-hidden">
+          <div className="overflow-x-auto min-h-[360px]">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 text-xs font-bold text-secondary uppercase tracking-wider border-b border-hairline-soft">
+                  <th className="p-4 pl-6">Business / Listing</th>
+                  <th className="p-4">Category & City</th>
+                  <th className="p-4">Reviews & Rating</th>
+                  <th className="p-4">Status</th>
+                  <th className="p-4 text-center pr-6">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-hairline-soft text-sm">
+                {data.map((item: any, i) => {
+                  const mediaUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                  const bannerImage = item.business_banner
+                    ? (item.business_banner.startsWith('http') ? item.business_banner : `${mediaUrl}${item.business_banner}`)
+                    : null;
+
+                  return (
+                    <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                      {/* Business / Listing */}
+                      <td className="p-4 pl-6">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 bg-slate-100 rounded-lg overflow-hidden border border-hairline-soft flex items-center justify-center shrink-0">
+                            {bannerImage ? (
+                              <img src={bannerImage} alt={item.business_name} className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="material-symbols-outlined text-slate-400 text-xl">storefront</span>
+                            )}
+                          </div>
+                          <div className="max-w-[240px]">
+                            <p className="font-bold text-ink-deep line-clamp-1 text-sm">{item.business_name}</p>
+                            <p className="text-xs text-secondary line-clamp-1 mt-0.5">{item.business_description || 'No description provided.'}</p>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Category & City */}
+                      <td className="p-4">
+                        <div className="flex flex-col gap-1 items-start">
+                          {item.main_category_name && (
+                            <span className="text-[10px] bg-slate-100 text-slate-700 font-bold px-2.5 py-0.5 rounded-full uppercase">
+                              {item.main_category_name}
+                            </span>
+                          )}
+                          <p className="text-xs text-secondary flex items-center gap-0.5">
+                            <span className="material-symbols-outlined text-[13px] text-slate-400">location_on</span>
+                            {item.city || 'Jalgaon'}
+                          </p>
+                        </div>
+                      </td>
+
+                      {/* Reviews & Rating */}
+                      <td className="p-4">
+                        <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-0.5 bg-amber-50 text-amber-700 text-xs font-bold px-2 py-0.5 rounded">
+                            <span className="material-symbols-outlined text-[13px] fill-amber-700 text-amber-700">star</span>
+                            {Number(item.avg_rating || 0).toFixed(1)}
+                          </div>
+                          <span className="text-xs text-secondary">({item.review_count || 0} reviews)</span>
+                        </div>
+                      </td>
+
+                      {/* Status */}
+                      <td className="p-4">
+                        <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase ${
+                          item.status === 'active' ? 'bg-emerald-50 text-emerald-700' :
+                          item.status === 'rejected' ? 'bg-red-50 text-red-700' :
+                          item.status === 'suspended' ? 'bg-slate-200 text-slate-700' : 'bg-amber-50 text-amber-700'
+                        }`}>
+                          {item.status || 'pending'}
+                        </span>
+                      </td>
+
+                      {/* Actions */}
+                      <td className="p-4 text-center pr-6 relative">
+                        <div className="inline-block text-left">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveDropdown(activeDropdown === item.slug ? null : item.slug);
+                            }}
+                            className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-all"
+                          >
+                            Actions <span className="material-symbols-outlined text-[14px]">keyboard_arrow_down</span>
+                          </button>
+
+                          {activeDropdown === item.slug && (
+                            <div className="absolute right-0 mt-1 w-48 bg-white border border-slate-200 rounded-lg shadow-lg z-50 py-1 text-left">
+                              <Link
+                                href={`/directory/${item.slug}`}
+                                className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors"
+                              >
+                                <span className="material-symbols-outlined text-slate-400 text-[16px]">visibility</span> View Listing
+                              </Link>
+                              <Link
+                                href={`/account/my-listings/${item.slug}/analytics`}
+                                className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-purple-600 hover:bg-purple-50 transition-colors"
+                              >
+                                <span className="material-symbols-outlined text-purple-400 text-[16px]">analytics</span> Analytics
+                              </Link>
+                              <Link
+                                href={`/add-job?listing_id=${item.id}&company_name=${encodeURIComponent(item.business_name || '')}`}
+                                className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-blue-600 hover:bg-blue-50 transition-colors"
+                              >
+                                <span className="material-symbols-outlined text-blue-400 text-[16px]">work</span> List Job
+                              </Link>
+                              <Link
+                                href={`/edit-listing/${item.slug}`}
+                                className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-emerald-600 hover:bg-emerald-50 transition-colors"
+                              >
+                                <span className="material-symbols-outlined text-emerald-400 text-[16px]">edit</span> Edit Profile
+                              </Link>
+                              <div className="border-t border-slate-100 my-1"></div>
+                              <button
+                                onClick={() => {
+                                  setActiveDropdown(null);
+                                  handleDeleteListing(item.slug);
+                                }}
+                                className="w-full flex items-center gap-2 px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors text-left"
+                              >
+                                <span className="material-symbols-outlined text-red-400 text-[16px]">delete</span> Delete Listing
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
