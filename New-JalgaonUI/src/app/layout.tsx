@@ -15,6 +15,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "https://www.jalgaon.com"),
   title: "Jalgaon.com | Local Business Directory & News",
   description: "Find services near you or list your business in minutes. The professional gateway to North Maharashtra's economic heartbeat.",
   keywords: [
@@ -31,15 +32,11 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_IN",
     siteName: "Jalgaon.com",
-    url: "https://jalgaon.com",
   },
   twitter: {
     card: "summary_large_image",
     title: "Jalgaon.com | Local Business Directory & News",
     description: "Find services near you or list your business in minutes.",
-  },
-  alternates: {
-    canonical: "https://jalgaon.com",
   },
   robots: {
     index: true,

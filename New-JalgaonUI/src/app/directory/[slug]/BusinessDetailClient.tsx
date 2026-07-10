@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { AuthContext } from '@/context/AuthContext';
 import BusinessClaimModal from '@/components/BusinessClaimModal';
 import BusinessReportModal from '@/components/BusinessReportModal';
+import Rating from '@mui/material/Rating';
 
 interface BusinessDetailClientProps {
   slug: string;
@@ -236,24 +237,15 @@ export default function BusinessDetailClient({ slug }: BusinessDetailClientProps
                 <div>
                   <label className="block text-sm font-semibold text-ink-deep mb-2">Rating</label>
                   <div className="flex gap-2">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button 
-                        key={star} 
-                        type="button" 
-                        onClick={() => setReviewRating(star)}
-                        className="p-1 focus:outline-none transition-transform hover:scale-110"
-                      >
-                        <span 
-                          className="material-symbols-outlined text-3xl" 
-                          style={{
-                            color: star <= reviewRating ? '#f59e0b' : '#cbd5e1', 
-                            fontVariationSettings: star <= reviewRating ? "'FILL' 1" : "'FILL' 0"
-                          }}
-                        >
-                          star
-                        </span>
-                      </button>
-                    ))}
+                    <Rating 
+                      name="business-rating" 
+                      value={reviewRating} 
+                      precision={0.5} 
+                      size="large"
+                      onChange={(event, newValue) => {
+                        setReviewRating(newValue || 0);
+                      }}
+                    />
                   </div>
                 </div>
                 <div>
@@ -287,10 +279,10 @@ export default function BusinessDetailClient({ slug }: BusinessDetailClientProps
                         <span className="text-xs text-secondary">{new Date(review.timestamp).toLocaleDateString()}</span>
                       </div>
                       <div className="flex text-yellow-500">
-                        {Array(review.rating).fill(0).map((_, i) => <span key={i} className="material-symbols-outlined text-[16px]" style={{fontVariationSettings: "'FILL' 1"}}>star</span>)}
+                        <Rating value={review.rating_star || 5} precision={0.5} size="small" readOnly />
                       </div>
                     </div>
-                    <p className="text-secondary leading-relaxed">{review.review_text}</p>
+                    <p className="text-secondary leading-relaxed">{review.user_review}</p>
                   </div>
                 ))
               ) : (
