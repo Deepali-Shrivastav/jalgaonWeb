@@ -53,6 +53,34 @@ export default function EventDetailClient({ slug }: { slug: string }) {
     fetchEvent();
   }, [slug]);
 
+  // Execute scripts within the event content container when the content changes
+  useEffect(() => {
+    if (!event || !event.description) return;
+
+    const container = document.getElementById('event-content-container');
+    if (!container) return;
+
+    const scripts = container.querySelectorAll('script');
+    scripts.forEach((oldScript) => {
+      const newScript = document.createElement('script');
+
+      // Copy all attributes
+      Array.from(oldScript.attributes).forEach((attr) => {
+        newScript.setAttribute(attr.name, attr.value);
+      });
+
+      // Copy inner content
+      if (oldScript.innerHTML) {
+        newScript.innerHTML = oldScript.innerHTML;
+      } else if (oldScript.textContent) {
+        newScript.textContent = oldScript.textContent;
+      }
+
+      // Replace old script with new script to force execution
+      oldScript.parentNode?.replaceChild(newScript, oldScript);
+    });
+  }, [event]);
+
   if (loading) {
     return (
       <div className="w-full flex justify-center items-center py-20">
@@ -144,7 +172,10 @@ export default function EventDetailClient({ slug }: { slug: string }) {
 
         <div className="prose prose-lg max-w-none prose-headings:font-bold prose-a:text-primary mb-12">
           {event.description ? (
-            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(event.description) }} />
+            <div 
+              id="event-content-container"
+              dangerouslySetInnerHTML={{ __html: event.description }} 
+            />
           ) : (
             <p className="text-secondary">{event.short_description}</p>
           )}

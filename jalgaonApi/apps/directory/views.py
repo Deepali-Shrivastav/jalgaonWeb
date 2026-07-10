@@ -68,12 +68,12 @@ class ListingListView(generics.ListAPIView):
                 pass
 
         if sort_by == 'rating':
-            queryset = queryset.order_by('-avg_rating', '-review_count')
+            queryset = queryset.order_by('-is_featured', '-avg_rating', '-review_count')
         elif sort_by == 'trending':
-            queryset = queryset.order_by('-trending_priority', '-created_at')
+            queryset = queryset.order_by('-is_featured', '-trending_priority', '-created_at')
         elif sort_by != 'distance':
             # default to newest
-            queryset = queryset.order_by('-created_at')
+            queryset = queryset.order_by('-is_featured', '-created_at')
             
         return queryset
 
@@ -92,6 +92,21 @@ class ListingSearchView(generics.ListAPIView):
         if q:
             from apps.search.models import SearchQuery
             SearchQuery.record(q)
+            
+            # Passive analytics event tracking
+            try:
+                from apps.analytics.models import AnalyticsEvent
+                from apps.analytics.utils import get_client_ip
+                AnalyticsEvent.objects.create(
+                    event_type='listing_search',
+                    search_query=q,
+                    user=self.request.user if self.request.user.is_authenticated else None,
+                    ip_address=get_client_ip(self.request),
+                    user_agent=self.request.META.get('HTTP_USER_AGENT', ''),
+                    session_id=self.request.session.session_key or ''
+                )
+            except Exception:
+                pass
 
         queryset = ShopListing.objects.filter(status='active')
         
@@ -189,20 +204,20 @@ class ListingSearchView(generics.ListAPIView):
             
         if lat and lng:
             if sort_by == 'distance':
-                return queryset.order_by('distance', '-avg_rating')
+                return queryset.order_by('-is_featured', 'distance', '-avg_rating')
             elif sort_by == 'rating':
-                return queryset.order_by('-avg_rating', '-review_count', 'distance')
+                return queryset.order_by('-is_featured', '-avg_rating', '-review_count', 'distance')
             elif sort_by == 'newest':
-                return queryset.order_by('-created_at', 'distance')
+                return queryset.order_by('-is_featured', '-created_at', 'distance')
             else: # relevance
-                return queryset.order_by('-is_trending', 'distance', '-avg_rating')
+                return queryset.order_by('-is_featured', '-is_trending', 'distance', '-avg_rating')
         else:
             if sort_by == 'rating':
-                return queryset.order_by('-avg_rating', '-review_count')
+                return queryset.order_by('-is_featured', '-avg_rating', '-review_count')
             elif sort_by == 'newest':
-                return queryset.order_by('-created_at')
+                return queryset.order_by('-is_featured', '-created_at')
             else: # relevance (default)
-                return queryset.order_by('-is_trending', '-avg_rating', '-created_at')
+                return queryset.order_by('-is_featured', '-is_trending', '-avg_rating', '-created_at')
 
 
 class TrendingListingsView(generics.ListAPIView):
@@ -232,6 +247,21 @@ class ListingDetailView(generics.RetrieveAPIView):
         if obj.status == 'active':
             obj.views += 1
             obj.save(update_fields=['views'])
+            
+            # Passive analytics event tracking
+            try:
+                from apps.analytics.models import AnalyticsEvent
+                from apps.analytics.utils import get_client_ip
+                AnalyticsEvent.objects.create(
+                    event_type='listing_view',
+                    listing=obj,
+                    user=self.request.user if self.request.user.is_authenticated else None,
+                    ip_address=get_client_ip(self.request),
+                    user_agent=self.request.META.get('HTTP_USER_AGENT', ''),
+                    session_id=self.request.session.session_key or ''
+                )
+            except Exception:
+                pass
         return obj
 
 class ListingCreateView(generics.CreateAPIView):

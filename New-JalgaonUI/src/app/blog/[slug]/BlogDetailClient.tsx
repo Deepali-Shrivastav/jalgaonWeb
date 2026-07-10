@@ -182,6 +182,34 @@ export default function BlogDetailClient({ slug }: { slug: string }) {
     };
   }, [toc, processedContent]);
 
+  // Execute scripts within the blog content container when the content changes
+  useEffect(() => {
+    if (!post || !processedContent) return;
+
+    const container = document.getElementById('blog-content-container');
+    if (!container) return;
+
+    const scripts = container.querySelectorAll('script');
+    scripts.forEach((oldScript) => {
+      const newScript = document.createElement('script');
+
+      // Copy all attributes
+      Array.from(oldScript.attributes).forEach((attr) => {
+        newScript.setAttribute(attr.name, attr.value);
+      });
+
+      // Copy inner content
+      if (oldScript.innerHTML) {
+        newScript.innerHTML = oldScript.innerHTML;
+      } else if (oldScript.textContent) {
+        newScript.textContent = oldScript.textContent;
+      }
+
+      // Replace old script with new script to force execution
+      oldScript.parentNode?.replaceChild(newScript, oldScript);
+    });
+  }, [processedContent, post]);
+
   if (loading) {
     return (
       <div className="w-full flex justify-center items-center py-20">
@@ -202,7 +230,7 @@ export default function BlogDetailClient({ slug }: { slug: string }) {
     );
   }
 
-  const cleanContentHtml = DOMPurify.sanitize(processedContent || post.content);
+  const cleanContentHtml = processedContent || post.content;
 
   return (
     <article className="w-full bg-surface-container-lowest min-h-screen pb-24 pt-6 md:pt-10 border-t border-hairline-soft">
@@ -259,6 +287,7 @@ export default function BlogDetailClient({ slug }: { slug: string }) {
 
             {/* Article Body */}
             <div 
+              id="blog-content-container"
               className="prose max-w-none text-ink-deep leading-relaxed text-base space-y-6"
               dangerouslySetInnerHTML={{ __html: cleanContentHtml }}
             />

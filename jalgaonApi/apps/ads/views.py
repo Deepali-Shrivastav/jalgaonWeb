@@ -73,8 +73,23 @@ class TrackImpressionView(APIView):
 
     def post(self, request, ad_id):
         try:
-            updated = AdsListing.objects.filter(id=ad_id, status='active').update(impressions=F('impressions') + 1)
-            if updated:
+            ad = AdsListing.objects.filter(id=ad_id, status='active').first()
+            if ad:
+                AdsListing.objects.filter(id=ad_id).update(impressions=F('impressions') + 1)
+                # passive analytics event tracking
+                try:
+                    from apps.analytics.models import AnalyticsEvent
+                    from apps.analytics.utils import get_client_ip
+                    AnalyticsEvent.objects.create(
+                        event_type='ad_impression',
+                        ad=ad,
+                        user=request.user if request.user.is_authenticated else None,
+                        ip_address=get_client_ip(request),
+                        user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                        session_id=request.session.session_key or ''
+                    )
+                except Exception:
+                    pass
                 return Response({'message': 'Impression tracked'}, status=status.HTTP_200_OK)
             return Response({'error': 'Ad not found or inactive'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
@@ -86,8 +101,23 @@ class TrackClickView(APIView):
 
     def post(self, request, ad_id):
         try:
-            updated = AdsListing.objects.filter(id=ad_id, status='active').update(clicks=F('clicks') + 1)
-            if updated:
+            ad = AdsListing.objects.filter(id=ad_id, status='active').first()
+            if ad:
+                AdsListing.objects.filter(id=ad_id).update(clicks=F('clicks') + 1)
+                # passive analytics event tracking
+                try:
+                    from apps.analytics.models import AnalyticsEvent
+                    from apps.analytics.utils import get_client_ip
+                    AnalyticsEvent.objects.create(
+                        event_type='ad_click',
+                        ad=ad,
+                        user=request.user if request.user.is_authenticated else None,
+                        ip_address=get_client_ip(request),
+                        user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                        session_id=request.session.session_key or ''
+                    )
+                except Exception:
+                    pass
                 return Response({'message': 'Click tracked'}, status=status.HTTP_200_OK)
             return Response({'error': 'Ad not found or inactive'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:

@@ -54,6 +54,19 @@ export default function FloatingSideButtons() {
           Phone Directory
         </span>
       </Link>
+
+      <Link
+        href="/clubs"
+        aria-label="Clubs"
+        className="group flex items-center justify-center w-8 h-28 sm:w-9 sm:h-32 md:w-10 md:h-36 bg-indigo-600 text-white rounded-l-lg sm:rounded-l-xl shadow-md hover:scale-[1.05] hover:brightness-110 transition-all duration-300 origin-right cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
+      >
+        <span
+          className="font-semibold tracking-wider text-[10px] sm:text-xs md:text-sm whitespace-nowrap"
+          style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+        >
+          Clubs
+        </span>
+      </Link>
     </div>
   );
 }
