@@ -94,6 +94,39 @@ export default function JobDetailClient({ slug }: { slug: string }) {
     fetchJob();
   }, [safeSlug]);
 
+  // Execute scripts within the job containers when the content changes
+  useEffect(() => {
+    if (!job) return;
+
+    const executeScripts = (containerId: string) => {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      const scripts = container.querySelectorAll('script');
+      scripts.forEach((oldScript) => {
+        const newScript = document.createElement('script');
+
+        // Copy all attributes
+        Array.from(oldScript.attributes).forEach((attr) => {
+          newScript.setAttribute(attr.name, attr.value);
+        });
+
+        // Copy inner content
+        if (oldScript.innerHTML) {
+          newScript.innerHTML = oldScript.innerHTML;
+        } else if (oldScript.textContent) {
+          newScript.textContent = oldScript.textContent;
+        }
+
+        // Replace old script with new script to force execution
+        oldScript.parentNode?.replaceChild(newScript, oldScript);
+      });
+    };
+
+    if (job.description) executeScripts('job-description-container');
+    if (job.requirements) executeScripts('job-requirements-container');
+  }, [job]);
+
   if (loading) {
     return (
       <div className="w-full flex justify-center items-center py-20">
@@ -189,8 +222,9 @@ export default function JobDetailClient({ slug }: { slug: string }) {
       <div className="mb-10">
         <h3 className="text-xl font-bold text-ink-deep mb-4">Job Description</h3>
         <div
+          id="job-description-container"
           className="prose prose-lg max-w-none text-secondary leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(job.description || '') }}
+          dangerouslySetInnerHTML={{ __html: job.description || '' }}
         />
       </div>
 
@@ -198,8 +232,9 @@ export default function JobDetailClient({ slug }: { slug: string }) {
         <div className="mb-10">
           <h3 className="text-xl font-bold text-ink-deep mb-4">Requirements</h3>
           <div
+            id="job-requirements-container"
             className="prose prose-lg max-w-none text-secondary leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(job.requirements || '') }}
+            dangerouslySetInnerHTML={{ __html: job.requirements || '' }}
           />
         </div>
       )}

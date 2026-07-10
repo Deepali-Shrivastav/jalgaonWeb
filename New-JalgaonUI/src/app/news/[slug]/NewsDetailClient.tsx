@@ -117,6 +117,34 @@ export default function NewsDetailClient({ slug }: { slug: string }) {
     fetchData();
   }, [safeSlug]);
 
+  // Execute scripts within the news content container when the content changes
+  useEffect(() => {
+    if (!article || !article.content) return;
+
+    const container = document.getElementById('news-content-container');
+    if (!container) return;
+
+    const scripts = container.querySelectorAll('script');
+    scripts.forEach((oldScript) => {
+      const newScript = document.createElement('script');
+
+      // Copy all attributes
+      Array.from(oldScript.attributes).forEach((attr) => {
+        newScript.setAttribute(attr.name, attr.value);
+      });
+
+      // Copy inner content
+      if (oldScript.innerHTML) {
+        newScript.innerHTML = oldScript.innerHTML;
+      } else if (oldScript.textContent) {
+        newScript.textContent = oldScript.textContent;
+      }
+
+      // Replace old script with new script to force execution
+      oldScript.parentNode?.replaceChild(newScript, oldScript);
+    });
+  }, [article]);
+
   if (loading) {
     return (
       <div className="w-full flex justify-center items-center py-20">
@@ -245,8 +273,9 @@ export default function NewsDetailClient({ slug }: { slug: string }) {
             
             {/* Article Content */}
             <div 
+              id="news-content-container"
               className="prose prose-lg md:prose-xl prose-slate max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-img:rounded-none prose-img:shadow-md prose-p:leading-relaxed prose-p:text-slate-800 pb-12 border-b border-hairline-soft mb-12"
-              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content || '') }}
+              dangerouslySetInnerHTML={{ __html: article.content || '' }}
             />
             
             {/* Comments Section */}
