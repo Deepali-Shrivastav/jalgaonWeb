@@ -323,6 +323,13 @@ export default function LoginSignup() {
               By registering, you accept our terms and conditions.
             </p>
 
+            {errorMessage && (
+              <div className="mb-5 p-3 rounded-xl bg-red-50 border border-red-100 flex items-start gap-2 animate-in fade-in">
+                <span className="material-symbols-outlined text-red-500 text-xl mt-0.5">error</span>
+                <p className="text-sm font-medium text-red-600 flex-1">{errorMessage}</p>
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={isLoading}
