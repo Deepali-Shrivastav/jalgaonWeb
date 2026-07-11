@@ -4,6 +4,42 @@ import React, { useState, useEffect } from "react";
 import CarouselAds from "@/components/CarouselAds";
 import Pagination from "@/components/Pagination";
 import { useLocation } from "@/hooks/useLocation";
+import Typography from '@mui/material/Typography';
+import Breadcrumbs from '@mui/material/Breadcrumbs';
+import LinkMUI from '@mui/material/Link';
+import HomeIcon from '@mui/icons-material/Home';
+import WhatshotIcon from '@mui/icons-material/Whatshot';
+
+const categoryIconMap: Record<string, string> = {
+  "automotive": "directions_car",
+  "agriculture services": "agriculture",
+  "construction and real estate": "real_estate_agent",
+  "beauty and wellness": "spa",
+  "business services": "business_center",
+  "education": "school",
+  "electronics and appliances": "devices",
+  "finance and insurance": "account_balance",
+  "food and beverages": "restaurant",
+  "healthcare": "local_hospital",
+  "home services": "home_repair_service",
+  "hospitality": "hotel",
+  "it and software": "developer_mode",
+  "manufacturing": "factory",
+  "media and entertainment": "movie",
+  "personal care": "dry_cleaning",
+  "retail": "shopping_bag",
+  "sports and recreation": "sports_soccer",
+  "transportation": "local_taxi",
+  "utilities": "electrical_services",
+  "wholesale and distributors": "warehouse",
+  "miscellaneous": "category"
+};
+
+const getCategoryIcon = (catName: string) => {
+  if (!catName) return "category";
+  const normalized = catName.replace(/-/g, " ").toLowerCase();
+  return categoryIconMap[normalized] || "category";
+};
 
 export interface Listing {
   id: string;
@@ -247,29 +283,36 @@ export default function BusinessListings({
   return (
     <div className="max-w-container-max mx-auto px-xxl py-12">
       {/* Breadcrumb */}
-      <nav className="mb-8 flex items-center gap-2 text-sm font-medium text-secondary">
-        <button
-          onClick={handleBack}
-          className="hover:text-primary transition-colors cursor-pointer flex items-center"
-        >
-          Home
-        </button>
-        <span className="material-symbols-outlined text-base text-secondary/40 select-none flex items-center">
-          chevron_right
-        </span>
-        <button
-          onClick={handleBack}
-          className="hover:text-primary transition-colors cursor-pointer flex items-center"
-        >
-          Business Directory
-        </button>
-        <span className="material-symbols-outlined text-base text-secondary/40 select-none flex items-center">
-          chevron_right
-        </span>
-        <span className="text-primary font-bold flex items-center capitalize">
-          {(category || searchQuery || "").replace(/-/g, " ")}
-        </span>
-      </nav>
+      <div className="mb-8" role="presentation">
+        <Breadcrumbs aria-label="breadcrumb">
+          <LinkMUI
+            underline="hover"
+            sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+            color="inherit"
+            onClick={(e) => { e.preventDefault(); handleBack(); }}
+          >
+            <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+            Home
+          </LinkMUI>
+          <LinkMUI
+            underline="hover"
+            sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+            color="inherit"
+            onClick={(e) => { e.preventDefault(); handleBack(); }}
+          >
+            <WhatshotIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+            Business Directory
+          </LinkMUI>
+          <Typography
+            sx={{ color: 'primary.main', display: 'flex', alignItems: 'center', fontWeight: 'bold' }}
+          >
+            <span className="material-symbols-outlined mr-1 text-[18px]">
+              {getCategoryIcon(category || searchQuery || "")}
+            </span>
+            <span className="capitalize">{(category || searchQuery || "All Categories").replace(/-/g, " ")}</span>
+          </Typography>
+        </Breadcrumbs>
+      </div>
 
       {/* Main Header */}
       <header className="mb-10">

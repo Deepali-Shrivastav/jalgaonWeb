@@ -784,6 +784,24 @@ class AdminAdsActionView(APIView):
             
         return Response({'error': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)
 
+    def delete(self, request, ad_id):
+        try:
+            ad = AdsListing.objects.get(id=ad_id)
+        except AdsListing.DoesNotExist:
+            return Response({'error': 'Ad not found'}, status=status.HTTP_404_NOT_FOUND)
+            
+        log_audit_action(
+            actor=request.user,
+            action='delete_ad',
+            target_type='AdsListing',
+            target_id=ad.id,
+            changes={'name': ad.name},
+            request=request
+        )
+        
+        ad.delete()
+        return Response({'message': 'Ad deleted'}, status=status.HTTP_204_NO_CONTENT)
+
 class AdminAdSlotListView(APIView):
     """GET /api/v1/admin-panel/ad-slots/ — List all ad slots."""
     permission_classes = [IsAdminRole]

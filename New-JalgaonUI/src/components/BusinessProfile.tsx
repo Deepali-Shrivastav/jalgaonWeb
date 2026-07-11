@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '@/context/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
+import Rating from '@mui/material/Rating';
 export interface Review {
   id: string;
   name: string;
@@ -34,20 +35,8 @@ export interface BusinessData {
   ratingBreakdown: { stars: number; pct: number }[];
 }
 
-function StarRating({ rating, max = 5, size = 'text-lg' }: { rating: number; max?: number; size?: string }) {
-  return (
-    <div className="flex items-center gap-0.5">
-      {Array.from({ length: max }).map((_, i) => (
-        <span
-          key={i}
-          className={`material-symbols-outlined ${size} ${i < Math.round(rating) ? 'text-amber-400' : 'text-secondary/30'}`}
-          style={{ fontVariationSettings: `'FILL' ${i < Math.round(rating) ? 1 : 0}` }}
-        >
-          star
-        </span>
-      ))}
-    </div>
-  );
+function StarRating({ rating, size = 'medium' }: { rating: number; size?: 'small' | 'medium' | 'large' }) {
+  return <Rating value={rating} precision={0.5} size={size} readOnly />;
 }
 
 interface BusinessProfileProps {
@@ -523,7 +512,7 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
                           <p className="text-xs text-secondary">{rev.timeAgo}</p>
                         </div>
                       </div>
-                      <StarRating rating={rev.rating} size="text-sm" />
+                      <StarRating rating={rev.rating} size="small" />
                     </div>
                     <p className="text-secondary text-sm leading-relaxed">{rev.comment}</p>
                   </div>
@@ -614,17 +603,14 @@ export default function BusinessProfile({ listingId, listingName, onBack }: Busi
             <form onSubmit={submitReview} className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold mb-2">Rating</label>
-                <select 
-                  className="w-full border border-hairline-soft rounded-lg p-3 outline-none" 
-                  value={reviewForm.rating} 
-                  onChange={(e) => setReviewForm({...reviewForm, rating: parseInt(e.target.value)})}
-                >
-                  <option value="5">5 Stars - Excellent</option>
-                  <option value="4">4 Stars - Good</option>
-                  <option value="3">3 Stars - Average</option>
-                  <option value="2">2 Stars - Poor</option>
-                  <option value="1">1 Star - Terrible</option>
-                </select>
+                <div>
+                  <Rating 
+                    value={reviewForm.rating} 
+                    precision={0.5} 
+                    size="large"
+                    onChange={(e, v) => setReviewForm({...reviewForm, rating: v || 0})}
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold mb-2">Your Review</label>

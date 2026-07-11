@@ -14,7 +14,7 @@ class ShopReview(models.Model):
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     shop_listing = models.ForeignKey(ShopListing, on_delete=models.CASCADE, related_name='reviews')
-    rating_star = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    rating_star = models.FloatField(validators=[MinValueValidator(1.0), MaxValueValidator(5.0)])
     user_review = models.CharField(max_length=2000)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     is_helpful_count = models.IntegerField(default=0)

@@ -18,6 +18,8 @@ export default function AdminAdsPage() {
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [targetRejectId, setTargetRejectId] = useState<number | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [targetDeleteId, setTargetDeleteId] = useState<number | null>(null);
 
   const fetchAds = async () => {
     setLoading(true);
@@ -51,6 +53,20 @@ export default function AdminAdsPage() {
 
   const openRejectModal = (id: number) => { setTargetRejectId(id); setRejectionReason(""); setRejectModalOpen(true); };
   const submitReject = () => { if (targetRejectId) handleAction(targetRejectId, "reject", rejectionReason); setRejectModalOpen(false); };
+
+  const handleDelete = async (id: number) => {
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch(`${baseUrl}/api/v1/admin-panel/ads/${id}/`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) {
+        setStatusMsg("Ad deleted successfully");
+        fetchAds();
+      } else {
+        setStatusMsg("Error deleting ad");
+      }
+      setTimeout(() => setStatusMsg(""), 3000);
+    } catch { setStatusMsg("Error deleting ad"); setTimeout(() => setStatusMsg(""), 3000); }
+  };
 
   const badgeClass = (status: string) => status === "active" ? "bg-green-100 text-green-700" : status === "rejected" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700";
 
@@ -87,7 +103,8 @@ export default function AdminAdsPage() {
                       <div className="flex gap-1">
                         <button onClick={() => { setPreviewData(ad); setPreviewModalOpen(true); }} className="p-1.5 rounded hover:bg-slate-100" title="Preview"><span className="material-symbols-outlined text-lg text-slate-500">image</span></button>
                         {ad.status !== "active" && <button onClick={() => handleAction(ad.id, "approve")} className="p-1.5 rounded hover:bg-green-50" title="Approve"><span className="material-symbols-outlined text-lg text-green-600">check_circle</span></button>}
-                        {ad.status !== "rejected" && <button onClick={() => openRejectModal(ad.id)} className="p-1.5 rounded hover:bg-red-50" title="Reject"><span className="material-symbols-outlined text-lg text-red-500">cancel</span></button>}
+                        {ad.status !== "rejected" && <button onClick={() => openRejectModal(ad.id)} className="p-1.5 rounded hover:bg-orange-50" title="Reject"><span className="material-symbols-outlined text-lg text-orange-500">cancel</span></button>}
+                        <button onClick={() => { setTargetDeleteId(ad.id); setDeleteModalOpen(true); }} className="p-1.5 rounded hover:bg-red-50" title="Delete"><span className="material-symbols-outlined text-lg text-red-500">delete</span></button>
                       </div>
                     </td>
                   </tr>
@@ -134,6 +151,19 @@ export default function AdminAdsPage() {
               ) : (
                 <div className="p-8 text-slate-400 border border-slate-200 rounded-lg">No image available</div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl w-full max-w-[400px] mx-4 shadow-xl">
+            <h3 className="text-lg font-bold text-ink-deep mb-2">Delete Advertisement?</h3>
+            <p className="text-secondary text-sm mb-6">Are you sure you want to permanently delete this ad? This action cannot be undone.</p>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setDeleteModalOpen(false)} className="px-4 py-2 bg-slate-100 rounded-lg text-sm font-semibold hover:bg-slate-200 transition-colors text-ink-dark">Cancel</button>
+              <button onClick={() => { if (targetDeleteId) handleDelete(targetDeleteId); setDeleteModalOpen(false); }} className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors shadow-sm">Delete Ad</button>
             </div>
           </div>
         </div>

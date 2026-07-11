@@ -12,6 +12,7 @@ export default function AdvertiseClient() {
   const router = useRouter();
 
   const [submitting, setSubmitting] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string[]>>({});
   const [formData, setFormData] = useState({
     name: '',
     contact_email: '',
@@ -51,6 +52,7 @@ export default function AdvertiseClient() {
     }
 
     setSubmitting(true);
+    setFormErrors({});
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
     const token = localStorage.getItem("token");
 
@@ -84,6 +86,9 @@ export default function AdvertiseClient() {
       } else {
         const errorData = await res.json();
         console.error("Submission error:", errorData);
+        if (typeof errorData === 'object' && errorData !== null) {
+          setFormErrors(errorData);
+        }
         toast.error("Failed to submit request. Please check required fields.");
       }
     } catch (err) {
@@ -116,7 +121,8 @@ export default function AdvertiseClient() {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-on-surface-variant" htmlFor="name">Business / Ad Name *</label>
-                    <input required disabled={!isLogin} className="w-full border border-hairline-soft rounded-lg focus:ring-primary focus:border-primary p-3 outline-none transition-all disabled:opacity-50" id="name" name="name" value={formData.name} onChange={handleInputChange} placeholder="Your Business Name" type="text"/>
+                    <input required disabled={!isLogin} className={`w-full border ${formErrors.name ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-hairline-soft focus:ring-primary focus:border-primary'} rounded-lg p-3 outline-none transition-all disabled:opacity-50`} id="name" name="name" value={formData.name} onChange={handleInputChange} placeholder="Your Business Name" type="text"/>
+                    {formErrors.name && formErrors.name.map((err, i) => <p key={i} className="text-red-500 text-xs mt-1">{err}</p>)}
                   </div>
                 </div>
               </div>
@@ -130,11 +136,13 @@ export default function AdvertiseClient() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-on-surface-variant" htmlFor="contact_email">Contact Email *</label>
-                    <input required disabled={!isLogin} className="w-full border border-hairline-soft rounded-lg focus:ring-primary focus:border-primary p-3 outline-none transition-all disabled:opacity-50" id="contact_email" name="contact_email" value={formData.contact_email} onChange={handleInputChange} placeholder="Contact Email" type="email"/>
+                    <input required disabled={!isLogin} className={`w-full border ${formErrors.contact_email ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-hairline-soft focus:ring-primary focus:border-primary'} rounded-lg p-3 outline-none transition-all disabled:opacity-50`} id="contact_email" name="contact_email" value={formData.contact_email} onChange={handleInputChange} placeholder="Contact Email" type="email"/>
+                    {formErrors.contact_email && formErrors.contact_email.map((err, i) => <p key={i} className="text-red-500 text-xs mt-1">{err}</p>)}
                   </div>
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-on-surface-variant" htmlFor="contact_number">Phone Number *</label>
-                    <input required disabled={!isLogin} className="w-full border border-hairline-soft rounded-lg focus:ring-primary focus:border-primary p-3 outline-none transition-all disabled:opacity-50" id="contact_number" name="contact_number" value={formData.contact_number} onChange={handleInputChange} placeholder="Phone Number" type="tel"/>
+                    <input required disabled={!isLogin} className={`w-full border ${formErrors.contact_number ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-hairline-soft focus:ring-primary focus:border-primary'} rounded-lg p-3 outline-none transition-all disabled:opacity-50`} id="contact_number" name="contact_number" value={formData.contact_number} onChange={handleInputChange} placeholder="Phone Number" type="tel"/>
+                    {formErrors.contact_number && formErrors.contact_number.map((err, i) => <p key={i} className="text-red-500 text-xs mt-1">{err}</p>)}
                   </div>
                 </div>
               </div>
@@ -148,14 +156,15 @@ export default function AdvertiseClient() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-on-surface-variant" htmlFor="ad_type">Ad Type *</label>
-                    <select required disabled={!isLogin} className="w-full border border-hairline-soft bg-white rounded-lg focus:ring-primary focus:border-primary p-3 outline-none transition-all text-on-surface-variant disabled:opacity-50" id="ad_type" name="ad_type" value={formData.ad_type} onChange={handleInputChange}>
+                    <select required disabled={!isLogin} className={`w-full border ${formErrors.ad_type ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-hairline-soft focus:ring-primary focus:border-primary'} bg-white rounded-lg p-3 outline-none transition-all text-on-surface-variant disabled:opacity-50`} id="ad_type" name="ad_type" value={formData.ad_type} onChange={handleInputChange}>
                       <option value="BA">Banner Ad</option>
                       <option value="CA">Card Ad</option>
                     </select>
+                    {formErrors.ad_type && formErrors.ad_type.map((err, i) => <p key={i} className="text-red-500 text-xs mt-1">{err}</p>)}
                   </div>
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-on-surface-variant" htmlFor="target_page">Target Page *</label>
-                    <select required disabled={!isLogin} className="w-full border border-hairline-soft bg-white rounded-lg focus:ring-primary focus:border-primary p-3 outline-none transition-all text-on-surface-variant disabled:opacity-50" id="target_page" name="target_page" value={formData.target_page} onChange={handleInputChange}>
+                    <select required disabled={!isLogin} className={`w-full border ${formErrors.target_page ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-hairline-soft focus:ring-primary focus:border-primary'} bg-white rounded-lg p-3 outline-none transition-all text-on-surface-variant disabled:opacity-50`} id="target_page" name="target_page" value={formData.target_page} onChange={handleInputChange}>
                       {formData.ad_type === 'BA' && (
                         <>
                           <option value="category_banner">Category Page Banner</option>
@@ -166,14 +175,16 @@ export default function AdvertiseClient() {
                         <option value="sidebar">Sidebar</option>
                       )}
                     </select>
+                    {formErrors.target_page && formErrors.target_page.map((err, i) => <p key={i} className="text-red-500 text-xs mt-1">{err}</p>)}
                   </div>
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-on-surface-variant" htmlFor="package">Package *</label>
-                    <select required disabled={!isLogin} className="w-full border border-hairline-soft bg-white rounded-lg focus:ring-primary focus:border-primary p-3 outline-none transition-all text-on-surface-variant disabled:opacity-50" id="package" name="package" value={formData.package} onChange={handleInputChange}>
+                    <select required disabled={!isLogin} className={`w-full border ${formErrors.package ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-hairline-soft focus:ring-primary focus:border-primary'} bg-white rounded-lg p-3 outline-none transition-all text-on-surface-variant disabled:opacity-50`} id="package" name="package" value={formData.package} onChange={handleInputChange}>
                       <option value="basic">Basic (3 Days)</option>
                       <option value="standard">Standard (7 Days)</option>
                       <option value="premium">Premium (30 Days)</option>
                     </select>
+                    {formErrors.package && formErrors.package.map((err, i) => <p key={i} className="text-red-500 text-xs mt-1">{err}</p>)}
                   </div>
                 </div>
               </div>
@@ -207,6 +218,7 @@ export default function AdvertiseClient() {
                         <input disabled={!isLogin} className="hidden" type="file" accept="image/*" onChange={handleFileChange} />
                       </label>
                     </div>
+                    {formErrors.ad_image && formErrors.ad_image.map((err, i) => <p key={i} className="text-red-500 text-xs mt-1 text-center">{err}</p>)}
                   </div>
                 </div>
               </div>

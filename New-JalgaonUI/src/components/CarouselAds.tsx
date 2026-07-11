@@ -56,7 +56,7 @@ export default function CarouselAds({ slot = 'hero_banner', className = '' }: { 
     }
   }, [currentIndex, ads]);
 
-  const baseWrapperClass = "relative mx-auto overflow-hidden rounded-xl my-6 group";
+  const baseWrapperClass = "relative mx-auto overflow-hidden my-6 group";
   const emptyWrapperClass = "flex flex-col items-center justify-center bg-surface-container-low border border-hairline-soft text-secondary/40";
   
   const finalWrapperClass = className 
@@ -70,13 +70,7 @@ export default function CarouselAds({ slot = 'hero_banner', className = '' }: { 
   if (loading) return null;
   
   if (ads.length === 0) {
-    return (
-      <div className={finalEmptyClass}>
-        <span className="material-symbols-outlined text-5xl mb-2 opacity-50">ad</span>
-        <span className="text-xs font-bold tracking-widest uppercase opacity-50">Advertisement Space</span>
-        <p className="text-[10px] mt-1 text-center px-4">({slot} slot is empty)</p>
-      </div>
-    );
+    return null;
   }
   return (
     <div className={finalWrapperClass}>
@@ -89,7 +83,7 @@ export default function CarouselAds({ slot = 'hero_banner', className = '' }: { 
             <img
               src={ad.ad_image.startsWith('http') ? ad.ad_image : `${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/$/, '')}${ad.ad_image.startsWith('/') ? '' : '/'}${ad.ad_image}`}
               alt={ad.name || 'Advertisement'}
-              className={`object-cover rounded-xl ${className ? 'w-full h-full' : 'w-full h-auto max-h-[400px]'}`}
+              className={`object-cover ${className ? 'w-full h-full' : 'w-full h-auto max-h-[400px]'}`}
               onError={(e) => {
                 // Fallback for broken images
                 e.currentTarget.style.display = 'none';
