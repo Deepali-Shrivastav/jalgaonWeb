@@ -76,6 +76,8 @@ jobs:
         working-directory: New-JalgaonUI
         env:
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
+          NEXT_PUBLIC_ADMIN_URL: ${{ secrets.NEXT_PUBLIC_ADMIN_URL }}
         run: |
           npm run build
           echo "✅ Build complete"
@@ -116,7 +118,9 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         env:
           DEPLOY_NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
-          DEPLOY_COMMODITY_KEY: ${{ secrets.COMMODITY_PRICE_API_KEY }}
+          DEPLOY_NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
+          DEPLOY_NEXT_PUBLIC_ADMIN_URL: ${{ secrets.NEXT_PUBLIC_ADMIN_URL }}
+          DEPLOY_ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
           DEPLOY_WEATHER_KEY: ${{ secrets.WEATHERAPI_KEY }}
         with:
           host: ${{ secrets.PRODUCTION_SERVER_IP }}
@@ -124,7 +128,7 @@ jobs:
           key: ${{ secrets.PRODUCTION_SSH_KEY }}
           port: 22
           command_timeout: 10m
-          envs: DEPLOY_NEXT_PUBLIC_API_URL,DEPLOY_COMMODITY_KEY,DEPLOY_WEATHER_KEY
+          envs: DEPLOY_NEXT_PUBLIC_API_URL,DEPLOY_NEXT_PUBLIC_BASE_URL,DEPLOY_NEXT_PUBLIC_ADMIN_URL,DEPLOY_ALPHA_VANTAGE_API_KEY,DEPLOY_WEATHER_KEY
           script: |
             set -euo pipefail
 
@@ -135,7 +139,9 @@ jobs:
             echo "=== [1/4] Writing runtime secrets to .env.production ==="
             {
               echo "NEXT_PUBLIC_API_URL=${DEPLOY_NEXT_PUBLIC_API_URL}"
-              echo "COMMODITY_PRICE_API_KEY=${DEPLOY_COMMODITY_KEY}"
+              echo "NEXT_PUBLIC_BASE_URL=${DEPLOY_NEXT_PUBLIC_BASE_URL}"
+              echo "NEXT_PUBLIC_ADMIN_URL=${DEPLOY_NEXT_PUBLIC_ADMIN_URL}"
+              echo "ALPHA_VANTAGE_API_KEY=${DEPLOY_ALPHA_VANTAGE_API_KEY}"
               echo "WEATHERAPI_KEY=${DEPLOY_WEATHER_KEY}"
             } > "${NEXT_DIR}/.env.production"
             chmod 600 "${NEXT_DIR}/.env.production"

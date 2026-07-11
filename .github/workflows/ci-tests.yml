@@ -149,4 +149,6 @@ jobs:
           # This is the production API URL — not a secret, but passed via env
           # here so the build succeeds in the CI environment.
           NEXT_PUBLIC_API_URL: https://api.jalgaon.com
+          NEXT_PUBLIC_BASE_URL: https://www.jalgaon.com
+          NEXT_PUBLIC_ADMIN_URL: https://admin.jalgaon.com
         run: npm run build
