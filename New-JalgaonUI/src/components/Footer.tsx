@@ -100,7 +100,7 @@ export default function Footer() {
               <li>
                 <Link
                   className="text-secondary hover:text-primary transition-colors"
-                  href="/directory"
+                  href="/search"
                 >
                   Business Directory
                 </Link>

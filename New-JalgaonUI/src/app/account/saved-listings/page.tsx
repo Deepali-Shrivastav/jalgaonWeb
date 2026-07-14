@@ -100,7 +100,7 @@ export default function SavedListingsPage() {
                   <p className="text-sm text-secondary mb-4 line-clamp-2">{shop.business_description}</p>
                 </div>
                 <div className="flex justify-between items-center mt-4 pt-4 border-t border-hairline-soft">
-                  <Link href={`/directory/${shop.slug}`} className="text-primary font-bold text-sm hover:underline flex items-center gap-1">
+                  <Link href={`/category/${shop.main_category_slug || 'business'}/${shop.slug}`} className="text-primary font-bold text-sm hover:underline flex items-center gap-1">
                     <span className="material-symbols-outlined text-[16px]">visibility</span> View
                   </Link>
                   <button onClick={() => handleUnsave(shop.id)} className="text-red-500 font-bold text-sm hover:underline flex items-center gap-1">

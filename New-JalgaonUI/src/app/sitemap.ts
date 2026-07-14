@@ -62,7 +62,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     listings.forEach((listing: any) => {
       if (listing.id || listing.slug) {
         routes.push({
-          url: `${baseUrl}/directory/${listing.slug || listing.id}`,
+          url: `${baseUrl}/category/${listing.main_category_slug || 'business'}/${listing.slug || listing.id}`,
           lastModified: listing.updated_at ? new Date(listing.updated_at) : new Date(),
           changeFrequency: 'weekly',
           priority: 0.8,

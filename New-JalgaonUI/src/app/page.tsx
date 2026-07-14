@@ -53,6 +53,7 @@ async function getHomeData() {
       id: item.slug || item.id,
       name: item.business_name,
       category: item.main_category_name || 'Business',
+      categorySlug: item.main_category_slug || '',
       rating: item.avg_rating || 4.0,
       location: item.city || 'Jalgaon',
       image: item.business_banner

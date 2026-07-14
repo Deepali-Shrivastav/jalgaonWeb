@@ -45,6 +45,7 @@ export interface Listing {
   id: string;
   name: string;
   category: string;
+  categorySlug?: string;
   displayCategory: string;
   rating: number;
   ratingCount: number;
@@ -64,7 +65,7 @@ export interface BusinessListingsProps {
   searchQuery?: string | null;
   selectedCity?: string | null;
   onBack?: () => void;
-  onSelectListing?: (id: string, name: string) => void;
+  onSelectListing?: (id: string, name: string, categorySlug?: string) => void;
 }
 
 export default function BusinessListings({
@@ -76,11 +77,12 @@ export default function BusinessListings({
 }: BusinessListingsProps) {
   const router = useRouter();
 
-  const handleSelect = (id: string, name: string) => {
+  const handleSelect = (id: string, name: string, categorySlug?: string) => {
     if (onSelectListing) {
-      onSelectListing(id, name);
+      onSelectListing(id, name, categorySlug);
     } else {
-      router.push(`/directory/${id}`);
+      const slug = categorySlug || 'business';
+      router.push(`/category/${slug}/${id}`);
     }
   };
 
@@ -162,6 +164,7 @@ export default function BusinessListings({
           id: item.slug || item.id,
           name: item.business_name || "",
           category: item.main_category_name || "",
+          categorySlug: item.main_category_slug || "",
           displayCategory: item.main_category_name || "",
           rating: parseFloat(item.avg_rating) || 0,
           ratingCount: item.review_count || 0,
@@ -683,7 +686,7 @@ export default function BusinessListings({
                     </div>
                   )}
                   <article
-                    onClick={() => handleSelect(listing.id, listing.name)}
+                    onClick={() => handleSelect(listing.id, listing.name, listing.categorySlug || (listing.category ? listing.category.toLowerCase().replace(/\s+/g, '-') : 'business'))}
                     className={`group bg-white rounded-xl border p-2 shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 flex flex-col md:flex-row relative cursor-pointer ${
                       listing.featured
                         ? "border-primary"
@@ -778,7 +781,7 @@ export default function BusinessListings({
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleSelect(listing.id, listing.name);
+                            handleSelect(listing.id, listing.name, listing.categorySlug || (listing.category ? listing.category.toLowerCase().replace(/\s+/g, '-') : 'business'));
                           }}
                           className="w-full md:w-auto mt-2 md:mt-0 flex justify-end items-center gap-1 text-primary text-sm font-bold hover:underline cursor-pointer"
                         >

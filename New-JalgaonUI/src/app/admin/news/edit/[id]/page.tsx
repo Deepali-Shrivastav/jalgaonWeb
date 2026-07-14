@@ -18,6 +18,12 @@ const slugify = (text: string) => {
 };
 
 export default function AdminNewsEditPage() {
+  const formatDateForInput = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const tzOffset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
+  };
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
   const router = useRouter();
   const params = useParams();
@@ -26,7 +32,7 @@ export default function AdminNewsEditPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isSlugManual, setIsSlugManual] = useState(true); // Default to manual for existing articles to prevent accidental URL changes
-  const [formData, setFormData] = useState({ title: "", slug: "", short_description: "", content: "", category: "", status: "draft", is_breaking: false, meta_title: "", meta_description: "" });
+  const [formData, setFormData] = useState({ title: "", slug: "", short_description: "", content: "", category: "", status: "draft", is_breaking: false, meta_title: "", meta_description: "", published_at: "" });
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   useEffect(() => {
@@ -40,7 +46,7 @@ export default function AdminNewsEditPage() {
         const catData = await catRes.json();
         setCategories(catData.results || catData);
         const data = await artRes.json();
-        setFormData({ title: data.title || "", slug: data.slug || "", short_description: data.short_description || "", content: data.content || "", category: data.category?.id || data.category || "", status: data.status || "draft", is_breaking: data.is_breaking || false, meta_title: data.meta_title || "", meta_description: data.meta_description || "" });
+        setFormData({ title: data.title || "", slug: data.slug || "", short_description: data.short_description || "", content: data.content || "", category: data.category?.id || data.category || "", status: data.status || "draft", is_breaking: data.is_breaking || false, meta_title: data.meta_title || "", meta_description: data.meta_description || "", published_at: formatDateForInput(data.published_at) });
       } catch { alert("Failed to load article."); router.push("/admin/news"); }
       finally { setLoading(false); }
     };
@@ -75,7 +81,15 @@ export default function AdminNewsEditPage() {
     try {
       const token = localStorage.getItem("token");
       const data = new FormData();
-      Object.entries(formData).forEach(([key, val]) => { if (val !== null && val !== "") data.append(key, String(typeof val === "object" ? (val as any).id : val)); });
+      Object.entries(formData).forEach(([key, val]) => { 
+        if (val !== null && val !== "") {
+          if (key === "published_at") {
+            data.append(key, new Date(String(val)).toISOString());
+          } else {
+            data.append(key, String(typeof val === "object" ? (val as any).id : val)); 
+          }
+        }
+      });
       if (imageFile) data.append("featured_image", imageFile);
       const res = await fetch(`${baseUrl}/api/v1/news/admin/articles/${id}/`, { method: "PATCH", headers: { Authorization: `Bearer ${token}` }, body: data });
       if (!res.ok) {
@@ -127,9 +141,10 @@ export default function AdminNewsEditPage() {
           />
           <small className="text-slate-400">Unique identifier for the URL (changing this will change the article's link).</small>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <div><label className="block text-sm font-medium text-slate-600 mb-1">Category</label><select name="category" value={formData.category} onChange={handleChange} className="w-full p-2.5 border border-slate-200 rounded-lg text-sm"><option value="">Select Category</option>{categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
           <div><label className="block text-sm font-medium text-slate-600 mb-1">Status</label><select name="status" value={formData.status} onChange={handleChange} className="w-full p-2.5 border border-slate-200 rounded-lg text-sm"><option value="draft">Draft</option><option value="review">Review</option><option value="published">Published</option></select></div>
+          <div><label className="block text-sm font-medium text-slate-600 mb-1">Publish Date</label><input type="datetime-local" name="published_at" value={formData.published_at} onChange={handleChange} className="w-full p-2.5 border border-slate-200 rounded-lg text-sm" /></div>
         </div>
         <div><label className="block text-sm font-medium text-slate-600 mb-1">Short Description *</label><textarea name="short_description" value={formData.short_description} onChange={handleChange} required rows={2} className="w-full p-2.5 border border-slate-200 rounded-lg text-sm" /></div>
         <div><label className="block text-sm font-medium text-slate-600 mb-1">Content *</label><textarea name="content" value={formData.content} onChange={handleChange} required rows={12} className="w-full p-2.5 border border-slate-200 rounded-lg text-sm" /></div>

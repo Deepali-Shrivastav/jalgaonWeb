@@ -5,7 +5,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import BusinessDetailClient from './BusinessDetailClient';
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ categorySlug: string; slug: string }> }): Promise<Metadata> {
   try {
     const { slug } = await params;
     const safeSlug = (() => {
@@ -20,11 +20,23 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     
     if (res.ok) {
       const data = await res.json();
+      
+      const categoryName = categorySlug
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+        
+      const locality = data.address || data.business_address || "";
+      const city = data.city || "Jalgaon";
+      const localityText = locality ? `${locality}, ` : "";
+      
+      const pageTitle = `${data.business_name} in ${localityText}${city} - Best ${data.main_category_name || categoryName} near me in ${city} - Jalgaon.com`;
+
       return {
-        title: `${data.business_name} | Jalgaon Directory`,
+        title: pageTitle,
         description: data.business_description || `View details, contact information, and reviews for ${data.business_name}.`,
         openGraph: {
-          title: `${data.business_name} | Jalgaon.com`,
+          title: pageTitle,
           description: data.business_description,
           images: data.business_banner ? [data.business_banner.startsWith('http') ? data.business_banner : `${baseUrl}${data.business_banner}`] : [],
         }
@@ -36,8 +48,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return { title: 'Business Directory | Jalgaon.com' };
 }
 
-export default async function BusinessDirectoryPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export default async function BusinessDirectoryPage({ params }: { params: Promise<{ categorySlug: string; slug: string }> }) {
+  const { categorySlug, slug } = await params;
   const safeSlug = (() => {
     try {
       return encodeURIComponent(decodeURIComponent(slug));
@@ -68,7 +80,7 @@ export default async function BusinessDirectoryPage({ params }: { params: Promis
         },
         "telephone": data.contact_person_number,
         "email": data.email,
-        "url": `https://www.jalgaon.com/directory/${slug}`,
+        "url": `https://www.jalgaon.com/category/${categorySlug}/${slug}`,
         "aggregateRating": data.avg_rating ? {
           "@type": "AggregateRating",
           "ratingValue": data.avg_rating,
@@ -90,19 +102,19 @@ export default async function BusinessDirectoryPage({ params }: { params: Promis
             "@type": "ListItem",
             "position": 2,
             "name": "Directory",
-            "item": "https://www.jalgaon.com/directory"
+            "item": "https://www.jalgaon.com/search"
           },
           {
             "@type": "ListItem",
             "position": 3,
-            "name": data.main_category_name || "Business",
-            "item": `https://www.jalgaon.com/category/${data.main_category_slug || ''}`
+            "name": data.main_category_name || "Category",
+            "item": `https://www.jalgaon.com/category/${categorySlug}`
           },
           {
             "@type": "ListItem",
             "position": 4,
             "name": data.business_name,
-            "item": `https://www.jalgaon.com/directory/${slug}`
+            "item": `https://www.jalgaon.com/category/${categorySlug}/${slug}`
           }
         ]
       });

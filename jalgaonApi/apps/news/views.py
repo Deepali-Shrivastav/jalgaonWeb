@@ -82,8 +82,8 @@ class TrendingNewsListView(generics.ListAPIView):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
-        # In a real app we'd filter by views in last 24h, for now just top by view_count
-        return NewsArticle.objects.filter(status='published').order_by('-view_count')[:5]
+        today = timezone.now().date()
+        return NewsArticle.objects.filter(status='published', published_at__date=today).order_by('-view_count')[:5]
 
 class PublicNewsDetailView(generics.RetrieveAPIView):
     queryset = NewsArticle.objects.filter(status='published')
