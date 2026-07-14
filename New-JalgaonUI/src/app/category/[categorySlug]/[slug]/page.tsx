@@ -7,7 +7,7 @@ import BusinessDetailClient from './BusinessDetailClient';
 
 export async function generateMetadata({ params }: { params: Promise<{ categorySlug: string; slug: string }> }): Promise<Metadata> {
   try {
-    const { slug } = await params;
+    const { slug, categorySlug } = await params;
     const safeSlug = (() => {
       try {
         return encodeURIComponent(decodeURIComponent(slug));
