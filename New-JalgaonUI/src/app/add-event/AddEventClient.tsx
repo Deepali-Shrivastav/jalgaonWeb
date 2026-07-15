@@ -384,9 +384,8 @@ export default function AddEventClient() {
                     value={formData.short_description}
                     onChange={handleChange}
                     rows={2}
-                    maxLength={160}
                     className="w-full bg-surface-container-low border border-outline rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
-                    placeholder="A brief summary (max 160 characters)..."
+                    placeholder="A brief summary..."
                   ></textarea>
                 </div>
                 
