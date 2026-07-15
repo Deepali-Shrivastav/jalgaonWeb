@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import EventsPortal from './EventsPortal';
 
 export const metadata: Metadata = {
-  title: 'Jalgaon Events — Discover Local Events, Festivals & Community Gatherings | Jalgaon.com',
+  title: 'Upcoming Events in Jalgaon | Festivals, Exhibitions, Workshops, Cultural & Business Events',
   description:
     'Find upcoming events in Jalgaon — cultural festivals, business summits, sports tournaments, community meetups, and more. Plan your calendar with local happenings.',
   keywords: [
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     'Khandesh festivals',
   ],
   openGraph: {
-    title: 'Discover Events in Jalgaon — Festivals, Summits & More',
+    title: 'Upcoming Events in Jalgaon | Festivals, Exhibitions, Workshops, Cultural & Business Events',
     description:
       'From vibrant local festivals to grand business summits, find exactly what\'s happening in Jalgaon.',
     type: 'website',

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import JobsPortal from './JobsPortal';
 
 export const metadata: Metadata = {
-  title: 'Jalgaon Jobs — Latest Job Openings & Career Opportunities | Jalgaon.com',
+  title: 'Latest Jobs in Jalgaon | Government, Private, Fresher, Part-Time & Local Vacancies',
   description:
     'Find the latest job openings in Jalgaon. Browse full-time, part-time, contract, and internship opportunities across IT, manufacturing, education, finance, and more.',
   keywords: [
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     'North Maharashtra jobs',
   ],
   openGraph: {
-    title: 'Latest Job Openings in Jalgaon — Find Your Career',
+    title: 'Latest Jobs in Jalgaon | Government, Private, Fresher, Part-Time & Local Vacancies',
     description:
       'Browse 142+ job openings in Jalgaon. Full-time, part-time, contract, and internship opportunities.',
     type: 'website',

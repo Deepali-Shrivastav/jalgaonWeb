@@ -15,13 +15,13 @@ export async function generateMetadata({ params }: { params: Promise<{ categoryS
     .join(' ');
 
   return {
-    title: `List of Top ${categoryName} in Jalgaon - Best ${categoryName} near me - Jalgaon.com`,
+    title: `Top ${categoryName} in Jalgaon | Best Local Businesses, Services & Reviews`,
     description: `Find the top-rated ${categoryName} businesses and services in Jalgaon. Read reviews, get contact details, and find locations on Jalgaon.com.`,
     alternates: {
       canonical: `https://www.jalgaon.com/category/${categorySlug}`,
     },
     openGraph: {
-      title: `List of Top ${categoryName} in Jalgaon - Best ${categoryName} near me - Jalgaon.com`,
+      title: `Top ${categoryName} in Jalgaon | Best Local Businesses, Services & Reviews`,
       description: `Find the top-rated ${categoryName} businesses and services in Jalgaon.`,
       url: `https://www.jalgaon.com/category/${categorySlug}`,
       type: 'website',
