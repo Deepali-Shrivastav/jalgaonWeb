@@ -31,7 +31,7 @@ class Event(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=300, unique=True)
     description = models.TextField()
-    short_description = models.CharField(max_length=300)
+    short_description = models.TextField()
 
     # Organizer details
     organizer_name = models.CharField(max_length=200)
