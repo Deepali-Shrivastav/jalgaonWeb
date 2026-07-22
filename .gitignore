@@ -54,3 +54,6 @@ dist/
 *.xlsx
 .env.local
 .env.*
+
+# IDEs
+.vscode/

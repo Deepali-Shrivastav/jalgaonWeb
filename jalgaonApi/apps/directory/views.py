@@ -410,3 +410,18 @@ class BusinessReportCreateView(generics.CreateAPIView):
         
         user = self.request.user if self.request.user.is_authenticated else None
         serializer.save(reported_by=user, shop_listing=shop)
+
+from django.views.generic.base import RedirectView
+from django.http import Http404
+
+class LegacyDirectoryRedirectView(RedirectView):
+    permanent = True
+    query_string = True
+
+    def get_redirect_url(self, *args, **kwargs):
+        business_slug = kwargs.get('business_slug')
+        listing = ShopListing.objects.select_related('main_category').filter(slug=business_slug).first()
+        if not listing:
+            raise Http404("Business not found")
+        category_slug = listing.main_category.slug
+        return f"/category/{category_slug}/{business_slug}/"

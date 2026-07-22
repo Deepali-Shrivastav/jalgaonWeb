@@ -21,7 +21,11 @@ from django.conf import settings
 
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
+from apps.directory.views import LegacyDirectoryRedirectView
+
 urlpatterns = [
+    path('directory/<str:business_slug>/', LegacyDirectoryRedirectView.as_view(), name='legacy-directory-redirect'),
+    path('directory/<str:business_slug>', LegacyDirectoryRedirectView.as_view(), name='legacy-directory-redirect-noslash'),
     path('admin/', admin.site.urls),
     path('api/v1/auth/', include('apps.accounts.urls')),
     path('api/v1/listings/', include('apps.directory.urls')),
