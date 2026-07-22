@@ -113,5 +113,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.warn("Failed to generate dynamic sitemap entries:", err);
   }
 
-  return routes;
+  // Deduplicate routes by URL to avoid crawler warnings and save crawl budget
+  const seenUrls = new Set<string>();
+  const uniqueRoutes = routes.filter((route) => {
+    if (seenUrls.has(route.url)) {
+      return false;
+    }
+    seenUrls.add(route.url);
+    return true;
+  });
+
+  return uniqueRoutes;
 }

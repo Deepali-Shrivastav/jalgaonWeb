@@ -9,6 +9,7 @@ import Breadcrumbs from '@mui/material/Breadcrumbs';
 import LinkMUI from '@mui/material/Link';
 import HomeIcon from '@mui/icons-material/Home';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
+import NextLink from 'next/link';
 
 const categoryIconMap: Record<string, string> = {
   "automotive": "directions_car",
@@ -289,19 +290,21 @@ export default function BusinessListings({
       <div className="mb-8" role="presentation">
         <Breadcrumbs aria-label="breadcrumb">
           <LinkMUI
+            component={NextLink}
+            href="/"
             underline="hover"
-            sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+            sx={{ display: 'flex', alignItems: 'center' }}
             color="inherit"
-            onClick={(e) => { e.preventDefault(); handleBack(); }}
           >
             <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
             Home
           </LinkMUI>
           <LinkMUI
+            component={NextLink}
+            href="/search"
             underline="hover"
-            sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+            sx={{ display: 'flex', alignItems: 'center' }}
             color="inherit"
-            onClick={(e) => { e.preventDefault(); handleBack(); }}
           >
             <WhatshotIcon sx={{ mr: 0.5 }} fontSize="inherit" />
             Business Directory
