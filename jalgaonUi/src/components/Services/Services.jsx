@@ -24,7 +24,7 @@ function Services() {
                 {categories.map(category => (
                     <Link to={`/categories/${category.slug}`}>
                     <div key={category.id} className="service">
-                        <img src={category.category_img.category_img.startsWith('http') ? category.category_img.category_img : `${djangoApi}${category.category_img.category_img}`} alt={category.category_img.img_name} />
+                        <img src={category.category_img.category_img.startsWith('http') ? category.category_img.category_img : `${djangoApi}${category.category_img.category_img}`} alt={category.category_img_alt || category.category_img.img_name} />
                         <p>{category.main_category}</p>
                     </div>
                     </Link>

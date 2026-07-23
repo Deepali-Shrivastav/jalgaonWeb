@@ -48,7 +48,7 @@ function BusinessCard({ businessData, is_like, is_edit=false }) {
             <Link to={`/business/jalgaon/${businessData.main_category_slug || 'uncategorized'}/${businessData.slug || businessData.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
             <div className="business_card">
                 <div className="business_imgg">
-                    <img src={businessData.business_banner?.startsWith('http') ? businessData.business_banner : (businessData.business_banner ? `${img_url}${businessData.business_banner}` : '/placeholder_banner.jpg')} alt={businessData.business_name} />
+                    <img src={businessData.business_banner?.startsWith('http') ? businessData.business_banner : (businessData.business_banner ? `${img_url}${businessData.business_banner}` : '/placeholder_banner.jpg')} alt={businessData.business_banner_alt || businessData.business_name} />
                 </div>
                 <div className="business_info">
                     <p className='business_name'>
