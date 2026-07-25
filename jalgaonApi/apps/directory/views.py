@@ -425,3 +425,18 @@ class LegacyDirectoryRedirectView(RedirectView):
             raise Http404("Business not found")
         category_slug = listing.main_category.slug
         return f"/category/{category_slug}/{business_slug}/"
+
+class ProductViewLegacyRedirectView(RedirectView):
+    permanent = True
+    query_string = True
+
+    def get_redirect_url(self, *args, **kwargs):
+        business_id = kwargs.get('id')
+        listing = ShopListing.objects.select_related('main_category').filter(id=business_id).first()
+        if not listing:
+            raise Http404("Business not found")
+        
+        category_slug = listing.main_category.slug
+        business_slug = listing.slug
+        return f"/category/{category_slug}/{business_slug}/"
+
