@@ -76,6 +76,20 @@ export default function RootLayout({
         className="bg-surface text-on-surface font-sans selection:bg-primary/20 min-h-full flex flex-col overflow-x-hidden"
         suppressHydrationWarning
       >
+        {/* Google Analytics Tag */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-CN00239CF9"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){window.dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-CN00239CF9');
+          `}
+        </Script>
         <AuthProvider>
           <Script
             id="structured-data-root"
