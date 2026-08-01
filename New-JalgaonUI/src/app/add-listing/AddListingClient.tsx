@@ -167,9 +167,7 @@ export default function AddListingClient() {
     if (!formData.business_name || formData.business_name.trim().length < 3) {
       newErrors.business_name = "Business name must be at least 3 characters.";
     }
-    if (!formData.business_email) {
-      newErrors.business_email = "Contact email is required.";
-    } else if (!/\S+@\S+\.\S+/.test(formData.business_email)) {
+    if (formData.business_email && !/\S+@\S+\.\S+/.test(formData.business_email)) {
       newErrors.business_email = "Please enter a valid email address.";
     }
     if (!formData.business_no) {
@@ -381,7 +379,7 @@ export default function AddListingClient() {
               </div>
               <div className="md:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-md">
                 <div className="group">
-                  <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Contact Email *</label>
+                  <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Contact Email</label>
                   <input
                     name="business_email"
                     value={formData.business_email}
@@ -612,6 +610,9 @@ export default function AddListingClient() {
                 }`}>
                   {bannerFile ? (
                     <div className="mb-2">
+                      <a href={URL.createObjectURL(bannerFile)} target="_blank" rel="noopener noreferrer">
+                        <img src={URL.createObjectURL(bannerFile)} alt="New Banner Preview" className="h-32 object-contain mx-auto rounded-lg mb-2 cursor-pointer hover:opacity-80 transition-opacity" />
+                      </a>
                       <p className="text-sm font-bold text-primary">{bannerFile.name}</p>
                       <button type="button" onClick={() => setBannerFile(null)} className="text-xs text-red-500 mt-1 hover:underline">Remove</button>
                     </div>

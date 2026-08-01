@@ -232,10 +232,11 @@ export default function EditListingClient({ slug }: { slug: string }) {
       return;
     }
     
-    if (!formData.lat || !formData.lng) {
-      toast.error("Please pick a location on the map or use your current location.");
-      return;
-    }
+    // Temporary fix: Do not force location picking for old listings that might not have lat/lng
+    // if (!formData.lat || !formData.lng) {
+    //   toast.error("Please pick a location on the map or use your current location.");
+    //   return;
+    // }
 
     setSubmitting(true);
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -331,8 +332,8 @@ export default function EditListingClient({ slug }: { slug: string }) {
               </div>
               <div className="md:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-md">
                 <div className="group">
-                  <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Contact Email *</label>
-                  <input required name="business_email" value={formData.business_email} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" type="email"/>
+                  <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Contact Email</label>
+                  <input name="business_email" value={formData.business_email} onChange={handleInputChange} className="w-full bg-white border border-outline-variant rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" type="email"/>
                 </div>
                 <div className="group">
                   <label className="block text-sm font-semibold text-on-surface-variant mb-xs">Phone Number *</label>
@@ -393,12 +394,17 @@ export default function EditListingClient({ slug }: { slug: string }) {
                 <div className="border-2 border-dashed border-outline-variant p-8 rounded-xl text-center bg-surface relative">
                   {bannerFile ? (
                     <div className="mb-2">
+                      <a href={URL.createObjectURL(bannerFile)} target="_blank" rel="noopener noreferrer">
+                        <img src={URL.createObjectURL(bannerFile)} alt="New Banner Preview" className="h-32 object-contain mx-auto rounded-lg mb-2 cursor-pointer hover:opacity-80 transition-opacity" />
+                      </a>
                       <p className="text-sm font-bold text-primary">{bannerFile.name}</p>
                       <button type="button" onClick={() => setBannerFile(null)} className="text-xs text-red-500 mt-1 hover:underline">Remove</button>
                     </div>
                   ) : existingBannerUrl ? (
                      <div className="mb-4">
-                       <img src={existingBannerUrl} alt="Current Banner" className="h-32 object-contain mx-auto rounded-lg mb-2" />
+                       <a href={existingBannerUrl} target="_blank" rel="noopener noreferrer">
+                         <img src={existingBannerUrl} alt="Current Banner" className="h-32 object-contain mx-auto rounded-lg mb-2 cursor-pointer hover:opacity-80 transition-opacity" />
+                       </a>
                        <p className="text-xs text-secondary">Upload a new file to replace this banner</p>
                      </div>
                   ) : (
