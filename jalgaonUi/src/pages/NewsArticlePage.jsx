@@ -105,9 +105,8 @@ const NewsArticlePage = () => {
                     
                     {article.featured_image && (
                         <div className="article-hero-image">
-                            <img 
-                                src={article.featured_image.startsWith('http') ? article.featured_image : `${djangoApi}${article.featured_image}`} 
-                                alt={article.title} 
+                            <img src={article.featured_image.startsWith('http') ? article.featured_image : `${djangoApi}${article.featured_image}`} 
+                                alt={article.featured_image_alt || article.title} 
                             />
                         </div>
                     )}

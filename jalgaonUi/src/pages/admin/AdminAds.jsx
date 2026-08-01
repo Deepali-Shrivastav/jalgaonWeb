@@ -285,7 +285,7 @@ const AdminAds = () => {
                             <button onClick={() => setPreviewModalOpen(false)} style={{ background: 'transparent', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#64748b' }}><MdClose /></button>
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                            <img src={previewData.ad_image.startsWith('http') ? previewData.ad_image : `${djangoApi}${previewData.ad_image}`} alt="Ad Preview" style={{ maxWidth: '100%', maxHeight: '60vh', objectFit: 'contain', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+                            <img src={previewData.ad_image.startsWith('http') ? previewData.ad_image : `${djangoApi}${previewData.ad_image}`} alt={previewData.ad_image_alt || "Ad Preview"} style={{ maxWidth: '100%', maxHeight: '60vh', objectFit: 'contain', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
                         </div>
                     </div>
                 </div>

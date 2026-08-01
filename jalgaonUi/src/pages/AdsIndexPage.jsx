@@ -47,9 +47,8 @@ const AdsIndexPage = () => {
                     {ads.map((ad) => (
                         <div key={ad.id} className="ad-card">
                             <div className="ad-image-wrapper">
-                                <img 
-                                    src={ad.ad_image.startsWith('http') ? ad.ad_image : `${djangoApi}${ad.ad_image}`} 
-                                    alt={ad.name} 
+                                <img src={ad.ad_image.startsWith('http') ? ad.ad_image : `${djangoApi}${ad.ad_image}`} 
+                                    alt={ad.ad_image_alt || ad.name} 
                                     className="ad-image"
                                 />
                             </div>

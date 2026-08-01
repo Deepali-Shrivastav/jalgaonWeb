@@ -52,9 +52,8 @@ const BusinessDashboard = () => {
             <div style={{ background: '#fff', borderRadius: '12px', padding: '20px', display: 'flex', alignItems: 'center', gap: '20px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', marginBottom: '30px' }}>
                 <div style={{ width: '80px', height: '80px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, background: '#f1f5f9' }}>
                     {business.business_banner && (
-                        <img 
-                            src={business.business_banner.startsWith('http') ? business.business_banner : `${djangoApi}${business.business_banner}`} 
-                            alt={business.business_name} 
+                        <img src={business.business_banner.startsWith('http') ? business.business_banner : `${djangoApi}${business.business_banner}`} 
+                            alt={business.business_banner_alt || business.business_name} 
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                         />
                     )}

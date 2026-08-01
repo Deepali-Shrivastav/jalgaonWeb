@@ -302,7 +302,7 @@ const AdminListings = () => {
                         </div>
                         <div style={{ padding: '20px' }}>
                             {previewData.business_banner && (
-                                <img src={previewData.business_banner.startsWith('http') ? previewData.business_banner : `${djangoApi}${previewData.business_banner}`} alt="Banner" style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '8px', marginBottom: '20px' }} />
+                                <img src={previewData.business_banner.startsWith('http') ? previewData.business_banner : `${djangoApi}${previewData.business_banner}`} alt={previewData.business_banner_alt || "Banner"} style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '8px', marginBottom: '20px' }} />
                             )}
                             
                             <h1 style={{ fontSize: '24px', marginBottom: '5px' }}>{previewData.business_name}</h1>

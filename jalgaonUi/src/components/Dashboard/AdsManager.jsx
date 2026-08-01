@@ -156,7 +156,7 @@ const AdsManager = ({ business }) => {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
                     {ads.map(ad => (
                         <div key={ad.id} style={{ border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden', background: '#fff', display: 'flex', flexDirection: 'column' }}>
-                            <img src={ad.ad_image.startsWith('http') ? ad.ad_image : `${djangoApi}${ad.ad_image}`} alt={ad.name} style={{ width: '100%', height: '150px', objectFit: 'cover' }} />
+                            <img src={ad.ad_image.startsWith('http') ? ad.ad_image : `${djangoApi}${ad.ad_image}`} alt={ad.ad_image_alt || ad.name} style={{ width: '100%', height: '150px', objectFit: 'cover' }} />
                             <div style={{ padding: '15px', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
                                     <h4 style={{ margin: 0 }}>{ad.name}</h4>
