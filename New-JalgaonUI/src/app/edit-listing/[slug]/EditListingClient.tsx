@@ -270,7 +270,14 @@ export default function EditListingClient({ slug }: { slug: string }) {
       } else {
         const errorData = await res.json();
         console.error("Update error:", errorData);
-        toast.error(errorData.detail || errorData.non_field_errors?.[0] || "Failed to update listing.");
+        let errorMsg = errorData.detail || errorData.non_field_errors?.[0];
+        if (!errorMsg && typeof errorData === 'object') {
+          const firstKey = Object.keys(errorData)[0];
+          if (firstKey && Array.isArray(errorData[firstKey])) {
+            errorMsg = `${firstKey}: ${errorData[firstKey][0]}`;
+          }
+        }
+        toast.error(errorMsg || "Failed to update listing.");
       }
     } catch (err) {
       console.error(err);

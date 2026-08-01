@@ -88,7 +88,7 @@ class ShopListing(models.Model):
 
     business_no = models.CharField(max_length=15)
     whatsapp = models.CharField(max_length=20, null=True, blank=True)
-    business_email = models.CharField(max_length=50)
+    business_email = models.CharField(max_length=50, blank=True, null=True)
     
     # Legacy social fields (for backward compatibility during migration)
     insta_link = models.CharField(max_length=1000, blank=True, null=True)
