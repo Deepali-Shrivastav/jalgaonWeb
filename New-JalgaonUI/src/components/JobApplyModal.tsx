@@ -12,6 +12,7 @@ interface JobApplyModalProps {
 
 export default function JobApplyModal({ isOpen, onClose, job, baseUrl }: JobApplyModalProps) {
   const [coverLetter, setCoverLetter] = useState('');
+  const [resume, setResume] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -40,6 +41,9 @@ export default function JobApplyModal({ isOpen, onClose, job, baseUrl }: JobAppl
       // For now, assuming cover_letter is the main text requirement for quick apply
       const formData = new FormData();
       formData.append('cover_letter', coverLetter);
+      if (resume) {
+        formData.append('resume', resume);
+      }
 
       const res = await fetch(`${baseUrl}/api/v1/jobs/${job.slug}/apply/`, {
         method: 'POST',
@@ -51,7 +55,25 @@ export default function JobApplyModal({ isOpen, onClose, job, baseUrl }: JobAppl
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData[0] || errorData.error || errorData.detail || 'Failed to submit application. Please try again later.');
+        let errorMessage = 'Failed to submit application. Please try again later.';
+        
+        if (errorData.detail) errorMessage = errorData.detail;
+        else if (errorData.error) errorMessage = errorData.error;
+        else if (errorData.non_field_errors) errorMessage = errorData.non_field_errors[0];
+        else if (typeof errorData === 'object' && !Array.isArray(errorData) && Object.keys(errorData).length > 0) {
+           const firstKey = Object.keys(errorData)[0];
+           if (Array.isArray(errorData[firstKey])) {
+             // Format key nicely (e.g. cover_letter -> Cover letter)
+             const formattedKey = firstKey.replace('_', ' ').charAt(0).toUpperCase() + firstKey.replace('_', ' ').slice(1);
+             errorMessage = `${formattedKey}: ${errorData[firstKey][0]}`;
+           } else if (typeof errorData[firstKey] === 'string') {
+             errorMessage = errorData[firstKey];
+           }
+        } else if (Array.isArray(errorData) && errorData.length > 0 && typeof errorData[0] === 'string') {
+           errorMessage = errorData[0];
+        }
+
+        throw new Error(errorMessage);
       }
 
       setSuccess(true);
@@ -115,9 +137,16 @@ export default function JobApplyModal({ isOpen, onClose, job, baseUrl }: JobAppl
                 />
               </div>
 
-              <div className="bg-blue-50 text-blue-800 p-4 rounded-xl text-sm border border-blue-100 flex items-start gap-2">
-                 <span className="material-symbols-outlined text-[20px]">info</span>
-                 Your default resume attached to your profile will be sent automatically with this application.
+              <div>
+                <label className="block text-sm font-semibold text-ink-deep mb-2">Resume (PDF/DOC, max 500KB)</label>
+                <input 
+                  type="file" 
+                  name="resume" 
+                  accept=".pdf,.doc,.docx"
+                  onChange={(e) => setResume(e.target.files?.[0] || null)} 
+                  required 
+                  className="w-full p-3 rounded-xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm"
+                />
               </div>
 
               <button 
