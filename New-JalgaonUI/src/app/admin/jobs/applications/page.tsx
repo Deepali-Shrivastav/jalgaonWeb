@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Pagination from "@/components/Pagination";
 
-interface JobApplication { id: number; applicant_name: string; applicant_email: string; job_title: string; status: string; applied_at: string; resume: string | null; }
+interface JobApplication { id: number; applicant_name: string; applicant_email: string; applicant_phone: string; job_title: string; status: string; applied_at: string; resume: string | null; }
 
 export default function AdminJobApplicationsPage() {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
@@ -57,11 +57,11 @@ export default function AdminJobApplicationsPage() {
               <tbody className="divide-y divide-slate-100">
                 {filtered.length > 0 ? filtered.map(app => (
                   <tr key={app.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3"><strong>{app.applicant_name}</strong><br /><span className="text-xs text-slate-400">{app.applicant_email}</span></td>
+                    <td className="px-4 py-3"><strong>{app.applicant_name}</strong><br /><span className="text-xs text-slate-400">{app.applicant_email}</span><br /><span className="text-xs text-slate-400">{app.applicant_phone}</span></td>
                     <td className="px-4 py-3">{app.job_title}</td>
                     <td className="px-4 py-3"><span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${badgeClass(app.status)}`}>{app.status}</span></td>
                     <td className="px-4 py-3 text-slate-500">{new Date(app.applied_at).toLocaleDateString()}</td>
-                    <td className="px-4 py-3">{app.resume ? <a href={`${baseUrl}${app.resume}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1"><span className="material-symbols-outlined text-lg">download</span></a> : <span className="text-slate-300">No Resume</span>}</td>
+                    <td className="px-4 py-3">{app.resume ? <a href={app.resume.startsWith('http') ? app.resume : `${baseUrl}${app.resume}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1"><span className="material-symbols-outlined text-lg">download</span></a> : <span className="text-slate-300">No Resume</span>}</td>
                   </tr>
                 )) : <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-400">No applications found.</td></tr>}
               </tbody>

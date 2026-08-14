@@ -41,6 +41,8 @@ class Job(models.Model):
     job_type = models.CharField(max_length=20, choices=JOB_TYPE_CHOICES, default='full_time')
     category = models.ForeignKey(JobCategory, on_delete=models.SET_NULL, null=True, related_name='jobs')
     shop_listing = models.ForeignKey('directory.ShopListing', on_delete=models.SET_NULL, null=True, blank=True, related_name='jobs')
+    contact_number = models.CharField(max_length=20, blank=True, null=True)
+    contact_email = models.EmailField(blank=True, null=True)
     
     salary_min = models.IntegerField(null=True, blank=True)
     salary_max = models.IntegerField(null=True, blank=True)
@@ -83,7 +85,10 @@ class JobApplication(models.Model):
 
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='applications')
     applicant = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='job_applications')
-    resume = models.FileField(upload_to='jobs/resumes/')
+    applicant_name = models.CharField(max_length=255, blank=True, null=True)
+    applicant_email = models.EmailField(blank=True, null=True)
+    applicant_phone = models.CharField(max_length=20, blank=True, null=True)
+    resume = models.FileField(upload_to='jobs/resumes/', null=True, blank=True)
     cover_letter = models.TextField(null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='submitted')
     applied_at = models.DateTimeField(auto_now_add=True)

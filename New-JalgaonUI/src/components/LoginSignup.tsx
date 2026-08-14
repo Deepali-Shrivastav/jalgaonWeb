@@ -112,7 +112,9 @@ export default function LoginSignup() {
         } else if (typeof data === "string") {
           msg = data;
         }
-        throw new Error(msg || "Registration failed. Please try again.");
+        setErrorMessage(msg || "Registration failed. Please try again.");
+        setIsLoading(false);
+        return;
       }
 
       // Auto login after register
@@ -168,7 +170,9 @@ export default function LoginSignup() {
       }
 
       if (!res.ok) {
-        throw new Error(data.error || "Invalid credentials. Please try again.");
+        setErrorMessage(data.error || "Invalid credentials. Please try again.");
+        setIsLoading(false);
+        return;
       }
 
       const { user, access, refresh } = data;

@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
+import { AuthContext } from '@/context/AuthContext';
+
 interface JobApplyModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -11,6 +13,12 @@ interface JobApplyModalProps {
 }
 
 export default function JobApplyModal({ isOpen, onClose, job, baseUrl }: JobApplyModalProps) {
+  const { user } = React.useContext(AuthContext);
+  
+  const [applicantName, setApplicantName] = useState('');
+  const [applicantEmail, setApplicantEmail] = useState('');
+  const [applicantPhone, setApplicantPhone] = useState('');
+  
   const [coverLetter, setCoverLetter] = useState('');
   const [resume, setResume] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -20,7 +28,12 @@ export default function JobApplyModal({ isOpen, onClose, job, baseUrl }: JobAppl
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    if (user) {
+      setApplicantName(user.get_full_name || user.first_name || '');
+      setApplicantEmail(user.email || '');
+      setApplicantPhone(user.phone_number || '');
+    }
+  }, [user]);
 
   if (!isOpen || !mounted) return null;
 
@@ -37,9 +50,10 @@ export default function JobApplyModal({ isOpen, onClose, job, baseUrl }: JobAppl
         return;
       }
 
-      // If backend requires multipart/form-data for resume, we would use FormData
-      // For now, assuming cover_letter is the main text requirement for quick apply
       const formData = new FormData();
+      formData.append('applicant_name', applicantName);
+      formData.append('applicant_email', applicantEmail);
+      formData.append('applicant_phone', applicantPhone);
       formData.append('cover_letter', coverLetter);
       if (resume) {
         formData.append('resume', resume);
@@ -87,7 +101,7 @@ export default function JobApplyModal({ isOpen, onClose, job, baseUrl }: JobAppl
 
   return createPortal(
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
-      <div className="bg-white rounded-2xl p-8 w-[95vw] md:w-[500px] relative shadow-2xl animate-fade-in shrink-0">
+      <div className="bg-white rounded-2xl p-6 w-[95vw] md:w-[500px] max-h-[90vh] overflow-y-auto relative shadow-2xl animate-fade-in shrink-0">
         <button 
           onClick={onClose} 
           className="absolute top-4 right-4 text-secondary hover:text-primary transition-colors focus:outline-none"
@@ -98,8 +112,8 @@ export default function JobApplyModal({ isOpen, onClose, job, baseUrl }: JobAppl
         <h2 className="text-2xl font-bold text-ink-deep mb-2 flex items-center gap-2">
           Apply for {job.title}
         </h2>
-        <p className="text-secondary mb-6 text-sm">at {job.company}</p>
-        
+        <p className="text-secondary mb-2 text-sm">at {job.company}</p>
+                
         {success ? (
           <div className="text-center py-6">
             <span className="material-symbols-outlined text-6xl text-emerald-500 mb-4 animate-bounce">check_circle</span>
@@ -125,26 +139,61 @@ export default function JobApplyModal({ isOpen, onClose, job, baseUrl }: JobAppl
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
+                <label className="block text-sm font-semibold text-ink-deep mb-2">Full Name *</label>
+                <input 
+                  type="text" 
+                  value={applicantName} 
+                  onChange={(e) => setApplicantName(e.target.value)} 
+                  required 
+                  placeholder="e.g. John Doe"
+                  className="w-full p-3 rounded-xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-ink-deep mb-2">Email *</label>
+                  <input 
+                    type="email" 
+                    value={applicantEmail} 
+                    onChange={(e) => setApplicantEmail(e.target.value)} 
+                    required 
+                    placeholder="e.g. john@example.com"
+                    className="w-full p-3 rounded-xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-ink-deep mb-2">Phone Number *</label>
+                  <input 
+                    type="tel" 
+                    value={applicantPhone} 
+                    onChange={(e) => setApplicantPhone(e.target.value)} 
+                    required 
+                    placeholder="e.g. +91 9876543210"
+                    className="w-full p-3 rounded-xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                  />
+                </div>
+              </div>
+
+              <div>
                 <label className="block text-sm font-semibold text-ink-deep mb-2">Cover Letter / Message to Employer</label>
                 <textarea 
                   name="cover_letter" 
                   value={coverLetter} 
                   onChange={(e) => setCoverLetter(e.target.value)} 
                   required 
-                  rows={6}
+                  rows={4}
                   placeholder="Introduce yourself and explain why you're a great fit for this role..."
                   className="w-full p-4 rounded-xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-y"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-ink-deep mb-2">Resume (PDF/DOC, max 500KB)</label>
+                <label className="block text-sm font-semibold text-ink-deep mb-2">Resume (PDF/DOC, max 500KB) <span className="font-normal text-slate-500">(Optional)</span></label>
                 <input 
                   type="file" 
                   name="resume" 
                   accept=".pdf,.doc,.docx"
                   onChange={(e) => setResume(e.target.files?.[0] || null)} 
-                  required 
                   className="w-full p-3 rounded-xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm"
                 />
               </div>

@@ -29,6 +29,22 @@ export default function ApplicationsPage() {
     }
   };
 
+  const handleDelete = async (appId: number) => {
+    if (!window.confirm("Are you sure you want to withdraw this application?")) return;
+    try {
+      const token = localStorage.getItem('token');
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const res = await fetch(`${baseUrl}/api/v1/jobs/my-applications/${appId}/`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error("Failed to withdraw application");
+      setData(prev => prev.filter(app => app.id !== appId));
+    } catch (err: any) {
+      alert(err.message || "Failed to withdraw application");
+    }
+  };
+
   useEffect(() => {
     if (isLogin) {
       fetchApplications();
@@ -84,11 +100,20 @@ export default function ApplicationsPage() {
               </div>
               <div className="flex justify-between items-center mt-4 pt-4 border-t border-hairline-soft text-xs text-secondary">
                 <span>Applied on: {new Date(item.applied_at).toLocaleDateString()}</span>
-                {item.job_slug && (
-                  <Link href={`/jobs/${item.job_slug}`} className="text-primary font-bold text-sm hover:underline">
-                    View Position &rarr;
-                  </Link>
-                )}
+                <div className="flex items-center gap-3">
+                  {item.job_slug && (
+                    <Link href={`/jobs/${item.job_slug}`} className="text-primary font-bold text-sm hover:underline">
+                      View Position &rarr;
+                    </Link>
+                  )}
+                  <button 
+                    onClick={() => handleDelete(item.id)}
+                    className="text-red-500 hover:text-red-700 flex items-center justify-center p-1"
+                    title="Withdraw Application"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">delete</span>
+                  </button>
+                </div>
               </div>
             </div>
           ))}

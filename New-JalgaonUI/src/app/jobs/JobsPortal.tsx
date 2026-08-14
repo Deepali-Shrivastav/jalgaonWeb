@@ -47,7 +47,7 @@ export default function JobsPortal() {
     const fetchCategories = async () => {
       try {
         const baseUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+          process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
         const res = await fetch(`${baseUrl}/api/v1/jobs/categories/`);
         if (res.ok) {
           const data = await res.json();
@@ -64,7 +64,7 @@ export default function JobsPortal() {
     const fetchFeaturedJobs = async () => {
       try {
         const baseUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+          process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
         const res = await fetch(`${baseUrl}/api/v1/jobs/featured/`);
         if (res.ok) {
           const data = await res.json();
@@ -84,7 +84,7 @@ export default function JobsPortal() {
       try {
         setLoading(true);
         const baseUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+          process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
         const url = new URL(`${baseUrl}/api/v1/jobs/`);
 
         if (selectedCategory)
