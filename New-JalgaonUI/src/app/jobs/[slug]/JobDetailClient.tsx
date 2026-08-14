@@ -210,7 +210,7 @@ export default function JobDetailClient({ slug }: { slug: string }) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
         <div className="flex items-start gap-3 bg-surface-container-lowest p-4 rounded-xl border border-hairline-soft h-full">
           <span className="material-symbols-outlined text-primary text-2xl shrink-0 mt-0.5">location_on</span>
           <div>
