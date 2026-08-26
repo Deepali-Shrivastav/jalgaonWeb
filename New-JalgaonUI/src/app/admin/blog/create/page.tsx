@@ -67,12 +67,30 @@ export default function AdminBlogCreatePage() {
       });
 
       if (!res.ok) {
-        throw new Error("Save post failed");
+        let errMsg = "Save post failed";
+        try {
+          const errData = await res.json();
+          // Extract the first error message from the object if it exists
+          if (typeof errData === 'object' && errData !== null) {
+            const firstKey = Object.keys(errData)[0];
+            if (firstKey) {
+              errMsg = `${firstKey}: ${errData[firstKey]}`;
+            }
+          }
+        } catch {
+          // If response isn't JSON, it might be an Nginx error (e.g. 413)
+          if (res.status === 413) {
+            errMsg = "File too large. Please upload an image smaller than 5MB.";
+          } else {
+            errMsg = `Server error: ${res.status} ${res.statusText}`;
+          }
+        }
+        throw new Error(errMsg);
       }
 
       router.push("/admin/blog");
-    } catch {
-      alert("Failed to save blog post.");
+    } catch (err: any) {
+      alert(err.message || "Failed to save blog post.");
     } finally {
       setSaving(false);
     }
