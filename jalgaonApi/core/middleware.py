@@ -84,4 +84,3 @@ class SpamGoneMiddleware:
             return HttpResponseGone("Gone")
 
         return self.get_response(request)
-   
