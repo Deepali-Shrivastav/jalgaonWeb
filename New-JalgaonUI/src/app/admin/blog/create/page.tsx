@@ -45,6 +45,10 @@ export default function AdminBlogCreatePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (imageFile && imageFile.size > 1048576) {
+      alert("File too large. Please upload an image smaller than 1MB.");
+      return;
+    }
     setSaving(true);
     try {
       const token = localStorage.getItem("token");
@@ -80,7 +84,7 @@ export default function AdminBlogCreatePage() {
         } catch {
           // If response isn't JSON, it might be an Nginx error (e.g. 413)
           if (res.status === 413) {
-            errMsg = "File too large. Please upload an image smaller than 5MB.";
+            errMsg = "File too large. Please upload an image smaller than 1MB.";
           } else {
             errMsg = `Server error: ${res.status} ${res.statusText}`;
           }
