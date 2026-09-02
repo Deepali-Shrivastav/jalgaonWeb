@@ -119,38 +119,42 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
 
       <main className="flex-grow max-w-[1400px] w-full mx-auto px-4 sm:px-8 py-8 space-y-12">
         {/* SECTION 1: HERO FEATURED EPISODE PLAYER BANNER (WIDESCREEN PODCAST) */}
-        <div className="relative w-full max-w-[1340px] mx-auto rounded-xl sm:rounded-3xl overflow-hidden shadow-lg bg-slate-950 aspect-video sm:aspect-[21/9] border border-hairline-soft group">
-          <img
-            src={getHighResThumbnail(featuredHero)}
-            alt={featuredHero.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-100"
-          />
+        {featuredHero ? (
+          <div className="relative w-full max-w-[1340px] mx-auto rounded-xl sm:rounded-3xl overflow-hidden shadow-lg bg-slate-950 aspect-video sm:aspect-[21/9] border border-hairline-soft group">
+            <img
+              src={getHighResThumbnail(featuredHero)}
+              alt={featuredHero.title || 'Jalgaon Glimpse'}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-100"
+            />
 
-          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
 
-          {/* Play Icon */}
-          <Link
-            href={`/jalgaon-glimpse/${featuredHero.video_id}`}
-            aria-label={`Play ${featuredHero.title}`}
-            className="absolute inset-0 flex items-center justify-center z-10 p-2"
-          >
-            <div className="w-10 h-10 sm:w-20 sm:h-20 bg-[#0081C7]/90 backdrop-blur-md hover:bg-[#0081C7] text-white rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(0,129,199,0.7)] group-hover:scale-110 transition-all duration-300 -translate-y-2 sm:translate-y-0">
-              <span className="material-symbols-outlined text-xl sm:text-5xl translate-x-0.5 fill-current">
-                play_arrow
+            {/* Play Icon */}
+            <Link
+              href={`/jalgaon-glimpse/${featuredHero.video_id}`}
+              aria-label={`Play ${featuredHero.title || 'Featured Episode'}`}
+              className="absolute inset-0 flex items-center justify-center z-10 p-2"
+            >
+              <div className="w-10 h-10 sm:w-20 sm:h-20 bg-[#0081C7]/90 backdrop-blur-md hover:bg-[#0081C7] text-white rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(0,129,199,0.7)] group-hover:scale-110 transition-all duration-300 -translate-y-2 sm:translate-y-0">
+                <span className="material-symbols-outlined text-xl sm:text-5xl translate-x-0.5 fill-current">
+                  play_arrow
+                </span>
+              </div>
+            </Link>
+
+            {/* Bottom Title Overlay */}
+            <div className="absolute bottom-2.5 left-3 right-3 sm:bottom-6 sm:left-6 sm:right-6 z-10 space-y-1 sm:space-y-2 pointer-events-none">
+              <span className="inline-block bg-[#0081C7] text-white text-[9px] sm:text-[11px] font-black uppercase tracking-wider px-2 py-0.5 sm:px-3.5 sm:py-1 rounded-full shadow-sm">
+                featured episode
               </span>
+              <h1 className="text-xs sm:text-xl md:text-3xl font-bold sm:font-black text-white leading-tight drop-shadow-md capitalize line-clamp-2 sm:line-clamp-3">
+                {featuredHero.title}
+              </h1>
             </div>
-          </Link>
-
-          {/* Bottom Title Overlay */}
-          <div className="absolute bottom-2.5 left-3 right-3 sm:bottom-6 sm:left-6 sm:right-6 z-10 space-y-1 sm:space-y-2 pointer-events-none">
-            <span className="inline-block bg-[#0081C7] text-white text-[9px] sm:text-[11px] font-black uppercase tracking-wider px-2 py-0.5 sm:px-3.5 sm:py-1 rounded-full shadow-sm">
-              featured episode
-            </span>
-            <h1 className="text-xs sm:text-xl md:text-3xl font-bold sm:font-black text-white leading-tight drop-shadow-md capitalize line-clamp-2 sm:line-clamp-3">
-              {featuredHero.title}
-            </h1>
           </div>
-        </div>
+        ) : (
+          <div className="w-full max-w-[1340px] mx-auto rounded-xl sm:rounded-3xl bg-slate-900 aspect-video sm:aspect-[21/9] animate-pulse border border-hairline-soft" />
+        )}
 
         {/* SECTION 2: DON'T MISS OUT / TRENDING PODCAST EPISODES (WIDESCREEN 16:9 GRID) */}
         <div className="space-y-6 max-w-[1340px] mx-auto pt-2">
