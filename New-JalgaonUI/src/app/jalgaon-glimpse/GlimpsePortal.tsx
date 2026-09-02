@@ -169,22 +169,33 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
   const fetchVideos = async () => {
     setLoading(true);
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      const url = `${baseUrl}/api/v1/jalgaon-glimpse/videos/?max_results=12`;
-      const res = await fetch(url);
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      let url = `${baseUrl}/api/v1/jalgaon-glimpse/videos/?max_results=12`;
+      let res = await fetch(url);
 
-      if (!res.ok) {
-        setVideos(DEMO_PODCASTS);
-        return;
+      if (!res.ok && baseUrl) {
+        res = await fetch('/api/v1/jalgaon-glimpse/videos/?max_results=12');
       }
 
-      const data: YouTubeVideoListResponse = await res.json();
-      if (data.results && data.results.length > 0) {
-        setVideos(data.results);
-      } else {
-        setVideos(DEMO_PODCASTS);
+      if (res.ok) {
+        const data: YouTubeVideoListResponse = await res.json();
+        if (data.results && data.results.length > 0) {
+          setVideos(data.results);
+          return;
+        }
       }
+      setVideos(DEMO_PODCASTS);
     } catch {
+      try {
+        const res = await fetch('/api/v1/jalgaon-glimpse/videos/?max_results=12');
+        if (res.ok) {
+          const data: YouTubeVideoListResponse = await res.json();
+          if (data.results && data.results.length > 0) {
+            setVideos(data.results);
+            return;
+          }
+        }
+      } catch {}
       setVideos(DEMO_PODCASTS);
     } finally {
       setLoading(false);

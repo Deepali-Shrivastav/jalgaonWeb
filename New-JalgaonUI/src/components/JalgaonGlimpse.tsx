@@ -102,8 +102,11 @@ export default function JalgaonGlimpse({ initialData }: JalgaonGlimpseProps) {
     if (!initialData || initialData.length === 0) {
       const fetchVideos = async () => {
         try {
-          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-          const res = await fetch(`${baseUrl}/api/v1/jalgaon-glimpse/videos/?max_results=3`);
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+          let res = await fetch(`${baseUrl}/api/v1/jalgaon-glimpse/videos/?max_results=3`);
+          if (!res.ok && baseUrl) {
+            res = await fetch('/api/v1/jalgaon-glimpse/videos/?max_results=3');
+          }
           if (res.ok) {
             const data: YouTubeVideoListResponse = await res.json();
             if (data.results && data.results.length > 0) {
@@ -111,7 +114,17 @@ export default function JalgaonGlimpse({ initialData }: JalgaonGlimpseProps) {
             }
           }
         } catch (err) {
-          // Keep DEMO_PODCASTS
+          try {
+            const res = await fetch('/api/v1/jalgaon-glimpse/videos/?max_results=3');
+            if (res.ok) {
+              const data: YouTubeVideoListResponse = await res.json();
+              if (data.results && data.results.length > 0) {
+                setVideos(data.results.slice(0, 3));
+              }
+            }
+          } catch {
+            // Keep DEMO_PODCASTS
+          }
         }
       };
       fetchVideos();

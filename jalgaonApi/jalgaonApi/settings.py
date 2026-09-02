@@ -348,5 +348,5 @@ CACHES = {
 # Used only in apps/youtube/services.py — never exposed to the browser.
 # To obtain: Google Cloud Console → APIs & Services → Credentials.
 # ─────────────────────────────────────────────────────────────────────────────
-YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY', '')
-YOUTUBE_CHANNEL_ID = os.getenv('YOUTUBE_CHANNEL_ID', '')
+YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY', 'AIzaSyCBh0_F2LmhY8-pd5-R-IGY_jAwjfm8se8')
+YOUTUBE_CHANNEL_ID = os.getenv('YOUTUBE_CHANNEL_ID', 'UC1_W6Le5fkEDxsNFZEqPsAA')
