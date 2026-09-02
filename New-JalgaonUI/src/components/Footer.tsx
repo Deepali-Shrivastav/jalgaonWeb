@@ -54,6 +54,14 @@ export default function Footer() {
               <li>
                 <Link
                   className="text-secondary hover:text-primary transition-colors"
+                  href="/jalgaon-glimpse"
+                >
+                  Jalgaon Glimpse
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className="text-secondary hover:text-primary transition-colors"
                   href="/news"
                 >
                   News

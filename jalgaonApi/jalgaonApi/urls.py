@@ -45,6 +45,8 @@ urlpatterns = [
     path('api/v1/startups/', include('apps.startups.urls')),
     path('api/v1/analytics/', include('apps.analytics.urls')),
     path('api/v1/clubs/', include('apps.clubs.urls')),
+    path('api/v1/jalgaon-glimpse/', include(('apps.jalgaon_glimpse.urls', 'jalgaon_glimpse'), namespace='jalgaon_glimpse')),
+    path('api/v1/youtube/', include(('apps.jalgaon_glimpse.urls', 'jalgaon_glimpse'), namespace='youtube')),
 
     # Swagger / OpenAPI Docs
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

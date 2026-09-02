@@ -6,12 +6,13 @@ async function getHomeData() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   
   try {
-    const [trendingRes, newsRes, eventsRes, jobsRes, startupsRes] = await Promise.allSettled([
+    const [trendingRes, newsRes, eventsRes, jobsRes, startupsRes, youtubeRes] = await Promise.allSettled([
       fetch(`${apiUrl}/api/v1/listings/trending/`, { next: { revalidate: 3600 } }),
       fetch(`${apiUrl}/api/v1/news/trending/`, { next: { revalidate: 1800 } }),
       fetch(`${apiUrl}/api/v1/events/`, { next: { revalidate: 3600 } }),
       fetch(`${apiUrl}/api/v1/jobs/`, { next: { revalidate: 3600 } }),
       fetch(`${apiUrl}/api/v1/startups/featured/`, { next: { revalidate: 3600 } }),
+      fetch(`${apiUrl}/api/v1/jalgaon-glimpse/videos/?max_results=4`, { next: { revalidate: 1800 } }),
     ]);
 
     const getJson = async (res: PromiseSettledResult<Response>) => {
@@ -48,6 +49,7 @@ async function getHomeData() {
     const slicedJobs = jobs.slice(0, 3);
     const startups = await getJson(startupsRes);
     const slicedStartups = startups.slice(0, 4);
+    const videos = await getJson(youtubeRes);
 
     const mappedListings = trendingListings.map((item: any) => ({
       id: item.slug || item.id,
@@ -69,15 +71,16 @@ async function getHomeData() {
       news, 
       events, 
       jobs: slicedJobs,
-      startups: slicedStartups
+      startups: slicedStartups,
+      videos
     };
   } catch (err) {
-    return { trendingListings: [], news: [], events: [], jobs: [], startups: [] };
+    return { trendingListings: [], news: [], events: [], jobs: [], startups: [], videos: [] };
   }
 }
 
 export default async function Home() {
-  const { trendingListings, news, events, jobs, startups } = await getHomeData();
+  const { trendingListings, news, events, jobs, startups, videos } = await getHomeData();
 
   return (
     <>
@@ -89,6 +92,7 @@ export default async function Home() {
           events={events} 
           jobs={jobs} 
           startups={startups}
+          videos={videos}
         />
       </main>
       <Footer />

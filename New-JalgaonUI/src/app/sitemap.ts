@@ -34,6 +34,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: baseUrl, lastModified: new Date(), changeFrequency: 'daily', priority: 1 },
     { url: `${baseUrl}/search`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
     { url: `${baseUrl}/news`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
+    { url: `${baseUrl}/jalgaon-glimpse`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
     { url: `${baseUrl}/events`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
     { url: `${baseUrl}/jobs`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
     { url: `${baseUrl}/ngo`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
@@ -83,7 +84,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         }
     });
 
-    // 4. Fetch All Events
+    // 4. Fetch YouTube Videos
+    const videos = await fetchAll(`${apiUrl}/api/v1/jalgaon-glimpse/videos/?max_results=50`);
+    videos.forEach((v: any) => {
+      if (v.video_id) {
+        routes.push({
+          url: `${baseUrl}/jalgaon-glimpse/${v.video_id}`,
+          lastModified: v.published_at ? new Date(v.published_at) : new Date(),
+          changeFrequency: 'weekly',
+          priority: 0.7,
+        });
+      }
+    });
+
+    // 5. Fetch All Events
     const events = await fetchAll(`${apiUrl}/api/v1/events/`);
     events.forEach((e: any) => {
         if (e.slug || e.id) {
@@ -96,7 +110,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         }
     });
 
-    // 5. Fetch All Jobs
+    // 6. Fetch All Jobs
     const jobs = await fetchAll(`${apiUrl}/api/v1/jobs/`);
     jobs.forEach((j: any) => {
         if (j.slug || j.id) {
