@@ -37,47 +37,6 @@ function formatViews(viewsStr?: string): string {
   if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
   if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
   return num.toString();
-}
-
-const DEMO_PODCASTS: YouTubeVideo[] = [
-  {
-    video_id: 'dQw4w9WgXcQ',
-    title: 'Jalgaon Business Podcast — EP 01: Economic Growth & Trade Secrets',
-    description: 'In-depth conversation on Jalgaon’s gold markets, agricultural exports, and business ecosystem.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1596895111956-bf1cf0599ce5?q=80&w=800',
-    published_at: '2024-10-24T10:00:00Z',
-    youtube_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    embed_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    duration_seconds: 3238,
-    is_short: false,
-    view_count: '53000000',
-  },
-  {
-    video_id: 'dQw4w9WgXcQ',
-    title: 'Banana Capital Agriculture Podcast — EP 02: Farming Innovations',
-    description: 'Interviews with progressive Jalgaon farmers pioneering modern banana cultivation & exports.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1528825871115-3581a5387919?q=80&w=800',
-    published_at: '2024-10-18T14:30:00Z',
-    youtube_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    embed_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    duration_seconds: 1850,
-    is_short: false,
-    view_count: '716000',
-  },
-  {
-    video_id: 'dQw4w9WgXcQ',
-    title: 'Gold City Podcast — EP 03: Inside Jalgaon Jewellery Crafting',
-    description: 'Conversations with master goldsmiths and trade leaders in Jalgaon’s legendary bullion market.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=800',
-    published_at: '2024-10-15T09:15:00Z',
-    youtube_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    embed_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    duration_seconds: 2140,
-    is_short: false,
-    view_count: '240000',
-  },
-];
-
 function getHighResThumbnail(video?: YouTubeVideo | null): string {
   if (!video) return 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=800';
   if (video.thumbnail_url && !video.thumbnail_url.includes('hqdefault.jpg') && !video.thumbnail_url.includes('mqdefault.jpg') && !video.thumbnail_url.includes('sddefault.jpg') && !video.thumbnail_url.includes('default.jpg')) {
@@ -95,12 +54,14 @@ interface JalgaonGlimpseProps {
 
 export default function JalgaonGlimpse({ initialData }: JalgaonGlimpseProps) {
   const [videos, setVideos] = useState<YouTubeVideo[]>(
-    initialData && initialData.length > 0 ? initialData.slice(0, 3) : DEMO_PODCASTS
+    initialData && initialData.length > 0 ? initialData.slice(0, 3) : []
   );
+  const [loading, setLoading] = useState<boolean>(!initialData || initialData.length === 0);
 
   useEffect(() => {
     if (!initialData || initialData.length === 0) {
       const fetchVideos = async () => {
+        setLoading(true);
         try {
           const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
           let res = await fetch(`${baseUrl}/api/v1/jalgaon-glimpse/videos/?max_results=3`);
@@ -122,16 +83,16 @@ export default function JalgaonGlimpse({ initialData }: JalgaonGlimpseProps) {
                 setVideos(data.results.slice(0, 3));
               }
             }
-          } catch {
-            // Keep DEMO_PODCASTS
-          }
+          } catch {}
+        } finally {
+          setLoading(false);
         }
       };
       fetchVideos();
     }
   }, [initialData]);
 
-  const displayVideos = videos.length > 0 ? videos : DEMO_PODCASTS;
+  const displayVideos = videos;
 
   return (
     <section id="jalgaon-glimpse" className="bg-surface-container-low py-section" aria-labelledby="jalgaon-glimpse-heading">

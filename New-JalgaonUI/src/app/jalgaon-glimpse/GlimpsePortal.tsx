@@ -53,117 +53,15 @@ function getHighResThumbnail(video?: YouTubeVideo | null): string {
   return video.thumbnail_url || 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?q=80&w=1200';
 }
 
-const DEMO_PODCASTS: YouTubeVideo[] = [
-  {
-    video_id: 'dQw4w9WgXcQ',
-    title: 'jalgaon business podcast, ep 01: economic growth and trade secrets',
-    description: 'in-depth conversation on jalgaon’s gold markets, agricultural exports, and business ecosystem.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?q=80&w=800',
-    published_at: '2024-10-24T10:00:00Z',
-    youtube_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    embed_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    duration_seconds: 3238,
-    is_short: false,
-    view_count: '53000000',
-  },
-  {
-    video_id: 'dQw4w9WgXcQ',
-    title: 'banana capital agriculture podcast, ep 02: farming innovations',
-    description: 'interviews with progressive jalgaon farmers pioneering modern banana cultivation and exports.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1528825871115-3581a5387919?q=80&w=800',
-    published_at: '2024-10-18T14:30:00Z',
-    youtube_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    embed_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    duration_seconds: 1859,
-    is_short: false,
-    view_count: '716000',
-  },
-  {
-    video_id: 'dQw4w9WgXcQ',
-    title: 'gold city podcast, ep 03: inside jalgaon jewellery crafting',
-    description: 'conversations with master goldsmiths and trade leaders in jalgaon’s legendary bullion market.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=800',
-    published_at: '2024-10-15T09:15:00Z',
-    youtube_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    embed_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    duration_seconds: 2140,
-    is_short: false,
-    view_count: '240000',
-  },
-];
-
-const DEMO_SHORTS: YouTubeVideo[] = [
-  {
-    video_id: 'dQw4w9WgXcQ',
-    title: 'trade secrets in 60 seconds',
-    description: 'Quick insights from Jalgaon business leaders.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1596895111956-bf1cf0599ce5?q=80&w=600',
-    published_at: '2024-10-22T08:00:00Z',
-    youtube_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    embed_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    duration_seconds: 52,
-    is_short: true,
-    view_count: '12000',
-  },
-  {
-    video_id: 'dQw4w9WgXcQ',
-    title: 'banana farming hacks',
-    description: 'Smart irrigation and harvest tips.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1528825871115-3581a5387919?q=80&w=600',
-    published_at: '2024-10-21T08:00:00Z',
-    youtube_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    embed_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    duration_seconds: 38,
-    is_short: true,
-    view_count: '8400',
-  },
-  {
-    video_id: 'dQw4w9WgXcQ',
-    title: 'inside a gold workshop',
-    description: 'Crafting fine ornaments in Jalgaon.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=600',
-    published_at: '2024-10-20T08:00:00Z',
-    youtube_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    embed_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    duration_seconds: 47,
-    is_short: true,
-    view_count: '21000',
-  },
-  {
-    video_id: 'dQw4w9WgXcQ',
-    title: 'ajanta caves in 60 sec',
-    description: 'Ancient rock-cut heritage tour.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=600',
-    published_at: '2024-10-19T08:00:00Z',
-    youtube_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    embed_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    duration_seconds: 45,
-    is_short: true,
-    view_count: '15000',
-  },
-  {
-    video_id: 'dQw4w9WgXcQ',
-    title: 'boat ride on girna river',
-    description: 'Scenic views of Girna river in Jalgaon.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=600',
-    published_at: '2024-10-18T08:00:00Z',
-    youtube_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    embed_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    duration_seconds: 33,
-    is_short: true,
-    view_count: '6100',
-  },
-];
-
 interface GlimpsePortalProps {
   initialData?: YouTubeVideoListResponse | null;
 }
 
 export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
   const [videos, setVideos] = useState<YouTubeVideo[]>(
-    initialData?.results && initialData.results.length > 0 ? initialData.results : DEMO_PODCASTS
+    initialData?.results && initialData.results.length > 0 ? initialData.results : []
   );
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(!initialData || !initialData.results || initialData.results.length === 0);
   const [activeShortIndex, setActiveShortIndex] = useState<number | null>(null);
 
   const fetchVideos = async () => {
@@ -184,7 +82,6 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
           return;
         }
       }
-      setVideos(DEMO_PODCASTS);
     } catch {
       try {
         const res = await fetch('/api/v1/jalgaon-glimpse/videos/?max_results=12');
@@ -196,7 +93,6 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
           }
         }
       } catch {}
-      setVideos(DEMO_PODCASTS);
     } finally {
       setLoading(false);
     }
@@ -209,11 +105,11 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
   }, []);
 
   const podcastList = videos.filter((v) => !v.is_short);
-  const displayPodcasts = podcastList.length > 0 ? podcastList : DEMO_PODCASTS;
-  const featuredHero = displayPodcasts[0] || videos[0] || DEMO_PODCASTS[0];
+  const displayPodcasts = podcastList.length > 0 ? podcastList : videos;
+  const featuredHero = displayPodcasts[0] || videos[0] || null;
 
   const apiShorts = videos.filter((v) => v.is_short);
-  const displayShorts = apiShorts.length > 0 ? apiShorts : DEMO_SHORTS;
+  const displayShorts = apiShorts;
 
   const currentShort = activeShortIndex !== null ? displayShorts[activeShortIndex] : null;
 

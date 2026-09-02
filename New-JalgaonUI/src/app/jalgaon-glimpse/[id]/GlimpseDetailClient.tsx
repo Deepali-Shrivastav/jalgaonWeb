@@ -41,57 +41,6 @@ function formatNumber(numStr?: string): string {
   return new Intl.NumberFormat('en-IN').format(num);
 }
 
-const DEMO_SIDEBAR_VIDEOS: YouTubeVideo[] = [
-  {
-    video_id: 'dQw4w9WgXcQ',
-    title: 'Jalgaon Business Podcast — EP 01: Economic Growth & Trade Secrets',
-    description: 'In-depth conversation on Jalgaon’s gold markets, agricultural exports, and business ecosystem.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1596895111956-bf1cf0599ce5?q=80&w=800',
-    published_at: '2024-10-24T10:00:00Z',
-    youtube_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    embed_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    duration_seconds: 3238,
-    is_short: false,
-    view_count: '53000000',
-  },
-  {
-    video_id: 'dQw4w9WgXcQ',
-    title: 'Banana Capital Agriculture Podcast — EP 02: Farming Innovations',
-    description: 'Interviews with progressive Jalgaon farmers pioneering modern banana cultivation & exports.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1528825871115-3581a5387919?q=80&w=800',
-    published_at: '2024-10-18T14:30:00Z',
-    youtube_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    embed_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    duration_seconds: 1850,
-    is_short: false,
-    view_count: '716000',
-  },
-  {
-    video_id: 'dQw4w9WgXcQ',
-    title: 'Gold City Podcast — EP 03: Inside Jalgaon Jewellery Crafting',
-    description: 'Conversations with master goldsmiths and trade leaders in Jalgaon’s legendary bullion market.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=800',
-    published_at: '2024-10-15T09:15:00Z',
-    youtube_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    embed_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    duration_seconds: 2140,
-    is_short: false,
-    view_count: '240000',
-  },
-  {
-    video_id: 'dQw4w9WgXcQ',
-    title: 'Ajanta Caves & Jalgaon Heritage Documentary',
-    description: 'A visual journey through the ancient rock-cut cave monuments near Jalgaon.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800',
-    published_at: '2024-10-22T08:00:00Z',
-    youtube_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    embed_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    duration_seconds: 45,
-    is_short: true,
-    view_count: '146000000',
-  },
-];
-
 interface GlimpseDetailClientProps {
   videoId: string;
   initialVideo?: YouTubeVideo | null;
@@ -99,19 +48,50 @@ interface GlimpseDetailClientProps {
 
 export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDetailClientProps) {
   const [video, setVideo] = useState<YouTubeVideo | null>(initialVideo || null);
+  const [sidebarVideos, setSidebarVideos] = useState<YouTubeVideo[]>([]);
   const [loading, setLoading] = useState<boolean>(!initialVideo);
   const [error, setError] = useState<string | null>(null);
   const [showFullDescription, setShowFullDescription] = useState<boolean>(false);
   const [filter, setFilter] = useState<'all' | 'channel' | 'related'>('all');
 
   useEffect(() => {
+    const fetchSidebarVideos = async () => {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+        let res = await fetch(`${baseUrl}/api/v1/jalgaon-glimpse/videos/?max_results=8`);
+        if (!res.ok && baseUrl) {
+          res = await fetch('/api/v1/jalgaon-glimpse/videos/?max_results=8');
+        }
+        if (res.ok) {
+          const data = await res.json();
+          if (data.results && data.results.length > 0) {
+            setSidebarVideos(data.results.filter((v: YouTubeVideo) => v.video_id !== videoId));
+          }
+        }
+      } catch (err) {
+        try {
+          const res = await fetch('/api/v1/jalgaon-glimpse/videos/?max_results=8');
+          if (res.ok) {
+            const data = await res.json();
+            if (data.results && data.results.length > 0) {
+              setSidebarVideos(data.results.filter((v: YouTubeVideo) => v.video_id !== videoId));
+            }
+          }
+        } catch {}
+      }
+    };
+    fetchSidebarVideos();
+
     if (!initialVideo && videoId) {
       const fetchVideoDetail = async () => {
         setLoading(true);
         setError(null);
         try {
-          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-          const res = await fetch(`${baseUrl}/api/v1/jalgaon-glimpse/videos/${videoId}/`);
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+          let res = await fetch(`${baseUrl}/api/v1/jalgaon-glimpse/videos/${videoId}/`);
+          if (!res.ok && baseUrl) {
+            res = await fetch(`/api/v1/jalgaon-glimpse/videos/${videoId}/`);
+          }
 
           if (!res.ok) {
             if (res.status === 404) {
@@ -481,7 +461,7 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
 
               {/* Related Videos Stack */}
               <div className="space-y-3">
-                {DEMO_SIDEBAR_VIDEOS.map((item, idx) => (
+                {sidebarVideos.map((item, idx) => (
                   <Link
                     key={`${item.video_id}-${idx}`}
                     href={`/jalgaon-glimpse/${item.video_id}`}
