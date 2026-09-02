@@ -37,6 +37,8 @@ function formatViews(viewsStr?: string): string {
   if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
   if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
   return num.toString();
+}
+
 function getHighResThumbnail(video?: YouTubeVideo | null): string {
   if (!video) return 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=800';
   if (video.thumbnail_url && !video.thumbnail_url.includes('hqdefault.jpg') && !video.thumbnail_url.includes('mqdefault.jpg') && !video.thumbnail_url.includes('sddefault.jpg') && !video.thumbnail_url.includes('default.jpg')) {
