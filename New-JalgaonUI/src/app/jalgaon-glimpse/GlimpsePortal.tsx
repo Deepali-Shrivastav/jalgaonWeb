@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import SkeletonCard from '@/components/SkeletonCard';
-import { YouTubeVideo, YouTubeVideoListResponse } from '@/types/youtube';
+import { YouTubeVideo, YouTubeVideoListResponse, YouTubeChannelInfo } from '@/types/youtube';
 
 function formatDuration(seconds: number): string {
   if (!seconds || seconds <= 0) return '';
@@ -42,6 +42,15 @@ function formatNumber(numStr?: string): string {
   return `${num}`;
 }
 
+function formatSubscribers(countStr?: string): string {
+  if (!countStr) return '';
+  const num = parseInt(countStr, 10);
+  if (isNaN(num)) return countStr;
+  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M subscribers`;
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}K subscribers`;
+  return `${num} subscribers`;
+}
+
 function getHighResThumbnail(video?: YouTubeVideo | null): string {
   if (!video) return 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?q=80&w=1200';
   if (video.thumbnail_url && !video.thumbnail_url.includes('hqdefault.jpg') && !video.thumbnail_url.includes('mqdefault.jpg') && !video.thumbnail_url.includes('sddefault.jpg') && !video.thumbnail_url.includes('default.jpg')) {
@@ -61,8 +70,23 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
   const [videos, setVideos] = useState<YouTubeVideo[]>(
     initialData?.results && initialData.results.length > 0 ? initialData.results : []
   );
+  const [channelInfo, setChannelInfo] = useState<YouTubeChannelInfo | null>(null);
   const [loading, setLoading] = useState<boolean>(!initialData || !initialData.results || initialData.results.length === 0);
   const [activeShortIndex, setActiveShortIndex] = useState<number | null>(null);
+
+  const fetchChannelInfo = async () => {
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      let res = await fetch(`${baseUrl}/api/v1/jalgaon-glimpse/channel/`);
+      if (!res.ok && baseUrl) {
+        res = await fetch('/api/v1/jalgaon-glimpse/channel/');
+      }
+      if (res.ok) {
+        const data: YouTubeChannelInfo = await res.json();
+        setChannelInfo(data);
+      }
+    } catch {}
+  };
 
   const fetchVideos = async () => {
     setLoading(true);
@@ -99,6 +123,7 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
   };
 
   useEffect(() => {
+    fetchChannelInfo();
     if (!initialData || !initialData.results || initialData.results.length === 0) {
       fetchVideos();
     }
@@ -358,11 +383,36 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
             </div>
 
             {/* Bottom Title & Details */}
-            <div className="w-full max-w-[420px] mt-4 bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/15 text-white text-xs space-y-1">
-              <h3 className="font-bold text-sm text-white line-clamp-2">
+            <div className="w-full max-w-[420px] mt-4 bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/15 text-white text-xs space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-white p-0.5 overflow-hidden shrink-0 shadow-sm">
+                    <img src="/title-logo.png" alt="Jalgaon Logo" className="w-full h-full object-contain rounded-full" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1 text-white font-extrabold text-xs">
+                      <span>{channelInfo?.title || 'jalgaondotcom'}</span>
+                      <span className="material-symbols-outlined text-xs text-sky-400 fill-current">check_circle</span>
+                    </div>
+                    {channelInfo?.subscriber_count && (
+                      <span className="text-[10px] text-white/70 font-medium">{formatSubscribers(channelInfo.subscriber_count)}</span>
+                    )}
+                  </div>
+                </div>
+                <a
+                  href={channelInfo?.youtube_url || "https://www.youtube.com/channel/UC1_W6Le5fkEDxsNFZEqPsAA?sub_confirmation=1"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-[#0081C7] hover:bg-sky-600 text-white font-extrabold text-[11px] px-3 py-1.5 rounded-full transition-all shadow-sm shrink-0"
+                >
+                  Subscribe
+                </a>
+              </div>
+
+              <h3 className="font-bold text-sm text-white line-clamp-2 leading-snug">
                 {currentShort.title}
               </h3>
-              <div className="flex items-center justify-between text-white/70 text-[11px] pt-1">
+              <div className="flex items-center justify-between text-white/70 text-[11px] pt-1 border-t border-white/10">
                 <span>👁 {formatNumber(currentShort.view_count)} views</span>
                 <a
                   href={currentShort.youtube_url}

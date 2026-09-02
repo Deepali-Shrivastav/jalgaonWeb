@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { YouTubeVideo } from '@/types/youtube';
+import { YouTubeVideo, YouTubeChannelInfo } from '@/types/youtube';
 
 function formatDate(isoString: string): string {
   if (!isoString) return '';
@@ -41,6 +41,15 @@ function formatNumber(numStr?: string): string {
   return new Intl.NumberFormat('en-IN').format(num);
 }
 
+function formatSubscribers(countStr?: string): string {
+  if (!countStr) return '';
+  const num = parseInt(countStr, 10);
+  if (isNaN(num)) return countStr;
+  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M subscribers`;
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}K subscribers`;
+  return `${num} subscribers`;
+}
+
 interface GlimpseDetailClientProps {
   videoId: string;
   initialVideo?: YouTubeVideo | null;
@@ -48,6 +57,7 @@ interface GlimpseDetailClientProps {
 
 export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDetailClientProps) {
   const [video, setVideo] = useState<YouTubeVideo | null>(initialVideo || null);
+  const [channelInfo, setChannelInfo] = useState<YouTubeChannelInfo | null>(null);
   const [sidebarVideos, setSidebarVideos] = useState<YouTubeVideo[]>([]);
   const [loading, setLoading] = useState<boolean>(!initialVideo);
   const [error, setError] = useState<string | null>(null);
@@ -55,6 +65,20 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
   const [filter, setFilter] = useState<'all' | 'channel' | 'related'>('all');
 
   useEffect(() => {
+    const fetchChannelInfo = async () => {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+        let res = await fetch(`${baseUrl}/api/v1/jalgaon-glimpse/channel/`);
+        if (!res.ok && baseUrl) {
+          res = await fetch('/api/v1/jalgaon-glimpse/channel/');
+        }
+        if (res.ok) {
+          const data: YouTubeChannelInfo = await res.json();
+          setChannelInfo(data);
+        }
+      } catch {}
+    };
+    fetchChannelInfo();
     const fetchSidebarVideos = async () => {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
@@ -337,10 +361,12 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
 
                   <div>
                     <div className="flex items-center gap-1.5 text-sm sm:text-base font-extrabold text-ink-deep hover:text-[#0081C7] transition-colors">
-                      <span>Jalgaon Glimpse Podcast</span>
+                      <span>{channelInfo?.title || 'jalgaondotcom'}</span>
                       <span className="material-symbols-outlined text-base text-[#0081C7]">check_circle</span>
                     </div>
-                    <span className="text-xs text-secondary font-medium">125K subscribers</span>
+                    {channelInfo?.subscriber_count && (
+                      <span className="text-xs text-secondary font-medium">{formatSubscribers(channelInfo.subscriber_count)}</span>
+                    )}
                   </div>
 
                   <a

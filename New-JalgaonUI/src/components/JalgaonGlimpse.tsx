@@ -171,7 +171,7 @@ export default function JalgaonGlimpse({ initialData }: JalgaonGlimpseProps) {
               <div className="flex items-start gap-3 px-0.5">
                 {/* Circular Channel Avatar */}
                 <Link href="/jalgaon-glimpse" className="shrink-0">
-                  <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center shadow-sm border border-hairline-soft overflow-hidden p-1 shrink-0">
+                  <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center shadow-sm border border-hairline-soft overflow-hidden shrink-0">
                     <img
                       src="/title-logo.png"
                       alt="Jalgaon Logo"
@@ -190,7 +190,7 @@ export default function JalgaonGlimpse({ initialData }: JalgaonGlimpseProps) {
 
                   {/* Channel / Author Name */}
                   <div className="text-xs text-secondary font-medium mt-1 flex items-center gap-1 hover:text-ink-deep">
-                    <span>Jalgaon Glimpse Podcast</span>
+                    <span>jalgaondotcom</span>
                     <span className="material-symbols-outlined text-xs text-[#0081C7]">check_circle</span>
                   </div>
 

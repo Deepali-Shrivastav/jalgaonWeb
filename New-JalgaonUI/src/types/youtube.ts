@@ -20,3 +20,15 @@ export interface YouTubeVideoListResponse {
   previous?: string | null;
   results: YouTubeVideo[];
 }
+
+export interface YouTubeChannelInfo {
+  channel_id?: string;
+  title?: string;
+  description?: string;
+  custom_url?: string;
+  thumbnail_url?: string;
+  subscriber_count?: string;
+  video_count?: string;
+  view_count?: string;
+  youtube_url?: string;
+}
