@@ -7,8 +7,8 @@ Uses Django's LocMemCache (configured in settings.py).
 
 from django.core.cache import cache
 
-CACHE_TTL_VIDEOS  = 30 * 60        # 30 minutes — video list
-CACHE_TTL_DETAIL  = 30 * 60        # 30 minutes — single video detail
+CACHE_TTL_VIDEOS  = 24 * 60 * 60   # 24 hours — video list
+CACHE_TTL_DETAIL  = 24 * 60 * 60   # 24 hours — single video detail
 CACHE_TTL_CHANNEL = 24 * 60 * 60   # 24 hours  — channel info
 
 

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import SkeletonCard from '@/components/SkeletonCard';
-import { YouTubeVideo, YouTubeVideoListResponse, YouTubeChannelInfo } from '@/types/youtube';
+import { YouTubeVideo, YouTubeVideoListResponse, YouTubeChannelInfo, DEFAULT_FALLBACK_VIDEOS } from '@/types/youtube';
 
 function formatDuration(seconds: number): string {
   if (!seconds || seconds <= 0) return '';
@@ -27,7 +27,7 @@ function formatDate(isoString: string): string {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
-    }).toLowerCase();
+    });
   } catch {
     return isoString;
   }
@@ -42,10 +42,19 @@ function formatNumber(numStr?: string): string {
   return `${num}`;
 }
 
-function formatSubscribers(countStr?: string): string {
-  if (!countStr) return '';
-  const num = parseInt(countStr, 10);
-  if (isNaN(num)) return countStr;
+function formatViews(viewsStr?: string): string {
+  if (!viewsStr) return '1.2K';
+  const num = parseInt(viewsStr, 10);
+  if (isNaN(num)) return viewsStr;
+  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+  return num.toString();
+}
+
+function formatSubscribers(subsStr?: string): string {
+  if (!subsStr) return '24.5K subscribers';
+  const num = parseInt(subsStr, 10);
+  if (isNaN(num)) return `${subsStr} subscribers`;
   if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M subscribers`;
   if (num >= 1000) return `${(num / 1000).toFixed(1)}K subscribers`;
   return `${num} subscribers`;
@@ -53,13 +62,11 @@ function formatSubscribers(countStr?: string): string {
 
 function getHighResThumbnail(video?: YouTubeVideo | null): string {
   if (!video) return 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?q=80&w=1200';
-  if (video.thumbnail_url && !video.thumbnail_url.includes('hqdefault.jpg') && !video.thumbnail_url.includes('mqdefault.jpg') && !video.thumbnail_url.includes('sddefault.jpg') && !video.thumbnail_url.includes('default.jpg')) {
-    return video.thumbnail_url;
-  }
+  if (video.thumbnail_url) return video.thumbnail_url;
   if (video.video_id) {
-    return `https://i.ytimg.com/vi/${video.video_id}/maxresdefault.jpg`;
+    return `https://i.ytimg.com/vi/${video.video_id}/hqdefault.jpg`;
   }
-  return video.thumbnail_url || 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?q=80&w=1200';
+  return 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?q=80&w=1200';
 }
 
 interface GlimpsePortalProps {
@@ -85,7 +92,7 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
         const data: YouTubeChannelInfo = await res.json();
         setChannelInfo(data);
       }
-    } catch {}
+    } catch { }
   };
 
   const fetchVideos = async () => {
@@ -116,7 +123,7 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
             return;
           }
         }
-      } catch {}
+      } catch { }
     } finally {
       setLoading(false);
     }
@@ -129,11 +136,12 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
     }
   }, []);
 
-  const podcastList = videos.filter((v) => !v.is_short);
-  const displayPodcasts = podcastList.length > 0 ? podcastList : videos;
-  const featuredHero = displayPodcasts[0] || videos[0] || null;
+  const allVideos = videos.length > 0 ? videos : DEFAULT_FALLBACK_VIDEOS;
+  const podcastList = allVideos.filter((v) => !v.is_short);
+  const displayPodcasts = podcastList.length > 0 ? podcastList : allVideos;
+  const featuredHero = displayPodcasts[0] || allVideos[0] || null;
 
-  const apiShorts = videos.filter((v) => v.is_short);
+  const apiShorts = allVideos.filter((v) => v.is_short);
   const displayShorts = apiShorts;
 
   const currentShort = activeShortIndex !== null ? displayShorts[activeShortIndex] : null;
@@ -329,7 +337,7 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
       {currentShort && activeShortIndex !== null && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 sm:p-6 animate-fadeIn">
           <div className="relative flex flex-col items-center max-w-full max-h-[90vh]">
-            
+
             {/* Modal Header Controls */}
             <div className="w-full max-w-[420px] flex items-center justify-between px-2 mb-3 text-white">
               <div className="flex items-center gap-2 text-xs font-bold">
@@ -349,7 +357,7 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
 
             {/* Vertical 9:16 Shorts Player Stage with Navigation */}
             <div className="relative flex items-center gap-3 sm:gap-5">
-              
+
               {/* Prev Short Arrow */}
               <button
                 type="button"

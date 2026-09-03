@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { YouTubeVideo, YouTubeVideoListResponse } from '@/types/youtube';
+import { YouTubeVideo, YouTubeVideoListResponse, DEFAULT_FALLBACK_VIDEOS } from '@/types/youtube';
 
 function formatDuration(seconds: number): string {
   if (!seconds || seconds <= 0) return '';
@@ -41,13 +41,11 @@ function formatViews(viewsStr?: string): string {
 
 function getHighResThumbnail(video?: YouTubeVideo | null): string {
   if (!video) return 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=800';
-  if (video.thumbnail_url && !video.thumbnail_url.includes('hqdefault.jpg') && !video.thumbnail_url.includes('mqdefault.jpg') && !video.thumbnail_url.includes('sddefault.jpg') && !video.thumbnail_url.includes('default.jpg')) {
-    return video.thumbnail_url;
-  }
+  if (video.thumbnail_url) return video.thumbnail_url;
   if (video.video_id) {
-    return `https://i.ytimg.com/vi/${video.video_id}/maxresdefault.jpg`;
+    return `https://i.ytimg.com/vi/${video.video_id}/hqdefault.jpg`;
   }
-  return video.thumbnail_url || 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=800';
+  return 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=800';
 }
 
 interface JalgaonGlimpseProps {
@@ -85,7 +83,7 @@ export default function JalgaonGlimpse({ initialData }: JalgaonGlimpseProps) {
                 setVideos(data.results.slice(0, 3));
               }
             }
-          } catch {}
+          } catch { }
         } finally {
           setLoading(false);
         }
@@ -94,7 +92,7 @@ export default function JalgaonGlimpse({ initialData }: JalgaonGlimpseProps) {
     }
   }, [initialData]);
 
-  const displayVideos = videos;
+  const displayVideos = videos.length > 0 ? videos : DEFAULT_FALLBACK_VIDEOS.slice(0, 3);
 
   return (
     <section id="jalgaon-glimpse" className="bg-surface-container-low py-section" aria-labelledby="jalgaon-glimpse-heading">

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Landmark, HeartHandshake, FileEdit, PhoneCall, Users, ChevronsLeft, ChevronsRight } from "lucide-react";
@@ -56,6 +56,7 @@ const navItems: NavItem[] = [
 export default function FloatingSideButtons() {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const navRef = useRef<HTMLDivElement>(null);
 
   // Auto-collapse on small mobile screens to keep layout aligned and prevent clipping
   useEffect(() => {
@@ -69,12 +70,46 @@ export default function FloatingSideButtons() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Handle click / tap outside, scroll, & Escape key to close when OPEN (!isCollapsed)
+  useEffect(() => {
+    if (isCollapsed) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (navRef.current && !navRef.current.contains(event.target as Node)) {
+        setIsCollapsed(true);
+      }
+    };
+
+    const handleScroll = () => {
+      setIsCollapsed(true);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsCollapsed(true);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isCollapsed]);
+
   if (pathname?.startsWith("/admin")) {
     return null;
   }
 
   return (
-    <div className="fixed top-1/2 right-1.5 sm:right-3 -translate-y-1/2 z-[9999] transition-all duration-300 scale-90 sm:scale-100 origin-right">
+    <div
+      ref={navRef}
+      className="fixed top-1/2 right-1.5 sm:right-3 -translate-y-1/2 z-[9999] transition-all duration-300 scale-90 sm:scale-100 origin-right"
+    >
       {/* High-End Frosted Glassmorphism Outer Capsule */}
       <div className="relative flex flex-col gap-2.5 p-2 sm:p-2.5 bg-gradient-to-b from-white/70 via-white/45 to-white/25 backdrop-blur-3xl saturate-150 border border-white/80 shadow-[0_20px_50px_rgba(0,0,0,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] rounded-[28px] sm:rounded-[32px]">
         
@@ -83,6 +118,7 @@ export default function FloatingSideButtons() {
           type="button"
           onClick={() => setIsCollapsed(!isCollapsed)}
           aria-label={isCollapsed ? "Expand Navigation" : "Collapse Navigation"}
+          aria-expanded={!isCollapsed}
           className="absolute -left-3.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/80 backdrop-blur-xl border border-white shadow-[0_4px_12px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,1)] flex items-center justify-center text-[#0081C7] hover:scale-110 active:scale-95 transition-all duration-200 z-20 cursor-pointer"
         >
           {isCollapsed ? (
@@ -131,3 +167,4 @@ export default function FloatingSideButtons() {
     </div>
   );
 }
+

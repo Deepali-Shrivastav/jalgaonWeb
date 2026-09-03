@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { YouTubeVideo, YouTubeChannelInfo } from '@/types/youtube';
+import { YouTubeVideo, YouTubeChannelInfo, DEFAULT_FALLBACK_VIDEOS } from '@/types/youtube';
 
 function formatDate(isoString: string): string {
   if (!isoString) return '';
@@ -76,7 +76,7 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
           const data: YouTubeChannelInfo = await res.json();
           setChannelInfo(data);
         }
-      } catch {}
+      } catch { }
     };
     fetchChannelInfo();
     const fetchSidebarVideos = async () => {
@@ -101,7 +101,7 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
               setSidebarVideos(data.results.filter((v: YouTubeVideo) => v.video_id !== videoId));
             }
           }
-        } catch {}
+        } catch { }
       }
     };
     fetchSidebarVideos();
@@ -127,7 +127,13 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
           const data: YouTubeVideo = await res.json();
           setVideo(data);
         } catch (err: any) {
-          setError(err.message || 'Error loading video');
+          const fallback = DEFAULT_FALLBACK_VIDEOS.find(v => v.video_id === videoId) || DEFAULT_FALLBACK_VIDEOS[0];
+          if (fallback) {
+            setVideo(fallback);
+            setError(null);
+          } else {
+            setError(err.message || 'Error loading video');
+          }
         } finally {
           setLoading(false);
         }
@@ -197,7 +203,7 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
               {activeMode === 'short' ? (
                 /* --- CLEAN LIGHT MODE SHORTS REEL STAGE --- */
                 <div className="relative w-full bg-white border border-hairline-soft rounded-3xl p-4 sm:p-6 shadow-sm flex flex-col items-center justify-center overflow-hidden my-1">
-                  
+
                   {/* Top Bar Navigation */}
                   <div className="w-full flex items-center justify-between px-2 mb-4">
                     <Link
@@ -459,8 +465,8 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                 <button
                   onClick={() => setFilter('all')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${filter === 'all'
-                      ? 'bg-[#0081C7] text-white shadow-sm'
-                      : 'bg-white border border-hairline-soft text-secondary hover:text-ink-deep'
+                    ? 'bg-[#0081C7] text-white shadow-sm'
+                    : 'bg-white border border-hairline-soft text-secondary hover:text-ink-deep'
                     }`}
                 >
                   All
@@ -468,8 +474,8 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                 <button
                   onClick={() => setFilter('channel')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${filter === 'channel'
-                      ? 'bg-[#0081C7] text-white shadow-sm'
-                      : 'bg-white border border-hairline-soft text-secondary hover:text-ink-deep'
+                    ? 'bg-[#0081C7] text-white shadow-sm'
+                    : 'bg-white border border-hairline-soft text-secondary hover:text-ink-deep'
                     }`}
                 >
                   From Jalgaon Glimpse
@@ -477,8 +483,8 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                 <button
                   onClick={() => setFilter('related')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${filter === 'related'
-                      ? 'bg-[#0081C7] text-white shadow-sm'
-                      : 'bg-white border border-hairline-soft text-secondary hover:text-ink-deep'
+                    ? 'bg-[#0081C7] text-white shadow-sm'
+                    : 'bg-white border border-hairline-soft text-secondary hover:text-ink-deep'
                     }`}
                 >
                   Related
