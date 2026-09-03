@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { YouTubeVideo, YouTubeChannelInfo, DEFAULT_FALLBACK_VIDEOS } from '@/types/youtube';
+import { YouTubeVideo, YouTubeChannelInfo, DEFAULT_FALLBACK_VIDEOS, getHighResThumbnail, handleThumbnailError } from '@/types/youtube';
 
 function formatDate(isoString: string): string {
   if (!isoString) return '';
@@ -63,6 +63,7 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
   const [error, setError] = useState<string | null>(null);
   const [showFullDescription, setShowFullDescription] = useState<boolean>(false);
   const [filter, setFilter] = useState<'all' | 'channel' | 'related'>('all');
+  const [showMoreShorts, setShowMoreShorts] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchChannelInfo = async () => {
@@ -305,7 +306,7 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                             <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                           </svg>
                         </div>
-                        <span className="text-[11px] font-bold text-secondary">Shorts</span>
+                        <span className="text-[11px] font-bold text-secondary">Glimpse</span>
                       </a>
                     </div>
 
@@ -491,64 +492,215 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                 </button>
               </div>
 
-              {/* Related Videos Stack */}
-              <div className="space-y-3">
-                {sidebarVideos.map((item, idx) => (
-                  <Link
-                    key={`${item.video_id}-${idx}`}
-                    href={`/jalgaon-glimpse/${item.video_id}`}
-                    className="group flex items-start gap-3 cursor-pointer bg-white p-2 rounded-xl border border-hairline-soft hover:shadow-md transition-all"
-                  >
-                    {/* Small Thumbnail */}
-                    <div className={`relative ${item.is_short ? 'w-24 aspect-[9/16]' : 'w-36 sm:w-40 aspect-video'} rounded-lg overflow-hidden flex-shrink-0 bg-slate-900 border border-hairline-soft`}>
-                      <img
-                        src={item.thumbnail_url}
-                        alt={item.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        loading="lazy"
-                      />
-                      {item.is_short ? (
-                        <div className="absolute top-1 left-1 bg-[#0081C7] text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full">
-                          ⚡ Short
-                        </div>
-                      ) : (
-                        !!item.duration_seconds && item.duration_seconds > 0 && (
-                          <div className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] font-mono px-1 rounded font-bold">
-                            {formatDuration(item.duration_seconds)}
+              {/* Related Videos Stack: Top 2 Videos -> 2 Shorts (with Show More) -> Remaining Videos */}
+              {(() => {
+                const displayList = sidebarVideos.length > 0
+                  ? sidebarVideos
+                  : DEFAULT_FALLBACK_VIDEOS.filter((v) => v.video_id !== videoId);
+
+                const regVideos = displayList.filter((v) => !v.is_short);
+                const shortVidList = displayList.filter((v) => v.is_short);
+
+                // 1. Top 2 videos from channel
+                const top2Videos = regVideos.slice(0, 2);
+                // 2. Shorts: top 2 shorts side-by-side
+                const top2Shorts = shortVidList.slice(0, 2);
+                // 3. Remaining videos (video 3, 4, 5...)
+                const remainingVideos = regVideos.slice(2);
+
+                return (
+                  <div className="space-y-4">
+                    {/* SECTION 1: TOP 2 VIDEOS (STACKED FULL-WIDTH ONE BELOW ANOTHER) */}
+                    {top2Videos.length > 0 && (
+                      <div className="space-y-2.5">
+                        {top2Videos.map((item, idx) => (
+                          <Link
+                            key={`top-v-${item.video_id}-${idx}`}
+                            href={`/jalgaon-glimpse/${item.video_id}`}
+                            className="group flex items-start gap-3 cursor-pointer bg-white p-2 rounded-xl border border-hairline-soft hover:shadow-md transition-all"
+                          >
+                            {/* Widescreen 16:9 Thumbnail */}
+                            <div className="relative w-36 sm:w-40 aspect-video rounded-lg overflow-hidden shrink-0 bg-slate-900 border border-hairline-soft">
+                              <img
+                                src={getHighResThumbnail(item)}
+                                alt={item.title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                loading="lazy"
+                                onError={handleThumbnailError}
+                              />
+                              {!!item.duration_seconds && item.duration_seconds > 0 && (
+                                <div className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] font-mono px-1 rounded font-bold">
+                                  {formatDuration(item.duration_seconds)}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Info */}
+                            <div className="flex-grow min-w-0 pr-1">
+                              <h4 className="text-xs sm:text-sm font-bold text-ink-deep line-clamp-2 leading-snug group-hover:text-[#0081C7] transition-colors">
+                                {item.title}
+                              </h4>
+
+                              <div className="text-[11px] text-secondary font-medium mt-1 flex items-center gap-1">
+                                <span>Jalgaon Glimpse Podcast</span>
+                                <span className="material-symbols-outlined text-[10px] text-[#0081C7]">check_circle</span>
+                              </div>
+
+                              <div className="text-[11px] text-secondary font-normal mt-0.5">
+                                <span>{formatNumber(item.view_count)} views</span>
+                                <span> • </span>
+                                <span>{formatDate(item.published_at || '')}</span>
+                              </div>
+                            </div>
+
+                            <button
+                              type="button"
+                              aria-label="Video options"
+                              className="text-secondary hover:text-ink-deep p-1 shrink-0 rounded-full"
+                            >
+                              <span className="material-symbols-outlined text-base">more_vert</span>
+                            </button>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* SECTION 2: SHORTS SECTION (ONLY 2 SHORTS DISPLAYED SIDE-BY-SIDE WITH 'SHOW MORE') */}
+                    {shortVidList.length > 0 && (
+                      <div className="py-2 space-y-2 border-y border-hairline-soft/80 my-2">
+                        <div className="flex items-center justify-between px-0.5">
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-[#0081C7] animate-pulse" />
+                            <span className="text-xs font-black uppercase tracking-wider text-ink-deep">
+                              Shorts
+                            </span>
                           </div>
-                        )
-                      )}
-                    </div>
 
-                    {/* Right Info */}
-                    <div className="flex-grow min-w-0 pr-1">
-                      <h4 className="text-xs sm:text-sm font-bold text-ink-deep line-clamp-2 leading-snug group-hover:text-[#0081C7] transition-colors">
-                        {item.title}
-                      </h4>
+                          <button
+                            type="button"
+                            onClick={() => setShowMoreShorts((prev) => !prev)}
+                            className="text-[11px] font-bold text-[#0081C7] hover:underline flex items-center gap-0.5 cursor-pointer"
+                          >
+                            {showMoreShorts ? 'Show less ↑' : 'Show more →'}
+                          </button>
+                        </div>
 
-                      <div className="text-[11px] text-secondary font-medium mt-1 flex items-center gap-1">
-                        <span>Jalgaon Glimpse Podcast</span>
-                        <span className="material-symbols-outlined text-[10px] text-[#0081C7]">check_circle</span>
+                        {/* 2-Column Grid (Two Shorts Per Row Side By Side) */}
+                        <div className="grid grid-cols-2 gap-2.5">
+                          {(showMoreShorts ? shortVidList : top2Shorts).map((short, idx) => (
+                            <Link
+                              key={`side-short-${short.video_id}-${idx}`}
+                              href={`/jalgaon-glimpse/${short.video_id}`}
+                              className="group flex flex-col cursor-pointer"
+                            >
+                              {/* 1. Vertical 9:16 Image Poster Container */}
+                              <div className="relative aspect-[9/16] bg-slate-900 rounded-xl overflow-hidden shadow-2xs hover:shadow-md transition-all duration-300 border border-hairline-soft mb-1.5">
+                                <img
+                                  src={getHighResThumbnail(short)}
+                                  alt={short.title}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                  loading="lazy"
+                                  onError={handleThumbnailError}
+                                />
+
+                                {/* Centered Play Disc */}
+                                <div className="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                                  <div className="w-8 h-8 bg-[#0081C7] text-white rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                                    <span className="material-symbols-outlined text-lg translate-x-0.5 fill-current">
+                                      play_arrow
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* 2. Title & 3-Dot Menu Row Underneath Image */}
+                              <div className="flex items-start justify-between gap-1 px-0.5">
+                                <h5 className="text-[11px] font-bold text-ink-deep group-hover:text-[#0081C7] transition-colors line-clamp-2 leading-tight">
+                                  {short.title}
+                                </h5>
+                                <button
+                                  type="button"
+                                  aria-label="Options"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                  }}
+                                  className="text-secondary hover:text-ink-deep p-0.5 shrink-0 rounded-full"
+                                >
+                                  <span className="material-symbols-outlined text-sm">more_vert</span>
+                                </button>
+                              </div>
+
+                              {/* Views Count Text Underneath Title */}
+                              <div className="text-[10px] text-secondary font-normal mt-0.5 px-0.5">
+                                <span>{formatNumber(short.view_count)} views</span>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
                       </div>
+                    )}
 
-                      <div className="text-[11px] text-secondary font-normal mt-0.5">
-                        <span>{formatNumber(item.view_count)} views</span>
-                        <span> • </span>
-                        <span>{formatDate(item.published_at || '')}</span>
+                    {/* SECTION 3: SUBSEQUENT VIDEOS (CONTINUATION OF CHANNEL VIDEOS LIST) */}
+                    {remainingVideos.length > 0 && (
+                      <div className="space-y-2.5 pt-1">
+                        <div className="text-[11px] font-black uppercase tracking-wider text-secondary px-0.5 pb-1 border-b border-hairline-soft">
+                          More Videos
+                        </div>
+                        {remainingVideos.map((item, idx) => (
+                          <Link
+                            key={`rem-v-${item.video_id}-${idx}`}
+                            href={`/jalgaon-glimpse/${item.video_id}`}
+                            className="group flex items-start gap-3 cursor-pointer bg-white p-2 rounded-xl border border-hairline-soft hover:shadow-md transition-all"
+                          >
+                            {/* Widescreen 16:9 Thumbnail */}
+                            <div className="relative w-36 sm:w-40 aspect-video rounded-lg overflow-hidden shrink-0 bg-slate-900 border border-hairline-soft">
+                              <img
+                                src={getHighResThumbnail(item)}
+                                alt={item.title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                loading="lazy"
+                                onError={handleThumbnailError}
+                              />
+                              {!!item.duration_seconds && item.duration_seconds > 0 && (
+                                <div className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] font-mono px-1 rounded font-bold">
+                                  {formatDuration(item.duration_seconds)}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Info */}
+                            <div className="flex-grow min-w-0 pr-1">
+                              <h4 className="text-xs sm:text-sm font-bold text-ink-deep line-clamp-2 leading-snug group-hover:text-[#0081C7] transition-colors">
+                                {item.title}
+                              </h4>
+
+                              <div className="text-[11px] text-secondary font-medium mt-1 flex items-center gap-1">
+                                <span>Jalgaon Glimpse Podcast</span>
+                                <span className="material-symbols-outlined text-[10px] text-[#0081C7]">check_circle</span>
+                              </div>
+
+                              <div className="text-[11px] text-secondary font-normal mt-0.5">
+                                <span>{formatNumber(item.view_count)} views</span>
+                                <span> • </span>
+                                <span>{formatDate(item.published_at || '')}</span>
+                              </div>
+                            </div>
+
+                            <button
+                              type="button"
+                              aria-label="Video options"
+                              className="text-secondary hover:text-ink-deep p-1 shrink-0 rounded-full"
+                            >
+                              <span className="material-symbols-outlined text-base">more_vert</span>
+                            </button>
+                          </Link>
+                        ))}
                       </div>
-                    </div>
-
-                    {/* Options Icon */}
-                    <button
-                      type="button"
-                      aria-label="Video options"
-                      className="text-secondary hover:text-ink-deep p-1 shrink-0 rounded-full"
-                    >
-                      <span className="material-symbols-outlined text-base">more_vert</span>
-                    </button>
-                  </Link>
-                ))}
-              </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           </div>
         )}

@@ -2,51 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { YouTubeVideo, YouTubeVideoListResponse, DEFAULT_FALLBACK_VIDEOS } from '@/types/youtube';
-
-function formatDuration(seconds: number): string {
-  if (!seconds || seconds <= 0) return '';
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  if (mins >= 60) {
-    const hrs = Math.floor(mins / 60);
-    const remMins = mins % 60;
-    return `${hrs}:${remMins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  }
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
-
-function formatDate(isoString: string): string {
-  if (!isoString) return '';
-  try {
-    const date = new Date(isoString);
-    return date.toLocaleDateString('en-IN', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
-  } catch {
-    return isoString;
-  }
-}
-
-function formatViews(viewsStr?: string): string {
-  if (!viewsStr) return '1.2K';
-  const num = parseInt(viewsStr, 10);
-  if (isNaN(num)) return viewsStr;
-  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
-  return num.toString();
-}
-
-function getHighResThumbnail(video?: YouTubeVideo | null): string {
-  if (!video) return 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=800';
-  if (video.thumbnail_url) return video.thumbnail_url;
-  if (video.video_id) {
-    return `https://i.ytimg.com/vi/${video.video_id}/hqdefault.jpg`;
-  }
-  return 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=800';
-}
+import { YouTubeVideo, YouTubeVideoListResponse, DEFAULT_FALLBACK_VIDEOS, getHighResThumbnail, handleThumbnailError, formatDuration, formatDate, formatViews } from '@/types/youtube';
 
 interface JalgaonGlimpseProps {
   initialData?: YouTubeVideo[];
@@ -135,6 +91,7 @@ export default function JalgaonGlimpse({ initialData }: JalgaonGlimpseProps) {
                     alt={video.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
+                    onError={handleThumbnailError}
                   />
 
                   {/* Dark Vignette Overlay on Hover */}
@@ -156,10 +113,10 @@ export default function JalgaonGlimpse({ initialData }: JalgaonGlimpseProps) {
                     </div>
                   )}
 
-                  {/* Shorts Badge (Top-Left) */}
+                  {/* Glimpse Badge (Top-Left) */}
                   {video.is_short && (
                     <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 bg-[#0081C7] text-white text-[11px] font-bold rounded-full flex items-center gap-1 shadow">
-                      <span>⚡</span> Shorts
+                      <span>⚡</span> Glimpse
                     </div>
                   )}
                 </div>

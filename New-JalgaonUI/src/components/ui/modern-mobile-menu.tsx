@@ -21,7 +21,7 @@ const defaultItems: InteractiveMenuItem[] = [
     { label: 'events', icon: CalendarDays, href: '/events' },
     { label: 'home', icon: Home, href: '/' },
     { label: 'jobs', icon: Briefcase, href: '/jobs' },
-    { label: 'shorts', icon: Flame, href: '/jalgaon-glimpse' },
+    { label: 'glimpse', icon: Flame, href: '/jalgaon-glimpse' },
 ];
 
 const defaultAccentColor = 'var(--component-active-color-default)';

@@ -24,7 +24,7 @@ FALLBACK_VIDEOS = [
         'video_id': '5X7bU5rRkWE',
         'title': 'Jalgaon City Heritage & History — Special Documentary Podcast',
         'description': 'Explore the rich culture, banana capital history, and heritage of Jalgaon district in this special podcast episode.',
-        'thumbnail_url': 'https://i.ytimg.com/vi/5X7bU5rRkWE/hqdefault.jpg',
+        'thumbnail_url': 'https://i.ytimg.com/vi/5X7bU5rRkWE/maxresdefault.jpg',
         'published_at': '2025-10-15T12:00:00Z',
         'youtube_url': 'https://www.youtube.com/watch?v=5X7bU5rRkWE',
         'embed_url': 'https://www.youtube.com/embed/5X7bU5rRkWE',
@@ -37,7 +37,7 @@ FALLBACK_VIDEOS = [
         'video_id': 'kJQP7kiw5Fk',
         'title': 'Top Startups & Entrepreneurs of Jalgaon | Inspiring Stories',
         'description': 'An insightful discussion with young entrepreneurs building successful businesses and innovations right from Jalgaon.',
-        'thumbnail_url': 'https://i.ytimg.com/vi/kJQP7kiw5Fk/hqdefault.jpg',
+        'thumbnail_url': 'https://i.ytimg.com/vi/kJQP7kiw5Fk/maxresdefault.jpg',
         'published_at': '2025-11-01T10:00:00Z',
         'youtube_url': 'https://www.youtube.com/watch?v=kJQP7kiw5Fk',
         'embed_url': 'https://www.youtube.com/embed/kJQP7kiw5Fk',
@@ -50,7 +50,7 @@ FALLBACK_VIDEOS = [
         'video_id': 'fJ9rUzIMcZQ',
         'title': 'Ajanta Caves & Jalgaon Tourism Guide — Travel Podcast',
         'description': 'Everything you need to know about visiting Ajanta Caves, Patnadevi, and scenic tourist spots around Jalgaon.',
-        'thumbnail_url': 'https://i.ytimg.com/vi/fJ9rUzIMcZQ/hqdefault.jpg',
+        'thumbnail_url': 'https://i.ytimg.com/vi/fJ9rUzIMcZQ/maxresdefault.jpg',
         'published_at': '2025-12-10T14:30:00Z',
         'youtube_url': 'https://www.youtube.com/watch?v=fJ9rUzIMcZQ',
         'embed_url': 'https://www.youtube.com/embed/fJ9rUzIMcZQ',
@@ -63,7 +63,7 @@ FALLBACK_VIDEOS = [
         'video_id': 'L_LUpnjgPso',
         'title': 'Jalgaon Street Food Tour — Best Eats & Local Flavors #shorts',
         'description': 'Quick tour of famous Shev Bhaji, Bharit, and local delicacies of Jalgaon! #shorts #jalgaon',
-        'thumbnail_url': 'https://i.ytimg.com/vi/L_LUpnjgPso/hqdefault.jpg',
+        'thumbnail_url': 'https://i.ytimg.com/vi/L_LUpnjgPso/maxresdefault.jpg',
         'published_at': '2026-01-05T08:00:00Z',
         'youtube_url': 'https://www.youtube.com/watch?v=L_LUpnjgPso',
         'embed_url': 'https://www.youtube.com/embed/L_LUpnjgPso',
@@ -76,7 +76,7 @@ FALLBACK_VIDEOS = [
         'video_id': '3JZ_D3ELwOQ',
         'title': 'Education & Colleges in Jalgaon — Campus Life & Opportunities',
         'description': 'Detailed breakdown of universities, engineering colleges, and educational institutes in Jalgaon.',
-        'thumbnail_url': 'https://i.ytimg.com/vi/3JZ_D3ELwOQ/hqdefault.jpg',
+        'thumbnail_url': 'https://i.ytimg.com/vi/3JZ_D3ELwOQ/maxresdefault.jpg',
         'published_at': '2026-01-20T11:15:00Z',
         'youtube_url': 'https://www.youtube.com/watch?v=3JZ_D3ELwOQ',
         'embed_url': 'https://www.youtube.com/embed/3JZ_D3ELwOQ',
@@ -192,9 +192,10 @@ class YouTubeService:
         thumbnails = snippet.get('thumbnails', {})
         thumb_url = (
             (thumbnails.get('maxres') or {}).get('url')
+            or (thumbnails.get('standard') or {}).get('url')
+            or (f'https://i.ytimg.com/vi/{video_id}/maxresdefault.jpg' if video_id else '')
             or (thumbnails.get('high') or {}).get('url', '')
             or (thumbnails.get('medium') or {}).get('url', '')
-            or (f'https://i.ytimg.com/vi/{video_id}/hqdefault.jpg' if video_id else '')
         )
 
         title = html.unescape(snippet.get('title', ''))
@@ -280,9 +281,10 @@ class YouTubeService:
             thumbnails = snippet.get('thumbnails', {})
             thumb_url = (
                 (thumbnails.get('maxres') or {}).get('url')
+                or (thumbnails.get('standard') or {}).get('url')
+                or (f'https://i.ytimg.com/vi/{video_id}/maxresdefault.jpg' if video_id else '')
                 or (thumbnails.get('high') or {}).get('url', '')
                 or (thumbnails.get('medium') or {}).get('url', '')
-                or (f'https://i.ytimg.com/vi/{video_id}/hqdefault.jpg' if video_id else '')
             )
 
             title = html.unescape(snippet.get('title', ''))

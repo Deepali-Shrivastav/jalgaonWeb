@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import SkeletonCard from '@/components/SkeletonCard';
-import { YouTubeVideo, YouTubeVideoListResponse, YouTubeChannelInfo, DEFAULT_FALLBACK_VIDEOS } from '@/types/youtube';
+import { YouTubeVideo, YouTubeVideoListResponse, YouTubeChannelInfo, DEFAULT_FALLBACK_VIDEOS, getHighResThumbnail, handleThumbnailError } from '@/types/youtube';
 
 function formatDuration(seconds: number): string {
   if (!seconds || seconds <= 0) return '';
@@ -60,14 +60,6 @@ function formatSubscribers(subsStr?: string): string {
   return `${num} subscribers`;
 }
 
-function getHighResThumbnail(video?: YouTubeVideo | null): string {
-  if (!video) return 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?q=80&w=1200';
-  if (video.thumbnail_url) return video.thumbnail_url;
-  if (video.video_id) {
-    return `https://i.ytimg.com/vi/${video.video_id}/hqdefault.jpg`;
-  }
-  return 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?q=80&w=1200';
-}
 
 interface GlimpsePortalProps {
   initialData?: YouTubeVideoListResponse | null;
@@ -275,57 +267,55 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
               onClick={() => setActiveShortIndex(0)}
               className="text-xs font-bold text-[#0081C7] hover:underline flex items-center gap-1"
             >
-              play all shorts ⚡ &rarr;
+              play all shorts ⚡ →
             </button>
           </div>
 
-          {/* 5 Vertical Cards Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+          {/* Vertical Shorts Cards Grid (Matching YouTube Reference Layout) */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
             {displayShorts.map((short, idx) => (
               <div
                 key={`short-${short.video_id}-${idx}`}
                 onClick={() => setActiveShortIndex(idx)}
-                className="group flex flex-col justify-between bg-white border border-hairline-soft rounded-2xl overflow-hidden shadow-2xs hover:shadow-xl transition-all duration-300 cursor-pointer"
+                className="group flex flex-col cursor-pointer"
               >
-                {/* Vertical 9:16 Image Container */}
-                <div className="relative aspect-[9/16] bg-slate-900 overflow-hidden">
+                {/* 1. Vertical 9:16 Poster Image Container */}
+                <div className="relative aspect-[9/16] bg-slate-900 rounded-xl overflow-hidden shadow-2xs hover:shadow-lg transition-all duration-300 border border-hairline-soft mb-2.5">
                   <img
-                    src={short.thumbnail_url}
+                    src={getHighResThumbnail(short)}
                     alt={short.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={handleThumbnailError}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
-
-                  {/* Brand Blue Shorts Badge */}
-                  <div className="absolute top-2.5 left-2.5 bg-[#0081C7] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-md flex items-center gap-1">
-                    <span>⚡</span>
-                    <span>Shorts</span>
-                  </div>
 
                   {/* Centered Play Disc */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-10 h-10 bg-[#0081C7] text-white rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
-                      <span className="material-symbols-outlined text-xl translate-x-0.5 fill-current">
+                  <div className="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                    <div className="w-10 h-10 sm:w-11 sm:h-11 bg-[#0081C7] text-white rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                      <span className="material-symbols-outlined text-xl sm:text-2xl translate-x-0.5 fill-current">
                         play_arrow
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Bottom Details Container */}
-                <div className="p-3 flex-grow flex flex-col justify-between space-y-2">
-                  <h3 className="text-xs font-bold text-ink-deep group-hover:text-[#0081C7] transition-colors line-clamp-2 leading-snug">
+                {/* 2. Details Row Underneath Image Container */}
+                <div className="flex items-start justify-between gap-1 px-0.5">
+                  <h3 className="text-xs sm:text-sm font-bold text-ink-deep group-hover:text-[#0081C7] transition-colors line-clamp-2 leading-snug">
                     {short.title}
                   </h3>
+                  <button
+                    type="button"
+                    aria-label="Options"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-secondary hover:text-ink-deep p-0.5 shrink-0 rounded-full"
+                  >
+                    <span className="material-symbols-outlined text-base">more_vert</span>
+                  </button>
+                </div>
 
-                  <div className="flex items-center gap-3 text-[11px] text-secondary font-medium pt-1">
-                    <span className="flex items-center gap-1">
-                      👁 {formatNumber(short.view_count)}
-                    </span>
-                    <span>
-                      {formatDuration(short.duration_seconds || 45)}
-                    </span>
-                  </div>
+                {/* Views Count Text Underneath Title */}
+                <div className="text-[11px] sm:text-xs text-secondary font-normal mt-1 px-0.5">
+                  <span>{formatNumber(short.view_count)} views</span>
                 </div>
               </div>
             ))}
@@ -428,7 +418,7 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
                   rel="noopener noreferrer"
                   className="text-sky-300 font-bold hover:underline"
                 >
-                  Watch on YouTube &rarr;
+                  Watch on YouTube →
                 </a>
               </div>
             </div>
