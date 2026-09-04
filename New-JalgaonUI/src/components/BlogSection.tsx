@@ -83,8 +83,8 @@ export default function BlogSection() {
   }
 
   return (
-    <section id="blog" className="bg-surface-container-low py-section" aria-labelledby="blog-heading">
-      <div className="mx-auto max-w-container-max px-base sm:px-xxl">
+    <section id="blog" className="bg-surface-container-low py-8 sm:py-12 md:py-section" aria-labelledby="blog-heading">
+      <div className="mx-auto max-w-container-max px-4 sm:px-6 md:px-xxl">
         <div className="mb-xxl flex items-end justify-between gap-xl">
           <div>
             <p className="mb-xs text-xs font-extrabold uppercase tracking-[0.2em] text-primary">Ideas &amp; local stories</p>

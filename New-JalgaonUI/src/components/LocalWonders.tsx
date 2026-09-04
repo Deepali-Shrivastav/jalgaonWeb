@@ -100,8 +100,8 @@ export default function LocalWonders() {
   }, []);
 
   return (
-    <section id="local-wonders" className="bg-surface-container-low py-section overflow-hidden" aria-labelledby="wonders-heading">
-      <div className="mx-auto max-w-container-max px-base sm:px-xxl">
+    <section id="local-wonders" className="bg-surface-container-low py-8 sm:py-12 md:py-section overflow-hidden" aria-labelledby="wonders-heading">
+      <div className="mx-auto max-w-container-max px-4 sm:px-6 md:px-xxl">
         <div className="mb-xxl flex items-end justify-between gap-xl">
           <div>
             <p className="mb-xs text-xs font-extrabold uppercase tracking-[0.2em] text-primary">Around Jalgaon</p>

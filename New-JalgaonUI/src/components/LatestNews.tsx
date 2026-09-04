@@ -123,8 +123,8 @@ export default function LatestNews({ initialData }: { initialData?: NewsStory[] 
   }
 
   return (
-    <section id="latest-news" className="bg-surface-container-low py-section" aria-labelledby="latest-news-heading">
-      <div className="mx-auto max-w-container-max px-base sm:px-xxl">
+    <section id="latest-news" className="bg-surface-container-low py-8 sm:py-12 md:py-section" aria-labelledby="latest-news-heading">
+      <div className="mx-auto max-w-container-max px-4 sm:px-6 md:px-xxl">
         <div className="mb-xl flex items-end justify-between gap-xl">
           <div>
             <p className="mb-xs text-xs font-extrabold uppercase tracking-[0.2em] text-primary">Stay informed</p>

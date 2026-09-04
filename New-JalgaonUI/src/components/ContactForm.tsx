@@ -17,8 +17,8 @@ export default function ContactForm() {
   };
 
   return (
-    <section className="py-section bg-surface-container-low">
-      <div className="max-w-container-max mx-auto px-xxl">
+    <section className="py-8 sm:py-12 md:py-section bg-surface-container-low">
+      <div className="max-w-container-max mx-auto px-4 sm:px-6 md:px-xxl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-section">
           <div>
             <h2 className="text-4xl font-extrabold text-ink-deep mb-xl">Get in Touch</h2>

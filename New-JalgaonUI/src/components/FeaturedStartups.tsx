@@ -50,8 +50,8 @@ export default function FeaturedStartups({ initialData }: { initialData?: Startu
   };
 
   return (
-    <section id="startups" className="bg-surface py-section border-y border-hairline-soft" aria-labelledby="startups-heading">
-      <div className="mx-auto max-w-container-max px-base sm:px-xxl">
+    <section id="startups" className="bg-surface py-8 sm:py-12 md:py-section border-y border-hairline-soft" aria-labelledby="startups-heading">
+      <div className="mx-auto max-w-container-max px-4 sm:px-6 md:px-xxl">
         <div className="mb-xxl flex flex-col md:flex-row md:items-end justify-between gap-xl">
           <div>
             <p className="mb-xs text-xs font-extrabold uppercase tracking-[0.2em] text-primary">Jalgaon Innovation</p>

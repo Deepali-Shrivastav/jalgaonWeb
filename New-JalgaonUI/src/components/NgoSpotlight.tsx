@@ -37,8 +37,8 @@ export default function NgoSpotlight() {
   }, []);
 
   return (
-    <section id="ngo-spotlight" className="bg-white py-section" aria-labelledby="ngo-heading">
-      <div className="mx-auto max-w-container-max px-base sm:px-xxl">
+    <section id="ngo-spotlight" className="bg-white py-8 sm:py-12 md:py-section" aria-labelledby="ngo-heading">
+      <div className="mx-auto max-w-container-max px-4 sm:px-6 md:px-xxl">
         <h2 id="ngo-heading" className="mb-xl text-2xl font-extrabold text-ink-deep sm:text-3xl">NGO Spotlight</h2>
 
         {loading ? (

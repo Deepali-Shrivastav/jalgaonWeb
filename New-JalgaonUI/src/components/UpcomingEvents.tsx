@@ -58,8 +58,8 @@ export default function UpcomingEvents({ initialData }: { initialData?: EventIte
   }, [initialData]);
 
   return (
-    <section id="events" className="bg-surface-container-low py-xxxl sm:py-section" aria-labelledby="events-heading">
-      <div className="mx-auto max-w-container-max px-base sm:px-xxl">
+    <section id="events" className="bg-surface-container-low py-8 sm:py-12 md:py-section" aria-labelledby="events-heading">
+      <div className="mx-auto max-w-container-max px-4 sm:px-6 md:px-xxl">
         <h2 id="events-heading" className="mb-xl text-2xl font-extrabold text-ink-deep sm:text-3xl">Upcoming Events</h2>
 
         {loading ? (

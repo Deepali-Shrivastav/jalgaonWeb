@@ -108,10 +108,10 @@ export default function FloatingSideButtons() {
   return (
     <div
       ref={navRef}
-      className="fixed top-1/2 right-1.5 sm:right-3 -translate-y-1/2 z-[9999] transition-all duration-300 scale-90 sm:scale-100 origin-right"
+      className="fixed top-1/2 right-1 sm:right-3 -translate-y-1/2 z-[9999] transition-all duration-300 scale-[0.72] sm:scale-100 origin-right"
     >
       {/* High-End Frosted Glassmorphism Outer Capsule */}
-      <div className="relative flex flex-col gap-2.5 p-2 sm:p-2.5 bg-gradient-to-b from-white/70 via-white/45 to-white/25 backdrop-blur-3xl saturate-150 border border-white/80 shadow-[0_20px_50px_rgba(0,0,0,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] rounded-[28px] sm:rounded-[32px]">
+      <div className="relative flex flex-col gap-1.5 sm:gap-2.5 p-1.5 sm:p-2.5 bg-gradient-to-b from-white/70 via-white/45 to-white/25 backdrop-blur-3xl saturate-150 border border-white/80 shadow-[0_20px_50px_rgba(0,0,0,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] rounded-[22px] sm:rounded-[32px]">
         
         {/* Specular Frosted Glass Minimize/Expand Button */}
         <button
@@ -119,12 +119,12 @@ export default function FloatingSideButtons() {
           onClick={() => setIsCollapsed(!isCollapsed)}
           aria-label={isCollapsed ? "Expand Navigation" : "Collapse Navigation"}
           aria-expanded={!isCollapsed}
-          className="absolute -left-3.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/80 backdrop-blur-xl border border-white shadow-[0_4px_12px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,1)] flex items-center justify-center text-[#0081C7] hover:scale-110 active:scale-95 transition-all duration-200 z-20 cursor-pointer"
+          className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/80 backdrop-blur-xl border border-white shadow-[0_4px_12px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,1)] flex items-center justify-center text-[#0081C7] hover:scale-110 active:scale-95 transition-all duration-200 z-20 cursor-pointer"
         >
           {isCollapsed ? (
-            <ChevronsRight className="w-4 h-4 stroke-[2.5]" />
+            <ChevronsRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
           ) : (
-            <ChevronsLeft className="w-4 h-4 stroke-[2.5]" />
+            <ChevronsLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
           )}
         </button>
 
@@ -143,20 +143,20 @@ export default function FloatingSideButtons() {
               key={item.name}
               {...linkProps}
               title={item.name}
-              className={`group flex flex-col items-center justify-center rounded-[20px] sm:rounded-[22px] transition-all duration-300 cursor-pointer relative hover:scale-105 active:scale-95 ${
-                isCollapsed ? "w-11 h-11" : "w-15 h-15 sm:w-16 sm:h-16"
+              className={`group flex flex-col items-center justify-center rounded-[16px] sm:rounded-[22px] transition-all duration-300 cursor-pointer relative hover:scale-105 active:scale-95 ${
+                isCollapsed ? "w-9 h-9 sm:w-11 sm:h-11" : "w-13 h-13 sm:w-16 sm:h-16"
               } ${item.cardStyle} ${
                 isActive ? "ring-2 ring-[#0081C7] bg-white/90 shadow-md scale-[1.03]" : ""
               }`}
             >
               {/* Outline Icon */}
               <Icon className={`transition-transform duration-300 group-hover:scale-110 ${item.iconColor} ${
-                isCollapsed ? "w-5 h-5" : "w-5 h-5 sm:w-6 sm:h-6"
+                isCollapsed ? "w-4 h-4 sm:w-5 sm:h-5" : "w-4.5 h-4.5 sm:w-6 sm:h-6"
               }`} />
 
               {/* Black Text Label */}
               {!isCollapsed && (
-                <span className="text-[10px] sm:text-[11px] font-black tracking-tight text-slate-950 mt-1 leading-none">
+                <span className="text-[9px] sm:text-[11px] font-black tracking-tight text-slate-950 mt-0.5 sm:mt-1 leading-none">
                   {item.name}
                 </span>
               )}

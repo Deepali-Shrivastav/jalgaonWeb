@@ -142,10 +142,10 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
     <div className="min-h-screen flex flex-col bg-surface-container-low text-ink-deep font-sans antialiased">
       <Header />
 
-      <main className="flex-grow max-w-[1400px] w-full mx-auto px-4 sm:px-8 py-8 space-y-12">
+      <main className="flex-grow max-w-[1400px] w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-8 sm:space-y-12">
         {/* SECTION 1: HERO FEATURED EPISODE PLAYER BANNER (WIDESCREEN PODCAST) */}
         {featuredHero ? (
-          <div className="relative w-full max-w-[1340px] mx-auto rounded-xl sm:rounded-3xl overflow-hidden shadow-lg bg-slate-950 aspect-video sm:aspect-[21/9] border border-hairline-soft group">
+          <div className="relative w-full max-w-[1340px] mx-auto rounded-lg sm:rounded-3xl overflow-hidden shadow-lg bg-slate-950 aspect-video sm:aspect-[21/9] border border-hairline-soft group">
             <img
               src={getHighResThumbnail(featuredHero)}
               alt={featuredHero.title || 'Jalgaon Glimpse'}
@@ -160,8 +160,8 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
               aria-label={`Play ${featuredHero.title || 'Featured Episode'}`}
               className="absolute inset-0 flex items-center justify-center z-10 p-2"
             >
-              <div className="w-10 h-10 sm:w-20 sm:h-20 bg-[#0081C7]/90 backdrop-blur-md hover:bg-[#0081C7] text-white rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(0,129,199,0.7)] group-hover:scale-110 transition-all duration-300 -translate-y-2 sm:translate-y-0">
-                <span className="material-symbols-outlined text-xl sm:text-5xl translate-x-0.5 fill-current">
+              <div className="w-12 h-12 sm:w-20 sm:h-20 bg-[#0081C7]/90 backdrop-blur-md hover:bg-[#0081C7] text-white rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(0,129,199,0.7)] group-hover:scale-110 transition-all duration-300">
+                <span className="material-symbols-outlined text-2xl sm:text-5xl translate-x-0.5 fill-current">
                   play_arrow
                 </span>
               </div>
@@ -172,7 +172,7 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
               <span className="inline-block bg-[#0081C7] text-white text-[9px] sm:text-[11px] font-black uppercase tracking-wider px-2 py-0.5 sm:px-3.5 sm:py-1 rounded-full shadow-sm">
                 featured episode
               </span>
-              <h1 className="text-xs sm:text-xl md:text-3xl font-bold sm:font-black text-white leading-tight drop-shadow-md capitalize line-clamp-2 sm:line-clamp-3">
+              <h1 className="text-sm sm:text-xl md:text-3xl font-bold sm:font-black text-white leading-tight drop-shadow-md capitalize line-clamp-2 sm:line-clamp-3">
                 {featuredHero.title}
               </h1>
             </div>
@@ -182,18 +182,18 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
         )}
 
         {/* SECTION 2: DON'T MISS OUT / TRENDING PODCAST EPISODES (WIDESCREEN 16:9 GRID) */}
-        <div className="space-y-6 max-w-[1340px] mx-auto pt-2">
-          <div className="border-b border-hairline-soft pb-4">
-            <span className="text-xs font-black uppercase tracking-widest text-[#0081C7] block mb-1">
+        <div className="space-y-4 sm:space-y-6 max-w-[1340px] mx-auto pt-2">
+          <div className="border-b border-hairline-soft pb-3 sm:pb-4">
+            <span className="text-[11px] sm:text-xs font-black uppercase tracking-widest text-[#0081C7] block mb-1">
               don't miss out
             </span>
-            <h2 className="text-2xl sm:text-4xl font-black text-ink-deep tracking-tight capitalize">
+            <h2 className="text-xl sm:text-4xl font-black text-ink-deep tracking-tight capitalize">
               trending episodes
             </h2>
           </div>
 
           {/* 3 Columns Podcast Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
             {displayPodcasts.map((podcast, idx) => (
               <Link
                 key={`podcast-${podcast.video_id}-${idx}`}
@@ -225,17 +225,17 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
                 </div>
 
                 {/* Content Details */}
-                <div className="p-5 flex-grow flex flex-col justify-between space-y-3">
-                  <div className="space-y-2">
-                    <h3 className="text-sm sm:text-base font-bold text-ink-deep group-hover:text-[#0081C7] transition-colors line-clamp-2 leading-snug">
+                <div className="p-4 sm:p-5 flex-grow flex flex-col justify-between space-y-3">
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <h3 className="text-xs sm:text-base font-bold text-ink-deep group-hover:text-[#0081C7] transition-colors line-clamp-2 leading-snug">
                       {podcast.title}
                     </h3>
-                    <p className="text-secondary text-xs line-clamp-2 leading-relaxed">
+                    <p className="text-secondary text-[11px] sm:text-xs line-clamp-2 leading-relaxed">
                       {podcast.description}
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs text-secondary pt-3 border-t border-hairline-soft">
+                  <div className="flex items-center justify-between text-[11px] sm:text-xs text-secondary pt-2.5 sm:pt-3 border-t border-hairline-soft">
                     <span className="flex items-center gap-1.5 font-medium">
                       <span className="material-symbols-outlined text-sm text-outline">calendar_today</span>
                       {formatDate(podcast.published_at || '')}
@@ -251,13 +251,13 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
         </div>
 
         {/* SECTION 3: QUICK BITES / YT SHORTS (PLAYS DIRECTLY IN SHORTS SECTION) */}
-        <div id="shorts-section" className="space-y-6 max-w-[1340px] mx-auto pt-6 scroll-mt-24">
-          <div className="flex items-end justify-between border-b border-hairline-soft pb-4">
+        <div id="shorts-section" className="space-y-4 sm:space-y-6 max-w-[1340px] mx-auto pt-4 sm:pt-6 scroll-mt-24">
+          <div className="flex items-end justify-between border-b border-hairline-soft pb-3 sm:pb-4">
             <div>
-              <span className="text-xs font-black uppercase tracking-widest text-[#0081C7] block mb-1">
+              <span className="text-[11px] sm:text-xs font-black uppercase tracking-widest text-[#0081C7] block mb-1">
                 quick bites
               </span>
-              <h2 className="text-2xl sm:text-4xl font-black text-ink-deep tracking-tight capitalize">
+              <h2 className="text-xl sm:text-4xl font-black text-ink-deep tracking-tight capitalize">
                 shorts
               </h2>
             </div>
@@ -265,14 +265,14 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
             <button
               type="button"
               onClick={() => setActiveShortIndex(0)}
-              className="text-xs font-bold text-[#0081C7] hover:underline flex items-center gap-1"
+              className="text-xs font-bold text-[#0081C7] hover:underline flex items-center gap-1 cursor-pointer"
             >
               play all shorts ⚡ →
             </button>
           </div>
 
           {/* Vertical Shorts Cards Grid (Matching YouTube Reference Layout) */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-6">
             {displayShorts.map((short, idx) => (
               <div
                 key={`short-${short.video_id}-${idx}`}
@@ -280,7 +280,7 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
                 className="group flex flex-col cursor-pointer"
               >
                 {/* 1. Vertical 9:16 Poster Image Container */}
-                <div className="relative aspect-[9/16] bg-slate-900 rounded-xl overflow-hidden shadow-2xs hover:shadow-lg transition-all duration-300 border border-hairline-soft mb-2.5">
+                <div className="relative aspect-[9/16] bg-slate-900 rounded-xl overflow-hidden shadow-2xs hover:shadow-lg transition-all duration-300 border border-hairline-soft mb-2">
                   <img
                     src={getHighResThumbnail(short)}
                     alt={short.title}
@@ -290,8 +290,8 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
 
                   {/* Centered Play Disc */}
                   <div className="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-                    <div className="w-10 h-10 sm:w-11 sm:h-11 bg-[#0081C7] text-white rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
-                      <span className="material-symbols-outlined text-xl sm:text-2xl translate-x-0.5 fill-current">
+                    <div className="w-9 h-9 sm:w-11 sm:h-11 bg-[#0081C7] text-white rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                      <span className="material-symbols-outlined text-lg sm:text-2xl translate-x-0.5 fill-current">
                         play_arrow
                       </span>
                     </div>
@@ -309,12 +309,12 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
                     onClick={(e) => e.stopPropagation()}
                     className="text-secondary hover:text-ink-deep p-0.5 shrink-0 rounded-full"
                   >
-                    <span className="material-symbols-outlined text-base">more_vert</span>
+                    <span className="material-symbols-outlined text-sm sm:text-base">more_vert</span>
                   </button>
                 </div>
 
                 {/* Views Count Text Underneath Title */}
-                <div className="text-[11px] sm:text-xs text-secondary font-normal mt-1 px-0.5">
+                <div className="text-[10px] sm:text-xs text-secondary font-normal mt-0.5 sm:mt-1 px-0.5">
                   <span>{formatNumber(short.view_count)} views</span>
                 </div>
               </div>
@@ -325,41 +325,41 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
 
       {/* --- INLINE SHORTS REEL MODAL PLAYER (PLAYS DIRECTLY IN SHORTS SECTION) --- */}
       {currentShort && activeShortIndex !== null && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 sm:p-6 animate-fadeIn">
-          <div className="relative flex flex-col items-center max-w-full max-h-[90vh]">
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 animate-fadeIn overflow-y-auto">
+          <div className="relative flex flex-col items-center w-full max-w-[420px] max-h-[92vh]">
 
             {/* Modal Header Controls */}
-            <div className="w-full max-w-[420px] flex items-center justify-between px-2 mb-3 text-white">
-              <div className="flex items-center gap-2 text-xs font-bold">
-                <span className="w-2 h-2 rounded-full bg-[#0081C7] animate-pulse" />
-                <span className="text-sky-300">⚡ Jalgaon Shorts ({activeShortIndex + 1}/{displayShorts.length})</span>
+            <div className="w-full flex items-center justify-between px-2 mb-2 text-white">
+              <div className="flex items-center gap-2 text-xs font-bold truncate pr-2">
+                <span className="w-2 h-2 rounded-full bg-[#0081C7] animate-pulse shrink-0" />
+                <span className="text-sky-300 truncate">⚡ Jalgaon Shorts ({activeShortIndex + 1}/{displayShorts.length})</span>
               </div>
 
               <button
                 type="button"
                 onClick={() => setActiveShortIndex(null)}
-                className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-all"
+                className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-all shrink-0 cursor-pointer"
                 aria-label="Close shorts player"
               >
                 <span className="material-symbols-outlined text-xl">close</span>
               </button>
             </div>
 
-            {/* Vertical 9:16 Shorts Player Stage with Navigation */}
-            <div className="relative flex items-center gap-3 sm:gap-5">
+            {/* Vertical 9:16 Shorts Player Stage with Mobile-Optimized Navigation */}
+            <div className="relative w-full flex items-center justify-center">
 
-              {/* Prev Short Arrow */}
+              {/* Prev Short Arrow (Positioned overlay on mobile, side-by-side on desktop) */}
               <button
                 type="button"
                 onClick={() => setActiveShortIndex((prev) => (prev !== null && prev > 0 ? prev - 1 : displayShorts.length - 1))}
-                className="w-10 h-10 rounded-full bg-white/20 hover:bg-[#0081C7] text-white flex items-center justify-center shadow-lg transition-all"
+                className="absolute left-1 sm:-left-14 z-30 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-black/60 sm:bg-white/20 hover:bg-[#0081C7] text-white flex items-center justify-center shadow-lg transition-all border border-white/20 sm:border-0 cursor-pointer"
                 aria-label="Previous short"
               >
-                <span className="material-symbols-outlined text-2xl">arrow_back</span>
+                <span className="material-symbols-outlined text-xl sm:text-2xl">arrow_back</span>
               </button>
 
               {/* 9:16 Video Frame */}
-              <div className="relative aspect-[9/16] w-[320px] sm:w-[380px] h-[65vh] max-h-[680px] rounded-3xl overflow-hidden bg-black shadow-2xl border-2 border-white/20">
+              <div className="relative aspect-[9/16] w-full max-w-[310px] sm:max-w-[380px] h-[55vh] sm:h-[65vh] max-h-[640px] rounded-lg sm:rounded-3xl overflow-hidden bg-black shadow-2xl border-2 border-white/20">
                 <iframe
                   src={`https://www.youtube-nocookie.com/embed/${currentShort.video_id}?autoplay=1&rel=0&modestbranding=1`}
                   title={currentShort.title}
@@ -373,27 +373,27 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
               <button
                 type="button"
                 onClick={() => setActiveShortIndex((prev) => (prev !== null && prev < displayShorts.length - 1 ? prev + 1 : 0))}
-                className="w-10 h-10 rounded-full bg-white/20 hover:bg-[#0081C7] text-white flex items-center justify-center shadow-lg transition-all"
+                className="absolute right-1 sm:-right-14 z-30 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-black/60 sm:bg-white/20 hover:bg-[#0081C7] text-white flex items-center justify-center shadow-lg transition-all border border-white/20 sm:border-0 cursor-pointer"
                 aria-label="Next short"
               >
-                <span className="material-symbols-outlined text-2xl">arrow_forward</span>
+                <span className="material-symbols-outlined text-xl sm:text-2xl">arrow_forward</span>
               </button>
             </div>
 
             {/* Bottom Title & Details */}
-            <div className="w-full max-w-[420px] mt-4 bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/15 text-white text-xs space-y-3">
+            <div className="w-full max-w-[310px] sm:max-w-[380px] mt-3 bg-white/10 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-white/15 text-white text-xs space-y-2.5">
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-white p-0.5 overflow-hidden shrink-0 shadow-sm">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white p-0.5 overflow-hidden shrink-0 shadow-sm">
                     <img src="/title-logo.png" alt="Jalgaon Logo" className="w-full h-full object-contain rounded-full" />
                   </div>
-                  <div>
-                    <div className="flex items-center gap-1 text-white font-extrabold text-xs">
-                      <span>{channelInfo?.title || 'jalgaondotcom'}</span>
-                      <span className="material-symbols-outlined text-xs text-sky-400 fill-current">check_circle</span>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1 text-white font-extrabold text-[11px] sm:text-xs truncate">
+                      <span className="truncate">{channelInfo?.title || 'jalgaondotcom'}</span>
+                      <span className="material-symbols-outlined text-xs text-sky-400 fill-current shrink-0">check_circle</span>
                     </div>
                     {channelInfo?.subscriber_count && (
-                      <span className="text-[10px] text-white/70 font-medium">{formatSubscribers(channelInfo.subscriber_count)}</span>
+                      <span className="text-[10px] text-white/70 font-medium block truncate">{formatSubscribers(channelInfo.subscriber_count)}</span>
                     )}
                   </div>
                 </div>
@@ -401,16 +401,16 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
                   href={channelInfo?.youtube_url || "https://www.youtube.com/channel/UC1_W6Le5fkEDxsNFZEqPsAA?sub_confirmation=1"}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-[#0081C7] hover:bg-sky-600 text-white font-extrabold text-[11px] px-3 py-1.5 rounded-full transition-all shadow-sm shrink-0"
+                  className="bg-[#0081C7] hover:bg-sky-600 text-white font-extrabold text-[10px] sm:text-[11px] px-3 py-1.5 rounded-full transition-all shadow-sm shrink-0"
                 >
                   Subscribe
                 </a>
               </div>
 
-              <h3 className="font-bold text-sm text-white line-clamp-2 leading-snug">
+              <h3 className="font-bold text-xs sm:text-sm text-white line-clamp-2 leading-snug">
                 {currentShort.title}
               </h3>
-              <div className="flex items-center justify-between text-white/70 text-[11px] pt-1 border-t border-white/10">
+              <div className="flex items-center justify-between text-white/70 text-[10px] sm:text-[11px] pt-1 border-t border-white/10">
                 <span>👁 {formatNumber(currentShort.view_count)} views</span>
                 <a
                   href={currentShort.youtube_url}

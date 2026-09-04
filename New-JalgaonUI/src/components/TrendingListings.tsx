@@ -73,11 +73,11 @@ export default function TrendingListings({ selectedCity, initialData }: Trending
   const displayListings = filteredListings.slice(0, 4);
 
   return (
-    <section className="py-section bg-white">
-      <div className="max-w-container-max mx-auto px-xxl">
-        <div className="flex justify-between items-end mb-xxl">
+    <section className="py-8 sm:py-12 md:py-section bg-white">
+      <div className="max-w-container-max mx-auto px-4 sm:px-6 md:px-xxl">
+        <div className="flex justify-between items-end mb-6 sm:mb-xxl">
           <div>
-            <h2 className="text-3xl font-extrabold text-ink-deep mb-xxs">Trending Listings</h2>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-ink-deep mb-xxs">Trending Listings</h2>
             <p className="text-secondary">The most visited local hotspots this week</p>
           </div>
         </div>

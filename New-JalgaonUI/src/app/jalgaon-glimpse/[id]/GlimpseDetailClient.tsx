@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -151,12 +151,13 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
   const [playerMode, setPlayerMode] = useState<'short' | 'standard' | 'auto'>('auto');
   const activeMode = playerMode === 'auto' ? (isShortVideo ? 'short' : 'standard') : playerMode;
 
+
   return (
     <div className="min-h-screen flex flex-col bg-surface-container-low">
       <Header />
 
       {/* Main YouTube Layout Container */}
-      <main className="flex-grow max-w-[1750px] w-full mx-auto px-4 lg:px-6 py-6">
+      <main className="flex-grow max-w-[1750px] w-full mx-auto px-2 sm:px-4 lg:px-6 py-3 sm:py-6">
         {/* Loading State */}
         {loading && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -175,19 +176,19 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
 
         {/* Error State */}
         {!loading && error && (
-          <div className="bg-white border border-hairline-soft rounded-2xl p-10 text-center max-w-xl mx-auto my-16 shadow-sm">
-            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600">
-              <span className="material-symbols-outlined text-3xl">error_outline</span>
+          <div className="bg-white border border-hairline-soft rounded-2xl p-6 sm:p-10 text-center max-w-xl mx-auto my-10 sm:my-16 shadow-sm">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600">
+              <span className="material-symbols-outlined text-2xl sm:text-3xl">error_outline</span>
             </div>
-            <h3 className="text-xl font-bold text-ink-deep mb-2">
+            <h3 className="text-lg sm:text-xl font-bold text-ink-deep mb-2">
               Video Unavailable
             </h3>
-            <p className="text-secondary text-sm mb-6">
+            <p className="text-secondary text-xs sm:text-sm mb-6">
               {error}
             </p>
             <Link
               href="/jalgaon-glimpse"
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#0081C7] hover:bg-sky-700 text-white rounded-full font-bold shadow text-xs transition-all"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0081C7] hover:bg-sky-700 text-white rounded-full font-bold shadow text-xs transition-all"
             >
               &larr; Back to Jalgaon Glimpse
             </Link>
@@ -198,28 +199,28 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
         {!loading && !error && video && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Left Main Column (~68% width = 8 cols) */}
-            <div className="lg:col-span-8 space-y-4">
+            <div className="lg:col-span-8 space-y-4 min-w-0">
 
               {/* VIDEO PLAYER CONTAINER */}
               {activeMode === 'short' ? (
                 /* --- CLEAN LIGHT MODE SHORTS REEL STAGE --- */
-                <div className="relative w-full bg-white border border-hairline-soft rounded-3xl p-4 sm:p-6 shadow-sm flex flex-col items-center justify-center overflow-hidden my-1">
+                <div className="relative w-full bg-white border border-hairline-soft rounded-2xl sm:rounded-3xl p-2 sm:p-6 shadow-sm flex flex-col items-center justify-center overflow-hidden my-1">
 
-                  {/* Top Bar Navigation */}
-                  <div className="w-full flex items-center justify-between px-2 mb-4">
+                  {/* Top Bar Navigation (Hidden on Mobile View) */}
+                  <div className="hidden sm:flex w-full items-center justify-between px-1 sm:px-2 mb-3 sm:mb-4">
                     <Link
                       href="/jalgaon-glimpse"
-                      className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-ink-deep rounded-full text-xs font-bold transition-all border border-hairline-soft"
+                      className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-slate-100 hover:bg-slate-200 text-ink-deep rounded-full text-[11px] sm:text-xs font-bold transition-all border border-hairline-soft"
                     >
-                      <span className="material-symbols-outlined text-base text-[#0081C7]">arrow_back</span>
+                      <span className="material-symbols-outlined text-sm sm:text-base text-[#0081C7]">arrow_back</span>
                       <span>Back to Glimpse</span>
                     </Link>
                   </div>
 
-                  {/* SHORTS MAIN STAGE CONTAINER (CENTERED 9:16 WITH SIDEBAR ACTIONS & INFO) */}
-                  <div className="relative flex items-center justify-center gap-4 sm:gap-6 w-full max-w-[1150px] min-h-[580px]">
+                  {/* SHORTS MAIN STAGE CONTAINER (CENTERED 9:16 WITH RESPONSIVE ACTION BUTTONS & INFO) */}
+                  <div className="relative flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-6 w-full max-w-[1150px] min-h-[460px] sm:min-h-[580px]">
 
-                    {/* LEFT CHANNEL OVERLAY & TITLE (LIGHT GLASS CARD) */}
+                    {/* LEFT CHANNEL OVERLAY & TITLE (LIGHT GLASS CARD - DESKTOP ONLY) */}
                     <div className="hidden lg:flex flex-col justify-end max-w-[300px] h-full space-y-3 shrink-0">
                       {/* Channel Row */}
                       <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-hairline-soft shadow-2xs">
@@ -257,7 +258,7 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                     </div>
 
                     {/* CENTER 9:16 VERTICAL VIDEO PLAYER CONTAINER */}
-                    <div className="relative aspect-[9/16] w-full max-w-[360px] sm:max-w-[390px] rounded-2xl overflow-hidden bg-slate-950 shadow-xl border border-hairline-soft shrink-0">
+                    <div className="relative aspect-[9/16] w-full max-w-[360px] sm:max-w-[390px] rounded-lg overflow-hidden bg-slate-950 shadow-xl border border-hairline-soft shrink-0">
                       <iframe
                         src={`https://www.youtube-nocookie.com/embed/${video.video_id}?autoplay=1&rel=0&modestbranding=1`}
                         title={video.title}
@@ -265,32 +266,107 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                         allowFullScreen
                         className="absolute -inset-[1px] w-[calc(100%+2px)] h-[calc(100%+2px)] border-0 scale-[1.005]"
                       />
+
                     </div>
 
-                    {/* RIGHT ACTION BUTTONS COLUMN */}
-                    <div className="flex flex-col items-center justify-end h-full space-y-4 shrink-0">
-                      {/* Like Button */}
-                      <button type="button" className="flex flex-col items-center gap-1 group">
-                        <div className="w-12 h-12 rounded-full bg-slate-100 group-hover:bg-[#0081C7] group-hover:text-white text-ink-deep border border-hairline-soft flex items-center justify-center transition-all shadow-2xs group-hover:scale-110">
-                          <span className="material-symbols-outlined text-2xl text-[#0081C7] group-hover:text-white">favorite</span>
+                    {/* MOBILE CHANNEL DETAILS & ACTION CONTROLS CARD (STRUCTURED & NON-OVERLAPPING) */}
+                    <div className="sm:hidden w-full max-w-[360px] mt-2 space-y-2.5 px-0.5">
+                      {/* Channel & Subscribe Row */}
+                      <div className="flex items-center justify-between gap-2 bg-slate-50 p-2.5 rounded-xl border border-hairline-soft shadow-2xs">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-8 h-8 rounded-full bg-white p-0.5 border border-hairline-soft overflow-hidden shrink-0 shadow-xs">
+                            <img src="/title-logo.png" alt="Jalgaon Logo" className="w-full h-full object-contain rounded-full" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-xs font-extrabold text-ink-deep truncate flex items-center gap-1">
+                              <span>@JalgaonGlimpse</span>
+                              <span className="material-symbols-outlined text-xs text-[#0081C7]">check_circle</span>
+                            </div>
+                            <span className="text-[10px] text-secondary font-medium block truncate">125K subscribers</span>
+                          </div>
                         </div>
-                        <span className="text-xs font-extrabold text-ink-deep">{formatNumber(video.like_count || '85000')}</span>
+                        <a
+                          href="https://www.youtube.com/channel/UC1_W6Le5fkEDxsNFZEqPsAA?sub_confirmation=1"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-[#0081C7] hover:bg-sky-700 text-white text-[11px] font-extrabold px-3 py-1.5 rounded-full transition-all shrink-0 shadow-xs"
+                        >
+                          Subscribe
+                        </a>
+                      </div>
+
+                      {/* Title & Hashtags */}
+                      <div className="bg-slate-50 p-3 rounded-xl border border-hairline-soft space-y-1">
+                        <h2 className="text-xs font-bold text-ink-deep line-clamp-2 leading-snug">
+                          {video.title}
+                        </h2>
+                        <div className="text-[11px] font-bold text-[#0081C7] flex items-center gap-1.5 flex-wrap">
+                          <span>#Jalgaon</span>
+                          <span>#MarathiPodcast</span>
+                          <span>#Shorts</span>
+                        </div>
+                      </div>
+
+                      {/* Action Pill Controls Row */}
+                      <div className="flex items-center justify-between gap-1.5 bg-slate-50 p-2 rounded-xl border border-hairline-soft">
+                        {/* Like Button */}
+                        <button type="button" className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-hairline-soft hover:bg-slate-100 text-xs font-bold transition-all shadow-2xs">
+                          <span className="material-symbols-outlined text-base text-[#0081C7]">favorite</span>
+                          <span>{formatNumber(video.like_count || '85000')}</span>
+                        </button>
+
+                        {/* Comment Button */}
+                        <button type="button" className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-hairline-soft hover:bg-slate-100 text-xs font-bold transition-all shadow-2xs">
+                          <span className="material-symbols-outlined text-base text-secondary">chat_bubble</span>
+                          <span>252</span>
+                        </button>
+
+                        {/* Share Button */}
+                        <button type="button" className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-hairline-soft hover:bg-slate-100 text-xs font-bold transition-all shadow-2xs">
+                          <span className="material-symbols-outlined text-base text-secondary">share</span>
+                          <span>Share</span>
+                        </button>
+
+                        {/* Watch on YouTube Button */}
+                        <a
+                          href={video.youtube_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-50 border border-red-200 text-red-600 hover:bg-red-600 hover:text-white text-xs font-extrabold transition-all shadow-2xs"
+                          title="Watch on YouTube"
+                        >
+                          <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                          </svg>
+                          <span>Glimpse</span>
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* RIGHT ACTION BUTTONS COLUMN (TABLET & DESKTOP ONLY) */}
+                    <div className="hidden sm:flex flex-col items-center justify-end h-full space-y-3 sm:space-y-4 shrink-0">
+                      {/* Like Button */}
+                      <button type="button" className="flex flex-col items-center gap-0.5 sm:gap-1 group">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-100 group-hover:bg-[#0081C7] group-hover:text-white text-ink-deep border border-hairline-soft flex items-center justify-center transition-all shadow-2xs group-hover:scale-110">
+                          <span className="material-symbols-outlined text-xl sm:text-2xl text-[#0081C7] group-hover:text-white">favorite</span>
+                        </div>
+                        <span className="text-[10px] sm:text-xs font-extrabold text-ink-deep">{formatNumber(video.like_count || '85000')}</span>
                       </button>
 
                       {/* Comment Button */}
-                      <button type="button" className="flex flex-col items-center gap-1 group">
-                        <div className="w-12 h-12 rounded-full bg-slate-100 group-hover:bg-[#0081C7] group-hover:text-white text-ink-deep border border-hairline-soft flex items-center justify-center transition-all shadow-2xs group-hover:scale-110">
-                          <span className="material-symbols-outlined text-2xl text-secondary group-hover:text-white">chat_bubble</span>
+                      <button type="button" className="flex flex-col items-center gap-0.5 sm:gap-1 group">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-100 group-hover:bg-[#0081C7] group-hover:text-white text-ink-deep border border-hairline-soft flex items-center justify-center transition-all shadow-2xs group-hover:scale-110">
+                          <span className="material-symbols-outlined text-xl sm:text-2xl text-secondary group-hover:text-white">chat_bubble</span>
                         </div>
-                        <span className="text-xs font-extrabold text-ink-deep">252</span>
+                        <span className="text-[10px] sm:text-xs font-extrabold text-ink-deep">252</span>
                       </button>
 
                       {/* Share Button */}
-                      <button type="button" className="flex flex-col items-center gap-1 group">
-                        <div className="w-12 h-12 rounded-full bg-slate-100 group-hover:bg-[#0081C7] group-hover:text-white text-ink-deep border border-hairline-soft flex items-center justify-center transition-all shadow-2xs group-hover:scale-110">
-                          <span className="material-symbols-outlined text-2xl text-secondary group-hover:text-white">share</span>
+                      <button type="button" className="flex flex-col items-center gap-0.5 sm:gap-1 group">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-100 group-hover:bg-[#0081C7] group-hover:text-white text-ink-deep border border-hairline-soft flex items-center justify-center transition-all shadow-2xs group-hover:scale-110">
+                          <span className="material-symbols-outlined text-xl sm:text-2xl text-secondary group-hover:text-white">share</span>
                         </div>
-                        <span className="text-xs font-extrabold text-ink-deep">Share</span>
+                        <span className="text-[10px] sm:text-xs font-extrabold text-ink-deep">Share</span>
                       </button>
 
                       {/* Watch on YouTube Button */}
@@ -298,15 +374,15 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                         href={video.youtube_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex flex-col items-center gap-1 group"
+                        className="flex flex-col items-center gap-0.5 sm:gap-1 group"
                         title="Watch on YouTube"
                       >
-                        <div className="w-12 h-12 rounded-full bg-red-50 group-hover:bg-red-600 text-red-600 group-hover:text-white border border-red-200 flex items-center justify-center transition-all shadow-2xs group-hover:scale-110">
-                          <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-50 group-hover:bg-red-600 text-red-600 group-hover:text-white border border-red-200 flex items-center justify-center transition-all shadow-2xs group-hover:scale-110">
+                          <svg className="w-4 h-4 sm:w-5 sm:h-5 fill-current" viewBox="0 0 24 24">
                             <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                           </svg>
                         </div>
-                        <span className="text-[11px] font-bold text-secondary">Glimpse</span>
+                        <span className="text-[10px] sm:text-[11px] font-bold text-secondary">Glimpse</span>
                       </a>
                     </div>
 
@@ -336,7 +412,7 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                 </div>
               ) : (
                 /* --- STANDARD WIDESCREEN PLAYER (16:9 ASPECT RATIO) --- */
-                <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 shadow-lg border border-hairline-soft">
+                <div className="relative aspect-video w-full rounded-md overflow-hidden bg-slate-950 shadow-lg border border-hairline-soft">
                   <iframe
                     src={`https://www.youtube-nocookie.com/embed/${video.video_id}?autoplay=1&rel=0&modestbranding=1`}
                     title={video.title}
@@ -348,53 +424,55 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
               )}
 
               {/* Video Title */}
-              <h1 className="text-xl sm:text-2xl font-black text-ink-deep leading-snug tracking-tight">
+              <h1 className="text-lg sm:text-2xl font-black text-ink-deep leading-snug tracking-tight">
                 {video.title}
               </h1>
 
-              {/* YouTube Channel & Actions Row */}
-              <div className="flex flex-wrap items-center justify-between gap-4 py-2 border-b border-hairline-soft pb-4">
+              {/* YouTube Channel & Actions Row (Mobile Responsive Flex Wrap) */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 py-2 border-b border-hairline-soft pb-4">
                 {/* Left: Channel Info */}
-                <div className="flex items-center gap-3">
-                  <Link href="/jalgaon-glimpse">
-                    <div className="w-11 h-11 rounded-full bg-white p-0.5 border-2 border-[#0081C7]/30 overflow-hidden shrink-0 shadow-md hover:scale-105 transition-transform">
-                      <img
-                        src="/title-logo.png"
-                        alt="Jalgaon Logo"
-                        className="w-full h-full object-contain rounded-full"
-                      />
-                    </div>
-                  </Link>
+                <div className="flex items-center justify-between sm:justify-start gap-3 w-full sm:w-auto">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <Link href="/jalgaon-glimpse" className="shrink-0">
+                      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white p-0.5 border-2 border-[#0081C7]/30 overflow-hidden shrink-0 shadow-md hover:scale-105 transition-transform">
+                        <img
+                          src="/title-logo.png"
+                          alt="Jalgaon Logo"
+                          className="w-full h-full object-contain rounded-full"
+                        />
+                      </div>
+                    </Link>
 
-                  <div>
-                    <div className="flex items-center gap-1.5 text-sm sm:text-base font-extrabold text-ink-deep hover:text-[#0081C7] transition-colors">
-                      <span>{channelInfo?.title || 'jalgaondotcom'}</span>
-                      <span className="material-symbols-outlined text-base text-[#0081C7]">check_circle</span>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-base font-extrabold text-ink-deep hover:text-[#0081C7] transition-colors truncate">
+                        <span className="truncate">{channelInfo?.title || 'jalgaondotcom'}</span>
+                        <span className="material-symbols-outlined text-sm sm:text-base text-[#0081C7] shrink-0">check_circle</span>
+                      </div>
+                      {channelInfo?.subscriber_count && (
+                        <span className="text-[11px] sm:text-xs text-secondary font-medium block truncate">{formatSubscribers(channelInfo.subscriber_count)}</span>
+                      )}
                     </div>
-                    {channelInfo?.subscriber_count && (
-                      <span className="text-xs text-secondary font-medium">{formatSubscribers(channelInfo.subscriber_count)}</span>
-                    )}
                   </div>
 
                   <a
                     href="https://www.youtube.com/channel/UC1_W6Le5fkEDxsNFZEqPsAA?sub_confirmation=1"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="ml-3 bg-gradient-to-r from-[#0081C7] to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-extrabold text-xs px-5 py-2.5 rounded-full transition-all shadow-md hover:shadow-lg hover:scale-105 active:scale-95 flex items-center gap-1.5"
+                    className="bg-gradient-to-r from-[#0081C7] to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-extrabold text-[11px] sm:text-xs px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full transition-all shadow-md hover:shadow-lg hover:scale-105 active:scale-95 flex items-center gap-1 shrink-0 ml-auto sm:ml-3"
                   >
                     <span>🔔</span> Subscribe
                   </a>
                 </div>
 
-                {/* Right: YouTube Action Pill Controls */}
-                <div className="flex items-center space-x-2">
+                {/* Right: YouTube Action Pill Controls (Fully Aligned & Always Visible) */}
+                <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto hide-scrollbar py-1 max-w-full">
                   {/* Like/Dislike Pill */}
-                  <div className="bg-white hover:bg-slate-50 text-ink-deep border border-hairline-soft rounded-full flex items-center text-xs font-bold transition-all shadow-xs">
-                    <button type="button" className="flex items-center gap-1.5 px-4 py-2 hover:bg-slate-100 rounded-l-full border-r border-hairline-soft">
+                  <div className="h-9 bg-white hover:bg-slate-50 text-ink-deep border border-hairline-soft rounded-full flex items-center text-xs font-bold transition-all shadow-xs shrink-0">
+                    <button type="button" className="h-full flex items-center gap-1 pl-3 pr-2.5 sm:px-4 hover:bg-slate-100 rounded-l-full border-r border-hairline-soft">
                       <span className="material-symbols-outlined text-base text-[#0081C7]">thumb_up</span>
                       <span>{formatNumber(video.like_count || '44000')}</span>
                     </button>
-                    <button type="button" className="px-3.5 py-2 hover:bg-slate-100 rounded-r-full">
+                    <button type="button" className="h-full flex items-center px-2.5 sm:px-3.5 hover:bg-slate-100 rounded-r-full">
                       <span className="material-symbols-outlined text-base text-secondary">thumb_down</span>
                     </button>
                   </div>
@@ -402,7 +480,7 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                   {/* Share Pill */}
                   <button
                     type="button"
-                    className="bg-white hover:bg-slate-50 text-ink-deep border border-hairline-soft px-4 py-2 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs hover:border-sky-300"
+                    className="h-9 bg-white hover:bg-slate-50 text-ink-deep border border-hairline-soft px-3 sm:px-4 rounded-full text-xs font-bold flex items-center gap-1 sm:gap-1.5 transition-all shadow-xs hover:border-sky-300 shrink-0"
                   >
                     <span className="material-symbols-outlined text-base text-[#0081C7]">share</span>
                     <span>Share</span>
@@ -413,9 +491,9 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                     href={video.youtube_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-700 hover:to-rose-800 text-white px-4 py-2 rounded-full text-xs font-extrabold flex items-center gap-1.5 transition-all shadow-md hover:scale-105"
+                    className="h-9 bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-700 hover:to-rose-800 text-white px-3 sm:px-4 rounded-full text-xs font-extrabold flex items-center gap-1 sm:gap-1.5 transition-all shadow-md hover:scale-105 shrink-0"
                   >
-                    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" viewBox="0 0 24 24">
                       <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                     </svg>
                     <span>YouTube</span>
@@ -424,7 +502,8 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                   {/* 3-Dots Menu Pill */}
                   <button
                     type="button"
-                    className="bg-white hover:bg-slate-100 border border-hairline-soft text-ink-deep w-9 h-9 rounded-full flex items-center justify-center transition-colors shadow-xs"
+                    aria-label="More options"
+                    className="h-9 w-9 bg-white hover:bg-slate-100 border border-hairline-soft text-ink-deep rounded-full flex items-center justify-center transition-colors shadow-xs shrink-0"
                   >
                     <span className="material-symbols-outlined text-base">more_horiz</span>
                   </button>
@@ -434,7 +513,7 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
               {/* YouTube Description Card Container */}
               <div
                 onClick={() => setShowFullDescription(!showFullDescription)}
-                className="bg-gradient-to-br from-white via-sky-50/20 to-white border border-hairline-soft hover:border-[#0081C7]/30 p-5 rounded-2xl text-xs sm:text-sm text-ink-deep cursor-pointer transition-all space-y-2 shadow-xs hover:shadow-md"
+                className="bg-gradient-to-br from-white via-sky-50/20 to-white border border-hairline-soft hover:border-[#0081C7]/30 p-4 sm:p-5 rounded-2xl text-xs sm:text-sm text-ink-deep cursor-pointer transition-all space-y-2 shadow-xs hover:shadow-md"
               >
                 <div className="font-extrabold text-ink-deep flex items-center gap-2 text-xs flex-wrap">
                   <span className="bg-[#0081C7]/10 text-[#0081C7] px-2.5 py-0.5 rounded-full font-bold">
@@ -517,10 +596,10 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                           <Link
                             key={`top-v-${item.video_id}-${idx}`}
                             href={`/jalgaon-glimpse/${item.video_id}`}
-                            className="group flex items-start gap-3 cursor-pointer bg-white p-2 rounded-xl border border-hairline-soft hover:shadow-md transition-all"
+                            className="group flex items-start gap-3 cursor-pointer bg-white p-2 rounded-md border border-hairline-soft hover:shadow-md transition-all"
                           >
                             {/* Widescreen 16:9 Thumbnail */}
-                            <div className="relative w-36 sm:w-40 aspect-video rounded-lg overflow-hidden shrink-0 bg-slate-900 border border-hairline-soft">
+                            <div className="relative w-36 sm:w-40 aspect-video rounded-md overflow-hidden shrink-0 bg-slate-900 border border-hairline-soft">
                               <img
                                 src={getHighResThumbnail(item)}
                                 alt={item.title}
@@ -594,7 +673,7 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                               className="group flex flex-col cursor-pointer"
                             >
                               {/* 1. Vertical 9:16 Image Poster Container */}
-                              <div className="relative aspect-[9/16] bg-slate-900 rounded-xl overflow-hidden shadow-2xs hover:shadow-md transition-all duration-300 border border-hairline-soft mb-1.5">
+                              <div className="relative aspect-[9/16] bg-slate-900 rounded-md overflow-hidden shadow-2xs hover:shadow-md transition-all duration-300 border border-hairline-soft mb-1.5">
                                 <img
                                   src={getHighResThumbnail(short)}
                                   alt={short.title}
@@ -651,10 +730,10 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                           <Link
                             key={`rem-v-${item.video_id}-${idx}`}
                             href={`/jalgaon-glimpse/${item.video_id}`}
-                            className="group flex items-start gap-3 cursor-pointer bg-white p-2 rounded-xl border border-hairline-soft hover:shadow-md transition-all"
+                            className="group flex items-start gap-3 cursor-pointer bg-white p-2 rounded-md border border-hairline-soft hover:shadow-md transition-all"
                           >
                             {/* Widescreen 16:9 Thumbnail */}
-                            <div className="relative w-36 sm:w-40 aspect-video rounded-lg overflow-hidden shrink-0 bg-slate-900 border border-hairline-soft">
+                            <div className="relative w-36 sm:w-40 aspect-video rounded-md overflow-hidden shrink-0 bg-slate-900 border border-hairline-soft">
                               <img
                                 src={getHighResThumbnail(item)}
                                 alt={item.title}

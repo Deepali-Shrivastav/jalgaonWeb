@@ -420,10 +420,10 @@ function IndustryCard({ ind, onSelectCategory }: { ind: any; onSelectCategory: (
   return (
     <div className={`bg-white rounded-xl overflow-hidden border border-hairline-soft flex flex-col ${ind.reverse ? 'lg:flex-row-reverse' : 'lg:flex-row'} group hover:shadow-2xl transition-all duration-500`}>
       
-      <div className="lg:w-1/3 p-xxxl flex flex-col justify-center bg-primary/5 shrink-0 z-10">
-        <span className="material-symbols-outlined text-5xl text-primary mb-xl">{ind.icon}</span>
-        <h3 className="text-3xl font-extrabold text-ink-deep mb-base">{ind.title}</h3>
-        <p className="text-secondary mb-xxxl text-lg leading-relaxed">{ind.description}</p>
+      <div className="lg:w-1/3 p-5 sm:p-xxxl flex flex-col justify-center bg-primary/5 shrink-0 z-10">
+        <span className="material-symbols-outlined text-4xl sm:text-5xl text-primary mb-4 sm:mb-xl">{ind.icon}</span>
+        <h3 className="text-2xl sm:text-3xl font-extrabold text-ink-deep mb-base">{ind.title}</h3>
+        <p className="text-secondary mb-6 sm:mb-xxxl text-sm sm:text-lg leading-relaxed">{ind.description}</p>
         <button 
           onClick={() => onSelectCategory(ind.slug || ind.title)}
           className="w-fit bg-primary text-white px-xl py-3 rounded-full font-bold hover:scale-105 transition-transform shadow-lg cursor-pointer"
@@ -524,9 +524,9 @@ export default function IndustryGrids({ onSelectCategory }: { onSelectCategory: 
   }, []);
 
   return (
-    <section id="explore-categories" className="py-section bg-surface-container-low">
-      <div className="max-w-container-max mx-auto px-xxl">
-        <h2 className="text-center text-4xl font-extrabold text-ink-deep mb-section">Explore Local Industries</h2>
+    <section id="explore-categories" className="py-8 sm:py-12 md:py-section bg-surface-container-low">
+      <div className="max-w-container-max mx-auto px-4 sm:px-6 md:px-xxl">
+        <h2 className="text-center text-2xl sm:text-4xl font-extrabold text-ink-deep mb-8 sm:mb-section">Explore Local Industries</h2>
         
         {loading ? (
           <div className="space-y-xl">
