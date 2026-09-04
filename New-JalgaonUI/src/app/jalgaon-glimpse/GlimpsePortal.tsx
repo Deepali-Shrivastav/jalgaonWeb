@@ -279,8 +279,8 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
                 onClick={() => setActiveShortIndex(idx)}
                 className="group flex flex-col cursor-pointer"
               >
-                {/* 1. Vertical 9:16 Poster Image Container */}
-                <div className="relative aspect-[9/16] bg-slate-900 rounded-xl overflow-hidden shadow-2xs hover:shadow-lg transition-all duration-300 border border-hairline-soft mb-2">
+                {/* 1. Vertical 9:16 Poster Image Container with Modern Large Rounded Corners */}
+                <div className="relative aspect-[9/16] bg-slate-950 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xs hover:shadow-lg transition-all duration-300 border border-hairline-soft mb-2">
                   <img
                     src={getHighResThumbnail(short)}
                     alt={short.title}

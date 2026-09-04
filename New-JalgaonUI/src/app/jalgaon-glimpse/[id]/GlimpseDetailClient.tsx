@@ -582,8 +582,8 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
 
                 // 1. Top 2 videos from channel
                 const top2Videos = regVideos.slice(0, 2);
-                // 2. Shorts: top 2 shorts side-by-side
-                const top2Shorts = shortVidList.slice(0, 2);
+                // 2. Shorts: top 4 shorts in a 2x2 grid (matching new photo design)
+                const top4Shorts = shortVidList.slice(0, 4);
                 // 3. Remaining videos (video 3, 4, 5...)
                 const remainingVideos = regVideos.slice(2);
 
@@ -644,7 +644,7 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                       </div>
                     )}
 
-                    {/* SECTION 2: SHORTS SECTION (ONLY 2 SHORTS DISPLAYED SIDE-BY-SIDE WITH 'SHOW MORE') */}
+                    {/* SECTION 2: SHORTS SECTION (4 SHORTS DISPLAYED IN A 2x2 GRID MATCHING NEW PHOTO DESIGN) */}
                     {shortVidList.length > 0 && (
                       <div className="py-2 space-y-2 border-y border-hairline-soft/80 my-2">
                         <div className="flex items-center justify-between px-0.5">
@@ -665,15 +665,15 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                         </div>
 
                         {/* 2-Column Grid (Two Shorts Per Row Side By Side) */}
-                        <div className="grid grid-cols-2 gap-2.5">
-                          {(showMoreShorts ? shortVidList : top2Shorts).map((short, idx) => (
+                        <div className="grid grid-cols-2 gap-3">
+                          {(showMoreShorts ? shortVidList : top4Shorts).map((short, idx) => (
                             <Link
                               key={`side-short-${short.video_id}-${idx}`}
                               href={`/jalgaon-glimpse/${short.video_id}`}
                               className="group flex flex-col cursor-pointer"
                             >
-                              {/* 1. Vertical 9:16 Image Poster Container */}
-                              <div className="relative aspect-[9/16] bg-slate-900 rounded-md overflow-hidden shadow-2xs hover:shadow-md transition-all duration-300 border border-hairline-soft mb-1.5">
+                              {/* 1. Vertical 9:16 Image Poster Container with Large Rounded Corners (Matching New Photo Design) */}
+                              <div className="relative aspect-[9/16] bg-slate-950 rounded-2xl sm:rounded-3xl overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 border border-hairline-soft mb-2">
                                 <img
                                   src={getHighResThumbnail(short)}
                                   alt={short.title}
@@ -684,8 +684,8 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
 
                                 {/* Centered Play Disc */}
                                 <div className="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-                                  <div className="w-8 h-8 bg-[#0081C7] text-white rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
-                                    <span className="material-symbols-outlined text-lg translate-x-0.5 fill-current">
+                                  <div className="w-8 h-8 sm:w-9 sm:h-9 bg-[#0081C7] text-white rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                                    <span className="material-symbols-outlined text-lg sm:text-xl translate-x-0.5 fill-current">
                                       play_arrow
                                     </span>
                                   </div>
@@ -694,7 +694,7 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
 
                               {/* 2. Title & 3-Dot Menu Row Underneath Image */}
                               <div className="flex items-start justify-between gap-1 px-0.5">
-                                <h5 className="text-[11px] font-bold text-ink-deep group-hover:text-[#0081C7] transition-colors line-clamp-2 leading-tight">
+                                <h5 className="text-[11px] sm:text-xs font-bold text-ink-deep group-hover:text-[#0081C7] transition-colors line-clamp-2 leading-tight">
                                   {short.title}
                                 </h5>
                                 <button

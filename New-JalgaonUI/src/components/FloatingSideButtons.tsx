@@ -3,7 +3,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Landmark, HeartHandshake, FileEdit, PhoneCall, Users, ChevronsLeft, ChevronsRight } from "lucide-react";
+import {
+  Landmark,
+  HeartHandshake,
+  FileEdit,
+  PhoneCall,
+  Users,
+  ChevronsLeft,
+  ChevronsRight,
+  GripVertical,
+} from "lucide-react";
 
 interface NavItem {
   name: string;
@@ -56,9 +65,15 @@ const navItems: NavItem[] = [
 export default function FloatingSideButtons() {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [topPos, setTopPos] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
 
-  // Auto-collapse on small mobile screens to keep layout aligned and prevent clipping
+  // Drag Tracking Refs
+  const dragStartPos = useRef<{ startY: number; initialTop: number }>({ startY: 0, initialTop: 0 });
+  const hasDraggedRef = useRef<boolean>(false);
+
+  // Auto-collapse on small mobile screens & initialize drag position
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 640) {
@@ -66,11 +81,24 @@ export default function FloatingSideButtons() {
       }
     };
     handleResize();
+
+    const savedTop = localStorage.getItem("floating_buttons_top_pos");
+    if (savedTop !== null) {
+      const parsed = parseFloat(savedTop);
+      if (!isNaN(parsed) && parsed > 0 && parsed < window.innerHeight - 100) {
+        setTopPos(parsed);
+      } else {
+        setTopPos(window.innerHeight / 2 - 160);
+      }
+    } else {
+      setTopPos(window.innerHeight / 2 - 160);
+    }
+
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Handle click / tap outside, scroll, & Escape key to close when OPEN (!isCollapsed)
+  // Auto close / collapse on tap outside or scroll
   useEffect(() => {
     if (isCollapsed) return;
 
@@ -101,18 +129,84 @@ export default function FloatingSideButtons() {
     };
   }, [isCollapsed]);
 
+  // Pointer Drag Handlers (Supports Touch, Mouse, & Stylus)
+  const handlePointerDown = (e: React.PointerEvent) => {
+    // Ignore drag start if clicking the collapse/expand toggle button
+    if ((e.target as HTMLElement).closest("button")) {
+      return;
+    }
+
+    setIsDragging(true);
+    hasDraggedRef.current = false;
+    const currentTop = topPos ?? (window.innerHeight / 2 - 160);
+    dragStartPos.current = {
+      startY: e.clientY,
+      initialTop: currentTop,
+    };
+
+    try {
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    } catch {}
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging) return;
+
+    const deltaY = e.clientY - dragStartPos.current.startY;
+    if (Math.abs(deltaY) > 5) {
+      hasDraggedRef.current = true;
+    }
+
+    const height = navRef.current?.offsetHeight || 320;
+    const minTop = 16;
+    const maxTop = Math.max(minTop, window.innerHeight - height - 16);
+    const newTop = Math.min(Math.max(dragStartPos.current.initialTop + deltaY, minTop), maxTop);
+
+    setTopPos(newTop);
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (!isDragging) return;
+    setIsDragging(false);
+
+    if (topPos !== null) {
+      localStorage.setItem("floating_buttons_top_pos", topPos.toString());
+    }
+
+    try {
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch {}
+  };
+
   if (pathname?.startsWith("/admin")) {
     return null;
   }
 
+  const styleTop = topPos !== null ? `${topPos}px` : "50%";
+  const styleTransform = topPos !== null ? "none" : "translateY(-50%)";
+
   return (
     <div
       ref={navRef}
-      className="fixed top-1/2 right-1 sm:right-3 -translate-y-1/2 z-[9999] transition-all duration-300 scale-[0.72] sm:scale-100 origin-right"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      style={{ top: styleTop, transform: styleTransform }}
+      className={`fixed right-1 sm:right-3 z-[9999] scale-[0.72] sm:scale-100 origin-right select-none touch-none ${
+        isDragging ? "cursor-grabbing" : "cursor-grab"
+      } ${isDragging ? "" : "transition-[top,transform] duration-200"}`}
     >
       {/* High-End Frosted Glassmorphism Outer Capsule */}
       <div className="relative flex flex-col gap-1.5 sm:gap-2.5 p-1.5 sm:p-2.5 bg-gradient-to-b from-white/70 via-white/45 to-white/25 backdrop-blur-3xl saturate-150 border border-white/80 shadow-[0_20px_50px_rgba(0,0,0,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] rounded-[22px] sm:rounded-[32px]">
         
+        {/* Drag Handle Indicator */}
+        <div
+          title="Drag to reposition"
+          className="w-full flex items-center justify-center py-0.5 text-slate-400 hover:text-slate-700 transition-colors cursor-grab active:cursor-grabbing"
+        >
+          <GripVertical className="w-3.5 h-3.5 rotate-90 opacity-60" />
+        </div>
+
         {/* Specular Frosted Glass Minimize/Expand Button */}
         <button
           type="button"
@@ -143,6 +237,13 @@ export default function FloatingSideButtons() {
               key={item.name}
               {...linkProps}
               title={item.name}
+              onClick={(e) => {
+                // Prevent navigation if the user was dragging the menu bar
+                if (hasDraggedRef.current) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }
+              }}
               className={`group flex flex-col items-center justify-center rounded-[16px] sm:rounded-[22px] transition-all duration-300 cursor-pointer relative hover:scale-105 active:scale-95 ${
                 isCollapsed ? "w-9 h-9 sm:w-11 sm:h-11" : "w-13 h-13 sm:w-16 sm:h-16"
               } ${item.cardStyle} ${
@@ -167,4 +268,5 @@ export default function FloatingSideButtons() {
     </div>
   );
 }
+
 
