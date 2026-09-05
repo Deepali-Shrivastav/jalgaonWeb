@@ -164,10 +164,11 @@ jobs:
             chmod 600 "${ENV_FILE}"
             echo "✅ .env.production written (permissions: 600)"
 
-            echo "=== [4/6] Running database migrations ==="
+            echo "=== [4/6] Running database migrations & loading clubs fixture ==="
             cd "${API_DIR}"
             DJANGO_ENV=production python manage.py migrate --noinput
-            echo "✅ Migrations applied"
+            DJANGO_ENV=production python manage.py loaddata clubs_backup.json
+            echo "✅ Migrations & Clubs data applied"
 
             echo "=== [5/6] Collecting static files ==="
             DJANGO_ENV=production python manage.py collectstatic --noinput --clear
