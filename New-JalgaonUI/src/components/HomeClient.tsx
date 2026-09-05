@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Hero from '@/components/Hero';
 import MarketWeatherDashboard from '@/components/MarketWeatherDashboard';
+import BreakingNews from '@/components/BreakingNews';
 import JalgaonGlimpse from '@/components/JalgaonGlimpse';
 import LatestNews from '@/components/LatestNews';
 import UpcomingEvents from '@/components/UpcomingEvents';
@@ -17,17 +18,17 @@ import CallToAction from '@/components/CallToAction';
 import ContactForm from '@/components/ContactForm';
 import BlogSection from '@/components/BlogSection';
 
-export default function HomeClient({ 
-  trendingListings, 
-  news, 
-  events, 
+export default function HomeClient({
+  trendingListings,
+  news,
+  events,
   jobs,
   startups,
   videos
-}: { 
-  trendingListings?: any[], 
-  news?: any[], 
-  events?: any[], 
+}: {
+  trendingListings?: any[],
+  news?: any[],
+  events?: any[],
   jobs?: any[],
   startups?: any[],
   videos?: any[]

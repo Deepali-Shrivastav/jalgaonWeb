@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 import CarouselAds from '@/components/CarouselAds';
 import Pagination from '@/components/Pagination';
 import SkeletonCard from '@/components/SkeletonCard';
+import BreakingNews from '@/components/BreakingNews';
 
 export interface NewsArticle {
   id: number;
@@ -67,35 +68,35 @@ export default function NewsPortal() {
       setError(null);
       try {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        
+
         let latestUrl = `${baseUrl}/api/v1/news/latest/?page=${page}`;
         let trendingUrl = `${baseUrl}/api/v1/news/trending/`;
 
         if (activeCategory) {
           latestUrl = `${baseUrl}/api/v1/news/latest/?category=${activeCategory}&page=${page}`;
-          trendingUrl = `${baseUrl}/api/v1/news/trending/?category=${activeCategory}`; 
+          trendingUrl = `${baseUrl}/api/v1/news/trending/?category=${activeCategory}`;
         }
 
         const latestRes = await fetch(latestUrl);
         const trendingRes = await fetch(trendingUrl);
-        
+
         if (!latestRes.ok || !trendingRes.ok) throw new Error('Failed to fetch news');
-        
+
         const latestJson = await latestRes.json();
         const trendingJson = await trendingRes.json();
-        
+
         const latestResults = latestJson.results || latestJson.data || latestJson || [];
         const trendingResults = trendingJson.results || trendingJson.data || trendingJson || [];
-        
+
         setNewsArticles(latestResults);
-        setRecentNews(trendingResults); 
-        
+        setRecentNews(trendingResults);
+
         if (page === 1) {
-            setMoreNews(latestResults.slice(3)); 
+          setMoreNews(latestResults.slice(3));
         } else {
-            setMoreNews(latestResults);
+          setMoreNews(latestResults);
         }
-        
+
         if (latestJson.count !== undefined) {
           setTotalPages(Math.ceil(latestJson.count / 20));
         } else {
@@ -109,7 +110,7 @@ export default function NewsPortal() {
     };
     fetchNews();
   }, [activeCategory, page]);
-  
+
   React.useEffect(() => { setPage(1); }, [activeCategory]);
 
   const displaySidebarNews = activeTab === 'recent' ? newsArticles.slice(0, 5) : recentNews.slice(0, 5);
@@ -117,19 +118,19 @@ export default function NewsPortal() {
   return (
     <>
       <Header />
-      
+
       {/* Category Navbar */}
       <div className="border-b border-gray-200 bg-white">
         <div className="max-w-7xl mx-auto px-4 flex items-center gap-6 py-4 overflow-x-auto text-[15px] font-bold text-gray-800 scrollbar-none">
-          <span 
+          <span
             onClick={() => setActiveCategory(null)}
             className={`cursor-pointer whitespace-nowrap ${!activeCategory ? 'text-red-600 border-b-2 border-red-600 pb-[18px] -mb-[18px]' : 'hover:text-red-600'}`}
           >
             All News
           </span>
           {categories.map(cat => (
-            <span 
-              key={cat.id} 
+            <span
+              key={cat.id}
               onClick={() => setActiveCategory(cat.slug)}
               className={`cursor-pointer whitespace-nowrap capitalize ${activeCategory === cat.slug ? 'text-red-600 border-b-2 border-red-600 pb-[18px] -mb-[18px]' : 'hover:text-red-600'}`}
             >
@@ -141,7 +142,7 @@ export default function NewsPortal() {
 
       <main className="pt-10 pb-20 bg-white min-h-screen">
         <div className="max-w-7xl mx-auto px-4">
-          <h1 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-8">
+          <h1 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-6">
             Breaking News
           </h1>
 
@@ -156,14 +157,14 @@ export default function NewsPortal() {
             </div>
           ) : (
             <div className="flex flex-col lg:flex-row gap-10">
-              
+
               {/* LEFT SIDE (Featured + Grid) */}
               <div className="lg:w-[65%]">
                 {newsArticles.length > 0 && (
                   <Link href={`/news/${newsArticles[0].slug || newsArticles[0].id}`} className="group block mb-10">
                     <div className="w-full aspect-[16/8] md:aspect-[2/1] overflow-hidden mb-5 bg-gray-100">
-                      <img 
-                        src={getImageUrl(newsArticles[0].image || newsArticles[0].featured_image)} 
+                      <img
+                        src={getImageUrl(newsArticles[0].image || newsArticles[0].featured_image)}
                         alt={newsArticles[0].title}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         onError={(e) => { e.currentTarget.style.display = 'none'; }}
@@ -178,13 +179,18 @@ export default function NewsPortal() {
                   </Link>
                 )}
 
+                {/* BREAKING NEWS SCROLLING TICKER */}
+                <div className="mb-6">
+                  <BreakingNews initialNews={newsArticles as any} />
+                </div>
+
                 {/* Grid of 2 below featured */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   {newsArticles.slice(1, 3).map((article: any) => (
                     <Link href={`/news/${article.slug || article.id}`} key={article.id} className="group block">
                       <div className="relative w-full aspect-[16/10] overflow-hidden mb-4 bg-gray-100">
-                        <img 
-                          src={getImageUrl(article.image || article.featured_image)} 
+                        <img
+                          src={getImageUrl(article.image || article.featured_image)}
                           alt={article.title}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                           onError={(e) => { e.currentTarget.style.display = 'none'; }}
@@ -209,14 +215,14 @@ export default function NewsPortal() {
               {/* RIGHT SIDE (Sidebar) */}
               <div className="lg:w-[35%] flex flex-col">
                 <div className="flex items-center gap-6 border-b-2 border-gray-100 mb-6 font-bold text-[15px]">
-                  <span 
-                    onClick={() => setActiveTab('recent')} 
+                  <span
+                    onClick={() => setActiveTab('recent')}
                     className={`cursor-pointer transition-colors pb-3 border-b-2 -mb-[2px] ${activeTab === 'recent' ? 'text-red-600 border-red-600' : 'text-gray-800 border-transparent hover:text-red-600'}`}
                   >
                     Most Recent
                   </span>
-                  <span 
-                    onClick={() => setActiveTab('picks')} 
+                  <span
+                    onClick={() => setActiveTab('picks')}
                     className={`cursor-pointer transition-colors pb-3 border-b-2 -mb-[2px] ${activeTab === 'picks' ? 'text-red-600 border-red-600' : 'text-gray-800 border-transparent hover:text-red-600'}`}
                   >
                     Today's Picks
@@ -227,8 +233,8 @@ export default function NewsPortal() {
                   {displaySidebarNews.map((article: any) => (
                     <Link href={`/news/${article.slug || article.id}`} key={article.id} className="group flex gap-4 items-start">
                       <div className="w-28 h-[84px] shrink-0 overflow-hidden bg-gray-100">
-                        <img 
-                          src={getImageUrl(article.image || article.featured_image)} 
+                        <img
+                          src={getImageUrl(article.image || article.featured_image)}
                           alt={article.title}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                           onError={(e) => { e.currentTarget.style.display = 'none'; }}
@@ -253,26 +259,28 @@ export default function NewsPortal() {
                     <div className="text-gray-500 text-sm">No articles available.</div>
                   )}
                 </div>
-                
+
                 {/* Advertisement in Sidebar */}
                 <div className="mt-8 w-full -mx-4 md:mx-0">
                   <CarouselAds slot="sidebar" />
                 </div>
               </div>
-              
+
             </div>
           )}
-          
+
+
+
           {/* More News Section (Paginated) */}
           {!loading && !error && (moreNews.length > 0 || page > 1) && (
-            <div className="mt-16 border-t border-gray-200 pt-12">
+            <div className="mt-10 border-t border-gray-200 pt-12">
               <h2 className="text-2xl font-serif font-bold text-gray-900 mb-8">More News</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                 {moreNews.map((article: any) => (
                   <Link href={`/news/${article.slug || article.id}`} key={article.id} className="group block">
                     <div className="w-full aspect-[16/10] overflow-hidden mb-4 bg-gray-100 rounded-lg">
-                      <img 
-                        src={getImageUrl(article.image || article.featured_image)} 
+                      <img
+                        src={getImageUrl(article.image || article.featured_image)}
                         alt={article.title}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
@@ -286,11 +294,11 @@ export default function NewsPortal() {
                   </Link>
                 ))}
               </div>
-              
-              <Pagination 
-                currentPage={page} 
-                totalPages={totalPages} 
-                onPageChange={setPage} 
+
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
               />
             </div>
           )}

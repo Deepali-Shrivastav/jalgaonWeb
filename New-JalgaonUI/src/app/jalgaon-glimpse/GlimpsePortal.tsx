@@ -258,7 +258,7 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
                 quick bites
               </span>
               <h2 className="text-xl sm:text-4xl font-black text-ink-deep tracking-tight capitalize">
-                shorts
+                glimpse
               </h2>
             </div>
 
@@ -267,7 +267,7 @@ export default function GlimpsePortal({ initialData }: GlimpsePortalProps) {
               onClick={() => setActiveShortIndex(0)}
               className="text-xs font-bold text-[#0081C7] hover:underline flex items-center gap-1 cursor-pointer"
             >
-              play all shorts ⚡ →
+              play all glimpse ⚡ →
             </button>
           </div>
 

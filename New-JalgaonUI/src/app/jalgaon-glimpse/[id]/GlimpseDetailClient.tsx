@@ -651,7 +651,7 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                           <div className="flex items-center gap-1.5">
                             <span className="w-2 h-2 rounded-full bg-[#0081C7] animate-pulse" />
                             <span className="text-xs font-black uppercase tracking-wider text-ink-deep">
-                              Shorts
+                              Glimpse
                             </span>
                           </div>
 

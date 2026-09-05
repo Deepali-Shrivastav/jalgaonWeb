@@ -62,18 +62,27 @@
     display: inline-block;
     vertical-align: middle;
   }
+
   .hero-gradient {
     background: radial-gradient(circle at top right, rgba(0, 100, 224, 0.05), transparent),
-                radial-gradient(circle at bottom left, rgba(0, 100, 224, 0.02), transparent);
+      radial-gradient(circle at bottom left, rgba(0, 100, 224, 0.02), transparent);
   }
-  .hide-scrollbar::-webkit-scrollbar { display: none; }
-  .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 
   /* Event card lift-on-hover shadow */
   .event-card-shadow {
     box-shadow: 0 10px 30px -12px rgba(0, 129, 199, 0.1);
     transition: all 0.3s ease;
   }
+
   .event-card-shadow:hover {
     transform: translateY(-5px);
     box-shadow: 0 20px 40px -12px rgba(0, 129, 199, 0.18);
@@ -88,15 +97,44 @@
 .market-ticker {
   mask-image: linear-gradient(to right, transparent, black 3%, black 97%, transparent);
 }
+
 .market-ticker-track {
   animation: market-ticker-scroll 38s linear infinite;
 }
+
 .market-ticker:hover .market-ticker-track {
   animation-play-state: paused;
 }
 
 @keyframes market-ticker-scroll {
-  to { transform: translateX(-50%); }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* TV-News Style Horizontal Ticker */
+.news-ticker-container {
+  mask-image: linear-gradient(to right, transparent, black 1%, black 99%, transparent);
+}
+
+.news-ticker-track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  animation: news-ticker-scroll var(--ticker-duration, 35s) linear infinite;
+}
+
+.news-ticker-container:hover .news-ticker-track {
+  animation-play-state: paused;
+}
+
+@keyframes news-ticker-scroll {
+  from {
+    transform: translateX(0%);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -104,10 +142,12 @@
     overflow-x: auto;
     mask-image: none;
   }
+
   .market-ticker-track {
     animation: none;
   }
-  .market-ticker-track > :last-child {
+
+  .market-ticker-track> :last-child {
     display: none;
   }
 }
@@ -132,18 +172,24 @@
 }
 
 @keyframes iconBounce {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   20% {
     transform: translateY(-0.3em);
   }
+
   40% {
     transform: translateY(0);
   }
+
   60% {
     transform: translateY(-0.1em);
   }
+
   80% {
     transform: translateY(0);
   }
