@@ -7,9 +7,9 @@ Uses Django's LocMemCache (configured in settings.py).
 
 from django.core.cache import cache
 
-CACHE_TTL_VIDEOS  = 24 * 60 * 60   # 24 hours — video list
-CACHE_TTL_DETAIL  = 24 * 60 * 60   # 24 hours — single video detail
-CACHE_TTL_CHANNEL = 24 * 60 * 60   # 24 hours  — channel info
+CACHE_TTL_VIDEOS  = 30 * 60        # 30 minutes — video list
+CACHE_TTL_DETAIL  = 2 * 60 * 60    # 2 hours — single video detail
+CACHE_TTL_CHANNEL = 12 * 60 * 60   # 12 hours — channel info
 
 
 def videos_key(page_token: str = '', max_results: int = 12) -> str:
