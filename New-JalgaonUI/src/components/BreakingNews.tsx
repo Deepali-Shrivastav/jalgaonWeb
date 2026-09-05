@@ -113,8 +113,8 @@ export default function BreakingNews({ initialNews }: BreakingNewsProps) {
     return filtered.length > 0 ? filtered : rawList;
   }, [rawList]);
 
-  // Triplicate items array so multiple items are constantly visible side-by-side without gaps
-  const tickerItems = [...activeList, ...activeList, ...activeList];
+  // Duplicate items array so news items loop continuously and seamlessly at 50% translation
+  const tickerItems = [...activeList, ...activeList];
 
   return (
     <div className="w-full overflow-hidden my-4">
@@ -124,7 +124,7 @@ export default function BreakingNews({ initialNews }: BreakingNewsProps) {
         <div className="flex-1 min-w-0 overflow-hidden relative news-ticker-container py-3 sm:py-4 bg-transparent flex items-center">
 
           <div
-            style={{ "--ticker-duration": "35s" } as React.CSSProperties}
+            style={{ "--ticker-duration": "32s", "--ticker-duration-mobile": "40s" } as React.CSSProperties}
             className="news-ticker-track whitespace-nowrap flex items-center gap-10 sm:gap-14 md:gap-16"
           >
             {tickerItems.map((item, idx) => {

@@ -114,6 +114,7 @@
 
 /* TV-News Style Horizontal Ticker */
 .news-ticker-container {
+  overflow: hidden;
   mask-image: linear-gradient(to right, transparent, black 1%, black 99%, transparent);
 }
 
@@ -121,7 +122,14 @@
   display: flex;
   align-items: center;
   width: max-content;
-  animation: news-ticker-scroll var(--ticker-duration, 35s) linear infinite;
+  will-change: transform;
+  animation: news-ticker-scroll var(--ticker-duration, 32s) linear infinite;
+}
+
+@media (max-width: 640px) {
+  .news-ticker-track {
+    animation-duration: var(--ticker-duration-mobile, 40s);
+  }
 }
 
 .news-ticker-container:hover .news-ticker-track {
@@ -129,11 +137,11 @@
 }
 
 @keyframes news-ticker-scroll {
-  from {
-    transform: translateX(0%);
+  0% {
+    transform: translate3d(0%, 0, 0);
   }
-  to {
-    transform: translateX(-50%);
+  100% {
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
