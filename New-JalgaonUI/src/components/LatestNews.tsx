@@ -68,7 +68,7 @@ export default function LatestNews({ initialData }: { initialData?: NewsStory[] 
         if (!res.ok) throw new Error('Failed to fetch');
         const json = await res.json();
         const results = json.results || json.data || json || [];
-        
+
         if (results.length > 0) {
           setFeaturedStory(results[0]);
           setNewsList(results.slice(1, 5)); // display up to 4 other stories
@@ -123,8 +123,8 @@ export default function LatestNews({ initialData }: { initialData?: NewsStory[] 
   }
 
   return (
-    <section id="latest-news" className="bg-surface-container-low py-section" aria-labelledby="latest-news-heading">
-      <div className="mx-auto max-w-container-max px-base sm:px-xxl">
+    <section id="latest-news" className="bg-surface-container-low py-8 sm:py-12 md:py-section" aria-labelledby="latest-news-heading">
+      <div className="mx-auto max-w-container-max px-4 sm:px-6 md:px-xxl">
         <div className="mb-xl flex items-end justify-between gap-xl">
           <div>
             <p className="mb-xs text-xs font-extrabold uppercase tracking-[0.2em] text-primary">Stay informed</p>
@@ -150,11 +150,11 @@ export default function LatestNews({ initialData }: { initialData?: NewsStory[] 
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/35 to-black/5" />
             <div className="absolute inset-x-0 bottom-0 p-xl sm:p-xxxl">
-              <StoryMeta 
-                category={featuredStory.category} 
-                date={featuredStory.date || featuredStory.readTime || ''} 
-                isoDate={featuredStory.isoDate || ''} 
-                inverse 
+              <StoryMeta
+                category={featuredStory.category}
+                date={featuredStory.date || featuredStory.readTime || ''}
+                isoDate={featuredStory.isoDate || ''}
+                inverse
               />
               <h3 className="mt-md max-w-[560px] text-3xl font-extrabold leading-[1.12] tracking-tight text-white sm:text-4xl lg:text-[42px]">
                 {featuredStory.title}
@@ -191,10 +191,10 @@ export default function LatestNews({ initialData }: { initialData?: NewsStory[] 
                   )}
                 </div>
                 <div className="flex flex-1 flex-col p-base sm:p-lg">
-                  <StoryMeta 
-                    category={story.category} 
-                    date={story.date || story.readTime || ''} 
-                    isoDate={story.isoDate || ''} 
+                  <StoryMeta
+                    category={story.category}
+                    date={story.date || story.readTime || ''}
+                    isoDate={story.isoDate || ''}
                   />
                   <h3 className="mt-sm line-clamp-2 text-base font-extrabold leading-snug text-ink-deep sm:text-lg">
                     {story.title}

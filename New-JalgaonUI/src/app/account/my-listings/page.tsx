@@ -194,7 +194,7 @@ export default function MyListingsPage() {
                           {activeDropdown === item.slug && (
                             <div className="absolute right-0 mt-1 w-48 bg-white border border-slate-200 rounded-lg shadow-lg z-50 py-1 text-left">
                               <Link
-                                href={`/directory/${item.slug}`}
+                                href={`/category/${item.main_category_slug || 'business'}/${item.slug}`}
                                 className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors"
                               >
                                 <span className="material-symbols-outlined text-slate-400 text-[16px]">visibility</span> View Listing

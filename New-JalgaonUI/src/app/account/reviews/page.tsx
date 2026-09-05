@@ -96,7 +96,7 @@ export default function ReviewsPage() {
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <h4 className="font-bold text-ink-deep">{item.user_name || 'Anonymous'}</h4>
-                    <Link href={`/directory/${item.business_slug}`} className="text-xs text-primary hover:underline font-bold mb-1 block">
+                    <Link href={`/category/${item.main_category_slug || 'business'}/${item.business_slug}`} className="text-xs text-primary hover:underline font-bold mb-1 block">
                       On: {item.business_name}
                     </Link>
                     <p className="text-xs text-secondary">{new Date(item.timestamp).toLocaleDateString()}</p>

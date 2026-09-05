@@ -6,6 +6,9 @@ from django.utils import timezone
 from django.db.models import F
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import PermissionDenied
+from django.core.mail import EmailMessage
+from django.conf import settings
+from django.contrib.auth import get_user_model
 
 from .models import JobCategory, Job, JobApplication, SavedJob
 from .serializers import (
@@ -70,10 +73,19 @@ class PublicJobDetailView(generics.RetrieveAPIView):
     lookup_field = 'slug'
 
     def get_queryset(self):
+        from django.db.models import Q
         today = timezone.now().date()
-        queryset = Job.objects.filter(status='active')
-        queryset = queryset.filter(deadline__gte=today) | queryset.filter(deadline__isnull=True)
-        return queryset
+        queryset = Job.objects.all()
+        
+        active_condition = Q(status='active') & (Q(deadline__gte=today) | Q(deadline__isnull=True))
+        
+        user = self.request.user
+        if user.is_authenticated:
+            if getattr(user, 'role', '') in ('super_admin', 'admin', 'content_manager', 'moderator') or user.is_superuser:
+                return queryset
+            return queryset.filter(active_condition | Q(posted_by=user))
+            
+        return queryset.filter(active_condition)
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -101,7 +113,21 @@ class SubmitJobView(generics.CreateAPIView):
         if Job.objects.filter(slug=slug).exists():
             slug = f"{base_slug}-{str(uuid.uuid4())[:8]}"
             
-        serializer.save(posted_by=self.request.user, slug=slug, status='active')
+        contact_number = serializer.validated_data.get('contact_number')
+        if not contact_number and hasattr(self.request.user, 'phone_number'):
+            contact_number = self.request.user.phone_number
+            
+        contact_email = serializer.validated_data.get('contact_email')
+        if not contact_email and hasattr(self.request.user, 'email'):
+            contact_email = self.request.user.email
+            
+        user_role = getattr(self.request.user, 'role', '')
+        if user_role in ('super_admin', 'admin', 'content_manager', 'moderator'):
+            status_val = 'active'
+        else:
+            status_val = 'pending'
+            
+        serializer.save(posted_by=self.request.user, slug=slug, status=status_val, contact_number=contact_number, contact_email=contact_email)
 
 class ApplyToJobView(generics.CreateAPIView):
     serializer_class = JobApplicationCreateSerializer
@@ -115,9 +141,39 @@ class ApplyToJobView(generics.CreateAPIView):
         if JobApplication.objects.filter(job=job, applicant=self.request.user).exists():
             raise PermissionDenied("You have already applied for this job.")
             
-        serializer.save(applicant=self.request.user, job=job)
+        application = serializer.save(applicant=self.request.user, job=job)
         
-        # TODO: Trigger notification to job.posted_by
+        try:
+            subject = f"New Job Application: {job.title}"
+            body = f"A new application has been submitted for the job '{job.title}'.\n\n"
+            body += f"Applicant: {self.request.user.get_full_name()} ({self.request.user.phone_number})\n"
+            if application.cover_letter:
+                body += f"Cover Letter:\n{application.cover_letter}\n"
+            
+            User = get_user_model()
+            recipient_list = set()
+            
+            if job.contact_email:
+                recipient_list.add(job.contact_email)
+            elif job.posted_by and job.posted_by.email:
+                recipient_list.add(job.posted_by.email)
+                
+            for sa in User.objects.filter(is_superuser=True).exclude(email=''):
+                recipient_list.add(sa.email)
+                
+            if recipient_list:
+                email = EmailMessage(
+                    subject=subject,
+                    body=body,
+                    from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@jalgaon.com'),
+                    to=list(recipient_list),
+                )
+                if application.resume:
+                    email.attach(application.resume.name, application.resume.read())
+                email.send(fail_silently=True)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Failed to send application email: {e}")
 
 class SavedJobView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
@@ -152,6 +208,12 @@ class MyApplicationsView(generics.ListAPIView):
 
     def get_queryset(self):
         return JobApplication.objects.filter(applicant=self.request.user).order_by('-applied_at')
+
+class DeleteJobApplicationView(generics.DestroyAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return JobApplication.objects.filter(applicant=self.request.user)
 
 class EmployerJobApplicationsView(generics.ListAPIView):
     serializer_class = JobApplicationListSerializer
@@ -197,7 +259,11 @@ class AdminJobViewSet(viewsets.ModelViewSet):
         if Job.objects.filter(slug=slug).exists():
             slug = f"{base_slug}-{str(uuid.uuid4())[:8]}"
             
-        serializer.save(posted_by=self.request.user, slug=slug)
+        contact_number = serializer.validated_data.get('contact_number')
+        if not contact_number and hasattr(self.request.user, 'phone_number'):
+            contact_number = self.request.user.phone_number
+            
+        serializer.save(posted_by=self.request.user, slug=slug, contact_number=contact_number)
 
     @action(detail=True, methods=['patch'], permission_classes=[CanManageJobs])
     def status(self, request, pk=None):

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import NewsPortal from './NewsPortal';
 
 export const metadata: Metadata = {
-  title: 'Jalgaon News — Latest Local News, Business Updates & Community Stories | Jalgaon.com',
+  title: 'Latest Jalgaon News Today | Breaking News, Crime, Politics, Business & Local Updates',
   description:
     'Stay updated with the latest news from Jalgaon. Read breaking stories, business updates, community happenings, and economy insights from North Maharashtra\'s commercial capital.',
   keywords: [
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     'Jalgaon gold market',
   ],
   openGraph: {
-    title: 'Jalgaon News — Latest Local News & Community Stories',
+    title: 'Latest Jalgaon News Today | Breaking News, Crime, Politics, Business & Local Updates',
     description:
       'Stay updated with breaking stories, business updates, and community happenings from Jalgaon district.',
     type: 'website',

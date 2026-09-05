@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import Link from 'next/link';
 import DOMPurify from 'isomorphic-dompurify';
 import JobApplyModal from '@/components/JobApplyModal';
@@ -23,6 +23,10 @@ interface JobDetail {
   deadline: string | null;
   view_count: number;
   created_at: string;
+  posted_by_name: string;
+  posted_by_phone: string;
+  posted_by_email: string;
+  status: string;
 }
 
 export default function JobDetailClient({ slug }: { slug: string }) {
@@ -43,6 +47,19 @@ export default function JobDetailClient({ slug }: { slug: string }) {
   const [isSaved, setIsSaved] = useState(false);
   const [saveActionMsg, setSaveActionMsg] = useState("");
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+  const isExpired = useMemo(() => {
+    if (!job) return false;
+    if (job.status === 'expired') return true;
+    if (job.deadline) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const deadlineDate = new Date(job.deadline);
+      deadlineDate.setHours(0, 0, 0, 0);
+      return deadlineDate < today;
+    }
+    return false;
+  }, [job]);
 
   const handleSaveJob = async () => {
     if (!isLogin) {
@@ -78,7 +95,10 @@ export default function JobDetailClient({ slug }: { slug: string }) {
   useEffect(() => {
     const fetchJob = async () => {
       try {
-        const res = await fetch(`${baseUrl}/api/v1/jobs/${safeSlug}/`);
+        const token = localStorage.getItem('token');
+        const headers: HeadersInit = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        const res = await fetch(`${baseUrl}/api/v1/jobs/${safeSlug}/`, { headers });
         if (!res.ok) {
           if (res.status === 404) throw new Error('Job not found');
           throw new Error('Failed to fetch job details');
@@ -154,9 +174,6 @@ export default function JobDetailClient({ slug }: { slug: string }) {
     return `₹${min?.toLocaleString()} - ₹${max?.toLocaleString()} / yr`;
   };
 
-  // Append time so the deadline expires at the end of the day rather than midnight
-  const isExpired = job.deadline ? new Date(`${job.deadline}T23:59:59`) < new Date() : false;
-
   return (
     <article className="bg-white rounded-2xl shadow-sm border border-hairline-soft overflow-hidden p-8 md:p-12">
       <div className="flex flex-col md:flex-row items-start gap-6 mb-8 pb-8 border-b border-hairline-soft">
@@ -193,28 +210,38 @@ export default function JobDetailClient({ slug }: { slug: string }) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
-        <div className="flex items-center gap-3 bg-surface-container-lowest p-4 rounded-xl border border-hairline-soft">
-          <span className="material-symbols-outlined text-primary text-2xl">location_on</span>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
+        <div className="flex items-start gap-3 bg-surface-container-lowest p-4 rounded-xl border border-hairline-soft h-full">
+          <span className="material-symbols-outlined text-primary text-2xl shrink-0 mt-0.5">location_on</span>
           <div>
-            <p className="text-xs text-secondary font-bold uppercase">Location</p>
+            <p className="text-xs text-secondary font-bold uppercase mb-1">Location</p>
             <p className="font-semibold text-ink-deep">{job.location}</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 bg-surface-container-lowest p-4 rounded-xl border border-hairline-soft">
-          <span className="material-symbols-outlined text-primary text-2xl">payments</span>
+        <div className="flex items-start gap-3 bg-surface-container-lowest p-4 rounded-xl border border-hairline-soft h-full">
+          <span className="material-symbols-outlined text-primary text-2xl shrink-0 mt-0.5">payments</span>
           <div>
-            <p className="text-xs text-secondary font-bold uppercase">Salary</p>
+            <p className="text-xs text-secondary font-bold uppercase mb-1">Salary</p>
             <p className="font-semibold text-ink-deep">{formatSalary(job.salary_min, job.salary_max)}</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 bg-surface-container-lowest p-4 rounded-xl border border-hairline-soft">
-          <span className="material-symbols-outlined text-primary text-2xl">schedule</span>
+        <div className="flex items-start gap-3 bg-surface-container-lowest p-4 rounded-xl border border-hairline-soft h-full">
+          <span className="material-symbols-outlined text-primary text-2xl shrink-0 mt-0.5">schedule</span>
           <div>
-            <p className="text-xs text-secondary font-bold uppercase">Posted On</p>
+            <p className="text-xs text-secondary font-bold uppercase mb-1">Posted On</p>
             <p className="font-semibold text-ink-deep">
               {new Date(job.created_at).toLocaleDateString()}
             </p>
+          </div>
+        </div>
+        <div className="flex items-start gap-3 bg-surface-container-lowest p-4 rounded-xl border border-hairline-soft h-full">
+          <span className="material-symbols-outlined text-primary text-2xl shrink-0 mt-0.5">contact_phone</span>
+          <div className="break-all">
+            <p className="text-xs text-secondary font-bold uppercase mb-1">Recruiter Contact</p>
+            <p className="font-semibold text-ink-deep">{job.posted_by_phone || 'Not Available'}</p>
+            {job.posted_by_email && (
+              <p className="text-sm text-secondary mt-1">{job.posted_by_email}</p>
+            )}
           </div>
         </div>
       </div>

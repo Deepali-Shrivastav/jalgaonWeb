@@ -12,12 +12,12 @@ try:
     from dotenv import load_dotenv
     generic_env = os.path.join(BASE_DIR, '.env')
     if os.path.exists(generic_env):
-        load_dotenv(generic_env)
+        load_dotenv(generic_env, override=True)
     else:
         if DJANGO_ENV == 'production':
-            load_dotenv(os.path.join(BASE_DIR, '.env.production'))
+            load_dotenv(os.path.join(BASE_DIR, '.env.production'), override=True)
         else:
-            load_dotenv(os.path.join(BASE_DIR, '.env.development'))
+            load_dotenv(os.path.join(BASE_DIR, '.env.development'), override=True)
 except ImportError:
     pass
 
@@ -98,6 +98,7 @@ INSTALLED_APPS = [
     'apps.tourism',
     'apps.ngo',
     'apps.finance',
+    'apps.jalgaon_glimpse',
 ]
 
 MIDDLEWARE = [
@@ -108,7 +109,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',  
 ]
 
 ROOT_URLCONF = 'jalgaonApi.urls'
@@ -327,3 +328,25 @@ if not DEBUG:
     SESSION_COOKIE_SAMESITE = 'Lax'
     CSRF_COOKIE_SAMESITE = 'Lax'
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CACHING  
+# LocMemCache: zero-dependency in-memory cache, one store per Gunicorn worker.
+# Used by apps.youtube to cache YouTube API responses (30-minute TTL).
+# If Redis is added in the future, swap BACKEND to django_redis.
+# ─────────────────────────────────────────────────────────────────────────────
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'jalgaon-cache',
+    }
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# YOUTUBE DATA API v3
+# Key is stored in .env / .env.production (never committed to git).
+# Used only in apps/youtube/services.py — never exposed to the browser.
+# To obtain: Google Cloud Console → APIs & Services → Credentials.
+# ─────────────────────────────────────────────────────────────────────────────
+YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY', 'AIzaSyCBh0_F2LmhY8-pd5-R-IGY_jAwjfm8se8')
+YOUTUBE_CHANNEL_ID = os.getenv('YOUTUBE_CHANNEL_ID', 'UC1_W6Le5fkEDxsNFZEqPsAA')

@@ -6,13 +6,13 @@ import { Metadata } from 'next';
 import Script from 'next/script';
 
 export const metadata: Metadata = {
-  title: 'Jalgaon Tourism & Heritage Places | Explore Ajanta Caves & More',
+  title: 'Tourist Places in Jalgaon | Ajanta Caves, Temples, Parks, Lakes & Heritage Sites',
   description: 'Explore the top tourist attractions in Jalgaon, including Ajanta Caves, Gandhi Teerth, Patnadevi, and Mehrun Lake. Plan your perfect Khandesh trip.',
   alternates: {
     canonical: 'https://www.jalgaon.com/tourism',
   },
   openGraph: {
-    title: 'Jalgaon Tourism & Heritage Places',
+    title: 'Tourist Places in Jalgaon | Ajanta Caves, Temples, Parks, Lakes & Heritage Sites',
     description: 'Explore the top tourist attractions in Jalgaon, including Ajanta Caves, Gandhi Teerth, Patnadevi, and Mehrun Lake.',
     url: 'https://www.jalgaon.com/tourism',
     type: 'website',

@@ -23,7 +23,7 @@ export default function AdminNewsCreatePage() {
   const [categories, setCategories] = useState<NewsCategory[]>([]);
   const [saving, setSaving] = useState(false);
   const [isSlugManual, setIsSlugManual] = useState(false);
-  const [formData, setFormData] = useState({ title: "", slug: "", short_description: "", content: "", category: "", status: "draft", is_breaking: false, meta_title: "", meta_description: "" });
+  const [formData, setFormData] = useState({ title: "", slug: "", short_description: "", content: "", category: "", status: "draft", is_breaking: false, meta_title: "", meta_description: "", published_at: "" });
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   useEffect(() => {
@@ -65,7 +65,15 @@ export default function AdminNewsCreatePage() {
     try {
       const token = localStorage.getItem("token");
       const data = new FormData();
-      Object.entries(formData).forEach(([key, val]) => { if (val !== null && val !== "") data.append(key, String(val)); });
+      Object.entries(formData).forEach(([key, val]) => { 
+        if (val !== null && val !== "") {
+          if (key === "published_at") {
+            data.append(key, new Date(String(val)).toISOString());
+          } else {
+            data.append(key, String(val)); 
+          }
+        }
+      });
       if (imageFile) data.append("featured_image", imageFile);
       const res = await fetch(`${baseUrl}/api/v1/news/admin/articles/`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: data });
       if (!res.ok) {
@@ -115,9 +123,10 @@ export default function AdminNewsCreatePage() {
           />
           <small className="text-slate-400">Unique identifier for the URL (auto-generated from title, can be customized).</small>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <div><label className="block text-sm font-medium text-slate-600 mb-1">Category</label><select name="category" value={formData.category} onChange={handleChange} className="w-full p-2.5 border border-slate-200 rounded-lg text-sm"><option value="">Select Category</option>{categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
           <div><label className="block text-sm font-medium text-slate-600 mb-1">Status</label><select name="status" value={formData.status} onChange={handleChange} className="w-full p-2.5 border border-slate-200 rounded-lg text-sm"><option value="draft">Draft</option><option value="review">Review</option><option value="published">Published</option></select></div>
+          <div><label className="block text-sm font-medium text-slate-600 mb-1">Publish Date</label><input type="datetime-local" name="published_at" value={formData.published_at} onChange={handleChange} className="w-full p-2.5 border border-slate-200 rounded-lg text-sm" /></div>
         </div>
         <div><label className="block text-sm font-medium text-slate-600 mb-1">Short Description *</label><textarea name="short_description" value={formData.short_description} onChange={handleChange} required rows={2} className="w-full p-2.5 border border-slate-200 rounded-lg text-sm" /></div>
         <div><label className="block text-sm font-medium text-slate-600 mb-1">Content *</label><textarea name="content" value={formData.content} onChange={handleChange} required rows={12} className="w-full p-2.5 border border-slate-200 rounded-lg text-sm" /><small className="text-slate-400">Separate paragraphs with a blank line.</small></div>

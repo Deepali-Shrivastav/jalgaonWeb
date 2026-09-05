@@ -100,14 +100,27 @@ class AdminBlogPostViewSet(viewsets.ModelViewSet):
         if BlogPost.objects.filter(slug=slug).exists():
             slug = f"{base_slug}-{str(uuid.uuid4())[:8]}"
             
-        serializer.save(author=self.request.user, slug=slug)
-        
+        # Check if creating as published
+        published_at = None
+        if serializer.validated_data.get('status') == 'published':
+            published_at = timezone.now()
+            
+        serializer.save(author=self.request.user, slug=slug, published_at=published_at)
+
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        # If changing to published and it doesn't have a published_at date yet
+        if serializer.validated_data.get('status') == 'published' and not instance.published_at:
+            serializer.save(published_at=timezone.now())
+        else:
+            serializer.save()
+
     def perform_destroy(self, instance):
         if not self.request.user.role in ('super_admin', 'admin'):
             raise exceptions.PermissionDenied("Only admins can delete posts.")
         instance.delete()
 
-    @action(detail=True, methods=['patch'], permission_classes=[IsContentManager])
+    @action(detail=True, methods=['patch'], permission_classes=[IsNewsEditor])
     def status(self, request, pk=None):
         post = self.get_object()
         new_status = request.data.get('status')

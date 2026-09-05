@@ -4,7 +4,7 @@ import Link from "next/link";
 export default function Footer() {
   return (
     <footer className="bg-white border-t border-hairline-soft pt-8 sm:pt-section pb-24 md:pb-xl">
-      <div className="max-w-container-max mx-auto px-6 md:px-xxl">
+      <div className="max-w-container-max mx-auto px-4 sm:px-6 md:px-xxl">
         <div className="hidden sm:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-12 md:gap-section mb-section">
           <div className="space-y-xl">
             <img
@@ -54,6 +54,14 @@ export default function Footer() {
               <li>
                 <Link
                   className="text-secondary hover:text-primary transition-colors"
+                  href="/jalgaon-glimpse"
+                >
+                  Jalgaon Glimpse
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className="text-secondary hover:text-primary transition-colors"
                   href="/news"
                 >
                   News
@@ -100,7 +108,7 @@ export default function Footer() {
               <li>
                 <Link
                   className="text-secondary hover:text-primary transition-colors"
-                  href="/directory"
+                  href="/search"
                 >
                   Business Directory
                 </Link>

@@ -21,7 +21,13 @@ from django.conf import settings
 
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
+from apps.directory.views import LegacyDirectoryRedirectView, ProductViewLegacyRedirectView
+
 urlpatterns = [
+    path('directory/<str:business_slug>/', LegacyDirectoryRedirectView.as_view(), name='legacy-directory-redirect'),
+    path('directory/<str:business_slug>', LegacyDirectoryRedirectView.as_view(), name='legacy-directory-redirect-noslash'),
+    path('productView/<int:id>/', ProductViewLegacyRedirectView.as_view(), name='legacy-productview-redirect'),
+    path('productView/<int:id>', ProductViewLegacyRedirectView.as_view(), name='legacy-productview-redirect-noslash'),
     path('admin/', admin.site.urls),
     path('api/v1/auth/', include('apps.accounts.urls')),
     path('api/v1/listings/', include('apps.directory.urls')),
@@ -39,6 +45,8 @@ urlpatterns = [
     path('api/v1/startups/', include('apps.startups.urls')),
     path('api/v1/analytics/', include('apps.analytics.urls')),
     path('api/v1/clubs/', include('apps.clubs.urls')),
+    path('api/v1/jalgaon-glimpse/', include(('apps.jalgaon_glimpse.urls', 'jalgaon_glimpse'), namespace='jalgaon_glimpse')),
+    path('api/v1/youtube/', include(('apps.jalgaon_glimpse.urls', 'jalgaon_glimpse'), namespace='youtube')),
 
     # Swagger / OpenAPI Docs
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

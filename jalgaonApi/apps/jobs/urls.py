@@ -4,6 +4,7 @@ from .views import (
     JobCategoryListView, PublicJobListView, FeaturedJobsView, PublicJobDetailView,
     SubmitJobView, ApplyToJobView, SavedJobView, MySavedJobsView, MyJobsView,
     MyApplicationsView, EmployerJobApplicationsView, EmployerUpdateApplicationStatusView, 
+    DeleteJobApplicationView,
     AdminJobViewSet, AdminJobCategoryViewSet, AdminJobApplicationViewSet
 )
 
@@ -25,6 +26,7 @@ urlpatterns = [
     # Authenticated user endpoints (job seekers)
     path('saved/', MySavedJobsView.as_view(), name='my-saved-jobs'),
     path('my-applications/', MyApplicationsView.as_view(), name='my-applications'),
+    path('my-applications/<int:pk>/', DeleteJobApplicationView.as_view(), name='delete-application'),
     
     # Job submission
     path('submit/', SubmitJobView.as_view(), name='submit-job'),

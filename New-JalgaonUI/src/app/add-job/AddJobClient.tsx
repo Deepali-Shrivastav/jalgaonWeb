@@ -25,13 +25,16 @@ export default function AddJobClient() {
     requirements: '',
     apply_url: '',
     deadline: '',
-    shop_listing: listingId
+    shop_listing: listingId,
+    contact_number: '',
+    contact_email: ''
   });
   
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [submittedStatus, setSubmittedStatus] = useState('');
 
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -42,6 +45,16 @@ export default function AddJobClient() {
       .then(data => setCategories(data.results || data))
       .catch(err => console.error(err));
   }, [baseUrl]);
+
+  useEffect(() => {
+    if (user && (user.phone_number || user.email) && !formData.contact_number) {
+      setFormData(prev => ({ 
+        ...prev, 
+        contact_number: user.phone_number || '',
+        contact_email: user.email || ''
+      }));
+    }
+  }, [user]);
 
   // Auth Guard
   useEffect(() => {
@@ -106,8 +119,10 @@ export default function AddJobClient() {
         throw new Error(errorMessage);
       }
 
+      const newJob = await res.json();
+      setSubmittedStatus(newJob.status || 'pending');
       setSuccess(true);
-      toast.success("Job Posted Successfully!");
+      toast.success("Job Submitted Successfully!");
       setTimeout(() => {
         router.push('/account');
       }, 3000);
@@ -131,9 +146,17 @@ export default function AddJobClient() {
   if (success) {
     return (
       <div className="max-w-3xl mx-auto py-20 px-4 text-center">
-        <span className="material-symbols-outlined text-7xl text-emerald-500 mb-6 animate-bounce">check_circle</span>
-        <h1 className="text-4xl font-extrabold text-ink-deep mb-4">Job Posted Successfully!</h1>
-        <p className="text-lg text-secondary mb-8">Your job listing has been created and is now active.</p>
+        <span className="material-symbols-outlined text-7xl text-emerald-500 mb-6 animate-bounce">
+          {submittedStatus === 'active' ? 'check_circle' : 'pending_actions'}
+        </span>
+        <h1 className="text-4xl font-extrabold text-ink-deep mb-4">
+          {submittedStatus === 'active' ? 'Job Posted Successfully!' : 'Job Submitted for Approval'}
+        </h1>
+        <p className="text-lg text-secondary mb-8">
+          {submittedStatus === 'active' 
+            ? 'Your job listing has been created and is now active.' 
+            : 'Your job listing has been received and will be visible after admin approval.'}
+        </p>
         <p className="text-sm text-secondary animate-pulse">Redirecting to dashboard...</p>
       </div>
     );
@@ -208,6 +231,31 @@ export default function AddJobClient() {
                   onChange={handleChange} 
                   required 
                   placeholder="e.g. Jalgaon, MIDC"
+                  className="w-full p-4 rounded-xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-ink-deep mb-2">Recruiter Contact Number *</label>
+                <input 
+                  type="text" 
+                  name="contact_number" 
+                  value={formData.contact_number} 
+                  onChange={handleChange} 
+                  required 
+                  placeholder="e.g. 9876543210"
+                  className="w-full p-4 rounded-xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-ink-deep mb-2">Recruiter Email <span className="font-normal text-slate-500">(Optional)</span></label>
+                <input 
+                  type="email" 
+                  name="contact_email" 
+                  value={formData.contact_email} 
+                  onChange={handleChange} 
+                  placeholder="e.g. hr@company.com"
                   className="w-full p-4 rounded-xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                 />
               </div>

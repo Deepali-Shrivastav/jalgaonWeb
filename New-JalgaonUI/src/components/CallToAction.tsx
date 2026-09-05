@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export default function CallToAction() {
   return (
-    <section id="list-your-business" className="bg-surface-container-low px-base py-xl sm:px-xxl sm:py-xxl" aria-labelledby="business-cta-heading">
+    <section id="list-your-business" className="bg-surface-container-low px-4 py-8 sm:px-xxl sm:py-xxl" aria-labelledby="business-cta-heading">
       <div className="relative mx-auto max-w-container-max overflow-hidden rounded-[28px] bg-[#071317] text-white shadow-xl">
         <div className="pointer-events-none absolute -right-32 -top-52 h-[520px] w-[520px] rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
         <div className="pointer-events-none absolute -bottom-64 left-1/4 h-[440px] w-[440px] rounded-full bg-primary/5 blur-3xl" aria-hidden="true" />

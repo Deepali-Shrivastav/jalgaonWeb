@@ -3,7 +3,7 @@ import StartupsClient from './StartupsClient';
 import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
-  title: 'Jalgaon Startup Directory | Local Entrepreneurs & Innovators',
+  title: 'Startups in Jalgaon | Local Companies, Founders, Business Ideas, Funding & Opportunities',
   description: 'Explore the Jalgaon startup ecosystem. Discover local startups, innovative founders, funding stages, and tech communities building the future in Jalgaon district.',
   keywords: [
     'Jalgaon startups',
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     'Jalgaon innovation',
   ],
   openGraph: {
-    title: 'Jalgaon Startup Directory | Local Entrepreneurs & Innovators',
+    title: 'Startups in Jalgaon | Local Companies, Founders, Business Ideas, Funding & Opportunities',
     description: 'Explore the Jalgaon startup ecosystem. Discover local startups, founders, and tech communities.',
     type: 'website',
     locale: 'en_IN',

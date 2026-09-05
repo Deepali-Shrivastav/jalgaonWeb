@@ -41,8 +41,8 @@ export default function JobOpenings({ initialData }: { initialData?: JobOpening[
   }, [initialData]);
 
   return (
-    <section id="jobs" className="bg-white py-section" aria-labelledby="jobs-heading">
-      <div className="mx-auto max-w-container-max px-base sm:px-xxl">
+    <section id="jobs" className="bg-white py-8 sm:py-12 md:py-section" aria-labelledby="jobs-heading">
+      <div className="mx-auto max-w-container-max px-4 sm:px-6 md:px-xxl">
         <div className="mb-xxl flex items-end justify-between gap-xl">
           <div>
             <p className="mb-xs text-xs font-extrabold uppercase tracking-[0.2em] text-primary">Build your future</p>

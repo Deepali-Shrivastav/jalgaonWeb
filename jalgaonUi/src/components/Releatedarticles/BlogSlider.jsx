@@ -9,7 +9,7 @@ function BlogSlider({ data, is_all }) {
   return (
 <div className="article_card">
       <div className="article_img">
-        <img src={renderContent.blog_img} alt={renderContent.title} />
+        <img src={renderContent.blog_img} alt={renderContent.blog_img_alt || renderContent.title} />
       </div>
       <p className="article_title">{renderContent.title}</p>
       <Link to={`/articleView/${renderContent.id}`}><p className="article_explore">Explore</p></Link>

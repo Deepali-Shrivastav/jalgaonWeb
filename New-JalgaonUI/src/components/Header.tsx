@@ -26,7 +26,7 @@ export default function Header() {
   return (
     <>
       <header className="w-full sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-hairline-soft">
-        <div className="max-w-container-max mx-auto px-xxl flex justify-between items-center h-20">
+        <div className="max-w-container-max mx-auto px-4 sm:px-6 md:px-xxl flex justify-between items-center h-16 sm:h-20">
           <div className="flex items-center gap-4 md:gap-xxxl">
             <Link href="/" className="flex-shrink-0">
               <img

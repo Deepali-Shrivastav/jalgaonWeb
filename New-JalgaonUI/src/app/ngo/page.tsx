@@ -3,7 +3,7 @@ import NgoClient from './NgoClient';
 import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
-  title: 'Jalgaon NGOs | Volunteer, Donate & Support Local Charities',
+  title: 'NGOs in Jalgaon | Volunteer, Donate, Charities, Social Work & Community Service',
   description: 'Connect with local non-profits driving real change in healthcare, education, and sustainability across Jalgaon district. Find verified NGOs, volunteer, or donate.',
   keywords: [
     'Jalgaon NGO',
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     'Jalgaon community service',
   ],
   openGraph: {
-    title: 'Jalgaon NGOs | Support Local Charities',
+    title: 'NGOs in Jalgaon | Volunteer, Donate, Charities, Social Work & Community Service',
     description: 'Connect with local non-profits driving real change across Jalgaon district.',
     type: 'website',
     locale: 'en_IN',

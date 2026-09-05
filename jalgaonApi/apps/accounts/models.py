@@ -76,6 +76,20 @@ class User(AbstractUser, PermissionsMixin):
     def __str__(self):
         return self.phone_number
 
+    def get_full_name(self):
+        """
+        Return the first_name plus the last_name, with a space in between.
+        If both are empty, return phone_number.
+        """
+        first = self.first_name or ''
+        last = self.last_name or ''
+        full_name = f"{first} {last}".strip()
+        return full_name if full_name else str(self.phone_number)
+
+    def get_short_name(self):
+        """Return the short name for the user."""
+        return self.first_name or str(self.phone_number)
+
     @property
     def is_admin_role(self):
         """Check if user has any admin-level role."""

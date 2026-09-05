@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Pagination from "@/components/Pagination";
 
 interface Event { id: number; title: string; slug: string; venue_name: string; start_datetime: string; organizer_name: string; is_featured: boolean; status: string; rejection_reason?: string; }
 
 export default function AdminEventsPage() {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+  const router = useRouter();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -123,6 +125,7 @@ export default function AdminEventsPage() {
                           <button onClick={() => handleReject(ev.id)} className="px-2 py-1 bg-red-50 text-red-700 rounded text-xs font-medium hover:bg-red-100 flex items-center gap-0.5"><span className="material-symbols-outlined text-sm">close</span>Reject</button>
                         </>)}
                         <a href={`/events/${ev.slug}`} target="_blank" rel="noreferrer" className="p-1.5 rounded hover:bg-slate-100"><span className="material-symbols-outlined text-lg text-slate-500">visibility</span></a>
+                        <button onClick={() => router.push(`/admin/events/edit/${ev.id}`)} className="p-1.5 rounded hover:bg-slate-100"><span className="material-symbols-outlined text-lg text-slate-500">edit</span></button>
                         <button onClick={() => handleDelete(ev.id)} className="p-1.5 rounded hover:bg-red-50"><span className="material-symbols-outlined text-lg text-red-400">delete</span></button>
                       </div>
                     </td>

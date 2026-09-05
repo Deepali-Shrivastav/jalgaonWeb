@@ -57,8 +57,8 @@ export default function AddEventClient() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("Image size must be less than 5MB");
+      if (file.size > 1 * 1024 * 1024) {
+        toast.error("Image size must be less than 1MB");
         return;
       }
       setImageFile(file);
@@ -262,7 +262,7 @@ export default function AddEventClient() {
                     onChange={handleFileChange}
                     className="w-full bg-surface-container-low border border-outline rounded-xl px-4 py-2.5 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-all cursor-pointer"
                   />
-                  <p className="text-xs text-secondary mt-1">Max size: 5MB</p>
+                  <p className="text-xs text-secondary mt-1">Max size: 1MB</p>
                 </div>
               </div>
             </div>
@@ -384,9 +384,8 @@ export default function AddEventClient() {
                     value={formData.short_description}
                     onChange={handleChange}
                     rows={2}
-                    maxLength={160}
                     className="w-full bg-surface-container-low border border-outline rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
-                    placeholder="A brief summary (max 160 characters)..."
+                    placeholder="A brief summary..."
                   ></textarea>
                 </div>
                 

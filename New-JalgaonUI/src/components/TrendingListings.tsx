@@ -7,6 +7,7 @@ export interface TrendingListing {
   id?: number | string;
   name: string;
   category: string;
+  categorySlug?: string;
   rating: string | number;
   location: string;
   image: string;
@@ -44,6 +45,7 @@ export default function TrendingListings({ selectedCity, initialData }: Trending
           id: item.slug || item.id,
           name: item.business_name,
           category: item.main_category_name || 'Business',
+          categorySlug: item.main_category_slug || '',
           rating: item.avg_rating || 4.0,
           location: item.city || 'Jalgaon',
           image: item.business_banner
@@ -71,11 +73,11 @@ export default function TrendingListings({ selectedCity, initialData }: Trending
   const displayListings = filteredListings.slice(0, 4);
 
   return (
-    <section className="py-section bg-white">
-      <div className="max-w-container-max mx-auto px-xxl">
-        <div className="flex justify-between items-end mb-xxl">
+    <section className="py-8 sm:py-12 md:py-section bg-white">
+      <div className="max-w-container-max mx-auto px-4 sm:px-6 md:px-xxl">
+        <div className="flex justify-between items-end mb-6 sm:mb-xxl">
           <div>
-            <h2 className="text-3xl font-extrabold text-ink-deep mb-xxs">Trending Listings</h2>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-ink-deep mb-xxs">Trending Listings</h2>
             <p className="text-secondary">The most visited local hotspots this week</p>
           </div>
         </div>
@@ -91,7 +93,7 @@ export default function TrendingListings({ selectedCity, initialData }: Trending
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-xl">
             {displayListings.map((listing, idx) => (
-              <Link href={`/directory/${listing.id}`} key={listing.id || idx} className="group cursor-pointer block">
+              <Link href={`/category/${listing.categorySlug || 'business'}/${listing.id}`} key={listing.id || idx} className="group cursor-pointer block">
                 <div className="relative h-[240px] w-full rounded-xl overflow-hidden mb-base shadow-sm group-hover:shadow-xl transition-all duration-500 bg-surface-container-low">
                   {listing.image ? (
                     <img 

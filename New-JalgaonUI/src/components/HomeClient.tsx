@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Hero from '@/components/Hero';
 import MarketWeatherDashboard from '@/components/MarketWeatherDashboard';
+import BreakingNews from '@/components/BreakingNews';
+import JalgaonGlimpse from '@/components/JalgaonGlimpse';
 import LatestNews from '@/components/LatestNews';
 import UpcomingEvents from '@/components/UpcomingEvents';
 import LocalWonders from '@/components/LocalWonders';
@@ -16,18 +18,20 @@ import CallToAction from '@/components/CallToAction';
 import ContactForm from '@/components/ContactForm';
 import BlogSection from '@/components/BlogSection';
 
-export default function HomeClient({ 
-  trendingListings, 
-  news, 
-  events, 
+export default function HomeClient({
+  trendingListings,
+  news,
+  events,
   jobs,
-  startups
-}: { 
-  trendingListings?: any[], 
-  news?: any[], 
-  events?: any[], 
+  startups,
+  videos
+}: {
+  trendingListings?: any[],
+  news?: any[],
+  events?: any[],
   jobs?: any[],
-  startups?: any[]
+  startups?: any[],
+  videos?: any[]
 }) {
   const router = useRouter();
   const [selectedCity, setSelectedCity] = useState<string>('Jalgaon');
@@ -45,6 +49,7 @@ export default function HomeClient({
     <>
       <MarketWeatherDashboard />
       <Hero selectedCity={selectedCity} onCityChange={setSelectedCity} onSearch={handleSearch} />
+      <JalgaonGlimpse initialData={videos} />
       <TrendingListings selectedCity={selectedCity} initialData={trendingListings} />
       <IndustryGrids onSelectCategory={handleSelectCategory} />
       <LatestNews initialData={news} />

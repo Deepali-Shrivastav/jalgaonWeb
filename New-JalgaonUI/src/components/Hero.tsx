@@ -76,19 +76,19 @@ export default function Hero({ onSearch, selectedCity: propCity, onCityChange }:
   }, []);
 
   return (
-    <section className="hero-gradient pt-section pb-xxxl">
-      <div className="max-w-container-max mx-auto px-xxl text-center">
-        <h1 className="text-5xl md:text-7xl font-extrabold mb-xl tracking-tight text-ink-deep leading-[1.1]">
+    <section className="hero-gradient pt-8 sm:pt-section pb-8 sm:pb-xxxl">
+      <div className="max-w-container-max mx-auto px-4 sm:px-6 md:px-xxl text-center">
+        <h1 className="text-3xl sm:text-5xl md:text-7xl font-extrabold mb-4 sm:mb-xl tracking-tight text-ink-deep leading-[1.15] sm:leading-[1.1]">
           Discover & Grow Local <br /> <span className="text-primary">Businesses in {selectedCity}</span>
         </h1>
-        <p className="text-xl md:text-2xl text-secondary max-w-2xl mx-auto mb-xxxl font-light">
+        <p className="text-sm sm:text-xl md:text-2xl text-secondary max-w-2xl mx-auto mb-6 sm:mb-xxxl font-light">
           Find services near you or list your business in minutes. The professional gateway to North Maharashtra&apos;s economic heartbeat.
         </p>
 
         {/* Professional Search Pill */}
         <div className="max-w-3xl mx-auto flex flex-col md:flex-row gap-3 items-stretch md:items-center bg-white rounded-[1.5rem] md:rounded-full p-2 border border-outline-variant shadow-xl">
           <div ref={dropdownRef} className="relative w-full md:w-auto md:flex-[0.3] shrink-0">
-            <button 
+            <button
               type="button"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="w-full h-full flex items-center justify-between md:justify-start px-4 md:px-6 py-3.5 md:py-3 gap-3 border-b md:border-b-0 md:border-r border-hairline-soft cursor-pointer hover:bg-slate-50 transition-colors rounded-t-[1.5rem] md:rounded-l-full outline-none text-left"
@@ -97,7 +97,7 @@ export default function Hero({ onSearch, selectedCity: propCity, onCityChange }:
                 <span className="material-symbols-outlined text-primary text-[22px]">location_on</span>
                 <span className="font-bold text-ink-deep whitespace-nowrap text-lg md:text-base">{selectedCity}</span>
               </div>
-              <span 
+              <span
                 className="material-symbols-outlined text-slate-400 text-sm transition-transform duration-200 select-none"
                 style={{ transform: isDropdownOpen ? 'rotate(180deg)' : 'none' }}
               >
@@ -115,11 +115,10 @@ export default function Hero({ onSearch, selectedCity: propCity, onCityChange }:
                     key={city}
                     type="button"
                     onClick={() => handleCitySelect(city)}
-                    className={`w-full text-left px-5 py-2.5 hover:bg-primary/5 text-sm font-semibold transition-colors flex items-center justify-between cursor-pointer ${
-                      selectedCity.toLowerCase() === city.toLowerCase() 
-                        ? 'text-primary bg-primary/5 font-bold' 
+                    className={`w-full text-left px-5 py-2.5 hover:bg-primary/5 text-sm font-semibold transition-colors flex items-center justify-between cursor-pointer ${selectedCity.toLowerCase() === city.toLowerCase()
+                        ? 'text-primary bg-primary/5 font-bold'
                         : 'text-slate-700 hover:text-primary'
-                    }`}
+                      }`}
                   >
                     <span>{city}</span>
                     {selectedCity.toLowerCase() === city.toLowerCase() && (
@@ -130,9 +129,9 @@ export default function Hero({ onSearch, selectedCity: propCity, onCityChange }:
               </div>
             )}
           </div>
-          
+
           <div className="w-full md:w-auto md:flex-1">
-            <SearchBar 
+            <SearchBar
               flat
               placeholder={`Search restaurants, services, shops in ${selectedCity}...`}
               onSearch={onSearch}

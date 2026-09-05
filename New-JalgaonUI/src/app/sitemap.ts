@@ -34,6 +34,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: baseUrl, lastModified: new Date(), changeFrequency: 'daily', priority: 1 },
     { url: `${baseUrl}/search`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
     { url: `${baseUrl}/news`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
+    { url: `${baseUrl}/jalgaon-glimpse`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
     { url: `${baseUrl}/events`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
     { url: `${baseUrl}/jobs`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
     { url: `${baseUrl}/ngo`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
@@ -62,7 +63,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     listings.forEach((listing: any) => {
       if (listing.id || listing.slug) {
         routes.push({
-          url: `${baseUrl}/directory/${listing.slug || listing.id}`,
+          url: `${baseUrl}/category/${listing.main_category_slug || 'business'}/${listing.slug || listing.id}`,
           lastModified: listing.updated_at ? new Date(listing.updated_at) : new Date(),
           changeFrequency: 'weekly',
           priority: 0.8,
@@ -83,7 +84,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         }
     });
 
-    // 4. Fetch All Events
+    // 4. Fetch YouTube Videos
+    const videos = await fetchAll(`${apiUrl}/api/v1/jalgaon-glimpse/videos/?max_results=50`);
+    videos.forEach((v: any) => {
+      if (v.video_id) {
+        routes.push({
+          url: `${baseUrl}/jalgaon-glimpse/${v.video_id}`,
+          lastModified: v.published_at ? new Date(v.published_at) : new Date(),
+          changeFrequency: 'weekly',
+          priority: 0.7,
+        });
+      }
+    });
+
+    // 5. Fetch All Events
     const events = await fetchAll(`${apiUrl}/api/v1/events/`);
     events.forEach((e: any) => {
         if (e.slug || e.id) {
@@ -96,7 +110,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         }
     });
 
-    // 5. Fetch All Jobs
+    // 6. Fetch All Jobs
     const jobs = await fetchAll(`${apiUrl}/api/v1/jobs/`);
     jobs.forEach((j: any) => {
         if (j.slug || j.id) {
@@ -113,5 +127,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.warn("Failed to generate dynamic sitemap entries:", err);
   }
 
-  return routes;
+  // Deduplicate routes by URL to avoid crawler warnings and save crawl budget
+  const seenUrls = new Set<string>();
+  const uniqueRoutes = routes.filter((route) => {
+    if (seenUrls.has(route.url)) {
+      return false;
+    }
+    seenUrls.add(route.url);
+    return true;
+  });
+
+  return uniqueRoutes;
 }

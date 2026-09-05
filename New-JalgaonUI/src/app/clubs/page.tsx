@@ -3,7 +3,7 @@ import ClubsClient from './ClubsClient';
 import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
-  title: 'Jalgaon Club Directory | Local Social, Sports & Cultural Clubs',
+  title: 'Clubs in Jalgaon | Social, Sports, Cultural, Trekking & Educational Groups',
   description: 'Explore social, cultural, sports, educational, and environmental clubs in Jalgaon. Connect with local communities, explore active clubs, and join weekend activities.',
   keywords: [
     'Jalgaon clubs',
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     'trekking groups Jalgaon',
   ],
   openGraph: {
-    title: 'Jalgaon Club Directory | Local Social, Sports & Cultural Clubs',
+    title: 'Clubs in Jalgaon | Social, Sports, Cultural, Trekking & Educational Groups',
     description: 'Explore social, cultural, sports, educational, and environmental clubs in Jalgaon. Connect with local communities.',
     type: 'website',
     locale: 'en_IN',

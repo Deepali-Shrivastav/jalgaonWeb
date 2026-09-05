@@ -1,12 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-<<<<<<< HEAD
 /node_modules
-/.pnp
-.pnp.js
-=======
-node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -14,35 +9,21 @@ node_modules/
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
->>>>>>> 419f2e8095bcd9ea476fffd633c07faba1933b8f
 
 # testing
 /coverage
 
 # next.js
-<<<<<<< HEAD
 /.next/
 /out/
-
-# production
-/build
-=======
-.next/
-out/
-
-# production
 build/
->>>>>>> 419f2e8095bcd9ea476fffd633c07faba1933b8f
 
 # misc
 .DS_Store
 *.pem
-<<<<<<< HEAD
-=======
 *.log
 .dev-*.err.log
 .dev-*.out.log
->>>>>>> 419f2e8095bcd9ea476fffd633c07faba1933b8f
 
 # debug
 npm-debug.log*
@@ -50,15 +31,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-<<<<<<< HEAD
-# local env files
-.env*.local
-.env
-=======
-# env files (can opt-in for committing if needed)
+# env files
 .env*
 !.env.example
->>>>>>> 419f2e8095bcd9ea476fffd633c07faba1933b8f
 
 # vercel
 .vercel
