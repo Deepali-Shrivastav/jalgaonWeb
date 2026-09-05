@@ -1,0 +1,99 @@
+# =============================================================================
+# Workflow: Manually restart production services
+# =============================================================================
+# This workflow only restarts services. It does not pull code, install
+# dependencies, run migrations, or change production environment files.
+# =============================================================================
+name: "Operations - Restart Production Server"
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: "Production service to restart"
+        required: true
+        type: choice
+        options:
+          - all
+          - backend
+          - frontend
+        default: all
+      reason:
+        description: "Reason for the restart"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-server-restart
+  cancel-in-progress: false
+
+jobs:
+  restart:
+    name: "Restart ${{ inputs.service }} service"
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: "Restart production service"
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          RESTART_REASON: ${{ inputs.reason }}
+        with:
+          host: ${{ secrets.PRODUCTION_SERVER_IP }}
+          username: ${{ secrets.PRODUCTION_SSH_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          port: 22
+          command_timeout: 5m
+          envs: RESTART_REASON
+          script: |
+            set -euo pipefail
+
+            SERVICE="${{ inputs.service }}"
+            echo "Restart requested for: ${SERVICE}"
+            echo "Reason: ${RESTART_REASON}"
+
+            restart_and_verify() {
+              local service_name="$1"
+              echo "=== Restarting ${service_name} ==="
+              sudo systemctl restart "${service_name}"
+              sleep 5
+
+              if sudo systemctl is-active --quiet "${service_name}"; then
+                echo "✅ ${service_name} is active"
+              else
+                echo "❌ ${service_name} failed to start. Last 30 log lines:"
+                sudo journalctl -u "${service_name}" --no-pager -n 30
+                return 1
+              fi
+            }
+
+            case "${SERVICE}" in
+              backend)
+                restart_and_verify gunicorn_jalgaon
+                ;;
+              frontend)
+                restart_and_verify nextjs_jalgaon
+                ;;
+              all)
+                restart_and_verify gunicorn_jalgaon
+                restart_and_verify nextjs_jalgaon
+                echo "=== Reloading Nginx ==="
+                sudo nginx -t
+                sudo systemctl reload nginx
+                if systemctl is-active --quiet nginx; then
+                  echo "✅ nginx is active"
+                else
+                  echo "❌ nginx is not active"
+                  exit 1
+                fi
+                ;;
+              *)
+                echo "❌ Unsupported service selection: ${SERVICE}"
+                exit 1
+                ;;
+            esac
+
+            echo "🚀 Production service operation completed"
+            echo "Timestamp: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"

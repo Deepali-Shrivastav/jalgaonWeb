@@ -73,10 +73,17 @@ After that — every push to `main` auto-deploys. **You never SSH for deployment
 | CI — Run Tests | `.github/workflows/ci-tests.yml` | Push to `develop`/`feature/**`, PRs to `main`/`develop`, Manual |
 | CD — Deploy Backend | `.github/workflows/deploy-backend.yml` | Push to `main` (jalgaonApi changes), Manual |
 | CD — Deploy Frontend | `.github/workflows/deploy-frontend.yml` | Push to `main` (jalgaonUi changes), Manual |
+| Operations — Restart Production Server | `.github/workflows/restart-server.yml` | Manual only; restart backend, frontend, or all services |
 
 ### Manual Trigger (Workflow Dispatch)
-All three workflows have a **"Run workflow"** button in **GitHub → Actions** tab.  
-Use this for emergency hotfixes or to re-deploy without making a code change.
+The CI and deployment workflows have a **"Run workflow"** button in
+**GitHub → Actions**. Use these for emergency hotfixes or to re-deploy
+without making a code change.
+
+The restart workflow has its own **"Run workflow"** button. Select `backend`,
+`frontend`, or `all`, enter the reason, and run it to restart production
+services without deploying code. Selecting `all` also validates and reloads
+Nginx.
 
 ---
 
