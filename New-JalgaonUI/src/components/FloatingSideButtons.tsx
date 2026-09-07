@@ -131,8 +131,9 @@ export default function FloatingSideButtons() {
 
   // Pointer Drag Handlers (Supports Touch, Mouse, & Stylus)
   const handlePointerDown = (e: React.PointerEvent) => {
-    // Ignore drag start if clicking link cards or buttons
-    if ((e.target as HTMLElement).closest("button, a")) {
+    const target = e.target as HTMLElement;
+    // Allow drag if user touches the drag handle, or empty capsule space (not a link/button)
+    if (target.closest("button, a") && !target.closest(".drag-handle")) {
       return;
     }
 
@@ -199,12 +200,13 @@ export default function FloatingSideButtons() {
       {/* High-End Frosted Glassmorphism Outer Capsule */}
       <div className="relative flex flex-col gap-1.5 sm:gap-2.5 p-1.5 sm:p-2.5 bg-gradient-to-b from-white/70 via-white/45 to-white/25 backdrop-blur-3xl saturate-150 border border-white/80 shadow-[0_20px_50px_rgba(0,0,0,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] rounded-[22px] sm:rounded-[32px]">
         
-        {/* Drag Handle Indicator */}
+        {/* Mobile-Friendly Drag Handle Indicator */}
         <div
           title="Drag to reposition"
-          className="w-full flex items-center justify-center py-0.5 text-slate-400 hover:text-slate-700 transition-colors cursor-grab active:cursor-grabbing"
+          className="drag-handle w-full flex flex-col items-center justify-center py-2 sm:py-0.5 text-slate-500 hover:text-slate-800 transition-colors cursor-grab active:cursor-grabbing touch-none select-none"
         >
-          <GripVertical className="w-3.5 h-3.5 rotate-90 opacity-60" />
+          <div className="w-7 h-1 bg-slate-400/80 rounded-full mb-0.5 sm:hidden" />
+          <GripVertical className="w-3.5 h-3.5 rotate-90 opacity-70" />
         </div>
 
         {/* Specular Frosted Glass Minimize/Expand Button */}
