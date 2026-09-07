@@ -53,13 +53,14 @@ const getImageUrl = (img: any) => {
 };
 
 export default function LatestNews({ initialData }: { initialData?: NewsStory[] }) {
-  const [featuredStory, setFeaturedStory] = useState<NewsStory | null>(initialData && initialData.length > 0 ? initialData[0] : null);
-  const [newsList, setNewsList] = useState<NewsStory[]>(initialData && initialData.length > 1 ? initialData.slice(1, 5) : []);
-  const [loading, setLoading] = useState(!initialData);
+  const hasInitialData = Array.isArray(initialData) && initialData.length > 0;
+  const [featuredStory, setFeaturedStory] = useState<NewsStory | null>(hasInitialData ? initialData[0] : null);
+  const [newsList, setNewsList] = useState<NewsStory[]>(hasInitialData && initialData.length > 1 ? initialData.slice(1, 5) : []);
+  const [loading, setLoading] = useState(!hasInitialData);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (initialData) return;
+    if (hasInitialData) return;
     const fetchNews = async () => {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -148,20 +149,22 @@ export default function LatestNews({ initialData }: { initialData?: NewsStory[] 
                 onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
               />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/35 to-black/5" />
-            <div className="absolute inset-x-0 bottom-0 p-xl sm:p-xxxl">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 md:p-8">
               <StoryMeta
                 category={featuredStory.category}
                 date={featuredStory.date || featuredStory.readTime || ''}
                 isoDate={featuredStory.isoDate || ''}
                 inverse
               />
-              <h3 className="mt-md max-w-[560px] text-3xl font-extrabold leading-[1.12] tracking-tight text-white sm:text-4xl lg:text-[42px]">
+              <h3 className="mt-2 line-clamp-3 text-xl font-bold leading-snug text-white sm:text-2xl lg:text-3xl drop-shadow-sm">
                 {featuredStory.title}
               </h3>
-              <p className="mt-base max-w-[520px] text-sm leading-relaxed text-white/75 sm:text-base">
-                {featuredStory.summary || featuredStory.excerpt || featuredStory.short_description}
-              </p>
+              {(featuredStory.summary || featuredStory.excerpt || featuredStory.short_description) && (
+                <p className="mt-2 line-clamp-2 text-xs text-white/80 sm:text-sm leading-relaxed">
+                  {featuredStory.summary || featuredStory.excerpt || featuredStory.short_description}
+                </p>
+              )}
             </div>
           </Link>
 

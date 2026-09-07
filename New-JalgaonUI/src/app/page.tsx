@@ -8,7 +8,7 @@ async function getHomeData() {
   try {
     const [trendingRes, newsRes, eventsRes, jobsRes, startupsRes, youtubeRes] = await Promise.allSettled([
       fetch(`${apiUrl}/api/v1/listings/trending/`, { next: { revalidate: 3600 } }),
-      fetch(`${apiUrl}/api/v1/news/trending/`, { next: { revalidate: 1800 } }),
+      fetch(`${apiUrl}/api/v1/news/latest/`, { next: { revalidate: 1800 } }),
       fetch(`${apiUrl}/api/v1/events/`, { next: { revalidate: 3600 } }),
       fetch(`${apiUrl}/api/v1/jobs/`, { next: { revalidate: 3600 } }),
       fetch(`${apiUrl}/api/v1/startups/featured/`, { next: { revalidate: 3600 } }),

@@ -83,7 +83,10 @@ class TrendingNewsListView(generics.ListAPIView):
 
     def get_queryset(self):
         today = timezone.now().date()
-        return NewsArticle.objects.filter(status='published', published_at__date=today).order_by('-view_count')[:5]
+        qs = NewsArticle.objects.filter(status='published', published_at__date=today).order_by('-view_count')[:5]
+        if not qs.exists():
+            qs = NewsArticle.objects.filter(status='published').order_by('-view_count', '-published_at')[:5]
+        return qs
 
 class PublicNewsDetailView(generics.RetrieveAPIView):
     queryset = NewsArticle.objects.filter(status='published')
