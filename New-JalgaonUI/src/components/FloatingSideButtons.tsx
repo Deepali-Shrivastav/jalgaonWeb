@@ -131,8 +131,8 @@ export default function FloatingSideButtons() {
 
   // Pointer Drag Handlers (Supports Touch, Mouse, & Stylus)
   const handlePointerDown = (e: React.PointerEvent) => {
-    // Ignore drag start if clicking the collapse/expand toggle button
-    if ((e.target as HTMLElement).closest("button")) {
+    // Ignore drag start if clicking link cards or buttons
+    if ((e.target as HTMLElement).closest("button, a")) {
       return;
     }
 
@@ -192,7 +192,7 @@ export default function FloatingSideButtons() {
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       style={{ top: styleTop, transform: styleTransform }}
-      className={`fixed right-1 sm:right-3 z-[9999] scale-[0.72] sm:scale-100 origin-right select-none touch-none ${
+      className={`fixed right-1 sm:right-3 z-[9999] scale-[0.72] sm:scale-100 origin-right select-none ${
         isDragging ? "cursor-grabbing" : "cursor-grab"
       } ${isDragging ? "" : "transition-[top,transform] duration-200"}`}
     >

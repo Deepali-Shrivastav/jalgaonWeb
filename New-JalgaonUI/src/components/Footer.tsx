@@ -94,6 +94,14 @@ export default function Footer() {
               <li>
                 <Link
                   className="text-secondary hover:text-primary transition-colors"
+                  href="/clubs"
+                >
+                  Clubs
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className="text-secondary hover:text-primary transition-colors"
                   href="/jobs"
                 >
                   Jobs
