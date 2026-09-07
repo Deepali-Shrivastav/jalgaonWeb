@@ -1,4 +1,4 @@
-﻿# =============================================================================
+# =============================================================================
 # Workflow: CD — Deploy Next.js Frontend (New-JalgaonUI) to Production
 # =============================================================================
 #
@@ -152,10 +152,11 @@ jobs:
             # Keep previous .next/ for rollback (instant rename, no disk copy)
             [ -d "${NEXT_DIR}/.next" ] && \
               mv "${NEXT_DIR}/.next" "${NEXT_DIR}/.next.prev" || true
-            # Unpack new build
+            # Unpack new build & set permissions for web server (Nginx/www-data)
             tar -xzf "${DEPLOY_PKG}" -C "${NEXT_DIR}/"
+            chmod -R 755 "${NEXT_DIR}/.next" "${NEXT_DIR}/public"
             rm -f "${DEPLOY_PKG}"
-            echo "✅ Build artifacts in place"
+            echo "✅ Build artifacts in place and permissions set (755)"
 
             # ── [3/4] Install production dependencies ────────────────────────
             # --omit=dev skips devDependencies — fast, no compile step.
