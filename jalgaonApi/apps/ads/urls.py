@@ -2,7 +2,8 @@ from django.urls import path
 from .views import (
     HomeCrouselAdsView, BannerAdsView, AdsListingCreateAPIView,
     UserAdsListView, PublicAdsListView, TrackImpressionView,
-    TrackClickView, AdvertiserAnalyticsView, AdsBySlotView
+    TrackClickView, AdvertiserAnalyticsView, AdsBySlotView,
+    PublicFloatingVideoAdView
 )
 
 urlpatterns = [
@@ -12,7 +13,9 @@ urlpatterns = [
     path('my-ads/', UserAdsListView.as_view(), name='my-ads'),
     path('list/', PublicAdsListView.as_view(), name='ads-list'),
     path('by-slot/', AdsBySlotView.as_view(), name='by-slot'),
+    path('floating-video-ad/', PublicFloatingVideoAdView.as_view(), name='floating-video-ad'),
     path('my-analytics/', AdvertiserAnalyticsView.as_view(), name='my-analytics'),
     path('<int:ad_id>/track-impression/', TrackImpressionView.as_view(), name='track-impression'),
     path('<int:ad_id>/track-click/', TrackClickView.as_view(), name='track-click'),
 ]
+

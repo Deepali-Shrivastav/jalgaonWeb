@@ -42,6 +42,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const getPageTitle = () => {
     if (!pathname) return "Dashboard Overview";
+    if (pathname.includes("floating-video-ad")) return "Floating Video Advertisement";
+    if (pathname.includes("analytics")) return "Analytics";
     if (pathname.includes("users")) return "User Management";
     if (pathname.includes("trending")) return "Trending Listings";
     if (pathname.includes("listings")) return "Listing Management";
@@ -66,6 +68,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (pathname.includes("clubs")) return "Club Management";
     return "Dashboard Overview";
   };
+
 
   if (!isMounted) return null;
   if (!isLogin || !user) return null;

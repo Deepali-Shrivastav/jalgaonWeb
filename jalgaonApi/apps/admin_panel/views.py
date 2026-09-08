@@ -836,3 +836,98 @@ class AdminAdSlotDetailView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+from apps.ads.floating_ad_utils import (
+    get_floating_ad_config,
+    save_floating_ad_config,
+    parse_and_validate_ad_url
+)
+
+class AdminFloatingVideoAdView(APIView):
+    """
+    Admin/Superadmin endpoint for Floating Video Advertisement management.
+    GET /api/v1/admin-panel/floating-video-ad/
+    POST/PUT/PATCH /api/v1/admin-panel/floating-video-ad/
+    Uses non-database file persistence (data/floating_video_ad.json).
+    """
+    permission_classes = [IsAdminRole]
+
+    def get(self, request):
+        config = get_floating_ad_config()
+        if config.get("url"):
+            val = parse_and_validate_ad_url(config.get("url"), config.get("platform"))
+            config["valid"] = val["valid"]
+            if val["valid"]:
+                config["embed_url"] = val["embed_url"]
+                config["video_id"] = val["video_id"]
+                config["platform"] = val["platform"]
+        else:
+            config["valid"] = False
+        return Response(config, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        return self._save_config(request)
+
+    def put(self, request):
+        return self._save_config(request)
+
+    def patch(self, request):
+        current = get_floating_ad_config()
+        enabled = request.data.get("enabled", current.get("enabled", False))
+        url = request.data.get("url", current.get("url", ""))
+
+        if enabled and not url:
+            return Response({"error": "Cannot enable floating ad without a video URL."}, status=status.HTTP_400_BAD_REQUEST)
+
+        current["enabled"] = bool(enabled)
+        if "title" in request.data:
+            current["title"] = request.data.get("title", "").strip() or "Feature of the day"
+
+        if url:
+            val = parse_and_validate_ad_url(url)
+            if not val["valid"] and enabled:
+                return Response({"error": val["error"]}, status=status.HTTP_400_BAD_REQUEST)
+            current["url"] = url
+            current["platform"] = val["platform"] or current.get("platform", "youtube")
+            current["embed_url"] = val["embed_url"]
+            current["video_id"] = val["video_id"]
+
+        saved = save_floating_ad_config(current)
+        return Response(saved, status=status.HTTP_200_OK)
+
+    def _save_config(self, request):
+        raw_url = request.data.get("url", "").strip()
+        title = request.data.get("title", "").strip() or "Feature of the day"
+        enabled = bool(request.data.get("enabled", False))
+        platform_pref = request.data.get("platform")
+
+        if not raw_url and enabled:
+            return Response({"error": "Please enter a valid YouTube or Instagram URL before enabling."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if raw_url:
+            val = parse_and_validate_ad_url(raw_url, platform_pref)
+            if not val["valid"]:
+                return Response({"error": val["error"]}, status=status.HTTP_400_BAD_REQUEST)
+            
+            new_config = {
+                "enabled": enabled,
+                "platform": val["platform"],
+                "title": title,
+                "url": raw_url,
+                "embed_url": val["embed_url"],
+                "video_id": val["video_id"]
+            }
+        else:
+            new_config = {
+                "enabled": False,
+                "platform": platform_pref or "youtube",
+                "title": title,
+                "url": "",
+                "embed_url": "",
+                "video_id": ""
+            }
+
+        saved = save_floating_ad_config(new_config)
+        return Response(saved, status=status.HTTP_200_OK)
+
+

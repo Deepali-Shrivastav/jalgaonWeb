@@ -42,5 +42,7 @@ urlpatterns = [
     path('ads/<int:ad_id>/', views.AdminAdsActionView.as_view(), name='ads-action'),
     path('ad-slots/', views.AdminAdSlotListView.as_view(), name='ad-slot-list'),
     path('ad-slots/<int:slot_id>/', views.AdminAdSlotDetailView.as_view(), name='ad-slot-detail'),
+    path('floating-video-ad/', views.AdminFloatingVideoAdView.as_view(), name='floating-video-ad'),
 ]
+
 

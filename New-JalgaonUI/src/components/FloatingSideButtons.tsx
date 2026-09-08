@@ -193,7 +193,7 @@ export default function FloatingSideButtons() {
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       style={{ top: styleTop, transform: styleTransform }}
-      className={`fixed right-1 sm:right-3 z-[9999] scale-[0.72] sm:scale-100 origin-right select-none ${
+      className={`fixed right-1 sm:right-3 z-[9999] scale-[0.88] sm:scale-100 origin-right select-none ${
         isDragging ? "cursor-grabbing" : "cursor-grab"
       } ${isDragging ? "" : "transition-[top,transform] duration-200"}`}
     >

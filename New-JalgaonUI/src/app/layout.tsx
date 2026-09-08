@@ -8,6 +8,7 @@ import { InteractiveMenu } from "@/components/ui/modern-mobile-menu";
 import EngagementTrigger from "@/components/EngagementTrigger";
 import ProfileCompleteModal from "@/components/ProfileCompleteModal";
 import FloatingSideButtons from "@/components/FloatingSideButtons";
+import FloatingVideoAd from "@/components/FloatingVideoAd";
 import Script from "next/script";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -67,6 +68,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${plusJakartaSans.variable} light scroll-smooth`}
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <head>
@@ -140,8 +142,10 @@ export default function RootLayout({
           <Toaster position="bottom-right" toastOptions={{ className: 'font-sans' }} />
           <InteractiveMenu />
           <FloatingSideButtons />
+          <FloatingVideoAd />
         </AuthProvider>
       </body>
     </html>
   );
 }
+

@@ -182,3 +182,32 @@ class AdsBySlotView(APIView):
             'is_enabled': True,
             'ads': serializer.data
         }, status=status.HTTP_200_OK)
+
+
+from .floating_ad_utils import get_floating_ad_config, parse_and_validate_ad_url
+
+class PublicFloatingVideoAdView(APIView):
+    """
+    Public endpoint: GET /api/v1/ads/floating-video-ad/
+    Retrieves the currently active floating video advertisement configuration.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        try:
+            config = get_floating_ad_config()
+            if config.get("enabled") and config.get("url"):
+                val = parse_and_validate_ad_url(config.get("url"), config.get("platform"))
+                if val["valid"]:
+                    config["embed_url"] = val["embed_url"]
+                    config["video_id"] = val["video_id"]
+                    config["platform"] = val["platform"]
+                else:
+                    config["enabled"] = False
+                    config["error"] = val["error"]
+
+            return Response(config, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error fetching floating video ad: {e}")
+            return Response({"enabled": False, "error": "Unable to fetch ad config."}, status=status.HTTP_200_OK)
+

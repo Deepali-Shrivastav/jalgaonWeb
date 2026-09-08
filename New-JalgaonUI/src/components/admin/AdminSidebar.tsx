@@ -121,11 +121,20 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, toggleSidebar 
 
         {/* Ads Moderation */}
         {canSeeListings && (
-          <Link href="/admin/ads" className={navLinkClass("/admin/ads")}>
+          <Link href="/admin/ads" className={navLinkClass("/admin/ads", true)}>
             <span className="material-symbols-outlined">campaign</span>
             {!isCollapsed && <span>Ads Moderation</span>}
           </Link>
         )}
+
+        {/* Floating Video Ad */}
+        {isAdmin && (
+          <Link href="/admin/floating-video-ad" className={navLinkClass("/admin/floating-video-ad")}>
+            <span className="material-symbols-outlined">video_settings</span>
+            {!isCollapsed && <span>Floating Video Ad</span>}
+          </Link>
+        )}
+
 
         {/* Categories */}
         {canSeeCategories && (
