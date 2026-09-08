@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from .models import HomeCrouselAds, BannerAds, AdsListing, AdSlot
 from .serializers import HomeCrouselAdsSerializer, BannerAdsSerializer, AdsListingSerializer, AdSlotSerializer
+from .floating_ad_utils import get_floating_ad_config, parse_and_validate_ad_url
 
 logger = logging.getLogger(__name__)
 
@@ -183,8 +184,6 @@ class AdsBySlotView(APIView):
             'ads': serializer.data
         }, status=status.HTTP_200_OK)
 
-
-from .floating_ad_utils import get_floating_ad_config, parse_and_validate_ad_url
 
 class PublicFloatingVideoAdView(APIView):
     """

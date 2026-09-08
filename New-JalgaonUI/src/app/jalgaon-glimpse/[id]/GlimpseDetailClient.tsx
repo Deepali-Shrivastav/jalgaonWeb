@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { YouTubeVideo, YouTubeChannelInfo, DEFAULT_FALLBACK_VIDEOS, getHighResThumbnail, handleThumbnailError } from '@/types/youtube';
@@ -50,12 +52,68 @@ function formatSubscribers(countStr?: string): string {
   return `${num} subscribers`;
 }
 
+interface CommentItem {
+  id: string;
+  author: string;
+  avatar: string;
+  time: string;
+  text: string;
+  likes: number;
+  isLiked?: boolean;
+  isOwner?: boolean;
+}
+
+const INITIAL_COMMENTS: CommentItem[] = [
+  {
+    id: '1',
+    author: 'jalgaondotcom',
+    avatar: '/title-logo.png',
+    time: 'Pinned by jalgaondotcom • 1 day ago',
+    text: '🙏 Thanks for watching! What was your favorite topic in this episode? Let us know in the comments below! 👇',
+    likes: 42,
+    isOwner: true,
+  },
+  {
+    id: '2',
+    author: 'Rahul Patil',
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80',
+    time: '2 hours ago',
+    text: 'खूप छान मुलाखत झाली! जलगावच्या नवीन कलाकारांना असा सपोर्ट मिळायला हवा. Great work team! 👏🔥',
+    likes: 18,
+  },
+  {
+    id: '3',
+    author: 'Priyanka Chaudhari',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80',
+    time: '5 hours ago',
+    text: 'Amazing interview! Very inspiring journey. Looking forward to the next episode. 🙌',
+    likes: 11,
+  },
+  {
+    id: '4',
+    author: 'Sagar Mahajan',
+    avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=80',
+    time: '1 day ago',
+    text: 'Jalgaon.com sound quality and video editing is top notch! 🔥 Keep making such content!',
+    likes: 29,
+  },
+  {
+    id: '5',
+    author: 'Aniket Shinde',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80',
+    time: '2 days ago',
+    text: 'Director aani producer kadun milarala support cha mudda khoop mhatvacha hota. Loved it!',
+    likes: 7,
+  },
+];
+
 interface GlimpseDetailClientProps {
   videoId: string;
   initialVideo?: YouTubeVideo | null;
 }
 
 export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDetailClientProps) {
+  const router = useRouter();
   const [video, setVideo] = useState<YouTubeVideo | null>(initialVideo || null);
   const [channelInfo, setChannelInfo] = useState<YouTubeChannelInfo | null>(null);
   const [sidebarVideos, setSidebarVideos] = useState<YouTubeVideo[]>([]);
@@ -64,6 +122,117 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
   const [showFullDescription, setShowFullDescription] = useState<boolean>(false);
   const [filter, setFilter] = useState<'all' | 'channel' | 'related'>('all');
   const [showMoreShorts, setShowMoreShorts] = useState<boolean>(false);
+  const [isLiked, setIsLiked] = useState<boolean>(false);
+  const [likeCount, setLikeCount] = useState<number>(8500);
+
+  const [showCommentsModal, setShowCommentsModal] = useState<boolean>(false);
+  const [commentsList, setCommentsList] = useState<CommentItem[]>(INITIAL_COMMENTS);
+  const [newCommentText, setNewCommentText] = useState<string>('');
+  const [commentsCount, setCommentsCount] = useState<number>(252);
+
+  useEffect(() => {
+    if (video) {
+      const parsed = parseInt(video.like_count || '0', 10);
+      setLikeCount(isNaN(parsed) || parsed <= 0 ? 8500 : parsed);
+    }
+  }, [video]);
+
+  const handleLikeToggle = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (isLiked) {
+      setIsLiked(false);
+      setLikeCount((prev) => Math.max(0, prev - 1));
+      toast('Removed from Liked videos', { icon: '🤍' });
+    } else {
+      setIsLiked(true);
+      setLikeCount((prev) => prev + 1);
+      toast.success('Liked video!', { icon: '❤️' });
+    }
+  };
+
+  const handleCommentClick = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setShowCommentsModal(true);
+  };
+
+  const handleAddComment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCommentText.trim()) return;
+    const newComment: CommentItem = {
+      id: Date.now().toString(),
+      author: 'You',
+      avatar: '/title-logo.png',
+      time: 'Just now',
+      text: newCommentText.trim(),
+      likes: 0,
+    };
+    setCommentsList([newComment, ...commentsList]);
+    setCommentsCount((prev) => prev + 1);
+    setNewCommentText('');
+    toast.success('Comment posted successfully!');
+  };
+
+  const handleCommentLikeToggle = (commentId: string) => {
+    setCommentsList((prev) =>
+      prev.map((c) => {
+        if (c.id === commentId) {
+          return {
+            ...c,
+            isLiked: !c.isLiked,
+            likes: c.isLiked ? c.likes - 1 : c.likes + 1,
+          };
+        }
+        return c;
+      })
+    );
+  };
+
+  const handleShareClick = async (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+    const shareTitle = video?.title || 'Jalgaon Glimpse Video';
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: `Check out "${shareTitle}" on Jalgaon Glimpse!`,
+          url: shareUrl,
+        });
+      } catch { }
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success('Link copied to clipboard!');
+      } catch {
+        toast.error('Could not copy link');
+      }
+    }
+  };
+
+  const handleNextVideo = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const displayList = sidebarVideos.length > 0 ? sidebarVideos : DEFAULT_FALLBACK_VIDEOS;
+    if (displayList.length === 0) return;
+    const currentIndex = displayList.findIndex((v) => v.video_id === videoId);
+    const nextIndex = currentIndex >= 0 && currentIndex < displayList.length - 1 ? currentIndex + 1 : 0;
+    const nextVid = displayList[nextIndex];
+    if (nextVid) {
+      router.push(`/jalgaon-glimpse/${nextVid.video_id}`);
+    }
+  };
+
+  const handlePrevVideo = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const displayList = sidebarVideos.length > 0 ? sidebarVideos : DEFAULT_FALLBACK_VIDEOS;
+    if (displayList.length === 0) return;
+    const currentIndex = displayList.findIndex((v) => v.video_id === videoId);
+    const prevIndex = currentIndex > 0 ? currentIndex - 1 : displayList.length - 1;
+    const prevVid = displayList[prevIndex];
+    if (prevVid) {
+      router.push(`/jalgaon-glimpse/${prevVid.video_id}`);
+    }
+  };
 
   useEffect(() => {
     const fetchChannelInfo = async () => {
@@ -223,22 +392,28 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                     {/* LEFT CHANNEL OVERLAY & TITLE (LIGHT GLASS CARD - DESKTOP ONLY) */}
                     <div className="hidden lg:flex flex-col justify-end max-w-[300px] h-full space-y-3 shrink-0">
                       {/* Channel Row */}
-                      <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-hairline-soft shadow-2xs">
-                        <div className="w-10 h-10 rounded-full bg-white p-0.5 border border-hairline-soft overflow-hidden shrink-0 shadow-xs">
-                          <img src="/title-logo.png" alt="Jalgaon Logo" className="w-full h-full object-contain rounded-full" />
-                        </div>
-                        <div className="min-w-0 flex-grow">
-                          <div className="text-xs font-extrabold text-ink-deep truncate flex items-center gap-1">
-                            <span>@JalgaonGlimpse</span>
-                            <span className="material-symbols-outlined text-xs text-[#0081C7]">check_circle</span>
+                      <div className="flex items-center justify-between gap-3 bg-slate-50 p-3 rounded-2xl border border-hairline-soft shadow-2xs">
+                        <div className="flex items-center gap-2.5 min-w-0 flex-grow">
+                          <div className="w-10 h-10 rounded-full bg-white p-0.5 border border-hairline-soft overflow-hidden shrink-0 shadow-xs flex items-center justify-center">
+                            <img src="/title-logo.png" alt="Jalgaon Logo" className="w-full h-full object-contain rounded-full" />
                           </div>
-                          <span className="text-[11px] text-secondary font-medium">125K subscribers</span>
+                          <div className="min-w-0 flex-grow">
+                            <div className="flex items-center gap-1">
+                              <span className="text-xs font-extrabold text-ink-deep leading-none">
+                                @jalgaondotcom
+                              </span>
+                              <span className="material-symbols-outlined text-[14px] text-[#0081C7] inline-flex items-center justify-center shrink-0 leading-none">check_circle</span>
+                            </div>
+                            <span className="text-[11px] text-secondary font-medium leading-tight block mt-0.5 truncate">
+                              {channelInfo?.subscriber_count ? formatSubscribers(channelInfo.subscriber_count) : '24.5K subscribers'}
+                            </span>
+                          </div>
                         </div>
                         <a
-                          href="https://www.youtube.com/channel/UC1_W6Le5fkEDxsNFZEqPsAA?sub_confirmation=1"
+                          href={channelInfo?.youtube_url || "https://www.youtube.com/channel/UC1_W6Le5fkEDxsNFZEqPsAA?sub_confirmation=1"}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="bg-[#0081C7] hover:bg-sky-700 text-white text-xs font-bold px-3 py-1.5 rounded-full transition-all shrink-0 shadow-xs"
+                          className="bg-[#0081C7] hover:bg-sky-700 text-white text-xs font-extrabold px-3.5 py-1.5 rounded-full transition-all shrink-0 shadow-xs inline-flex items-center justify-center"
                         >
                           Subscribe
                         </a>
@@ -273,23 +448,27 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                     <div className="sm:hidden w-full max-w-[360px] mt-2 space-y-2.5 px-0.5">
                       {/* Channel & Subscribe Row */}
                       <div className="flex items-center justify-between gap-2 bg-slate-50 p-2.5 rounded-xl border border-hairline-soft shadow-2xs">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <div className="w-8 h-8 rounded-full bg-white p-0.5 border border-hairline-soft overflow-hidden shrink-0 shadow-xs">
+                        <div className="flex items-center gap-2 min-w-0 flex-grow">
+                          <div className="w-8 h-8 rounded-full bg-white p-0.5 border border-hairline-soft overflow-hidden shrink-0 shadow-xs flex items-center justify-center">
                             <img src="/title-logo.png" alt="Jalgaon Logo" className="w-full h-full object-contain rounded-full" />
                           </div>
-                          <div className="min-w-0">
-                            <div className="text-xs font-extrabold text-ink-deep truncate flex items-center gap-1">
-                              <span>@JalgaonGlimpse</span>
-                              <span className="material-symbols-outlined text-xs text-[#0081C7]">check_circle</span>
+                          <div className="min-w-0 flex-grow">
+                            <div className="flex items-center gap-1">
+                              <span className="text-xs font-extrabold text-ink-deep leading-none">
+                                @jalgaondotcom
+                              </span>
+                              <span className="material-symbols-outlined text-[13px] text-[#0081C7] inline-flex items-center justify-center shrink-0 leading-none">check_circle</span>
                             </div>
-                            <span className="text-[10px] text-secondary font-medium block truncate">125K subscribers</span>
+                            <span className="text-[10px] text-secondary font-medium block truncate leading-tight mt-0.5">
+                              {channelInfo?.subscriber_count ? formatSubscribers(channelInfo.subscriber_count) : '24.5K subscribers'}
+                            </span>
                           </div>
                         </div>
                         <a
-                          href="https://www.youtube.com/channel/UC1_W6Le5fkEDxsNFZEqPsAA?sub_confirmation=1"
+                          href={channelInfo?.youtube_url || "https://www.youtube.com/channel/UC1_W6Le5fkEDxsNFZEqPsAA?sub_confirmation=1"}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="bg-[#0081C7] hover:bg-sky-700 text-white text-[11px] font-extrabold px-3 py-1.5 rounded-full transition-all shrink-0 shadow-xs"
+                          className="bg-[#0081C7] hover:bg-sky-700 text-white text-[11px] font-extrabold px-3 py-1.5 rounded-full transition-all shrink-0 shadow-xs inline-flex items-center justify-center"
                         >
                           Subscribe
                         </a>
@@ -310,26 +489,43 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                       {/* Action Pill Controls Row */}
                       <div className="flex items-center justify-between gap-1.5 bg-slate-50 p-2 rounded-xl border border-hairline-soft">
                         {/* Like Button */}
-                        <button type="button" className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-hairline-soft hover:bg-slate-100 text-xs font-bold transition-all shadow-2xs">
-                          <span className="material-symbols-outlined text-base text-[#0081C7]">favorite</span>
-                          <span>{formatNumber(video.like_count || '85000')}</span>
+                        <button
+                          type="button"
+                          onClick={handleLikeToggle}
+                          className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs font-bold transition-all shadow-2xs ${isLiked
+                              ? 'bg-red-50 border-red-200 text-red-600'
+                              : 'bg-white border-hairline-soft hover:bg-slate-100'
+                            }`}
+                        >
+                          <span className={`material-symbols-outlined text-base ${isLiked ? 'text-red-500 fill-current' : 'text-[#0081C7]'}`}>
+                            favorite
+                          </span>
+                          <span>{formatNumber(likeCount.toString())}</span>
                         </button>
 
                         {/* Comment Button */}
-                        <button type="button" className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-hairline-soft hover:bg-slate-100 text-xs font-bold transition-all shadow-2xs">
+                        <button
+                          type="button"
+                          onClick={handleCommentClick}
+                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-hairline-soft hover:bg-slate-100 text-xs font-bold transition-all shadow-2xs"
+                        >
                           <span className="material-symbols-outlined text-base text-secondary">chat_bubble</span>
                           <span>252</span>
                         </button>
 
                         {/* Share Button */}
-                        <button type="button" className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-hairline-soft hover:bg-slate-100 text-xs font-bold transition-all shadow-2xs">
+                        <button
+                          type="button"
+                          onClick={handleShareClick}
+                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-hairline-soft hover:bg-slate-100 text-xs font-bold transition-all shadow-2xs"
+                        >
                           <span className="material-symbols-outlined text-base text-secondary">share</span>
                           <span>Share</span>
                         </button>
 
                         {/* Watch on YouTube Button */}
                         <a
-                          href={video.youtube_url}
+                          href={video.youtube_url || `https://www.youtube.com/watch?v=${video.video_id}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-50 border border-red-200 text-red-600 hover:bg-red-600 hover:text-white text-xs font-extrabold transition-all shadow-2xs"
@@ -346,15 +542,31 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                     {/* RIGHT ACTION BUTTONS COLUMN (TABLET & DESKTOP ONLY) */}
                     <div className="hidden sm:flex flex-col items-center justify-end h-full space-y-3 sm:space-y-4 shrink-0">
                       {/* Like Button */}
-                      <button type="button" className="flex flex-col items-center gap-0.5 sm:gap-1 group">
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-100 group-hover:bg-[#0081C7] group-hover:text-white text-ink-deep border border-hairline-soft flex items-center justify-center transition-all shadow-2xs group-hover:scale-110">
-                          <span className="material-symbols-outlined text-xl sm:text-2xl text-[#0081C7] group-hover:text-white">favorite</span>
+                      <button
+                        type="button"
+                        onClick={handleLikeToggle}
+                        className="flex flex-col items-center gap-0.5 sm:gap-1 group cursor-pointer"
+                      >
+                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full border flex items-center justify-center transition-all shadow-2xs group-hover:scale-110 ${isLiked
+                            ? 'bg-red-500 text-white border-red-500'
+                            : 'bg-slate-100 group-hover:bg-[#0081C7] group-hover:text-white text-ink-deep border-hairline-soft'
+                          }`}>
+                          <span className={`material-symbols-outlined text-xl sm:text-2xl ${isLiked ? 'text-white fill-current' : 'text-[#0081C7] group-hover:text-white'
+                            }`}>
+                            favorite
+                          </span>
                         </div>
-                        <span className="text-[10px] sm:text-xs font-extrabold text-ink-deep">{formatNumber(video.like_count || '85000')}</span>
+                        <span className="text-[10px] sm:text-xs font-extrabold text-ink-deep">
+                          {formatNumber(likeCount.toString())}
+                        </span>
                       </button>
 
                       {/* Comment Button */}
-                      <button type="button" className="flex flex-col items-center gap-0.5 sm:gap-1 group">
+                      <button
+                        type="button"
+                        onClick={handleCommentClick}
+                        className="flex flex-col items-center gap-0.5 sm:gap-1 group cursor-pointer"
+                      >
                         <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-100 group-hover:bg-[#0081C7] group-hover:text-white text-ink-deep border border-hairline-soft flex items-center justify-center transition-all shadow-2xs group-hover:scale-110">
                           <span className="material-symbols-outlined text-xl sm:text-2xl text-secondary group-hover:text-white">chat_bubble</span>
                         </div>
@@ -362,7 +574,11 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                       </button>
 
                       {/* Share Button */}
-                      <button type="button" className="flex flex-col items-center gap-0.5 sm:gap-1 group">
+                      <button
+                        type="button"
+                        onClick={handleShareClick}
+                        className="flex flex-col items-center gap-0.5 sm:gap-1 group cursor-pointer"
+                      >
                         <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-100 group-hover:bg-[#0081C7] group-hover:text-white text-ink-deep border border-hairline-soft flex items-center justify-center transition-all shadow-2xs group-hover:scale-110">
                           <span className="material-symbols-outlined text-xl sm:text-2xl text-secondary group-hover:text-white">share</span>
                         </div>
@@ -371,10 +587,10 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
 
                       {/* Watch on YouTube Button */}
                       <a
-                        href={video.youtube_url}
+                        href={video.youtube_url || `https://www.youtube.com/watch?v=${video.video_id}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex flex-col items-center gap-0.5 sm:gap-1 group"
+                        className="flex flex-col items-center gap-0.5 sm:gap-1 group cursor-pointer"
                         title="Watch on YouTube"
                       >
                         <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-50 group-hover:bg-red-600 text-red-600 group-hover:text-white border border-red-200 flex items-center justify-center transition-all shadow-2xs group-hover:scale-110">
@@ -390,16 +606,21 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                     <div className="hidden md:flex flex-col items-center justify-center gap-3 shrink-0 ml-2">
                       <button
                         type="button"
+                        onClick={handlePrevVideo}
                         aria-label="Previous video"
-                        className="w-11 h-11 rounded-full bg-slate-100 hover:bg-[#0081C7] text-secondary hover:text-white flex items-center justify-center shadow-xs transition-all border border-hairline-soft"
+                        className="w-11 h-11 rounded-full bg-slate-100 hover:bg-[#0081C7] text-secondary hover:text-white flex items-center justify-center shadow-xs transition-all border border-hairline-soft cursor-pointer group relative"
                       >
                         <span className="material-symbols-outlined text-xl">arrow_upward</span>
+                        <span className="absolute right-14 bg-ink-deep text-white text-xs font-bold px-3 py-1 rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                          Previous video
+                        </span>
                       </button>
 
                       <button
                         type="button"
+                        onClick={handleNextVideo}
                         aria-label="Next video"
-                        className="w-11 h-11 rounded-full bg-slate-100 hover:bg-[#0081C7] text-secondary hover:text-white flex items-center justify-center shadow-xs transition-all border border-hairline-soft group relative"
+                        className="w-11 h-11 rounded-full bg-slate-100 hover:bg-[#0081C7] text-secondary hover:text-white flex items-center justify-center shadow-xs transition-all border border-hairline-soft group relative cursor-pointer"
                       >
                         <span className="material-symbols-outlined text-xl">arrow_downward</span>
                         <span className="absolute right-14 bg-ink-deep text-white text-xs font-bold px-3 py-1 rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
@@ -468,11 +689,11 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                 <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto hide-scrollbar py-1 max-w-full">
                   {/* Like/Dislike Pill */}
                   <div className="h-9 bg-white hover:bg-slate-50 text-ink-deep border border-hairline-soft rounded-full flex items-center text-xs font-bold transition-all shadow-xs shrink-0">
-                    <button type="button" className="h-full flex items-center gap-1 pl-3 pr-2.5 sm:px-4 hover:bg-slate-100 rounded-l-full border-r border-hairline-soft">
-                      <span className="material-symbols-outlined text-base text-[#0081C7]">thumb_up</span>
-                      <span>{formatNumber(video.like_count || '44000')}</span>
+                    <button type="button" onClick={handleLikeToggle} className="h-full flex items-center gap-1 pl-3 pr-2.5 sm:px-4 hover:bg-slate-100 rounded-l-full border-r border-hairline-soft">
+                      <span className={`material-symbols-outlined text-base ${isLiked ? 'text-red-500 fill-current' : 'text-[#0081C7]'}`}>thumb_up</span>
+                      <span>{formatNumber(likeCount.toString())}</span>
                     </button>
-                    <button type="button" className="h-full flex items-center px-2.5 sm:px-3.5 hover:bg-slate-100 rounded-r-full">
+                    <button type="button" onClick={() => toast('Feedback received', { icon: '👍' })} className="h-full flex items-center px-2.5 sm:px-3.5 hover:bg-slate-100 rounded-r-full">
                       <span className="material-symbols-outlined text-base text-secondary">thumb_down</span>
                     </button>
                   </div>
@@ -480,6 +701,7 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                   {/* Share Pill */}
                   <button
                     type="button"
+                    onClick={handleShareClick}
                     className="h-9 bg-white hover:bg-slate-50 text-ink-deep border border-hairline-soft px-3 sm:px-4 rounded-full text-xs font-bold flex items-center gap-1 sm:gap-1.5 transition-all shadow-xs hover:border-sky-300 shrink-0"
                   >
                     <span className="material-symbols-outlined text-base text-[#0081C7]">share</span>
@@ -488,7 +710,7 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
 
                   {/* Watch on YouTube Pill */}
                   <a
-                    href={video.youtube_url}
+                    href={video.youtube_url || `https://www.youtube.com/watch?v=${video.video_id}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="h-9 bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-700 hover:to-rose-800 text-white px-3 sm:px-4 rounded-full text-xs font-extrabold flex items-center gap-1 sm:gap-1.5 transition-all shadow-md hover:scale-105 shrink-0"
@@ -503,6 +725,7 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
                   <button
                     type="button"
                     aria-label="More options"
+                    onClick={handleShareClick}
                     className="h-9 w-9 bg-white hover:bg-slate-100 border border-hairline-soft text-ink-deep rounded-full flex items-center justify-center transition-colors shadow-xs shrink-0"
                   >
                     <span className="material-symbols-outlined text-base">more_horiz</span>
@@ -512,6 +735,7 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
 
               {/* YouTube Description Card Container */}
               <div
+                id="description-card"
                 onClick={() => setShowFullDescription(!showFullDescription)}
                 className="bg-gradient-to-br from-white via-sky-50/20 to-white border border-hairline-soft hover:border-[#0081C7]/30 p-4 sm:p-5 rounded-2xl text-xs sm:text-sm text-ink-deep cursor-pointer transition-all space-y-2 shadow-xs hover:shadow-md"
               >
@@ -784,6 +1008,127 @@ export default function GlimpseDetailClient({ videoId, initialVideo }: GlimpseDe
           </div>
         )}
       </main>
+
+      {/* --- INTERACTIVE COMMENTS MODAL DRAWER --- */}
+      {showCommentsModal && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-3 sm:p-4 animate-fadeIn"
+          onClick={() => setShowCommentsModal(false)}
+        >
+          <div
+            className="relative bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] border border-hairline-soft"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-4 py-3 sm:px-5 sm:py-3.5 border-b border-hairline-soft bg-slate-50">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-lg sm:text-xl text-[#0081C7]">chat_bubble</span>
+                <h3 className="font-extrabold text-sm sm:text-base text-ink-deep">
+                  Comments <span className="text-secondary text-xs sm:text-sm font-semibold">({commentsCount})</span>
+                </h3>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowCommentsModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-200/80 hover:bg-slate-300 text-ink-deep flex items-center justify-center transition-colors cursor-pointer"
+                aria-label="Close comments"
+              >
+                <span className="material-symbols-outlined text-xl">close</span>
+              </button>
+            </div>
+
+            {/* Add Comment Input Form */}
+            <form onSubmit={handleAddComment} className="p-3 sm:p-4 border-b border-hairline-soft bg-white">
+              <div className="flex items-start gap-2.5 sm:gap-3">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#0081C7] text-white font-extrabold flex items-center justify-center text-xs shrink-0 shadow-xs">
+                  Y
+                </div>
+                <div className="flex-grow space-y-2">
+                  <textarea
+                    rows={2}
+                    value={newCommentText}
+                    onChange={(e) => setNewCommentText(e.target.value)}
+                    placeholder="Add a public comment..."
+                    className="w-full text-xs sm:text-sm p-2.5 rounded-xl border border-hairline-soft focus:border-[#0081C7] focus:ring-1 focus:ring-[#0081C7] outline-none resize-none bg-slate-50 focus:bg-white transition-all text-ink-deep placeholder:text-secondary"
+                  />
+                  <div className="flex items-center justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setNewCommentText('')}
+                      className="px-3 py-1 text-xs font-bold text-secondary hover:text-ink-deep rounded-full transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={!newCommentText.trim()}
+                      className="px-4 py-1.5 bg-[#0081C7] hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold rounded-full transition-all shadow-xs"
+                    >
+                      Comment
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
+
+            {/* Scrollable Comments List */}
+            <div className="flex-grow overflow-y-auto p-4 space-y-4 divide-y divide-hairline-soft/60">
+              {commentsList.map((comment) => (
+                <div key={comment.id} className="pt-3.5 first:pt-0 flex items-start gap-3">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-100 border border-hairline-soft overflow-hidden shrink-0 shadow-2xs">
+                    <img
+                      src={comment.avatar}
+                      alt={comment.author}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
+                  <div className="flex-grow min-w-0 space-y-1">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-xs font-extrabold text-ink-deep">{comment.author}</span>
+                      {comment.isOwner && (
+                        <span className="bg-[#0081C7] text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full uppercase tracking-wider">
+                          Author
+                        </span>
+                      )}
+                      <span className="text-[10px] text-secondary font-medium">{comment.time}</span>
+                    </div>
+
+                    <p className="text-xs sm:text-sm text-ink-deep leading-relaxed whitespace-pre-wrap">
+                      {comment.text}
+                    </p>
+
+                    {/* Action Bar (Like & Reply) */}
+                    <div className="flex items-center gap-4 text-xs pt-1">
+                      <button
+                        type="button"
+                        onClick={() => handleCommentLikeToggle(comment.id)}
+                        className={`flex items-center gap-1 font-semibold transition-colors ${comment.isLiked ? 'text-red-500 font-bold' : 'text-secondary hover:text-ink-deep'
+                          }`}
+                      >
+                        <span className={`material-symbols-outlined text-sm ${comment.isLiked ? 'fill-current' : ''}`}>
+                          thumb_up
+                        </span>
+                        <span>{comment.likes > 0 ? comment.likes : ''}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => toast('Reply feature coming soon!', { icon: '💬' })}
+                        className="text-secondary hover:text-ink-deep font-bold text-[11px]"
+                      >
+                        Reply
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
