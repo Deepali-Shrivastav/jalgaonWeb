@@ -210,7 +210,7 @@ export default function FloatingVideoAd() {
   const thumbnailUrl =
     isYouTube && currentAd.video_id
       ? `https://img.youtube.com/vi/${currentAd.video_id}/mqdefault.jpg`
-      : "/main-logo.png";
+      : "/title-logo.png";
 
   const videoTitle = currentAd.title?.trim() || "Feature of the day";
   const instagramEmbedUrl = `https://www.instagram.com/p/${currentAd.video_id}/embed/`;
@@ -239,13 +239,15 @@ export default function FloatingVideoAd() {
           }`}
         >
           {/* Left Circular Video Thumbnail */}
-          <div className="w-9 h-9 rounded-full overflow-hidden border border-slate-200/80 flex-shrink-0 bg-slate-100 flex items-center justify-center shadow-sm">
+          <div className="w-9 h-9 rounded-full overflow-hidden border border-slate-200/80 flex-shrink-0 bg-slate-50 flex items-center justify-center shadow-sm p-1">
             <img
               src={thumbnailUrl}
               alt={videoTitle}
-              className="w-full h-full object-cover"
+              className={`w-full h-full ${
+                thumbnailUrl.includes("youtube.com") ? "object-cover" : "object-contain"
+              }`}
               onError={(e) => {
-                (e.target as HTMLImageElement).src = "/main-logo.png";
+                (e.target as HTMLImageElement).src = "/title-logo.png";
               }}
             />
           </div>
@@ -388,13 +390,15 @@ export default function FloatingVideoAd() {
           {/* Footer Badge */}
           <div className="px-3.5 py-2.5 bg-white border-t border-slate-100 flex items-center justify-between gap-2.5">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200/80 flex-shrink-0 overflow-hidden flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-200/80 flex-shrink-0 overflow-hidden flex items-center justify-center p-1">
                 <img
                   src={thumbnailUrl}
                   alt={videoTitle}
-                  className="w-full h-full object-cover"
+                  className={`w-full h-full ${
+                    thumbnailUrl.includes("youtube.com") ? "object-cover" : "object-contain"
+                  }`}
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/main-logo.png";
+                    (e.target as HTMLImageElement).src = "/title-logo.png";
                   }}
                 />
               </div>
