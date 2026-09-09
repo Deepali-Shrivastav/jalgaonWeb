@@ -47,8 +47,9 @@ const navItems: NavItem[] = [
   },
   {
     name: "Directory",
-    href: "/directory",
+    href: "https://jalgaon.gov.in/en/telephone-directory/",
     icon: PhoneCall,
+    isExternal: true,
     cardStyle: "bg-amber-500/12 hover:bg-amber-500/22 border border-white/70 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9)] backdrop-blur-md",
     iconColor: "text-amber-600",
   },

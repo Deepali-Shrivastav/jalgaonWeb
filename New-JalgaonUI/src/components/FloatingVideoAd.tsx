@@ -176,8 +176,23 @@ export default function FloatingVideoAd() {
     );
   };
 
+  const [is404Page, setIs404Page] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const check404 = () => {
+        const el = document.querySelector('[data-is-404="true"]');
+        setIs404Page(!!el);
+      };
+      check404();
+      const timer = setTimeout(check404, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [pathname]);
+
   if (
     !isAllowedPage(pathname) ||
+    is404Page ||
     !isVisible ||
     !currentAd ||
     !currentAd.embed_url
