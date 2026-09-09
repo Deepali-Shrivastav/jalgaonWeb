@@ -147,6 +147,9 @@ export default function FloatingSideButtons() {
 
   // Pointer Drag Handlers (Supports Touch, Mouse, & Stylus)
   const handlePointerDown = (e: React.PointerEvent) => {
+    // ALWAYS reset drag tracking flag when pointer down occurs
+    hasDraggedRef.current = false;
+
     const target = e.target as HTMLElement;
     // Allow normal click navigation if user touches an interactive link/button
     if (target.closest("button, a") && !target.closest(".drag-handle")) {
@@ -154,7 +157,6 @@ export default function FloatingSideButtons() {
     }
 
     setIsDragging(true);
-    hasDraggedRef.current = false;
     const currentTop = topPos ?? (window.innerHeight / 2 - 160);
     dragStartPos.current = {
       startY: e.clientY,
@@ -237,7 +239,10 @@ export default function FloatingSideButtons() {
         {/* Specular Frosted Glass Minimize/Expand Button */}
         <button
           type="button"
-          onClick={() => setIsCollapsed(!isCollapsed)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsCollapsed(!isCollapsed);
+          }}
           aria-label={isCollapsed ? "Expand Navigation" : "Collapse Navigation"}
           aria-expanded={!isCollapsed}
           className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/80 backdrop-blur-xl border border-white shadow-[0_4px_12px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,1)] flex items-center justify-center text-[#0081C7] hover:scale-110 active:scale-95 transition-all duration-200 z-20 cursor-pointer"
