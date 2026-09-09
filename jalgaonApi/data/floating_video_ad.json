@@ -1,9 +1,9 @@
 {
-  "enabled": true,
-  "platform": "instagram",
+  "enabled": false,
+  "platform": "youtube",
   "title": "Feature of the day",
-  "url": "https://www.instagram.com/reel/DdBvm9Ousqe/?stkn=MW9yMjRhanBxdDZzdQ==",
-  "embed_url": "https://www.instagram.com/p/DdBvm9Ousqe/embed/",
-  "video_id": "DdBvm9Ousqe",
-  "updated_at": "2026-09-09T05:36:14.866986+00:00"
+  "url": "",
+  "embed_url": "",
+  "video_id": "",
+  "updated_at": null
 }
