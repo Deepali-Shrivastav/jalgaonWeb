@@ -47,8 +47,7 @@ const navItems: NavItem[] = [
   },
   {
     name: "Directory",
-    href: "https://jalgaon.gov.in/en/telephone-directory/",
-    isExternal: true,
+    href: "/directory",
     icon: PhoneCall,
     cardStyle: "bg-amber-500/12 hover:bg-amber-500/22 border border-white/70 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9)] backdrop-blur-md",
     iconColor: "text-amber-600",
@@ -65,6 +64,7 @@ const navItems: NavItem[] = [
 export default function FloatingSideButtons() {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isAdOpen, setIsAdOpen] = useState(false);
   const [topPos, setTopPos] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
@@ -72,6 +72,28 @@ export default function FloatingSideButtons() {
   // Drag Tracking Refs
   const dragStartPos = useRef<{ startY: number; initialTop: number }>({ startY: 0, initialTop: 0 });
   const hasDraggedRef = useRef<boolean>(false);
+
+  // Auto-hide FAB stick when FloatingVideoAd modal is open (prevents visual overlaps)
+  useEffect(() => {
+    let timerId: NodeJS.Timeout;
+
+    const handleAdStateChange = (e: Event) => {
+      const customEvent = e as CustomEvent<{ isAdOpen: boolean }>;
+      const openState = customEvent.detail?.isAdOpen ?? false;
+
+      clearTimeout(timerId);
+      timerId = setTimeout(() => {
+        setIsAdOpen(openState);
+      }, 150);
+    };
+
+    window.addEventListener("floating-ad-state-change", handleAdStateChange);
+
+    return () => {
+      clearTimeout(timerId);
+      window.removeEventListener("floating-ad-state-change", handleAdStateChange);
+    };
+  }, []);
 
   // Auto-collapse on small mobile screens & initialize drag position
   useEffect(() => {
@@ -98,7 +120,7 @@ export default function FloatingSideButtons() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Auto close / collapse on tap outside or scroll
+  // Auto-collapse ONLY on pointer tap outside of the navigation container
   useEffect(() => {
     if (isCollapsed) return;
 
@@ -108,10 +130,6 @@ export default function FloatingSideButtons() {
       }
     };
 
-    const handleScroll = () => {
-      setIsCollapsed(true);
-    };
-
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setIsCollapsed(true);
@@ -119,12 +137,10 @@ export default function FloatingSideButtons() {
     };
 
     document.addEventListener("pointerdown", handlePointerDown);
-    window.addEventListener("scroll", handleScroll, { passive: true });
     document.addEventListener("keydown", handleKeyDown);
 
     return () => {
       document.removeEventListener("pointerdown", handlePointerDown);
-      window.removeEventListener("scroll", handleScroll);
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [isCollapsed]);
@@ -132,7 +148,7 @@ export default function FloatingSideButtons() {
   // Pointer Drag Handlers (Supports Touch, Mouse, & Stylus)
   const handlePointerDown = (e: React.PointerEvent) => {
     const target = e.target as HTMLElement;
-    // Allow drag if user touches the drag handle, or empty capsule space (not a link/button)
+    // Allow normal click navigation if user touches an interactive link/button
     if (target.closest("button, a") && !target.closest(".drag-handle")) {
       return;
     }
@@ -144,10 +160,6 @@ export default function FloatingSideButtons() {
       startY: e.clientY,
       initialTop: currentTop,
     };
-
-    try {
-      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    } catch {}
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -166,17 +178,13 @@ export default function FloatingSideButtons() {
     setTopPos(newTop);
   };
 
-  const handlePointerUp = (e: React.PointerEvent) => {
+  const handlePointerUp = () => {
     if (!isDragging) return;
     setIsDragging(false);
 
     if (topPos !== null) {
       localStorage.setItem("floating_buttons_top_pos", topPos.toString());
     }
-
-    try {
-      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-    } catch {}
   };
 
   if (pathname?.startsWith("/admin")) {
@@ -184,7 +192,18 @@ export default function FloatingSideButtons() {
   }
 
   const styleTop = topPos !== null ? `${topPos}px` : "50%";
-  const styleTransform = topPos !== null ? "none" : "translateY(-50%)";
+  const styleTransform =
+    topPos !== null
+      ? isAdOpen
+        ? "translateX(160%)"
+        : "none"
+      : isAdOpen
+      ? "translate(160%, -50%)"
+      : "translateY(-50%)";
+
+  const styleTransition = isDragging
+    ? "none"
+    : "top 250ms cubic-bezier(0.16, 1, 0.3, 1), transform 550ms cubic-bezier(0.16, 1, 0.3, 1), opacity 550ms cubic-bezier(0.16, 1, 0.3, 1)";
 
   return (
     <div
@@ -192,10 +211,16 @@ export default function FloatingSideButtons() {
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
-      style={{ top: styleTop, transform: styleTransform }}
+      style={{
+        top: styleTop,
+        transform: styleTransform,
+        opacity: isAdOpen ? 0 : 1,
+        pointerEvents: isAdOpen ? "none" : "auto",
+        transition: styleTransition,
+      }}
       className={`fixed right-1 sm:right-3 z-[9999] scale-[0.88] sm:scale-100 origin-right select-none ${
         isDragging ? "cursor-grabbing" : "cursor-grab"
-      } ${isDragging ? "" : "transition-[top,transform] duration-200"}`}
+      }`}
     >
       {/* High-End Frosted Glassmorphism Outer Capsule */}
       <div className="relative flex flex-col gap-1.5 sm:gap-2.5 p-1.5 sm:p-2.5 bg-gradient-to-b from-white/70 via-white/45 to-white/25 backdrop-blur-3xl saturate-150 border border-white/80 shadow-[0_20px_50px_rgba(0,0,0,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)] rounded-[22px] sm:rounded-[32px]">
@@ -240,7 +265,7 @@ export default function FloatingSideButtons() {
               {...linkProps}
               title={item.name}
               onClick={(e) => {
-                // Prevent navigation if the user was dragging the menu bar
+                // Only prevent navigation if user actively dragged the capsule
                 if (hasDraggedRef.current) {
                   e.preventDefault();
                   e.stopPropagation();
@@ -270,5 +295,3 @@ export default function FloatingSideButtons() {
     </div>
   );
 }
-
-

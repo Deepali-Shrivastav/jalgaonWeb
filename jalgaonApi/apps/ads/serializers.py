@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import HomeCrouselAds, BannerAds, AdsListing, AdSlot
+from .models import HomeCrouselAds, BannerAds, AdsListing, AdSlot, FloatingVideoAdvertisement
+from .floating_ad_utils import parse_and_validate_ad_url
 
 class HomeCrouselAdsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -35,3 +36,31 @@ class AdsListingSerializer(serializers.ModelSerializer):
         if obj.impressions > 0:
             return round((obj.clicks / obj.impressions) * 100, 2)
         return 0.0
+
+class FloatingVideoAdvertisementSerializer(serializers.ModelSerializer):
+    status = serializers.ReadOnlyField()
+    embed_url = serializers.SerializerMethodField()
+    video_id = serializers.SerializerMethodField()
+    parsed_platform = serializers.SerializerMethodField()
+
+    class Meta:
+        model = FloatingVideoAdvertisement
+        fields = [
+            'id', 'title', 'platform', 'video_url', 'start_date', 'end_date',
+            'is_enabled', 'status', 'embed_url', 'video_id', 'parsed_platform',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def get_embed_url(self, obj):
+        val = parse_and_validate_ad_url(obj.video_url, obj.platform)
+        return val.get('embed_url', '')
+
+    def get_video_id(self, obj):
+        val = parse_and_validate_ad_url(obj.video_url, obj.platform)
+        return val.get('video_id', '')
+
+    def get_parsed_platform(self, obj):
+        val = parse_and_validate_ad_url(obj.video_url, obj.platform)
+        return val.get('platform') or obj.platform
+

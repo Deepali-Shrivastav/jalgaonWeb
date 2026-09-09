@@ -2,7 +2,7 @@
 
 import React, { useContext, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { AuthContext } from "@/context/AuthContext";
 
 interface AdminSidebarProps {
@@ -13,6 +13,7 @@ interface AdminSidebarProps {
 const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, toggleSidebar }) => {
   const { user } = useContext(AuthContext);
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const [isNewsExpanded, setIsNewsExpanded] = useState(false);
   const [isBlogExpanded, setIsBlogExpanded] = useState(false);
@@ -20,6 +21,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, toggleSidebar 
   const [isEventsExpanded, setIsEventsExpanded] = useState(false);
   const [isStartupsExpanded, setIsStartupsExpanded] = useState(false);
   const [isClubsExpanded, setIsClubsExpanded] = useState(false);
+  const [isFloatingAdExpanded, setIsFloatingAdExpanded] = useState(pathname?.startsWith("/admin/floating-video-ad") || false);
 
   const userRole = user?.role || "";
   const isAdmin = ["super_admin", "admin"].includes(userRole);
@@ -37,8 +39,18 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, toggleSidebar 
   const canSeeClubs = isAdmin || ["content_manager", "moderator"].includes(userRole);
   const canSeeAnalytics = isAdmin || ["content_manager", "moderator", "seo_manager", "support"].includes(userRole);
 
+  const currentTab = searchParams ? searchParams.get("tab") : null;
+
   const navLinkClass = (path: string, exact = false) => {
-    const isActive = exact ? pathname === path : pathname?.startsWith(path);
+    let isActive = false;
+    if (path.includes("?tab=create")) {
+      isActive = pathname === "/admin/floating-video-ad" && currentTab === "create";
+    } else if (path === "/admin/floating-video-ad") {
+      isActive = pathname === "/admin/floating-video-ad" && (!currentTab || currentTab === "list");
+    } else {
+      isActive = exact ? pathname === path : pathname?.startsWith(path) || false;
+    }
+
     return `flex items-center ${
       isCollapsed ? "justify-center w-12 h-12 mx-auto" : "gap-3 px-4 py-3"
     } text-sm font-medium rounded-xl transition-all duration-200 ${
@@ -127,12 +139,36 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, toggleSidebar 
           </Link>
         )}
 
-        {/* Floating Video Ad */}
+        {/* Floating Video Advertisement Dropdown */}
         {isAdmin && (
-          <Link href="/admin/floating-video-ad" className={navLinkClass("/admin/floating-video-ad")}>
-            <span className="material-symbols-outlined">video_settings</span>
-            {!isCollapsed && <span>Floating Video Ad</span>}
-          </Link>
+          <div className="space-y-1">
+            <button
+              onClick={() => setIsFloatingAdExpanded(!isFloatingAdExpanded)}
+              className={`w-full flex items-center ${
+                isCollapsed ? "justify-center w-12 h-12 mx-auto" : "justify-between px-4 py-3"
+              } text-sm font-medium rounded-xl text-slate-600 hover:bg-slate-100 transition-all duration-200`}
+            >
+              <div className={`flex items-center ${isCollapsed ? "" : "gap-3"}`}>
+                <span className="material-symbols-outlined">video_settings</span>
+                {!isCollapsed && <span>Floating Video Ad</span>}
+              </div>
+              {!isCollapsed && (
+                <span className="material-symbols-outlined text-sm">
+                  {isFloatingAdExpanded ? "expand_less" : "expand_more"}
+                </span>
+              )}
+            </button>
+            {isFloatingAdExpanded && !isCollapsed && (
+              <div className="pl-11 space-y-1">
+                <Link href="/admin/floating-video-ad" className={navLinkClass("/admin/floating-video-ad", true)}>
+                  <span className="whitespace-nowrap">All Advertisements</span>
+                </Link>
+                <Link href="/admin/floating-video-ad?tab=create" className={navLinkClass("/admin/floating-video-ad?tab=create")}>
+                  <span className="whitespace-nowrap">Add New Advertisement</span>
+                </Link>
+              </div>
+            )}
+          </div>
         )}
 
 

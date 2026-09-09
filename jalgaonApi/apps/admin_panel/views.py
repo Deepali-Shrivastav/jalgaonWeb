@@ -837,97 +837,238 @@ class AdminAdSlotDetailView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-from apps.ads.floating_ad_utils import (
-    get_floating_ad_config,
-    save_floating_ad_config,
-    parse_and_validate_ad_url
-)
+from apps.ads.models import FloatingVideoAdvertisement
+from apps.ads.serializers import FloatingVideoAdvertisementSerializer
+from apps.ads.floating_ad_utils import parse_and_validate_ad_url
 
 class AdminFloatingVideoAdView(APIView):
     """
     Admin/Superadmin endpoint for Floating Video Advertisement management.
-    GET /api/v1/admin-panel/floating-video-ad/
-    POST/PUT/PATCH /api/v1/admin-panel/floating-video-ad/
-    Uses non-database file persistence (data/floating_video_ad.json).
+    GET  /api/v1/admin-panel/floating-video-ad/ - List all floating ads with counts and status filtering
+    POST /api/v1/admin-panel/floating-video-ad/ - Create a new floating video ad
     """
     permission_classes = [IsAdminRole]
 
     def get(self, request):
-        config = get_floating_ad_config()
-        if config.get("url"):
-            val = parse_and_validate_ad_url(config.get("url"), config.get("platform"))
-            config["valid"] = val["valid"]
-            if val["valid"]:
-                config["embed_url"] = val["embed_url"]
-                config["video_id"] = val["video_id"]
-                config["platform"] = val["platform"]
-        else:
-            config["valid"] = False
-        return Response(config, status=status.HTTP_200_OK)
+        today = timezone.now().date()
+        qs = FloatingVideoAdvertisement.objects.all().order_by('-created_at')
+
+        # Status filter
+        status_filter = request.query_params.get('status', '').strip().upper()
+        
+        # Calculate overall counts before filtering
+        all_ads = list(qs)
+        active_count = sum(1 for ad in all_ads if ad.status == 'ACTIVE')
+        scheduled_count = sum(1 for ad in all_ads if ad.status == 'SCHEDULED')
+        expired_count = sum(1 for ad in all_ads if ad.status == 'EXPIRED')
+        disabled_count = sum(1 for ad in all_ads if ad.status == 'DISABLED')
+
+        if status_filter and status_filter != 'ALL':
+            all_ads = [ad for ad in all_ads if ad.status == status_filter]
+
+        search = request.query_params.get('search', '').strip()
+        if search:
+            all_ads = [
+                ad for ad in all_ads 
+                if search.lower() in ad.title.lower() or search.lower() in ad.video_url.lower()
+            ]
+
+        serializer = FloatingVideoAdvertisementSerializer(all_ads, many=True)
+        return Response({
+            "ads": serializer.data,
+            "total": len(serializer.data),
+            "counts": {
+                "all": len(qs),
+                "active": active_count,
+                "scheduled": scheduled_count,
+                "expired": expired_count,
+                "disabled": disabled_count
+            }
+        }, status=status.HTTP_200_OK)
 
     def post(self, request):
-        return self._save_config(request)
+        data = request.data
+        title = data.get('title', '').strip() or 'Feature of the day'
+        platform = data.get('platform', 'youtube').strip().lower()
+        video_url = data.get('video_url', data.get('url', '')).strip()
+        start_date_str = data.get('start_date')
+        end_date_str = data.get('end_date')
+        is_enabled = bool(data.get('is_enabled', data.get('enabled', True)))
 
-    def put(self, request):
-        return self._save_config(request)
+        # Validation 1: Required URL
+        if not video_url:
+            return Response({"error": "Video / Reel URL is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-    def patch(self, request):
-        current = get_floating_ad_config()
-        enabled = request.data.get("enabled", current.get("enabled", False))
-        url = request.data.get("url", current.get("url", ""))
+        # Validation 2: URL format
+        val = parse_and_validate_ad_url(video_url, platform)
+        if not val["valid"]:
+            return Response({"error": val["error"]}, status=status.HTTP_400_BAD_REQUEST)
 
-        if enabled and not url:
-            return Response({"error": "Cannot enable floating ad without a video URL."}, status=status.HTTP_400_BAD_REQUEST)
+        # Validation 3: Required Start and End dates
+        if not start_date_str or not end_date_str:
+            return Response({"error": "Start Date and End Date are required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        current["enabled"] = bool(enabled)
-        if "title" in request.data:
-            current["title"] = request.data.get("title", "").strip() or "Feature of the day"
+        # Validation 4: Date logic (Start Date cannot be after End Date)
+        try:
+            start_date = timezone.datetime.strptime(str(start_date_str).split('T')[0], '%Y-%m-%d').date()
+            end_date = timezone.datetime.strptime(str(end_date_str).split('T')[0], '%Y-%m-%d').date()
+        except ValueError:
+            return Response({"error": "Invalid date format. Please use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
 
-        if url:
-            val = parse_and_validate_ad_url(url)
-            if not val["valid"] and enabled:
-                return Response({"error": val["error"]}, status=status.HTTP_400_BAD_REQUEST)
-            current["url"] = url
-            current["platform"] = val["platform"] or current.get("platform", "youtube")
-            current["embed_url"] = val["embed_url"]
-            current["video_id"] = val["video_id"]
+        if start_date > end_date:
+            return Response({"error": "Start Date cannot be after End Date."}, status=status.HTTP_400_BAD_REQUEST)
 
-        saved = save_floating_ad_config(current)
-        return Response(saved, status=status.HTTP_200_OK)
+        ad = FloatingVideoAdvertisement.objects.create(
+            title=title,
+            platform=val["platform"] or platform,
+            video_url=video_url,
+            start_date=start_date,
+            end_date=end_date,
+            is_enabled=is_enabled
+        )
 
-    def _save_config(self, request):
-        raw_url = request.data.get("url", "").strip()
-        title = request.data.get("title", "").strip() or "Feature of the day"
-        enabled = bool(request.data.get("enabled", False))
-        platform_pref = request.data.get("platform")
+        log_audit_action(
+            actor=request.user,
+            action='create_floating_video_ad',
+            target_type='FloatingVideoAdvertisement',
+            target_id=ad.id,
+            changes={'title': ad.title, 'url': ad.video_url, 'start_date': str(start_date), 'end_date': str(end_date)},
+            request=request
+        )
 
-        if not raw_url and enabled:
-            return Response({"error": "Please enter a valid YouTube or Instagram URL before enabling."}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = FloatingVideoAdvertisementSerializer(ad)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        if raw_url:
-            val = parse_and_validate_ad_url(raw_url, platform_pref)
-            if not val["valid"]:
-                return Response({"error": val["error"]}, status=status.HTTP_400_BAD_REQUEST)
-            
-            new_config = {
-                "enabled": enabled,
-                "platform": val["platform"],
-                "title": title,
-                "url": raw_url,
-                "embed_url": val["embed_url"],
-                "video_id": val["video_id"]
-            }
-        else:
-            new_config = {
-                "enabled": False,
-                "platform": platform_pref or "youtube",
-                "title": title,
-                "url": "",
-                "embed_url": "",
-                "video_id": ""
-            }
 
-        saved = save_floating_ad_config(new_config)
-        return Response(saved, status=status.HTTP_200_OK)
+class AdminFloatingVideoAdDetailView(APIView):
+    """
+    GET    /api/v1/admin-panel/floating-video-ad/<ad_id>/ - Retrieve single ad
+    PUT    /api/v1/admin-panel/floating-video-ad/<ad_id>/ - Update ad
+    PATCH  /api/v1/admin-panel/floating-video-ad/<ad_id>/ - Partial update ad
+    DELETE /api/v1/admin-panel/floating-video-ad/<ad_id>/ - Delete ad
+    """
+    permission_classes = [IsAdminRole]
+
+    def get_object(self, ad_id):
+        try:
+            return FloatingVideoAdvertisement.objects.get(id=ad_id)
+        except FloatingVideoAdvertisement.DoesNotExist:
+            return None
+
+    def get(self, request, ad_id):
+        ad = self.get_object(ad_id)
+        if not ad:
+            return Response({'error': 'Advertisement not found'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = FloatingVideoAdvertisementSerializer(ad)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, ad_id):
+        return self.patch(request, ad_id)
+
+    def patch(self, request, ad_id):
+        ad = self.get_object(ad_id)
+        if not ad:
+            return Response({'error': 'Advertisement not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        data = request.data
+        if 'title' in data:
+            ad.title = data.get('title', '').strip() or 'Feature of the day'
+
+        if 'video_url' in data or 'url' in data:
+            url_val = data.get('video_url', data.get('url', '')).strip()
+            if url_val:
+                val = parse_and_validate_ad_url(url_val)
+                if not val["valid"]:
+                    return Response({"error": val["error"]}, status=status.HTTP_400_BAD_REQUEST)
+                ad.video_url = url_val
+                if val["platform"]:
+                    ad.platform = val["platform"]
+
+        if 'platform' in data and not data.get('video_url'):
+            ad.platform = data.get('platform')
+
+        if 'is_enabled' in data or 'enabled' in data:
+            ad.is_enabled = bool(data.get('is_enabled', data.get('enabled')))
+
+        # Date validations if updated
+        start_date = ad.start_date
+        end_date = ad.end_date
+
+        if 'start_date' in data and data['start_date']:
+            try:
+                start_date = timezone.datetime.strptime(str(data['start_date']).split('T')[0], '%Y-%m-%d').date()
+            except ValueError:
+                return Response({"error": "Invalid start_date format."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if 'end_date' in data and data['end_date']:
+            try:
+                end_date = timezone.datetime.strptime(str(data['end_date']).split('T')[0], '%Y-%m-%d').date()
+            except ValueError:
+                return Response({"error": "Invalid end_date format."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if start_date > end_date:
+            return Response({"error": "Start Date cannot be after End Date."}, status=status.HTTP_400_BAD_REQUEST)
+
+        ad.start_date = start_date
+        ad.end_date = end_date
+        ad.save()
+
+        log_audit_action(
+            actor=request.user,
+            action='update_floating_video_ad',
+            target_type='FloatingVideoAdvertisement',
+            target_id=ad.id,
+            changes={'title': ad.title, 'is_enabled': ad.is_enabled},
+            request=request
+        )
+
+        serializer = FloatingVideoAdvertisementSerializer(ad)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, ad_id):
+        ad = self.get_object(ad_id)
+        if not ad:
+            return Response({'error': 'Advertisement not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        log_audit_action(
+            actor=request.user,
+            action='delete_floating_video_ad',
+            target_type='FloatingVideoAdvertisement',
+            target_id=ad.id,
+            changes={'title': ad.title},
+            request=request
+        )
+
+        ad.delete()
+        return Response({'message': 'Advertisement deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+
+class AdminFloatingVideoAdToggleView(APIView):
+    """
+    PATCH /api/v1/admin-panel/floating-video-ad/<ad_id>/toggle/ - Toggle enabled state
+    """
+    permission_classes = [IsAdminRole]
+
+    def patch(self, request, ad_id):
+        try:
+            ad = FloatingVideoAdvertisement.objects.get(id=ad_id)
+        except FloatingVideoAdvertisement.DoesNotExist:
+            return Response({'error': 'Advertisement not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        ad.is_enabled = not ad.is_enabled
+        ad.save(update_fields=['is_enabled', 'updated_at'])
+
+        log_audit_action(
+            actor=request.user,
+            action='toggle_floating_video_ad',
+            target_type='FloatingVideoAdvertisement',
+            target_id=ad.id,
+            changes={'is_enabled': ad.is_enabled},
+            request=request
+        )
+
+        serializer = FloatingVideoAdvertisementSerializer(ad)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 

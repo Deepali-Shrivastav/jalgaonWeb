@@ -6,8 +6,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 
-from .models import HomeCrouselAds, BannerAds, AdsListing, AdSlot
-from .serializers import HomeCrouselAdsSerializer, BannerAdsSerializer, AdsListingSerializer, AdSlotSerializer
+from .models import HomeCrouselAds, BannerAds, AdsListing, AdSlot, FloatingVideoAdvertisement
+from .serializers import (
+    HomeCrouselAdsSerializer, BannerAdsSerializer, AdsListingSerializer,
+    AdSlotSerializer, FloatingVideoAdvertisementSerializer
+)
 from .floating_ad_utils import get_floating_ad_config, parse_and_validate_ad_url
 
 logger = logging.getLogger(__name__)
@@ -188,12 +191,36 @@ class AdsBySlotView(APIView):
 class PublicFloatingVideoAdView(APIView):
     """
     Public endpoint: GET /api/v1/ads/floating-video-ad/
-    Retrieves the currently active floating video advertisement configuration.
+    Retrieves all currently ACTIVE floating video advertisements from the database.
     """
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
         try:
+            today = timezone.now().date()
+            db_ads = FloatingVideoAdvertisement.objects.filter(
+                is_enabled=True,
+                start_date__lte=today,
+                end_date__gte=today
+            ).order_by('-created_at')
+
+            if db_ads.exists():
+                serializer = FloatingVideoAdvertisementSerializer(db_ads, many=True)
+                active_list = serializer.data
+                primary = active_list[0]
+
+                return Response({
+                    "enabled": True,
+                    "title": primary.get("title"),
+                    "platform": primary.get("platform"),
+                    "url": primary.get("video_url"),
+                    "embed_url": primary.get("embed_url"),
+                    "video_id": primary.get("video_id"),
+                    "ads": active_list,
+                    "count": len(active_list)
+                }, status=status.HTTP_200_OK)
+
+            # Fallback to json configuration if present and valid
             config = get_floating_ad_config()
             if config.get("enabled") and config.get("url"):
                 val = parse_and_validate_ad_url(config.get("url"), config.get("platform"))
@@ -201,12 +228,31 @@ class PublicFloatingVideoAdView(APIView):
                     config["embed_url"] = val["embed_url"]
                     config["video_id"] = val["video_id"]
                     config["platform"] = val["platform"]
-                else:
-                    config["enabled"] = False
-                    config["error"] = val["error"]
+                    config["ads"] = [{
+                        "id": 0,
+                        "title": config.get("title", "Feature of the day"),
+                        "platform": config.get("platform", "youtube"),
+                        "video_url": config.get("url"),
+                        "embed_url": val["embed_url"],
+                        "video_id": val["video_id"],
+                        "is_enabled": True,
+                        "status": "ACTIVE"
+                    }]
+                    config["count"] = 1
+                    return Response(config, status=status.HTTP_200_OK)
 
-            return Response(config, status=status.HTTP_200_OK)
+            return Response({
+                "enabled": False,
+                "title": "",
+                "platform": "youtube",
+                "url": "",
+                "embed_url": "",
+                "video_id": "",
+                "ads": [],
+                "count": 0
+            }, status=status.HTTP_200_OK)
         except Exception as e:
             logger.error(f"Error fetching floating video ad: {e}")
-            return Response({"enabled": False, "error": "Unable to fetch ad config."}, status=status.HTTP_200_OK)
+            return Response({"enabled": False, "ads": [], "count": 0, "error": "Unable to fetch ad config."}, status=status.HTTP_200_OK)
+
 

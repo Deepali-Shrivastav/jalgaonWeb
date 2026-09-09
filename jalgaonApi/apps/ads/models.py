@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 
 class HomeCrouselAds(models.Model):
     crousel_add_img = models.ImageField(upload_to='static/assets/AdsImages')
@@ -103,3 +104,46 @@ class AdsListing(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class FloatingVideoAdvertisement(models.Model):
+    PLATFORM_CHOICES = [
+        ('youtube', 'YouTube'),
+        ('instagram', 'Instagram'),
+    ]
+
+    title = models.CharField(max_length=255, default='Feature of the day')
+    platform = models.CharField(max_length=20, choices=PLATFORM_CHOICES, default='youtube')
+    video_url = models.URLField(max_length=500)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    is_enabled = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'app_floatingvideoadvertisement'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.title} ({self.platform})"
+
+    @property
+    def status(self):
+        """
+        Calculates status dynamically based on current timezone-aware date and is_enabled status:
+        - DISABLED: Admin manually disabled the advertisement
+        - SCHEDULED: Start date has not arrived yet
+        - EXPIRED: End date has passed
+        - ACTIVE: Current date is between Start Date and End Date and ad is enabled
+        """
+        if not self.is_enabled:
+            return 'DISABLED'
+        today = timezone.now().date()
+        if self.start_date and self.start_date > today:
+            return 'SCHEDULED'
+        elif self.end_date and self.end_date < today:
+            return 'EXPIRED'
+        else:
+            return 'ACTIVE'
+
