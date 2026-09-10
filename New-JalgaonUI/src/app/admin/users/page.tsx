@@ -82,12 +82,23 @@ export default function AdminUsersPage() {
         body: JSON.stringify({ role: newRole }),
       });
       
-      if (res.status === 401 || res.status === 403) {
+      const data = await res.json();
+
+      if (res.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        localStorage.removeItem("refresh_token");
         window.location.href = "/";
         return;
       }
 
-      const data = await res.json();
+      if (!res.ok) {
+        setStatusMsg(data.error || data.detail || data.message || "Failed to update role");
+        setTimeout(() => setStatusMsg(""), 4000);
+        fetchUsers();
+        return;
+      }
+
       setStatusMsg(data.message || "Role updated");
       fetchUsers();
       setTimeout(() => setStatusMsg(""), 3000);

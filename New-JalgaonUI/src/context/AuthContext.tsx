@@ -51,6 +51,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
         setIsLogin(true);
+
+        // Fetch fresh profile from API to ensure role updates are immediately reflected
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+        fetch(`${baseUrl}/api/v1/auth/user/`, {
+          headers: { Authorization: `Bearer ${storedToken}` },
+        })
+          .then((res) => {
+            if (res.ok) return res.json();
+            return null;
+          })
+          .then((data) => {
+            if (data && data.user) {
+              setUser(data.user);
+              localStorage.setItem("user", JSON.stringify(data.user));
+            }
+          })
+          .catch((err) => {
+            console.error("Profile sync error", err);
+          });
       } catch (e) {
         console.error("Failed to parse stored user", e);
       }

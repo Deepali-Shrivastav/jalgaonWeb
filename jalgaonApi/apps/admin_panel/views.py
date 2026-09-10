@@ -136,7 +136,7 @@ class AdminUserRoleView(APIView):
         if serializer.is_valid():
             old_role = user.role
             user.role = serializer.validated_data['role']
-            user.save(update_fields=['role'])
+            user.save(update_fields=['role', 'is_staff', 'is_superuser'])
             
             log_audit_action(
                 actor=request.user,

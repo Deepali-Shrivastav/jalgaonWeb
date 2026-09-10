@@ -103,6 +103,38 @@ class User(AbstractUser, PermissionsMixin):
             'news_editor', 'seo_manager', 'moderator', 'support'
         )
 
+    def save(self, *args, **kwargs):
+        """
+        Synchronize is_staff and is_superuser based on role:
+        - super_admin: is_staff=True, is_superuser=True
+        - staff roles (admin, content_manager, etc.): is_staff=True, is_superuser=False
+        - non-staff roles: is_staff=False, is_superuser=False
+        Also ensures update_fields includes is_staff and is_superuser whenever role is being updated.
+        """
+        if self.role == 'super_admin':
+            self.is_staff = True
+            self.is_superuser = True
+        elif self.role in (
+            'admin', 'content_manager', 'news_editor',
+            'seo_manager', 'moderator', 'support'
+        ):
+            self.is_staff = True
+            self.is_superuser = False
+        else:
+            self.is_staff = False
+            self.is_superuser = False
+
+        update_fields = kwargs.get('update_fields')
+        if update_fields is not None:
+            update_fields_set = set(update_fields)
+            if 'role' in update_fields_set:
+                update_fields_set.add('is_staff')
+                update_fields_set.add('is_superuser')
+            kwargs['update_fields'] = list(update_fields_set)
+
+        super().save(*args, **kwargs)
+
+
 class LoginAttempt(models.Model):
     """
     Tracks failed login attempts per phone number.
