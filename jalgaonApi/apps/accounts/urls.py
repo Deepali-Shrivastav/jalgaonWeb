@@ -1,14 +1,16 @@
 from django.urls import path
 from .views import (
     UserRegister, UserLogin, UserLogout, LogoutAllDevicesView,
-    UserView, get_csrf_token
+    UserView, get_csrf_token, PasswordResetRequestView, PasswordResetConfirmView
 )
 from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 
 urlpatterns = [
-    # --- Password-based auth (current system, to be replaced by OTP in next phase) ---
+    # --- Password-based auth ---
     path('register/', UserRegister.as_view(), name='register'),
     path('login/', UserLogin.as_view(), name='login'),
+    path('password-reset/', PasswordResetRequestView.as_view(), name='password-reset'),
+    path('password-reset-confirm/', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
 
     # --- Session management ---
     path('logout/', UserLogout.as_view(), name='logout'),
@@ -24,3 +26,4 @@ urlpatterns = [
     # --- Utilities ---
     path('csrf-token/', get_csrf_token, name='csrf-token'),
 ]
+

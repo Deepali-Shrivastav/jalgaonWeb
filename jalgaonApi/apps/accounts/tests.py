@@ -61,3 +61,68 @@ class UserRoleSynchronizationTests(TestCase):
         request.user = superuser_only
         self.assertTrue(permission.has_permission(request, None))
 
+
+class PasswordResetAPITests(TestCase):
+    def setUp(self):
+        from rest_framework.test import APIClient
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            phone_number="9876543210",
+            email="testuser@example.com",
+            password="OldPassword123!"
+        )
+
+    def test_password_reset_request_with_valid_email(self):
+        response = self.client.post(
+            '/api/v1/auth/password-reset/',
+            {'email': 'testuser@example.com'},
+            format='json'
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('message', response.data)
+
+    def test_password_reset_request_with_valid_phone(self):
+        response = self.client.post(
+            '/api/v1/auth/password-reset/',
+            {'phone_number': '9876543210'},
+            format='json'
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('message', response.data)
+
+    def test_password_reset_request_nonexistent_user(self):
+        response = self.client.post(
+            '/api/v1/auth/password-reset/',
+            {'email': 'nonexistent@example.com'},
+            format='json'
+        )
+        # Should still return 200 to prevent user enumeration
+        self.assertEqual(response.status_code, 200)
+
+    def test_password_reset_confirm_flow(self):
+        from django.contrib.auth.tokens import default_token_generator
+        from django.utils.http import urlsafe_base64_encode
+        from django.utils.encoding import force_bytes
+
+        uid = urlsafe_base64_encode(force_bytes(self.user.pk))
+        token = default_token_generator.make_token(self.user)
+
+        response = self.client.post(
+            '/api/v1/auth/password-reset-confirm/',
+            {
+                'uid': uid,
+                'token': token,
+                'new_password': 'NewPassword123!',
+                'confirm_password': 'NewPassword123!'
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('message', response.data)
+
+        # Verify user password was changed in DB
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password('NewPassword123!'))
+        self.assertFalse(self.user.check_password('OldPassword123!'))
+
+

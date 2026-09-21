@@ -12,8 +12,9 @@ try:
     from dotenv import load_dotenv
     generic_env = os.path.join(BASE_DIR, '.env')
     if os.path.exists(generic_env):
-        load_dotenv(generic_env, override=True)
+        load_dotenv(generic_env, override=True)  # Loaded local testing settings
     else:
+
         if DJANGO_ENV == 'production':
             load_dotenv(os.path.join(BASE_DIR, '.env.production'), override=True)
         else:
@@ -252,6 +253,19 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# EMAIL & FRONTEND CONFIGURATION (Password Reset & Notifications)
+# ─────────────────────────────────────────────────────────────────────────────
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() in ('true', '1', 'yes')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'Jalgaon Portal <no-reply@jalgaon.com>')
+
 
 # CORS settings
 CORS_ALLOW_CREDENTIALS = True

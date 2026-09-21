@@ -102,3 +102,43 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['phone_number'] = user.phone_number
         token['is_verified'] = user.is_verified
         return token
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    """
+    Serializer for requesting a password reset.
+    Accepts either an email address or a 10-digit phone number.
+    """
+    email = serializers.EmailField(required=False, allow_blank=True)
+    phone_number = serializers.CharField(required=False, allow_blank=True)
+
+    def validate(self, data):
+        email = data.get('email', '').strip()
+        phone = data.get('phone_number', '').strip()
+        if not email and not phone:
+            raise serializers.ValidationError("Please provide either an email address or a phone number.")
+        return data
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    """
+    Serializer for confirming password reset with token and new password.
+    """
+    uid = serializers.CharField()
+    token = serializers.CharField()
+    new_password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
+
+    def validate_new_password(self, value):
+        from django.contrib.auth.password_validation import validate_password as dj_validate
+        try:
+            dj_validate(value)
+        except Exception as e:
+            raise serializers.ValidationError(list(e.messages))
+        return value
+
+    def validate(self, data):
+        if data['new_password'] != data['confirm_password']:
+            raise serializers.ValidationError({"confirm_password": "Passwords do not match."})
+        return data
+
