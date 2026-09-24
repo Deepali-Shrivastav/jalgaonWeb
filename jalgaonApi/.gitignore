@@ -8,6 +8,7 @@ __pycache__/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+db.sqlite3*
 media/
 static/
 staticfiles/
@@ -25,6 +26,12 @@ venv.bak/
 dist/
 build/
 *.egg-info/
+
+# Local seed scripts & scratch files
+seed_*.py
+*_backup.json
+fake_mig.py
+import_clubs.py
 
 # IDEs / OS
 .idea/

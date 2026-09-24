@@ -18,8 +18,8 @@ from .serializers import (
     AdminSettingSerializer, AdminBusinessClaimSerializer,
     AdminBusinessReportSerializer
 )
-from apps.ads.models import AdsListing, AdSlot
-from apps.ads.serializers import AdsListingSerializer, AdSlotSerializer
+from apps.ads.models import AdsListing, AdSlot, Banner
+from apps.ads.serializers import AdsListingSerializer, AdSlotSerializer, BannerSerializer
 from apps.audit.utils import log_audit_action
 
 User = get_user_model()
@@ -1069,6 +1069,159 @@ class AdminFloatingVideoAdToggleView(APIView):
 
         serializer = FloatingVideoAdvertisementSerializer(ad)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class AdminBannerListView(APIView):
+    """
+    Admin/Superadmin endpoint for Banner Management.
+    GET  /api/v1/admin-panel/banners/ - List all banners with counts & status filtering
+    POST /api/v1/admin-panel/banners/ - Create a new banner (supports multipart form-data for banner_image)
+    """
+    permission_classes = [IsAdminRole]
+
+    def get(self, request):
+        qs = Banner.objects.all().order_by('-created_at')
+        status_filter = request.query_params.get('status', '').strip().upper()
+        
+        all_banners = list(qs)
+        active_count = sum(1 for b in all_banners if b.status == 'ACTIVE')
+        scheduled_count = sum(1 for b in all_banners if b.status == 'SCHEDULED')
+        expired_count = sum(1 for b in all_banners if b.status == 'EXPIRED')
+        inactive_count = sum(1 for b in all_banners if b.status == 'INACTIVE')
+
+        filtered = all_banners
+        if status_filter and status_filter != 'ALL':
+            filtered = [b for b in filtered if b.status == status_filter]
+
+        search = request.query_params.get('search', '').strip()
+        if search:
+            search_lower = search.lower()
+            filtered = [
+                b for b in filtered 
+                if search_lower in b.client_name.lower() or search_lower in (b.title or '').lower() or search_lower in b.website_url.lower()
+            ]
+
+        serializer = BannerSerializer(filtered, many=True, context={'request': request})
+        return Response({
+            "banners": serializer.data,
+            "total": len(serializer.data),
+            "counts": {
+                "all": len(qs),
+                "active": active_count,
+                "scheduled": scheduled_count,
+                "expired": expired_count,
+                "inactive": inactive_count
+            }
+        }, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = BannerSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            banner = serializer.save(created_by=request.user)
+            log_audit_action(
+                actor=request.user,
+                action='create_banner',
+                target_type='Banner',
+                target_id=banner.id,
+                changes={'client_name': banner.client_name, 'website_url': banner.website_url, 'start_date': str(banner.start_date), 'expiry_date': str(banner.expiry_date)},
+                request=request
+            )
+            return Response(BannerSerializer(banner, context={'request': request}).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AdminBannerDetailView(APIView):
+    """
+    GET    /api/v1/admin-panel/banners/<id>/ - Retrieve banner
+    PUT    /api/v1/admin-panel/banners/<id>/ - Update banner
+    PATCH  /api/v1/admin-panel/banners/<id>/ - Partial update banner
+    DELETE /api/v1/admin-panel/banners/<id>/ - Delete banner
+    """
+    permission_classes = [IsAdminRole]
+
+    def get_object(self, banner_id):
+        try:
+            return Banner.objects.get(id=banner_id)
+        except Banner.DoesNotExist:
+            return None
+
+    def get(self, request, banner_id):
+        banner = self.get_object(banner_id)
+        if not banner:
+            return Response({'error': 'Banner not found'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = BannerSerializer(banner, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, banner_id):
+        return self.patch(request, banner_id)
+
+    def patch(self, request, banner_id):
+        banner = self.get_object(banner_id)
+        if not banner:
+            return Response({'error': 'Banner not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = BannerSerializer(banner, data=request.data, partial=True, context={'request': request})
+        if serializer.is_valid():
+            updated_banner = serializer.save()
+            log_audit_action(
+                actor=request.user,
+                action='update_banner',
+                target_type='Banner',
+                target_id=updated_banner.id,
+                changes=serializer.validated_data,
+                request=request
+            )
+            return Response(BannerSerializer(updated_banner, context={'request': request}).data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, banner_id):
+        banner = self.get_object(banner_id)
+        if not banner:
+            return Response({'error': 'Banner not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        log_audit_action(
+            actor=request.user,
+            action='delete_banner',
+            target_type='Banner',
+            target_id=banner.id,
+            changes={'client_name': banner.client_name},
+            request=request
+        )
+
+        banner.delete()
+        return Response({'message': 'Banner deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+
+class AdminBannerToggleView(APIView):
+    """
+    PATCH /api/v1/admin-panel/banners/<banner_id>/toggle/ - Toggle is_enabled state
+    """
+    permission_classes = [IsAdminRole]
+
+    def patch(self, request, banner_id):
+        try:
+            banner = Banner.objects.get(id=banner_id)
+        except Banner.DoesNotExist:
+            return Response({'error': 'Banner not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        banner.is_enabled = not banner.is_enabled
+        banner.save(update_fields=['is_enabled', 'updated_at'])
+
+        log_audit_action(
+            actor=request.user,
+            action='toggle_banner_enabled',
+            target_type='Banner',
+            target_id=banner.id,
+            changes={'is_enabled': banner.is_enabled},
+            request=request
+        )
+
+        return Response({
+            'message': f"Banner is now {'enabled' if banner.is_enabled else 'disabled'}",
+            'is_enabled': banner.is_enabled,
+            'status': banner.status
+        }, status=status.HTTP_200_OK)
+
 
 
 

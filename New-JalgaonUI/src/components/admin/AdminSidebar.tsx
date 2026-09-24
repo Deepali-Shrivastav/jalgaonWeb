@@ -21,6 +21,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, toggleSidebar 
   const [isEventsExpanded, setIsEventsExpanded] = useState(false);
   const [isStartupsExpanded, setIsStartupsExpanded] = useState(false);
   const [isClubsExpanded, setIsClubsExpanded] = useState(false);
+  const [isBannersExpanded, setIsBannersExpanded] = useState(pathname?.startsWith("/admin/banners") || false);
   const [isFloatingAdExpanded, setIsFloatingAdExpanded] = useState(pathname?.startsWith("/admin/floating-video-ad") || false);
 
   const userRole = user?.role || "";
@@ -40,10 +41,15 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, toggleSidebar 
   const canSeeAnalytics = isAdmin || ["content_manager", "moderator", "seo_manager", "support"].includes(userRole);
 
   const currentTab = searchParams ? searchParams.get("tab") : null;
+  const currentStatus = searchParams ? searchParams.get("status") : null;
 
   const navLinkClass = (path: string, exact = false) => {
     let isActive = false;
-    if (path.includes("?tab=create")) {
+    if (path === "/admin/banners?tab=create") {
+      isActive = pathname === "/admin/banners" && currentTab === "create";
+    } else if (path === "/admin/banners?tab=list") {
+      isActive = pathname === "/admin/banners" && (!currentTab || currentTab === "list");
+    } else if (path.includes("?tab=create") && pathname === "/admin/floating-video-ad") {
       isActive = pathname === "/admin/floating-video-ad" && currentTab === "create";
     } else if (path === "/admin/floating-video-ad") {
       isActive = pathname === "/admin/floating-video-ad" && (!currentTab || currentTab === "list");
@@ -137,6 +143,44 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, toggleSidebar 
             <span className="material-symbols-outlined">campaign</span>
             {!isCollapsed && <span>Ads Moderation</span>}
           </Link>
+        )}
+
+        {/* Banner Management Dropdown */}
+        {isAdmin && (
+          <div className="space-y-1">
+            <button
+              onClick={() => setIsBannersExpanded(!isBannersExpanded)}
+              className={`w-full flex items-center ${
+                isCollapsed ? "justify-center w-12 h-12 mx-auto" : "justify-between px-4 py-3"
+              } text-sm font-medium rounded-xl transition-all duration-200 ${
+                pathname?.startsWith("/admin/banners")
+                  ? "bg-slate-100 text-slate-900 font-semibold"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              }`}
+            >
+              <div className={`flex items-center ${isCollapsed ? "" : "gap-3"}`}>
+                <span className={`material-symbols-outlined ${pathname?.startsWith("/admin/banners") ? "text-primary" : ""}`}>
+                  view_carousel
+                </span>
+                {!isCollapsed && <span className="whitespace-nowrap font-medium">Banner Management</span>}
+              </div>
+              {!isCollapsed && (
+                <span className="material-symbols-outlined text-sm text-slate-400">
+                  {isBannersExpanded ? "expand_less" : "expand_more"}
+                </span>
+              )}
+            </button>
+            {isBannersExpanded && !isCollapsed && (
+              <div className="pl-11 space-y-1">
+                <Link href="/admin/banners?tab=create" className={navLinkClass("/admin/banners?tab=create")}>
+                  <span className="whitespace-nowrap">Add Banner</span>
+                </Link>
+                <Link href="/admin/banners?tab=list" className={navLinkClass("/admin/banners?tab=list")}>
+                  <span className="whitespace-nowrap">View All Banners</span>
+                </Link>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Floating Video Advertisement Dropdown */}

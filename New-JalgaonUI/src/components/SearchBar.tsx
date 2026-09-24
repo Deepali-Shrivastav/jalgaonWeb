@@ -26,6 +26,7 @@ interface AutocompleteResult {
 
 interface SearchBarProps {
   placeholder?: string;
+  animatedPlaceholders?: string[];
   defaultValue?: string;
   onSearch?: (query: string) => void; // override for in-page search
   compact?: boolean; // true for header, false for hero
@@ -34,6 +35,7 @@ interface SearchBarProps {
 
 export default function SearchBar({
   placeholder = 'Search businesses, services, shops…',
+  animatedPlaceholders,
   defaultValue = '',
   onSearch,
   compact = false,
@@ -50,6 +52,60 @@ export default function SearchBar({
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Typewriter placeholder state
+  const [isMounted, setIsMounted] = useState(false);
+  const [animatedText, setAnimatedText] = useState('');
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const [charIndex, setCharIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted || !animatedPlaceholders || animatedPlaceholders.length === 0) return;
+    if (query || isFocused) return;
+
+    const currentPhrase = animatedPlaceholders[phraseIndex % animatedPlaceholders.length];
+    let timer: NodeJS.Timeout;
+
+    if (!isDeleting) {
+      if (charIndex < currentPhrase.length) {
+        timer = setTimeout(() => {
+          setCharIndex((prev) => prev + 1);
+        }, 85);
+      } else {
+        timer = setTimeout(() => {
+          setIsDeleting(true);
+        }, 1800);
+      }
+    } else {
+      if (charIndex > 0) {
+        timer = setTimeout(() => {
+          setCharIndex((prev) => prev - 1);
+        }, 48);
+      } else {
+        setIsDeleting(false);
+        setPhraseIndex((prev) => (prev + 1) % animatedPlaceholders.length);
+        timer = setTimeout(() => {}, 400);
+      }
+    }
+
+    return () => clearTimeout(timer);
+  }, [isMounted, animatedPlaceholders, phraseIndex, charIndex, isDeleting, query, isFocused]);
+
+  useEffect(() => {
+    if (!isMounted || !animatedPlaceholders || animatedPlaceholders.length === 0) return;
+    const currentPhrase = animatedPlaceholders[phraseIndex % animatedPlaceholders.length];
+    setAnimatedText(currentPhrase.substring(0, charIndex));
+  }, [isMounted, animatedPlaceholders, phraseIndex, charIndex]);
+
+  const activePlaceholder =
+    animatedPlaceholders && animatedPlaceholders.length > 0 && isMounted && !query && !isFocused
+      ? animatedText || placeholder
+      : placeholder;
 
   // Load popular searches once on mount
   useEffect(() => {
@@ -172,8 +228,8 @@ export default function SearchBar({
           onChange={(e) => { setQuery(e.target.value); setHighlightedIndex(-1); }}
           onFocus={() => setIsFocused(true)}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          className="flex-1 bg-transparent border-none outline-none font-medium text-on-surface placeholder:text-outline"
+          placeholder={activePlaceholder}
+          className="flex-1 bg-transparent border-none outline-none font-medium text-on-surface placeholder:text-outline text-xs sm:text-sm md:text-base min-w-0 truncate"
           aria-label="Search"
           aria-autocomplete="list"
           aria-haspopup="listbox"
@@ -190,8 +246,9 @@ export default function SearchBar({
         )}
         {!compact && (
           <button
+            type="button"
             onClick={() => executeSearch(query)}
-            className="bg-primary text-white rounded-full font-bold shrink-0 hover:bg-primary-deep transition-colors px-5 py-2 text-sm"
+            className="bg-[#0081c7] text-white rounded-full font-bold shrink-0 hover:bg-[#006ea8] transition duration-300 px-4 sm:px-6 py-2 text-sm flex items-center justify-center cursor-pointer shadow-xs"
           >
             Search
           </button>

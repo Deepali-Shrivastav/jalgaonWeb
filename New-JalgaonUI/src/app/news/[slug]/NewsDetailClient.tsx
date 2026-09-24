@@ -513,11 +513,6 @@ export default function NewsDetailClient({ slug }: { slug: string }) {
                   </div>
                 )}
               </div>
-
-              {/* Ad / Banner */}
-              <div className="mt-8 w-full -mx-4 md:mx-0">
-                <CarouselAds slot="sidebar" />
-              </div>
             </div>
           </aside>
         </div>

@@ -42,6 +42,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const getPageTitle = () => {
     if (!pathname) return "Dashboard Overview";
+    if (pathname.includes("banners")) return "Banner Management";
     if (pathname.includes("floating-video-ad")) return "Floating Video Advertisement";
     if (pathname.includes("analytics")) return "Analytics";
     if (pathname.includes("users")) return "User Management";

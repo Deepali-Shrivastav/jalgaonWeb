@@ -510,7 +510,7 @@ export default function IndustryGrids({ onSelectCategory }: { onSelectCategory: 
           };
         });
         
-        setCategories(mapped);
+        setCategories(mapped.length > 0 ? mapped : industries);
       } catch (error) {
         console.warn("Failed to fetch categories (using fallback):", error);
         // Fallback to hardcoded if API fails

@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Hero from '@/components/Hero';
+import BannerCarousel from '@/components/BannerCarousel';
+import HomeSearchSection from '@/components/HomeSearchSection';
 import MarketWeatherDashboard from '@/components/MarketWeatherDashboard';
 import BreakingNews from '@/components/BreakingNews';
 import JalgaonGlimpse from '@/components/JalgaonGlimpse';

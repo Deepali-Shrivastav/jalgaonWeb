@@ -108,7 +108,7 @@ export default function BusinessListings({
   // Geolocation and Subcategory filtering states
   const { lat, lng, hasLocation, error: locationError, isLoading: isLocationLoading, requestLocation } = useLocation();
   const [radius, setRadius] = useState<number>(10);
-  const [subcategories, setSubcategories] = useState<Array<{sub_category: string, slug: string}>>([]);
+  const [subcategories, setSubcategories] = useState<Array<{ sub_category: string, slug: string }>>([]);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
 
   // Interactive filtering states (applied on click of Apply Filters or live-updated)
@@ -337,7 +337,7 @@ export default function BusinessListings({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-xl items-start">
         {/* Mobile Filter Toggle */}
         <div className="lg:hidden mb-2">
-          <button 
+          <button
             onClick={() => setIsFilterOpen(!isFilterOpen)}
             className="w-full bg-white border border-hairline-soft rounded-xl p-4 flex justify-between items-center text-ink-deep font-bold shadow-sm active:scale-95 transition-all"
           >
@@ -345,8 +345,8 @@ export default function BusinessListings({
               <span className="material-symbols-outlined text-primary">filter_alt</span>
               Filters
             </div>
-            <span 
-              className="material-symbols-outlined transition-transform duration-300" 
+            <span
+              className="material-symbols-outlined transition-transform duration-300"
               style={{ transform: isFilterOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
             >
               expand_more
@@ -404,11 +404,10 @@ export default function BusinessListings({
                         key={r}
                         type="button"
                         onClick={() => setRadius(r)}
-                        className={`py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center ${
-                          radius === r
+                        className={`py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center ${radius === r
                             ? 'bg-primary text-white border-primary shadow-sm'
                             : 'border-hairline-soft bg-white text-secondary hover:border-primary'
-                        }`}
+                          }`}
                       >
                         {r}km
                       </button>
@@ -455,11 +454,10 @@ export default function BusinessListings({
                 <button
                   type="button"
                   onClick={() => setSelectedSubcategory(null)}
-                  className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    selectedSubcategory === null
+                  className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${selectedSubcategory === null
                       ? 'bg-primary/5 text-primary border border-primary/20'
                       : 'text-secondary hover:bg-slate-50 border border-transparent'
-                  }`}
+                    }`}
                 >
                   All Subcategories
                 </button>
@@ -468,11 +466,10 @@ export default function BusinessListings({
                     key={sub.slug}
                     type="button"
                     onClick={() => setSelectedSubcategory(sub.slug)}
-                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                      selectedSubcategory === sub.slug
+                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${selectedSubcategory === sub.slug
                         ? 'bg-primary/5 text-primary border border-primary/20'
                         : 'text-secondary hover:bg-slate-50 border border-transparent'
-                    }`}
+                      }`}
                   >
                     {sub.sub_category}
                   </button>
@@ -541,10 +538,6 @@ export default function BusinessListings({
           >
             Apply Filters
           </button>
-
-          <div className="mt-8 flex justify-center w-full">
-            <CarouselAds slot="sidebar" className="w-[300px] h-[250px]" />
-          </div>
         </aside>
 
         {/* Results Listings */}
@@ -582,11 +575,10 @@ export default function BusinessListings({
                   setSelectedCategories(availableCategories);
                   setSelectedSubcategory(null);
                 }}
-                className={`px-4 py-2 rounded-full text-xs font-bold border transition-all cursor-pointer ${
-                  selectedCategories.length === availableCategories.length
+                className={`px-4 py-2 rounded-full text-xs font-bold border transition-all cursor-pointer ${selectedCategories.length === availableCategories.length
                     ? 'bg-primary text-white border-primary shadow-sm'
                     : 'border-hairline-soft bg-white text-secondary hover:border-primary'
-                }`}
+                  }`}
               >
                 All Categories
               </button>
@@ -598,11 +590,10 @@ export default function BusinessListings({
                     setSelectedCategories([cat]);
                     setSelectedSubcategory(null);
                   }}
-                  className={`px-4 py-2 rounded-full text-xs font-bold border transition-all cursor-pointer ${
-                    selectedCategories.length === 1 && selectedCategories[0] === cat
+                  className={`px-4 py-2 rounded-full text-xs font-bold border transition-all cursor-pointer ${selectedCategories.length === 1 && selectedCategories[0] === cat
                       ? 'bg-primary text-white border-primary shadow-sm'
                       : 'border-hairline-soft bg-white text-secondary hover:border-primary'
-                  }`}
+                    }`}
                 >
                   {cat}
                 </button>
@@ -617,11 +608,10 @@ export default function BusinessListings({
               <button
                 type="button"
                 onClick={() => setSelectedSubcategory(null)}
-                className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all cursor-pointer ${
-                  selectedSubcategory === null
+                className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all cursor-pointer ${selectedSubcategory === null
                     ? 'bg-primary/10 text-primary border-primary/20'
                     : 'border-hairline-soft bg-white text-secondary hover:border-primary'
-                }`}
+                  }`}
               >
                 All
               </button>
@@ -630,11 +620,10 @@ export default function BusinessListings({
                   key={sub.slug}
                   type="button"
                   onClick={() => setSelectedSubcategory(sub.slug)}
-                  className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all cursor-pointer ${
-                    selectedSubcategory === sub.slug
+                  className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all cursor-pointer ${selectedSubcategory === sub.slug
                       ? 'bg-primary text-white border-primary shadow-sm'
                       : 'border-hairline-soft bg-white text-secondary hover:border-primary'
-                  }`}
+                    }`}
                 >
                   {sub.sub_category}
                 </button>
@@ -690,11 +679,10 @@ export default function BusinessListings({
                   )}
                   <article
                     onClick={() => handleSelect(listing.id, listing.name, listing.categorySlug || (listing.category ? listing.category.toLowerCase().replace(/\s+/g, '-') : 'business'))}
-                    className={`group bg-white rounded-xl border p-2 shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 flex flex-col md:flex-row relative cursor-pointer ${
-                      listing.featured
+                    className={`group bg-white rounded-xl border p-2 shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 flex flex-col md:flex-row relative cursor-pointer ${listing.featured
                         ? "border-primary"
                         : "border-hairline-soft"
-                    }`}
+                      }`}
                   >
                     {listing.featured && (
                       <div className="absolute -top-3 left-6 bg-primary text-white text-[9px] font-bold tracking-widest px-3 py-1 rounded-full uppercase z-10 shadow-sm">
@@ -813,11 +801,11 @@ export default function BusinessListings({
               </div>
             )}
           </div>
-          
-          <Pagination 
-            currentPage={page} 
-            totalPages={totalPages} 
-            onPageChange={setPage} 
+
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
           />
         </div>
       </div>

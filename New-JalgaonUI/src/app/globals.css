@@ -68,6 +68,10 @@
       radial-gradient(circle at bottom left, rgba(0, 100, 224, 0.02), transparent);
   }
 
+  .hero-radial-bg {
+    background: radial-gradient(circle at 50% 20%, #f0f7ff 0%, #ffffff 70%);
+  }
+
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -140,6 +144,7 @@
   0% {
     transform: translate3d(0%, 0, 0);
   }
+
   100% {
     transform: translate3d(-50%, 0, 0);
   }

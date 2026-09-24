@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { AuthContext } from '@/context/AuthContext';
 import BusinessClaimModal from '@/components/BusinessClaimModal';
 import BusinessReportModal from '@/components/BusinessReportModal';
+import BannerCarousel from '@/components/BannerCarousel';
 import Rating from '@mui/material/Rating';
 
 interface BusinessDetailClientProps {
@@ -225,6 +226,15 @@ export default function BusinessDetailClient({ slug }: BusinessDetailClientProps
               </div>
             </section>
           )}
+
+          {/* Promotional Banner Section */}
+          <BannerCarousel
+            slot="business_detail"
+            placement="business"
+            categorySlug={businessData?.main_category_slug}
+            businessSlug={slug}
+            className="my-0 px-0"
+          />
 
           <section className="bg-white p-8 rounded-2xl shadow-sm border border-hairline-soft">
             <h3 className="text-2xl font-bold text-ink-deep mb-6 flex items-center gap-2">

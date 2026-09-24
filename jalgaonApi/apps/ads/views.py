@@ -6,10 +6,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 
-from .models import HomeCrouselAds, BannerAds, AdsListing, AdSlot, FloatingVideoAdvertisement
+from .models import HomeCrouselAds, BannerAds, AdsListing, AdSlot, FloatingVideoAdvertisement, Banner
 from .serializers import (
     HomeCrouselAdsSerializer, BannerAdsSerializer, AdsListingSerializer,
-    AdSlotSerializer, FloatingVideoAdvertisementSerializer
+    AdSlotSerializer, FloatingVideoAdvertisementSerializer, BannerSerializer
 )
 from .floating_ad_utils import get_floating_ad_config, parse_and_validate_ad_url
 
@@ -159,6 +159,7 @@ class AdsBySlotView(APIView):
 
     def get(self, request):
         slot_name = request.query_params.get('slot', 'hero_banner')
+        category_slug = request.query_params.get('category')
         today = timezone.now().date()
 
         # Check if global slot is enabled
@@ -170,15 +171,25 @@ class AdsBySlotView(APIView):
         except AdSlot.DoesNotExist:
             max_ads = 5
 
-        # Query active ads for target_page
-        qs = AdsListing.objects.filter(
-            status='active',
-            target_page=slot_name
+        # Base query for active ads in date range
+        base_qs = AdsListing.objects.filter(
+            status='active'
+        ).filter(
+            Q(target_page=slot_name) | Q(target_page='hero_banner')
         ).filter(
             Q(start_date__isnull=True) | Q(start_date__lte=today)
         ).filter(
             Q(end_date__isnull=True) | Q(end_date__gte=today)
-        ).order_by('-updated_at')[:max_ads]
+        )
+
+        if category_slug:
+            cat_qs = base_qs.filter(category_slug=category_slug).order_by('-updated_at')[:max_ads]
+            if cat_qs.exists():
+                qs = cat_qs
+            else:
+                qs = base_qs.order_by('-updated_at')[:max_ads]
+        else:
+            qs = base_qs.order_by('-updated_at')[:max_ads]
 
         serializer = AdsListingSerializer(qs, many=True)
         return Response({
@@ -254,5 +265,54 @@ class PublicFloatingVideoAdView(APIView):
         except Exception as e:
             logger.error(f"Error fetching floating video ad: {e}")
             return Response({"enabled": False, "ads": [], "count": 0, "error": "Unable to fetch ad config."}, status=status.HTTP_200_OK)
+
+
+class PublicBannerListView(APIView):
+    """
+    Public Endpoint: GET /api/v1/banners/active/
+    Returns all currently ACTIVE public banners where:
+    - is_enabled = True
+    - start_date <= today
+    - expiry_date >= today
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        try:
+            today = timezone.now().date()
+            active_banners = Banner.objects.filter(
+                is_enabled=True,
+                start_date__lte=today,
+                expiry_date__gte=today
+            ).order_by('-created_at')
+
+            serializer = BannerSerializer(active_banners, many=True, context={'request': request})
+            return Response({
+                "banners": serializer.data,
+                "count": len(serializer.data)
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error fetching public banners: {e}")
+            return Response({"banners": [], "count": 0, "error": "Unable to fetch banners."}, status=status.HTTP_200_OK)
+
+
+class TrackBannerClickView(APIView):
+    """
+    Public Endpoint: POST /api/v1/banners/<banner_id>/track-click/
+    Tracks click events on public banners safely.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, banner_id):
+        try:
+            banner = Banner.objects.filter(id=banner_id).first()
+            if banner:
+                Banner.objects.filter(id=banner_id).update(clicks=F('clicks') + 1)
+                return Response({'message': 'Click tracked successfully', 'website_url': banner.website_url}, status=status.HTTP_200_OK)
+            return Response({'error': 'Banner not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error tracking banner click: {e}")
+            return Response({'error': 'Failed to track click'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 

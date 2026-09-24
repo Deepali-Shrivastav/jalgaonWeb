@@ -41,10 +41,13 @@ urlpatterns = [
     path('ads/', views.AdminAdsListView.as_view(), name='ads-list'),
     path('ads/<int:ad_id>/', views.AdminAdsActionView.as_view(), name='ads-action'),
     path('ad-slots/', views.AdminAdSlotListView.as_view(), name='ad-slot-list'),
-    path('ad-slots/<int:slot_id>/', views.AdminAdSlotDetailView.as_view(), name='ad-slot-detail'),
     path('floating-video-ad/', views.AdminFloatingVideoAdView.as_view(), name='floating-video-ad'),
     path('floating-video-ad/<int:ad_id>/', views.AdminFloatingVideoAdDetailView.as_view(), name='floating-video-ad-detail'),
     path('floating-video-ad/<int:ad_id>/toggle/', views.AdminFloatingVideoAdToggleView.as_view(), name='floating-video-ad-toggle'),
+    # Banner Management
+    path('banners/', views.AdminBannerListView.as_view(), name='banner-list'),
+    path('banners/<int:banner_id>/', views.AdminBannerDetailView.as_view(), name='banner-detail'),
+    path('banners/<int:banner_id>/toggle/', views.AdminBannerToggleView.as_view(), name='banner-toggle'),
 ]
 
 

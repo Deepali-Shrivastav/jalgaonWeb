@@ -259,11 +259,6 @@ export default function NewsPortal() {
                     <div className="text-gray-500 text-sm">No articles available.</div>
                   )}
                 </div>
-
-                {/* Advertisement in Sidebar */}
-                <div className="mt-8 w-full -mx-4 md:mx-0">
-                  <CarouselAds slot="sidebar" />
-                </div>
               </div>
 
             </div>
