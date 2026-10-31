@@ -1,0 +1,6 @@
+{
+  "extraPaths": [
+    "./jalgaonApi",
+    "./jalgaonApi/apps"
+  ]
+}

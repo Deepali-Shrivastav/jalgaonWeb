@@ -1,16 +1,19 @@
-from django.contrib.auth.models import AbstractUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
-from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
+
 
 class UserManager(BaseUserManager):
     def create_user(self, phone_number, password=None, **extra_fields):
         if not phone_number:
             raise ValueError("Phone number is required")
 
+        if extra_fields.get('email'):
+            extra_fields['email'] = self.normalize_email(extra_fields['email'])
+
         user = self.model(phone_number=phone_number, **extra_fields)
-        user.set_password(password)  # Fixed typo here
+        user.set_password(password)
         user.save(using=self._db)
 
         return user
@@ -21,9 +24,15 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_active', True)
         extra_fields.setdefault('role', 'super_admin')
 
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError("Superuser must have is_staff=True.")
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError("Superuser must have is_superuser=True.")
+
         return self.create_user(phone_number, password, **extra_fields)
 
-class User(AbstractUser, PermissionsMixin):
+
+class User(AbstractUser):
     ROLE_CHOICES = [
         ('super_admin', 'Super Admin'),
         ('admin', 'Admin'),
@@ -34,11 +43,14 @@ class User(AbstractUser, PermissionsMixin):
         ('support', 'Support Executive'),
         ('advertiser', 'Advertiser'),
         ('business_owner', 'Business Owner'),
+        ('event_manager', 'Event Manager'),
+        ('gate_staff', 'Gate Staff'),
+        ('venue_staff', 'Venue Staff'),
         ('registered_user', 'Registered User'),
         ('guest', 'Guest'),
     ]
 
-    username = None
+    username = None  # type: ignore
     phone_number = models.CharField(max_length=13, unique=True)
     first_name = models.CharField(max_length=50, null=True, blank=True)
     last_name = models.CharField(max_length=50, null=True, blank=True)
@@ -64,11 +76,11 @@ class User(AbstractUser, PermissionsMixin):
         null=True,
         blank=True
     )
-    
-    USERNAME_FIELD = 'phone_number'
-    REQUIRED_FIELDS = []  # Add additional required fields for createsuperuser
 
-    objects = UserManager()
+    USERNAME_FIELD = 'phone_number'
+    REQUIRED_FIELDS = []
+
+    objects = UserManager()  # type: ignore
 
     class Meta:
         db_table = 'app_user'
@@ -100,8 +112,14 @@ class User(AbstractUser, PermissionsMixin):
         """Check if user has any staff-level role (admin or content/moderation)."""
         return self.role in (
             'super_admin', 'admin', 'content_manager',
-            'news_editor', 'seo_manager', 'moderator', 'support'
+            'news_editor', 'seo_manager', 'moderator', 'support',
+            'event_manager'
         )
+
+    @property
+    def is_gate_staff_role(self):
+        """Check if user has gate staff or venue staff scanner role."""
+        return self.role in ('gate_staff', 'venue_staff')
 
     def save(self, *args, **kwargs):
         """
@@ -116,7 +134,7 @@ class User(AbstractUser, PermissionsMixin):
             self.is_superuser = True
         elif self.role in (
             'admin', 'content_manager', 'news_editor',
-            'seo_manager', 'moderator', 'support'
+            'seo_manager', 'moderator', 'support', 'event_manager'
         ):
             self.is_staff = True
             self.is_superuser = False
@@ -145,6 +163,8 @@ class LoginAttempt(models.Model):
     attempted_at = models.DateTimeField(auto_now_add=True)
     was_successful = models.BooleanField(default=False)
     user_agent = models.CharField(max_length=512, blank=True)
+
+    objects = models.Manager()
 
     class Meta:
         db_table = 'auth_login_attempt'

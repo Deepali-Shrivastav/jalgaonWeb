@@ -36,7 +36,21 @@ allowed_hosts_env = os.getenv('ALLOWED_HOSTS')
 if allowed_hosts_env:
     ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',') if host.strip()]
 else:
-    ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'www.jalgaon.com', 'api.jalgaon.com']
+    ALLOWED_HOSTS = ['*']
+
+# Ensure essential mobile app and production domains/IPs are always permissible
+_ESSENTIAL_HOSTS = [
+    'api.jalgaon.com',
+    'jalgaon.com',
+    'www.jalgaon.com',
+    'localhost',
+    '127.0.0.1',
+    '10.0.2.2',  # Android Emulator local loopback
+]
+if '*' not in ALLOWED_HOSTS:
+    for _h in _ESSENTIAL_HOSTS:
+        if _h not in ALLOWED_HOSTS:
+            ALLOWED_HOSTS.append(_h)
 
 csrf_trusted_origins_env = os.getenv('CSRF_TRUSTED_ORIGINS')
 if csrf_trusted_origins_env:
@@ -267,26 +281,21 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'Jalgaon Portal <no-reply@jalgaon.com>')
 
 
-# CORS settings
+# CORS settings (Configured for Web & Flutter Mobile App support)
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
-if DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = True
-else:
-    cors_allowed_origins_env = os.getenv('CORS_ALLOWED_ORIGINS')
-    if cors_allowed_origins_env:
-        CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_allowed_origins_env.split(',') if origin.strip()]
-    else:
-        CORS_ALLOWED_ORIGINS = [
-            'https://api.jalgaon.com',
-            'https://www.jalgaon.com',
-            'https://jalgaon.com',
-            'capacitor://localhost',
-            'http://localhost:5173',
-            'http://127.0.0.1:5173',
-            'http://localhost:3000',
-            'http://127.0.0.1:3000'
-        ]
+from corsheaders.defaults import default_headers
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SWAGGER / OPENAPI DOCUMENTATION (PRD §15.1)

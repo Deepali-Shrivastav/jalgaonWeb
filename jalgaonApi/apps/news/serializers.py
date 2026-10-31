@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import ArticleModel, ActiveArticle, NewsCategory, NewsTag, NewsArticle, NewsComment
+from core.utils import get_absolute_media_url
 
 # --- Legacy Serializers ---
 class ArticleModelSerializer(serializers.ModelSerializer):
@@ -30,37 +31,28 @@ class NewsArticleListSerializer(serializers.ModelSerializer):
     tags = NewsTagSerializer(many=True, read_only=True)
     author_name = serializers.CharField(source='author.get_full_name', read_only=True, default='Admin')
     featured_image = serializers.SerializerMethodField()
+    image_url = serializers.SerializerMethodField()
 
     def get_featured_image(self, obj):
         """
-        Always return an absolute HTTPS URL for the featured image.
-
-        Django behind Nginx may incorrectly build http:// URLs when
-        SECURE_PROXY_SSL_HEADER is not trusted. This method is explicit
-        and never depends on the proxy header chain being configured correctly.
+        Always return a guaranteed absolute HTTPS URL for the featured image.
+        Uses core.utils.get_absolute_media_url.
         """
         if not obj.featured_image:
             return None
         request = self.context.get('request')
-        url = obj.featured_image.url          # e.g. /media/news/featured/img.jpg
-        if request is not None:
-            # build_absolute_uri gives us the full URL (scheme + host + path)
-            absolute = request.build_absolute_uri(url)
-        else:
-            absolute = url
-        # Guarantee HTTPS — regardless of proxy header configuration
-        if absolute.startswith('http://'):
-            absolute = 'https://' + absolute[7:]
-        return absolute
+        default_img = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167'
+        return get_absolute_media_url(obj.featured_image, request, default=default_img)
 
-
+    def get_image_url(self, obj):
+        return self.get_featured_image(obj)
 
     class Meta:
         model = NewsArticle
         fields = [
             'id', 'title', 'slug', 'short_description', 'featured_image',
-            'category', 'tags', 'author_name', 'status', 'is_breaking',
-            'published_at', 'view_count', 'created_at'
+            'image_url', 'category', 'tags', 'author_name', 'status',
+            'is_breaking', 'published_at', 'view_count', 'created_at'
         ]
 
 class NewsCommentSerializer(serializers.ModelSerializer):

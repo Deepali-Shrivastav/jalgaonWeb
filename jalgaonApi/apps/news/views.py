@@ -77,6 +77,24 @@ class BreakingNewsListView(generics.ListAPIView):
     def get_queryset(self):
         return NewsArticle.objects.filter(status='published', is_breaking=True).order_by('-published_at')[:5]
 
+class MobileNewsListView(generics.ListAPIView):
+    """
+    GET /api/news/
+    Public read endpoint for Flutter mobile app with AllowAny permission.
+    Returns direct JSON array without pagination.
+    """
+    serializer_class = NewsArticleListSerializer
+    permission_classes = [AllowAny]
+    pagination_class = None
+
+    def get_queryset(self):
+        queryset = NewsArticle.objects.filter(status='published').order_by('-published_at')
+        category_slug = self.request.query_params.get('category')
+        if category_slug:
+            queryset = queryset.filter(category__slug=category_slug)
+        return queryset
+
+
 class TrendingNewsListView(generics.ListAPIView):
     serializer_class = NewsArticleListSerializer
     permission_classes = [AllowAny]

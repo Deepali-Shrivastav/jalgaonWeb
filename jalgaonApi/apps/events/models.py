@@ -48,6 +48,7 @@ class Event(models.Model):
     start_datetime = models.DateTimeField()
     end_datetime = models.DateTimeField(null=True, blank=True)
     registration_link = models.URLField(max_length=500, blank=True, null=True)
+    price = models.CharField(max_length=50, default='Free', blank=True, help_text="e.g. 'Free' or '₹199'")
 
     # Media & Category
     featured_image = models.ImageField(upload_to='events/featured/', null=True, blank=True)
@@ -87,3 +88,25 @@ class Event(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class EventBooking(models.Model):
+    booking_reference = models.CharField(max_length=50, unique=True)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='mobile_bookings')
+    pass_category = models.CharField(max_length=100, default='General')
+    quantity = models.PositiveIntegerField(default=1)
+    customer_name = models.CharField(max_length=200, blank=True, default='Mobile App Guest')
+    customer_phone = models.CharField(max_length=20, blank=True, default='')
+    customer_email = models.EmailField(blank=True, default='')
+    total_price = models.CharField(max_length=50, blank=True, default='Free')
+    status = models.CharField(max_length=20, default='confirmed')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'events_booking'
+        ordering = ['-created_at']
+        verbose_name = 'Mobile Event Booking'
+        verbose_name_plural = 'Mobile Event Bookings'
+
+    def __str__(self):
+        return f"{self.booking_reference} - {self.event.title} ({self.quantity} tickets)"

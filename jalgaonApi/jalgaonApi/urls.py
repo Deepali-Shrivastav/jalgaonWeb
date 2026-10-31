@@ -29,6 +29,13 @@ urlpatterns = [
     path('productView/<int:id>/', ProductViewLegacyRedirectView.as_view(), name='legacy-productview-redirect'),
     path('productView/<int:id>', ProductViewLegacyRedirectView.as_view(), name='legacy-productview-redirect-noslash'),
     path('admin/', admin.site.urls),
+
+    # ─── Mobile App Dedicated API Endpoints (/api/events/, /api/places/, /api/bookings/, etc.) ───
+    path('api/', include('api.urls')),
+
+    # ─── Tourism Web Endpoints ───
+    path('api/v1/places/', include('apps.tourism.urls')),
+    path('api/v1/tourism/', include('apps.tourism.urls')),
     path('api/v1/auth/', include('apps.accounts.urls')),
     path('api/v1/listings/', include('apps.directory.urls')),
     path('api/v1/search/', include('apps.search.urls')),

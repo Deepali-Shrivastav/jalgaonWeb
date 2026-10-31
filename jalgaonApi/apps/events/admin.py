@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import EventCategory, Event
+from .models import EventCategory, Event, EventBooking
 
 
 @admin.register(EventCategory)
@@ -14,7 +14,7 @@ class EventCategoryAdmin(admin.ModelAdmin):
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     list_display = (
-        'title', 'category', 'status', 'is_featured',
+        'title', 'category', 'price', 'status', 'is_featured',
         'start_datetime', 'organizer_name', 'submitted_by', 'view_count'
     )
     list_filter = ('status', 'is_featured', 'category', 'start_datetime')
@@ -25,7 +25,7 @@ class EventAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Basic Information', {
-            'fields': ('title', 'slug', 'category', 'short_description', 'description', 'featured_image')
+            'fields': ('title', 'slug', 'category', 'price', 'short_description', 'description', 'featured_image')
         }),
         ('Schedule & Venue', {
             'fields': ('start_datetime', 'end_datetime', 'venue_name', 'venue_address', 'venue_lat', 'venue_lng', 'maps_url')
@@ -56,3 +56,11 @@ class EventAdmin(admin.ModelAdmin):
         for event in queryset:
             event.is_featured = not event.is_featured
             event.save()
+
+
+@admin.register(EventBooking)
+class EventBookingAdmin(admin.ModelAdmin):
+    list_display = ('booking_reference', 'event', 'pass_category', 'quantity', 'customer_name', 'customer_phone', 'status', 'created_at')
+    list_filter = ('status', 'pass_category', 'created_at')
+    search_fields = ('booking_reference', 'customer_name', 'customer_phone', 'customer_email', 'event__title')
+    readonly_fields = ('booking_reference', 'created_at')

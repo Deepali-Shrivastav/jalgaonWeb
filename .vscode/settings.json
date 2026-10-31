@@ -3,5 +3,13 @@
     "python.analysis.exclude": [
         "**/__pyrefly_virtual__/**",
         "d:/__pyrefly_virtual__/**"
+    ],
+    "python.analysis.extraPaths": [
+        "./jalgaonApi",
+        "./jalgaonApi/apps"
+    ],
+    "python.autoComplete.extraPaths": [
+        "./jalgaonApi",
+        "./jalgaonApi/apps"
     ]
 }
