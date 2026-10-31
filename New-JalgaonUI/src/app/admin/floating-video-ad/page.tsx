@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
@@ -28,7 +28,7 @@ interface Counts {
   disabled: number;
 }
 
-export default function AdminFloatingVideoAdPage() {
+function AdminFloatingVideoAdContent() {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -912,6 +912,20 @@ export default function AdminFloatingVideoAdPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function AdminFloatingVideoAdPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="p-8 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+        </div>
+      }
+    >
+      <AdminFloatingVideoAdContent />
+    </Suspense>
   );
 }
 

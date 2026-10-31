@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import HoldCountdownTimer from '@/components/ticketing/HoldCountdownTimer';
 import OrderSummaryCard from '@/components/ticketing/OrderSummaryCard';
 import { QrCode, Smartphone, ArrowLeft, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
-export default function GPayAuthorizationPage() {
+function GPayAuthorizationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const bookingRef = searchParams.get('booking_ref') || 'JLG-8F42K91';
@@ -130,5 +130,19 @@ export default function GPayAuthorizationPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function GPayAuthorizationPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-amber-500" />
+        </div>
+      }
+    >
+      <GPayAuthorizationContent />
+    </Suspense>
   );
 }

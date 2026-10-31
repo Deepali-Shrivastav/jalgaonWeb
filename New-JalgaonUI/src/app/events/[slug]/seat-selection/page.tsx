@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -12,7 +12,7 @@ interface SelectedSeat {
   price: number;
 }
 
-export default function SeatSelectionPage({ params }: { params: { slug: string } }) {
+function SeatSelectionContent({ params }: { params: Promise<{ slug: string }> | { slug: string } }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const showId = searchParams.get('show_id') || '1';
@@ -560,5 +560,19 @@ export default function SeatSelectionPage({ params }: { params: { slug: string }
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SeatSelectionPage(props: { params: Promise<{ slug: string }> | { slug: string } }) {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#0081C7]" />
+        </div>
+      }
+    >
+      <SeatSelectionContent {...props} />
+    </Suspense>
   );
 }

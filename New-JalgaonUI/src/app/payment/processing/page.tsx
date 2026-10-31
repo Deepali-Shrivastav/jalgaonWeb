@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ShieldCheck, RefreshCw, AlertTriangle, Lock } from 'lucide-react';
 
-export default function PaymentProcessingPage() {
+function PaymentProcessingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const bookingRef = searchParams.get('booking_ref') || 'JLG-8F42K91';
@@ -61,5 +61,19 @@ export default function PaymentProcessingPage() {
         <span>256-bit SSL Bank-Grade Encryption • Jalgaon.com Escrow</span>
       </div>
     </div>
+  );
+}
+
+export default function PaymentProcessingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-amber-500" />
+        </div>
+      }
+    >
+      <PaymentProcessingContent />
+    </Suspense>
   );
 }

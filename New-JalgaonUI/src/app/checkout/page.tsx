@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import HoldCountdownTimer from '@/components/ticketing/HoldCountdownTimer';
 import OrderSummaryCard from '@/components/ticketing/OrderSummaryCard';
 import TicketRecipientForm from '@/components/ticketing/TicketRecipientForm';
 import { ArrowLeft, ArrowRight, Tag, ShieldCheck } from 'lucide-react';
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const bookingRef = searchParams.get('booking_ref') || 'JLG-8F42K91';
@@ -139,5 +139,19 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-amber-500" />
+        </div>
+      }
+    >
+      <CheckoutContent />
+    </Suspense>
   );
 }

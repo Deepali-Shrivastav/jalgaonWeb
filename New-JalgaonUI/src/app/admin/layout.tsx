@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, Suspense } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { AuthContext } from "@/context/AuthContext";
 import AdminSidebar from "@/components/admin/AdminSidebar";
@@ -84,7 +84,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         />
       )}
       
-      <AdminSidebar isCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} />
+      <Suspense fallback={<aside className="w-64 bg-white border-r border-slate-200" />}>
+        <AdminSidebar isCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} />
+      </Suspense>
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <AdminTopbar toggleSidebar={toggleSidebar} title={getPageTitle()} />

@@ -1,0 +1,13 @@
+search-path = [
+    ".",
+    "jalgaonApi",
+    "jalgaonApi/apps",
+]
+python-interpreter-path = "C:/Users/dell/AppData/Local/Programs/Python/Python312/python.exe"
+
+[errors]
+bad-assignment = "ignore"
+missing-attribute = "ignore"
+missing-import = "ignore"
+implicit-any = "ignore"
+

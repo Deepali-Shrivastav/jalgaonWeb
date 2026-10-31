@@ -1,10 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle2, Copy, QrCode, ArrowRight, ShieldCheck, MapPin, Calendar, Car } from 'lucide-react';
 
-export default function BookingConfirmedPage() {
+function BookingConfirmedContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const bookingRef = searchParams.get('booking_ref') || 'JLG-8F42K91';
@@ -108,5 +108,19 @@ export default function BookingConfirmedPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function BookingConfirmedPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-amber-500" />
+        </div>
+      }
+    >
+      <BookingConfirmedContent />
+    </Suspense>
   );
 }

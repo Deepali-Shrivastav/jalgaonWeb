@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { AdminBanner } from "@/types/banner";
@@ -13,7 +13,7 @@ interface Counts {
   inactive: number;
 }
 
-export default function AdminBannersPage() {
+function AdminBannersContent() {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -897,5 +897,19 @@ export default function AdminBannersPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function AdminBannersPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="p-8 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+        </div>
+      }
+    >
+      <AdminBannersContent />
+    </Suspense>
   );
 }
