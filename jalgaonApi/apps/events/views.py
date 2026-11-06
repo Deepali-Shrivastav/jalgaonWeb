@@ -272,14 +272,26 @@ class MobileEventListView(generics.ListAPIView):
     pagination_class = None
 
     def get_queryset(self):
-        # Return approved events (both upcoming and recent)
-        qs = Event.objects.filter(status='approved').order_by('-is_featured', 'start_datetime')
+        now = timezone.now()
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        # Return approved upcoming events ordered with newly uploaded / latest events first
+        upcoming_qs = Event.objects.filter(
+            status='approved',
+            start_datetime__gte=today_start
+        ).order_by('-is_featured', '-created_at', '-id')
+        
         category = self.request.query_params.get('category')
-        if category:
+        if category and category.lower() != 'all':
+            upcoming_qs = upcoming_qs.filter(category__name__iexact=category)
+
+        if upcoming_qs.exists():
+            return upcoming_qs
+
+        # If no upcoming events exist, fall back to approved events ordered newest created first
+        qs = Event.objects.filter(status='approved').order_by('-is_featured', '-created_at', '-id')
+        if category and category.lower() != 'all':
             qs = qs.filter(category__name__iexact=category)
-        # If no approved events in future, return all approved events
-        if not qs.exists():
-            qs = Event.objects.filter(status='approved')
         return qs
 
 

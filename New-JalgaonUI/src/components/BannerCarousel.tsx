@@ -1,99 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Building2, Paintbrush, Leaf, ShieldCheck, Sparkles, Award } from 'lucide-react';
-import { BannerItem, BannerCarouselProps, BannerFeatureBlock } from '@/types/banner';
-
-const DEFAULT_BANNERS: BannerItem[] = [
-  {
-    id: 'default-1',
-    title: 'Discover Historic Jalgaon & Ajanta Gateway',
-    subtitle: 'Explore ancient forts, heritage temples, and natural wonders across the region.',
-    ctaText: 'Explore Tourism',
-    ctaUrl: '/tourism',
-    badgeText: 'LOCAL HERITAGE',
-    bannerType: 'promotional',
-    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80',
-  },
-  {
-    id: 'default-2',
-    title: 'Jalgaon Gold City Shopping Festival',
-    subtitle: 'Discover trusted jewellers, festive discounts, and premier local retail outlets.',
-    ctaText: 'Browse Gold & Retail',
-    ctaUrl: '/category/retail',
-    badgeText: 'GOLD CITY SPECIAL',
-    bannerType: 'offer',
-    image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=1600&q=80',
-  },
-  {
-    id: 'default-3',
-    title: 'Agri-Tech & Business Expo 2026',
-    subtitle: 'Join leading regional enterprise leaders, agricultural innovators, and startups.',
-    ctaText: 'View Event Details',
-    ctaUrl: '/events',
-    badgeText: 'UPCOMING EXPO',
-    bannerType: 'event',
-    image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1600&q=80',
-  },
-  {
-    id: 'default-4',
-    title: 'Authentic Khandeshi Food & Dining Trail',
-    subtitle: 'Taste traditional delicacies and discover top-rated local cafes and restaurants.',
-    ctaText: 'Find Restaurants',
-    ctaUrl: '/category/food-and-beverages',
-    badgeText: 'FOOD SPOTLIGHT',
-    bannerType: 'category',
-    image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1600&q=80',
-  },
-  {
-    id: 'default-5',
-    title: 'Connect With 5,000+ Verified Businesses',
-    subtitle: 'Find verified automotive, home, healthcare, and professional services near you.',
-    ctaText: 'Explore Directory',
-    ctaUrl: '/category/business-services',
-    badgeText: 'SMART JALGAON',
-    bannerType: 'business',
-    image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=80',
-  },
-];
-
-const DEFAULT_FEATURE_BLOCKS: BannerFeatureBlock[] = [
-  {
-    id: 'block-1',
-    iconName: 'Building2',
-    title: 'Architectural Design',
-    description: 'Short supporting text here...',
-  },
-  {
-    id: 'block-2',
-    iconName: 'Paintbrush',
-    title: 'Interior Styling',
-    description: 'Short supporting text here...',
-  },
-  {
-    id: 'block-3',
-    iconName: 'Leaf',
-    title: 'Sustainable Consulting',
-    description: 'Short supporting text here...',
-  },
-];
-
-const renderIcon = (iconName?: string) => {
-  switch (iconName) {
-    case 'Building2':
-      return <Building2 className="w-5 h-5 text-primary" />;
-    case 'Paintbrush':
-      return <Paintbrush className="w-5 h-5 text-primary" />;
-    case 'Leaf':
-      return <Leaf className="w-5 h-5 text-primary" />;
-    case 'ShieldCheck':
-      return <ShieldCheck className="w-5 h-5 text-primary" />;
-    case 'Sparkles':
-      return <Sparkles className="w-5 h-5 text-primary" />;
-    default:
-      return <Award className="w-5 h-5 text-primary" />;
-  }
-};
+import { BannerItem, BannerCarouselProps } from '@/types/banner';
 
 export default function BannerCarousel({
   banners: customBanners,
@@ -119,7 +27,6 @@ export default function BannerCarousel({
   const resumeTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-  const activeFeatureBlocks = customFeatureBlocks && customFeatureBlocks.length > 0 ? customFeatureBlocks : DEFAULT_FEATURE_BLOCKS;
 
   // Fetch banners if not provided manually
   useEffect(() => {
@@ -194,14 +101,14 @@ export default function BannerCarousel({
             });
             if (isMounted) setBanners(mapped);
           } else {
-            if (isMounted) setBanners(DEFAULT_BANNERS);
+            if (isMounted) setBanners([]);
           }
         } else {
-          if (isMounted) setBanners(DEFAULT_BANNERS);
+          if (isMounted) setBanners([]);
         }
       } catch (err) {
-        console.warn('Failed to fetch banner ads, falling back to default banners:', err);
-        if (isMounted) setBanners(DEFAULT_BANNERS);
+        console.warn('Failed to fetch banner ads:', err);
+        if (isMounted) setBanners([]);
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -399,10 +306,6 @@ export default function BannerCarousel({
                       alt={displayTitle}
                       className="w-full h-auto object-cover rounded-xl block transition-transform duration-300 group-hover/side:scale-[1.01]"
                       loading={index === 0 ? 'eager' : 'lazy'}
-                      onError={(e) => {
-                        e.currentTarget.src =
-                          'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80';
-                      }}
                     />
                   </div>
                 </a>
@@ -464,8 +367,8 @@ export default function BannerCarousel({
           <div className="bg-white rounded-2xl border border-slate-200/90 shadow-md p-3 sm:p-4">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 items-stretch">
 
-              {/* Main Moving Banner Carousel (Full width on mobile, 8 cols on desktop) */}
-              <div className="w-full md:col-span-8 flex flex-col justify-center">
+              {/* Main Moving Banner Carousel (Full width on mobile, 8 cols on desktop when 3+ banners, otherwise 12 cols) */}
+              <div className={`w-full ${banners.length >= 3 ? 'md:col-span-8' : 'md:col-span-12'} flex flex-col justify-center`}>
                 <div
                   className="relative group rounded-xl md:rounded-lg overflow-hidden border border-slate-200/70 shadow-2xs bg-slate-50 flex-1 flex flex-col touch-pan-y select-none cursor-grab active:cursor-grabbing"
                   onTouchStart={handleTouchStart}
@@ -500,10 +403,6 @@ export default function BannerCarousel({
                               alt={displayTitle}
                               className="w-full h-full object-cover transition duration-500 group-hover/slide:scale-[1.01] rounded-xl md:rounded-lg pointer-events-none"
                               loading={index === 0 ? 'eager' : 'lazy'}
-                              onError={(e) => {
-                                e.currentTarget.src =
-                                  'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80';
-                              }}
                             />
                           </a>
                         );
@@ -563,49 +462,45 @@ export default function BannerCarousel({
                 )}
               </div>
 
-              {/* Right 4-Column Two Stacked Banners (Desktop view only, hidden on mobile for clean moving banner display) */}
-              <div className="hidden md:flex md:col-span-4 flex-col gap-3 sm:gap-4 justify-between">
-                <div className="flex-1 flex flex-col justify-center">
-                  <a
-                    className="group relative rounded-lg md:rounded-xl overflow-hidden border border-slate-200/90 shadow-xs block h-full flex items-center justify-center bg-slate-50"
-                    href={banners[1]?.ctaUrl || banners[1]?.websiteUrl || '#'}
-                    onClick={(e) => banners[1] && handleBannerClick(banners[1], e)}
-                  >
-                    <img
-                      alt={banners[1]?.title || 'Commercial Bank Company Profile'}
-                      className="w-full h-full object-cover transition duration-500 group-hover:scale-105 rounded-lg md:rounded-xl aspect-[16/9] md:aspect-auto"
-                      src={
-                        banners[1]?.image ||
-                        'https://lh3.googleusercontent.com/aida-public/AB6AXuD2AGHNPUTtllN9rcK7DYSn2AvuRAyiYa7S2MKf6GNg7XyrqhxVblYjojO1v95aLKctSenuuAaIwjP2Cze3ZCccdBWv53yCxbWOs190VgRQBu9MOhfmCIL2wU9ilG4ifvXLKaoG7_qMS0WuH6pRI_21Z_LGUAoIscpngdtre7i_gejACrDJ1Ln3kOU-loFlFB4GDgUjgQpO5kVE6igZGKkcvyFYIUoXLLzHzA0PSHfY68YoIZ0Ii8xzLU44_Fg3WwYLxQ'
-                      }
-                      onError={(e) => {
-                        e.currentTarget.src =
-                          'https://lh3.googleusercontent.com/aida-public/AB6AXuD2AGHNPUTtllN9rcK7DYSn2AvuRAyiYa7S2MKf6GNg7XyrqhxVblYjojO1v95aLKctSenuuAaIwjP2Cze3ZCccdBWv53yCxbWOs190VgRQBu9MOhfmCIL2wU9ilG4ifvXLKaoG7_qMS0WuH6pRI_21Z_LGUAoIscpngdtre7i_gejACrDJ1Ln3kOU-loFlFB4GDgUjgQpO5kVE6igZGKkcvyFYIUoXLLzHzA0PSHfY68YoIZ0Ii8xzLU44_Fg3WwYLxQ';
-                      }}
-                    />
-                  </a>
+              {/* Right 4-Column Two Stacked Banners (Desktop view only, shown ONLY when 3+ real banners exist) */}
+              {banners.length >= 3 && (
+                <div className="hidden md:flex md:col-span-4 flex-col gap-3 sm:gap-4 justify-between">
+                  {banners[1] && (
+                    <div className="flex-1 flex flex-col justify-center">
+                      <a
+                        className="group relative rounded-lg md:rounded-xl overflow-hidden border border-slate-200/90 shadow-xs block h-full flex items-center justify-center bg-slate-50"
+                        href={banners[1].ctaUrl || banners[1].websiteUrl || '#'}
+                        target={banners[1].ctaUrl?.startsWith('http') || banners[1].websiteUrl?.startsWith('http') ? '_blank' : '_self'}
+                        rel="noopener noreferrer"
+                        onClick={(e) => handleBannerClick(banners[1], e)}
+                      >
+                        <img
+                          alt={banners[1].title || banners[1].clientName || 'Featured Banner'}
+                          className="w-full h-full object-cover transition duration-500 group-hover:scale-105 rounded-lg md:rounded-xl aspect-[16/9] md:aspect-auto"
+                          src={banners[1].image}
+                        />
+                      </a>
+                    </div>
+                  )}
+                  {banners[2] && (
+                    <div className="flex-1 flex flex-col justify-center">
+                      <a
+                        className="group relative rounded-lg md:rounded-xl overflow-hidden border border-slate-200/90 shadow-xs block h-full flex items-center justify-center bg-slate-50"
+                        href={banners[2].ctaUrl || banners[2].websiteUrl || '#'}
+                        target={banners[2].ctaUrl?.startsWith('http') || banners[2].websiteUrl?.startsWith('http') ? '_blank' : '_self'}
+                        rel="noopener noreferrer"
+                        onClick={(e) => handleBannerClick(banners[2], e)}
+                      >
+                        <img
+                          alt={banners[2].title || banners[2].clientName || 'Featured Banner'}
+                          className="w-full h-full object-cover transition duration-500 group-hover:scale-105 rounded-lg md:rounded-xl aspect-[16/9] md:aspect-auto"
+                          src={banners[2].image}
+                        />
+                      </a>
+                    </div>
+                  )}
                 </div>
-                <div className="flex-1 flex flex-col justify-center">
-                  <a
-                    className="group relative rounded-lg md:rounded-xl overflow-hidden border border-slate-200/90 shadow-xs block h-full flex items-center justify-center bg-slate-50"
-                    href={banners[2]?.ctaUrl || banners[2]?.websiteUrl || '#'}
-                    onClick={(e) => banners[2] && handleBannerClick(banners[2], e)}
-                  >
-                    <img
-                      alt={banners[2]?.title || 'Promotional Banner'}
-                      className="w-full h-full object-cover transition duration-500 group-hover:scale-105 rounded-lg md:rounded-xl aspect-[16/9] md:aspect-auto"
-                      src={
-                        banners[2]?.image ||
-                        'https://lh3.googleusercontent.com/aida-public/AB6AXuBAARjqzmLM0msrYAdSFSUu2ApV6CqR93YQ_5EYsv5zosDuLT_qz1f5aNjSbFI7yj6Popdc798qKis7KBIc7bib-XY1M74Dbz2E9_ETJeWexWnzj9rQ4zzCwp_ow6UUcO-AjV-F2uUC1jxjgxuO5ioeDHhlVoNMKuk7N8uUGVvKrxWXsPO9QykOvj1caKxDPU-YY3QE4u7gDxHsMrjqtCKBY1-Rd5J8_7uzdGB0PNF3EGWNGekBEXjmpcJrAV05miiYGQ'
-                      }
-                      onError={(e) => {
-                        e.currentTarget.src =
-                          'https://lh3.googleusercontent.com/aida-public/AB6AXuBAARjqzmLM0msrYAdSFSUu2ApV6CqR93YQ_5EYsv5zosDuLT_qz1f5aNjSbFI7yj6Popdc798qKis7KBIc7bib-XY1M74Dbz2E9_ETJeWexWnzj9rQ4zzCwp_ow6UUcO-AjV-F2uUC1jxjgxuO5ioeDHhlVoNMKuk7N8uUGVvKrxWXsPO9QykOvj1caKxDPU-YY3QE4u7gDxHsMrjqtCKBY1-Rd5J8_7uzdGB0PNF3EGWNGekBEXjmpcJrAV05miiYGQ';
-                      }}
-                    />
-                  </a>
-                </div>
-              </div>
+              )}
 
             </div>
           </div>
@@ -614,4 +509,3 @@ export default function BannerCarousel({
     </div>
   );
 }
-
