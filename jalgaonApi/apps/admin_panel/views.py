@@ -5,6 +5,9 @@ from rest_framework.pagination import PageNumberPagination
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.db.models import Q
+import logging
+
+logger = logging.getLogger(__name__)
 
 from apps.directory.models import MainCategory, SubCategory, ShopListing
 from core.permissions import IsAdminRole, IsSuperAdmin, IsModerator, IsContentManager
@@ -23,6 +26,38 @@ from apps.ads.serializers import AdsListingSerializer, AdSlotSerializer, BannerS
 from apps.audit.utils import log_audit_action
 
 User = get_user_model()
+
+
+def _serializable_audit_changes(data):
+    """
+    Convert serializer.validated_data into a JSON-serializable dict for audit logging.
+
+    DRF puts UploadedFile objects into validated_data for file/ImageFields, but
+    AuditLog.changes is a JSONField. Passing an UploadedFile straight through
+    raises TypeError during JSON serialization AFTER the model has already been
+    saved, which surfaced as a "Server error while saving banner" even though
+    the banner was persisted successfully.
+    """
+    import json
+
+    from django.core.files.uploadedfile import UploadedFile
+
+    def _convert(value):
+        if isinstance(value, UploadedFile):
+            return getattr(value, "name", str(value))
+        if isinstance(value, dict):
+            return {str(k): _convert(v) for k, v in value.items()}
+        if isinstance(value, (list, tuple)):
+            return [_convert(v) for v in value]
+        try:
+            json.dumps(value)
+            return value
+        except (TypeError, ValueError):
+            return str(value)
+
+    if isinstance(data, dict):
+        return _convert(data)
+    return {}
 
 
 class AdminPagination(PageNumberPagination):
@@ -1163,14 +1198,19 @@ class AdminBannerDetailView(APIView):
         serializer = BannerSerializer(banner, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             updated_banner = serializer.save()
-            log_audit_action(
-                actor=request.user,
-                action='update_banner',
-                target_type='Banner',
-                target_id=updated_banner.id,
-                changes=serializer.validated_data,
-                request=request
-            )
+            # Audit logging must never break a successful save. Sanitize file
+            # fields (UploadedFile is not JSON-serializable) and swallow errors.
+            try:
+                log_audit_action(
+                    actor=request.user,
+                    action='update_banner',
+                    target_type='Banner',
+                    target_id=updated_banner.id,
+                    changes=_serializable_audit_changes(serializer.validated_data),
+                    request=request
+                )
+            except Exception as audit_err:
+                logger.warning(f"Audit log failed for banner update id={updated_banner.id}: {audit_err}")
             return Response(BannerSerializer(updated_banner, context={'request': request}).data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

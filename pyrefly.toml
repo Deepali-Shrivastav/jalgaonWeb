@@ -10,4 +10,5 @@ bad-assignment = "ignore"
 missing-attribute = "ignore"
 missing-import = "ignore"
 implicit-any = "ignore"
+untyped-import = "ignore"
 
