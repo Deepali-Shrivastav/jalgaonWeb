@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import (
     UserRegister, UserLogin, UserLogout, LogoutAllDevicesView,
-    UserView, get_csrf_token, PasswordResetRequestView, PasswordResetConfirmView
+    UserView, get_csrf_token, PasswordResetRequestView, PasswordResetConfirmView,
+    DeleteAccountView
 )
 from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 
@@ -22,6 +23,7 @@ urlpatterns = [
 
     # --- User profile ---
     path('user/', UserView.as_view(), name='user'),
+    path('delete-account/', DeleteAccountView.as_view(), name='delete-account'),
 
     # --- Utilities ---
     path('csrf-token/', get_csrf_token, name='csrf-token'),

@@ -1,9 +1,16 @@
+import base64
+import json
+import time
+
 from rest_framework import status, permissions
+from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from django.contrib.auth import get_user_model, login, logout
+from django.db import transaction
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
@@ -23,6 +30,57 @@ import logging
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
+
+
+class ExpiredToken(AuthenticationFailed):
+    status_code = 403
+
+
+def _token_is_expired(raw_token):
+    try:
+        if isinstance(raw_token, (bytes, bytearray)):
+            token_str = raw_token.decode('utf-8')
+        else:
+            token_str = str(raw_token)
+        parts = token_str.split('.')
+        if len(parts) < 2:
+            return False
+        padded = parts[1] + '=' * (-len(parts[1]) % 4)
+        payload = json.loads(base64.urlsafe_b64decode(padded.encode('utf-8')))
+        exp = payload.get('exp')
+        if exp is None:
+            return False
+        return time.time() > float(exp)
+    except Exception:
+        return False
+
+
+class CustomJWTAuthentication(JWTAuthentication):
+    def authenticate(self, request):
+        header = self.get_header(request)
+        if header is None:
+            return None
+        raw_token = self.get_raw_token(header)
+        if raw_token is None:
+            return None
+        try:
+            validated_token = self.get_validated_token(raw_token)
+        except Exception:
+            if _token_is_expired(raw_token):
+                raise ExpiredToken({'error': 'Token is invalid or expired.'})
+            raise AuthenticationFailed({'error': 'Token is invalid or expired.'})
+        try:
+            user = self.get_user(validated_token)
+        except Exception:
+            raise AuthenticationFailed({'error': 'Token is invalid or expired.'})
+        return user, validated_token
+
+
+class IsAuthenticatedWithError(permissions.IsAuthenticated):
+    def has_permission(self, request, view):
+        if not (request.user and request.user.is_authenticated):
+            raise NotAuthenticated({'error': 'Authentication credentials were not provided.'})
+        return True
 
 class UserRegister(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -376,6 +434,159 @@ class PasswordResetRequestView(APIView):
         )
 
         return generic_response
+
+    def _get_client_ip(self, request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            return x_forwarded_for.split(',')[0].strip()
+        return request.META.get('REMOTE_ADDR')
+
+
+class DeleteAccountView(APIView):
+    """
+    DELETE /api/v1/auth/delete-account/
+    Permanently deletes the authenticated user's account and all related data.
+    """
+    authentication_classes = (CustomJWTAuthentication,)
+    permission_classes = (IsAuthenticatedWithError,)
+
+    RATE_LIMIT_SECONDS = 86400  # 1 deletion request per user per day
+
+    def delete(self, request):
+        user = request.user
+        ip_address = self._get_client_ip(request)
+
+        # Verify user still exists in database
+        if not User.objects.filter(pk=user.pk).exists():
+            return Response(
+                {'error': 'User not found.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Rate limiting: max 1 deletion request per user per day
+        cache_key = f'delete_account_rate_{user.id}'
+        from django.core.cache import cache
+        if cache.get(cache_key):
+            return Response(
+                {'error': 'Account deletion failed. Please try again.'},
+                status=status.HTTP_429_TOO_MANY_REQUESTS
+            )
+
+        data = request.data or {}
+        # Optional confirmation flag
+        confirm = data.get('confirm', True)
+        if confirm is False:
+            return Response(
+                {'error': 'Account deletion failed. Please try again.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Optional password confirmation
+        password = data.get('password')
+        if password is not None and not user.check_password(password):
+            return Response(
+                {'error': 'Account deletion failed. Please try again.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Mark rate limit before processing
+        cache.set(cache_key, True, self.RATE_LIMIT_SECONDS)
+
+        user_id = user.id
+        user_phone = user.phone_number
+        user_email = user.email
+
+        try:
+            with transaction.atomic():
+                # Send confirmation email before deletion (best effort)
+                if user_email:
+                    try:
+                        from django.core.mail import send_mail
+                        from django.conf import settings as django_settings
+                        send_mail(
+                            subject='Account Deletion Confirmation — Jalgaon Portal',
+                            message=(
+                                f'Hello,\n\n'
+                                f'Your Jalgaon Portal account ({user_phone}) has been deleted successfully. '
+                                f'All associated data has been removed.\n\n'
+                                f'If you did not request this, please contact support immediately.\n\n'
+                                f'Regards,\nJalgaon Portal Team'
+                            ),
+                            from_email=getattr(django_settings, 'DEFAULT_FROM_EMAIL', None),
+                            recipient_list=[user_email],
+                            fail_silently=True,
+                        )
+                    except Exception as e:
+                        logger.error(f"Failed to send deletion confirmation email to {user_email}: {str(e)}")
+
+                # Log deletion event (audit) before removal
+                AuditLog.objects.create(
+                    actor=user,
+                    action='auth.delete_account',
+                    target_type='User',
+                    target_id=str(user_id),
+                    ip_address=ip_address,
+                    changes={'phone_number': user_phone, 'email': user_email},
+                )
+
+                # Invalidate all active sessions/tokens
+                try:
+                    from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+                    tokens = OutstandingToken.objects.filter(user=user)
+                    for token in tokens:
+                        BlacklistedToken.objects.get_or_create(token=token)
+                except Exception as e:
+                    logger.warning(f"Token blacklist during deletion failed: {str(e)}")
+
+                # Delete related data explicitly (cascade also handles FK CASCADE)
+                # Notifications
+                try:
+                    user.notifications.all().delete()
+                except Exception:
+                    pass
+                # Reviews / comments
+                try:
+                    from apps.reviews.models import ShopReview
+                    ShopReview.objects.filter(user=user).delete()
+                except Exception:
+                    pass
+                try:
+                    from apps.news.models import NewsComment
+                    NewsComment.objects.filter(user=user).delete()
+                except Exception:
+                    pass
+                try:
+                    from apps.blog.models import BlogComment
+                    BlogComment.objects.filter(user=user).delete()
+                except Exception:
+                    pass
+                # Saved/bookmarked businesses
+                try:
+                    from app.models import LikedShops
+                    LikedShops.objects.filter(user=user).delete()
+                except Exception:
+                    pass
+                try:
+                    from apps.directory.models import BusinessClaim
+                    BusinessClaim.objects.filter(user=user).delete()
+                except Exception:
+                    pass
+
+                # Delete user account (cascades remaining related records)
+                user.delete()
+
+                logger.info(f"Account deleted successfully: user {user_id} ({user_phone}) from IP {ip_address}")
+
+            return Response({
+                "success": True,
+                "message": "Account deleted successfully. All associated data has been removed."
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            logger.error(f"Account deletion failed for user {user_id}: {str(e)}")
+            return Response({
+                "error": "Account deletion failed. Please try again."
+            }, status=status.HTTP_400_BAD_REQUEST)
 
     def _get_client_ip(self, request):
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
