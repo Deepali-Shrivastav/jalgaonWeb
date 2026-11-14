@@ -10,15 +10,16 @@ DJANGO_ENV = os.getenv('DJANGO_ENV', 'development')
 
 try:
     from dotenv import load_dotenv
+    prod_env = os.path.join(BASE_DIR, '.env.production')
     generic_env = os.path.join(BASE_DIR, '.env')
-    if os.path.exists(generic_env):
-        load_dotenv(generic_env, override=True)  # Loaded local testing settings
-    else:
+    dev_env = os.path.join(BASE_DIR, '.env.development')
 
-        if DJANGO_ENV == 'production':
-            load_dotenv(os.path.join(BASE_DIR, '.env.production'), override=True)
-        else:
-            load_dotenv(os.path.join(BASE_DIR, '.env.development'), override=True)
+    if os.path.exists(prod_env) and (DJANGO_ENV == 'production' or not os.path.exists(generic_env)):
+        load_dotenv(prod_env, override=True)
+    elif os.path.exists(generic_env):
+        load_dotenv(generic_env, override=True)
+    elif os.path.exists(dev_env):
+        load_dotenv(dev_env, override=True)
 except ImportError:
     pass
 
