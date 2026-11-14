@@ -14,9 +14,20 @@ interface UserData {
 }
 
 const roles = [
-  "super_admin", "admin", "content_manager", "news_editor",
-  "seo_manager", "moderator", "support", "advertiser",
-  "business_owner"
+  "registered_user",
+  "business_owner",
+  "advertiser",
+  "event_manager",
+  "gate_staff",
+  "venue_staff",
+  "support",
+  "moderator",
+  "seo_manager",
+  "news_editor",
+  "content_manager",
+  "admin",
+  "super_admin",
+  "guest",
 ];
 
 export default function AdminUsersPage() {
@@ -305,8 +316,11 @@ export default function AdminUsersPage() {
                         <select
                           value={u.role}
                           onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                          className="px-2.5 py-1 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
+                          className="px-2.5 py-1 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 capitalize"
                         >
+                          {!roles.includes(u.role) && (
+                            <option value={u.role}>{u.role.replace(/_/g, " ")}</option>
+                          )}
                           {roles.map((r) => (
                             <option key={r} value={r}>{r.replace(/_/g, " ")}</option>
                           ))}
