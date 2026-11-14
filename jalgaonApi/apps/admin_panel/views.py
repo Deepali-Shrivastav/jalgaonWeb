@@ -150,6 +150,55 @@ class AdminUserDetailView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def delete(self, request, user_id):
+        """DELETE /api/v1/admin-panel/users/<id>/ — Completely delete user from database (super_admin only)."""
+        if request.user.role != 'super_admin' and not getattr(request.user, 'is_superuser', False):
+            return Response(
+                {'error': 'Only Super Admins can delete users.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if user.id == request.user.id:
+            return Response(
+                {'error': 'You cannot delete your own account.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user_phone = user.phone_number
+        user_name = f"{user.first_name or ''} {user.last_name or ''}".strip()
+        user_role = user.role
+
+        log_audit_action(
+            actor=request.user,
+            action='delete_user',
+            target_type='User',
+            target_id=user.id,
+            changes={
+                'deleted_user_phone': user_phone,
+                'deleted_user_name': user_name,
+                'deleted_user_role': user_role,
+            },
+            request=request
+        )
+
+        try:
+            user.delete()
+        except Exception as e:
+            return Response(
+                {'error': f"Failed to delete user: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        return Response(
+            {'message': f"User {user_phone} has been completely deleted from the database."},
+            status=status.HTTP_200_OK
+        )
+
 
 class AdminUserRoleView(APIView):
     """PATCH /api/v1/admin-panel/users/<id>/role/ — Change user role (super_admin only)."""
