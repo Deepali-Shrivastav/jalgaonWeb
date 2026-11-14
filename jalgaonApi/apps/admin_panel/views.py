@@ -187,6 +187,17 @@ class AdminUserDetailView(APIView):
         )
 
         try:
+            from django.db import connection
+            with connection.cursor() as cursor:
+                for query in [
+                    "DELETE FROM authtoken_token WHERE user_id = %s",
+                    "DELETE FROM token_blacklist_outstandingtoken WHERE user_id = %s",
+                ]:
+                    try:
+                        cursor.execute(query, [user.id])
+                    except Exception:
+                        pass
+
             user.delete()
         except Exception as e:
             return Response(
